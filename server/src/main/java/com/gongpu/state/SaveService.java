@@ -24,6 +24,11 @@ public class SaveService {
     private final GameSaveRepository repo;
     private final StateCache cache;
 
+    /** 轮询节流落库：每个存档距上次 MySQL 写入的最小间隔（毫秒）。 */
+    private static final long PERSIST_THROTTLE_MS = 5_000L;
+    private final java.util.concurrent.ConcurrentHashMap<String, Long> lastDbWrite =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
     public SaveService(GameSaveRepository repo, StateCache cache) {
         this.repo = repo;
         this.cache = cache;
@@ -44,6 +49,27 @@ public class SaveService {
 
     public boolean exists(long userId, int slot) {
         return repo.findByUserIdAndSlotNo(userId, slot).isPresent();
+    }
+
+    /**
+     * 节流落库（供每秒轮询的状态帧使用）：缓存与成就评估每帧都做，
+     * MySQL 写入每档最多每 {@link #PERSIST_THROTTLE_MS} 一次；
+     * 死亡状态强制立即落库（硬核死亡制不能丢）。显式动作仍走全量 persist。
+     */
+    public void persistThrottled(long userId, int slot, PlayerState s) {
+        String key = userId + ":" + slot;
+        long now = System.currentTimeMillis();
+        Long last = lastDbWrite.get(key);
+        if (!s.dead && last != null && now - last < PERSIST_THROTTLE_MS) {
+            s.lastSaveAt = now;
+            if (s.achievements != null) {
+                s.achievements.addAll(com.gongpu.game.Achievements.evaluate(s));
+            }
+            cache.put(userId, slot, s);
+            return;
+        }
+        persist(userId, slot, s, null);
+        lastDbWrite.put(key, System.currentTimeMillis());
     }
 
     /** 落库并刷新缓存。 */

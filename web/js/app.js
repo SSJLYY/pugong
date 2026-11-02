@@ -654,7 +654,7 @@
       // 签名守卫(范式同 renderPotions):chip 集合不变只更新倒计时文本,
       // 不整条 innerHTML 重建——autoSkill/autoBurn 常驻时此前每秒销毁重建整条
       const sig = JSON.stringify([html ? html.replace(/buff-time">[^<]*/g, 'buff-time">') : '', bulletMp, mpCap]);
-      if (sig === renderBuffs._sig) {
+      if (sig === applyView._buffSig) {
         // 只同步倒计时:chip 数量/种类未变,剩余时长文本逐个更新
         const times = buffBar.querySelectorAll('.buff-time');
         const vals = [];
@@ -665,7 +665,7 @@
         times.forEach((el, i) => { if (vals[i] !== undefined && el.textContent !== vals[i]) el.textContent = vals[i]; });
         return;
       }
-      renderBuffs._sig = sig;
+      applyView._buffSig = sig;
       buffBar.innerHTML = html;
     }
 

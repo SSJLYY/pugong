@@ -110,7 +110,8 @@ public class GameController {
         }
         try {
             PlayerState s = saves.load(uid, slot);
-            s.bulletinName = accounts.require(uid).getUsername();
+            String username = accounts.require(uid).getUsername();
+            s.bulletinName = username;
             com.gongpu.game.GameEngine.AdvanceResult advanceResult = saves.advanceNow(uid, slot, s);
             // 自动飞升(legacy autobot autoRebirth):通关线达成且管家开关开启 → 立即转生
             // (必须在 persist 之前改状态,否则转生不落库)
@@ -139,11 +140,16 @@ public class GameController {
                 extra = action == null ? null : action.apply(s);
             } finally {
                 // 动作抛异常也要落库（例如燃烧生命可能直接致死）
-                saves.persist(uid, slot, s, null);
+                // 纯轮询帧（无动作）走节流落库，避免每秒一次 MySQL 写入
+                if (action == null) {
+                    saves.persistThrottled(uid, slot, s);
+                } else {
+                    saves.persist(uid, slot, s, null);
+                }
             }
             // 榜单（生命/金币/世代三榜统一上报,带内部节流,静默失败）
             try {
-                board.submit(uid, accounts.require(uid).getUsername(),
+                board.submit(uid, username,
                         s.life.maxHP, s.gen, s.gold);
             } catch (RuntimeException ignored) {
                 // 榜单不影响游戏

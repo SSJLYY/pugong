@@ -9,7 +9,11 @@
 前端纯静态（nginx），后端 Spring Boot 3.2.5 + Java 21（8081），
 MySQL 8 持久 + Redis 缓存/锁/榜单。数值全部服务端结算，前端只发意图。
 
-## 0.5 当前状态速览（2026-11-02，v3.14 药剂扩容上线 136 后）
+## 0.5 当前状态速览（2026-11-02 晚更新，公网部署 + 三处修复后）
+
+- **第二部署目标已上线**：`https://pugong.shaun88.cc.cd/gongpu/`（Muse VM，Cloudflare 隧道 → nginx :8088 → 本栈）。该 VM 的 JVM 出站 TCP 被平台拦截，MySQL/Redis 全走 Unix 套接字（MariaDB localSocket + 新增 `DeploySocketConfig`），构建走离线 Maven 仓；细节见 README「公网部署」节，下方 136 的路径/命令不适用于此目标。部署目录 `~/workspace/pugong-deploy/`，看门狗 supervise + cron 保活。
+- **三处修复（已实测，详见 README 变更记录）**：①CORS 白名单缺公网域名致浏览器注册/登录 403，启动参数已补；②前端 `renderBuffs._sig` 悬空引用致新手天赋觉醒仪式永不触发，改挂 `applyView._buffSig`（浏览器实测抽卡全流程通过），前端版本升 v=52；③灌库 CLI 字符集错误致 cfg_* 文本双重编码乱码，45 列已反转还原，CLI 导入必须 `--default-character-set=utf8mb4`。
+- **后端优化**：轮询帧落库节流 `SaveService.persistThrottled`（MySQL 写降至约 1/5，死亡强制立即写）；`run()` 内重复账号查询合并。
 
 - **验证基线**：单测 **160 全绿**（mvn -o test，含 PotionsV314Test 12 项）+ 冒烟 **66 全绿**（136 已跑）；每次改完必须双绿。
 - **136 部署**：2026-11-02 v3.14 已按第 3 节完整部署（8180c24），双层冒烟 66/66 全绿；前端 ?v=49 已生效，136 商店 meta 实测 18 种药剂。

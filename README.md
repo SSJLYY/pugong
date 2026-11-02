@@ -37,7 +37,7 @@ Controller.run()
   → saves.load()                     # Redis 命中或 MySQL 回源
   → saves.advanceNow()               # 服务端权威时间结算（含离线）
   → action.apply(state)              # 换区/施法/嗑药/装备/转生…
-  → saves.persist()                  # 写 MySQL + 刷 Redis
+  → saves.persist()                  # 写 MySQL + 刷 Redis（纯轮询帧走 persistThrottled 节流，见变更记录）
   → board.submit()                   # 榜单（节流，静默失败）
   → cache.unlock()
 ```
@@ -141,6 +141,23 @@ scp -r web/* root@192.168.215.136:/data/games/gongpu/
 - 表：`account_user`（账号+香火+切磋战绩）、`game_save`（3 槽/人，state_json=滚动状态，snapshot_json=存档点快照）、`game_grave`（墓碑）、`stat_daily`
 - `spring.jpa.ddl-auto=validate`：实体与表不匹配会**启动失败**——改实体必须同步改 schema.sql 并走 deploy.sh 的幂等迁移
 - 新装库：`mysql < server/src/main/resources/schema.sql`（root 执行，含建库）
+- **灌库字符集（必读）**：mysql CLI 导入任何含中文的 SQL 必须带 `--default-character-set=utf8mb4`（或在 my.cnf 的 [client] 段预设）。客户端按 latin1 读 UTF-8 文件会把文本双重编码存入（页面显示 å°è¡€ 式乱码），2026-11-02 公网库已中招并逐列反转修复，详见开发注意 #10。
+
+---
+
+## 公网部署（Muse VM · shaun88.cc.cd，2026-11-02 上线）
+
+第二个部署目标，与 136 并行，专为这台受限 VM 适配：
+
+- 公网地址：`https://pugong.shaun88.cc.cd/gongpu/`（Cloudflare 命名隧道 `muse-vm` → 本机 nginx :8088，配置同 deploy/games.conf）
+- 部署目录：`~/workspace/pugong-deploy/`（start-gongpu.sh 启动后端，app.env 存密钥 600，supervise + cron 看门狗保活整条链路）
+- **本 VM 的 JVM 出站 TCP 被平台拦截**（连 127.0.0.1 也会被重置/伪应答，curl/python 不受影响），全栈改走 Unix 套接字：
+  - MySQL：MariaDB Connector/J + JNA 走 `localSocket`（驱动 jar 放 loader.path 的 lib/，DB 用户需 `mysql_native_password`）
+  - Redis：`server/src/main/java/com/gongpu/config/DeploySocketConfig.java`（Lettuce + RedisSocketConfiguration 连 redis.sock；另需 netty epoll 两个 jar 进 lib/）
+  - JPA：启动参数关 `ddl-auto` 并显式指定 MySQLDialect（Hibernate validate 与 MariaDB 驱动元数据不合；库仍用仓库脚本建）
+- **CORS**：启动参数 `--gongpu.cors.origins` 必须含公网域名 `https://pugong.shaun88.cc.cd`，否则浏览器同源请求也会被默认白名单（仅 localhost）以 403 Invalid CORS request 拒绝（curl 无 Origin 头测不出来）
+- **构建**：VM 上 Maven 无法直连中央仓（同 JVM TCP 限制），本地仓由 curl 预灌后 `mvn -o` 离线构建；新增依赖要先补灌
+- 管理页：`/gongpu/admin.html`，密码在部署目录 app.env
 
 ---
 
@@ -186,6 +203,9 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 6. **前端路径**：页面在 `/gongpu/` 子路径下，fetch 必须用 `API_BASE` 相对拼接；nginx 反代用 `^~` 前缀匹配，防止 API 路径被静态正则截走。
 7. **XSS**：用户名/墓志铭/槽名进 innerHTML 前必须过 `esc()`。
 8. **ddl-auto=validate**：改实体 = 改 schema.sql + deploy.sh 迁移列表，三处同步。
+9. **前端渲染抛错会静默中断进游戏分支**：`applyView` 里任何一处抛错，`enterGame` 的后续分支（天赋觉醒仪式/死亡/转生弹窗）就永远到不了，界面却照常渲染，极难察觉。v3.14 的 buff 签名守卫引用了已被内联删除的 `renderBuffs._sig`，每次渲染存档视图必抛 ReferenceError，新手觉醒仪式因此从未触发；2026-11-02 改挂 `applyView._buffSig` 修复。给函数挂 `_sig` 属性前先确认函数还在。
+10. **灌库字符集**：见「数据库」节——mysql CLI 必须 `--default-character-set=utf8mb4`；双重编码的修复式：`CONVERT(BINARY(CONVERT(col USING latin1)) USING utf8mb4)`（`desc` 等保留字列名要加反引号）。JDBC 侧不受影响。
+11. **前端静态版本**：静态资源走 immutable 长缓存，改 `web/` 后必须同步提升 `index.html` 的 `?v=` 参数（当前 v=52），否则玩家继续用旧 JS；136 的 no-cache 部署同理确认。
 
 ## 配置主表与运维端（v3.0）
 
@@ -249,6 +269,15 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 - ~~成就为纯前端展示层~~ **已落库（v3.3）**：18 项成就服务端权威评估（Achievements.java），随 state_json 持久化，换设备/清缓存不丢
 - ~~旧版自动管家的 autoBurn/autoSkill buff 常驻链未迁移~~ **已迁移（v3.4）**：挂机管家新增「技能常驻」「燃烧常驻」开关，服务端 GameEngine.autoBuffTick 按 legacy 语义执行（涌动先行免蓝→急速→蓄力常驻、血<60% 补格挡、血<30% 怒吼、血>60% 补燃烧），离线同样生效
 
+## 变更记录（2026-11-02 · 公网部署轮次）
+
+- **修复 注册/登录 403**：CORS 白名单启动参数补公网域名，见「公网部署」节。
+- **修复 新手天赋觉醒仪式永不触发**：`web/js/app.js` 悬空引用 `renderBuffs._sig`（开发注意 #9），改挂 `applyView._buffSig`；真实浏览器全流程实测：新号建档即弹仪式，抽卡/确认/进游戏正常。
+- **修复 cfg 配置文本乱码**：灌库客户端字符集错误致双重编码（开发注意 #10），8 张 cfg 表 45 个文本列已反转还原；玩家表未受影响。
+- **优化 轮询写放大**：`GameController.run()` 的纯状态轮询帧改走 `SaveService.persistThrottled`——缓存与成就评估每帧照旧，MySQL 落库每档最多 5 秒一次，死亡状态强制立即落库；显式动作仍全量 persist。此前每玩家每秒 1 次全量写库，现降至约 1/5（遗留清单 #4 的 persist 部分同此）。
+- **优化 重复账号查询**：`run()` 内两次 `accounts.require(uid)` 合并为一次（遗留清单 #4 的 username 部分；JWT claim 方案未动）。
+- **新增 部署适配**：`DeploySocketConfig`（Redis Unix 套接字）+ MariaDB localSocket 启动参数，均为 Muse VM 的 TCP 限制适配，136 环境不启用。
+
 ## 技术遗留清单（v3.10 十轮优化后，按价值排序）
 
 审计已识别、本轮有意不动的较大手术（各自值得独立轮次+专项回归）：
@@ -256,6 +285,6 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 1. **锁模板收口**：lock→try→finally unlock 在 Game/Save/Social 三个 controller 各抄一遍，抽 `StateCache.withLock(uid, slot, Supplier)`；顺带复审锁 TTL 10s 与离线大帧耗时的耦合
 2. **SocialService 写路径收口**：祭奠/香火复活直读 DB 改 JSON 再 save,绕过 persist(不评估成就/不推时间)——改走 `saves.load + persist`
 3. **StatDailyAggregator**：每小时 `saves.findAll()` 全表 LONGTEXT 反序列化,玩家量上千后拖垮 DB/GC——punches/kills 冗余成数值列走 SUM SQL
-4. **轮询瘦身**：GET /state 每次全量 JSON 编解码 + 每请求 2 次 DB 查用户名(username 在 JWT claim 里,可用 request attribute 消掉)
+4. **轮询瘦身**：GET /state 每次全量 JSON 编解码 + ~~每请求 2 次 DB 查用户名~~（2026-11-02 已合并为 1 次，见变更记录；username 进 JWT claim 仍可再进一步）
 5. **榜单 submitBoard** 读-比-写三步非原子(并发残留旧 member);throttle Map 只增不删
 6. **BULLET_MP 会被强化放大**(测试 Agent 发现):魔弹枪强化后每发更耗蓝,若非有意设计应从强化乘区排除

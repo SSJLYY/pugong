@@ -151,6 +151,7 @@ scp -r web/* root@192.168.215.136:/data/games/gongpu/
 
 - 公网地址：`https://pugong.shaun88.cc.cd/gongpu/`（Cloudflare 命名隧道 `muse-vm` → 本机 nginx :8088，配置同 deploy/games.conf）
 - 部署目录：`~/workspace/pugong-deploy/`（start-gongpu.sh 启动后端，app.env 存密钥 600，supervise + cron 看门狗保活整条链路）
+- **运行时全在持久层**：这台 VM 会被平台整体替换，系统包靠 os-intent 重放恢复、耗时几十分钟（2026-11-02 晚实测宕机约 15 分钟）。故 JDK 21（Temurin tarball）、Maven、MySQL 8.0.46 / Redis 7.0.15 / nginx 1.24（官方 deb 用 dpkg -x 解包）全部放在 `pugong-deploy/runtime/`（jdk/、maven/、sysroot/、bin/ 包装脚本），supervise.sh 与 start-gongpu.sh 把 `runtime/bin` 置于 PATH 首位——VM 替换后看门狗直接从持久层拉起全栈，不等系统包。注意：mysqld 包装脚本里 `--defaults-file` 必须保持为第一个参数，附加参数（--basedir/--secure-file-priv）只能追加在末尾；nginx.conf 的 mime.types 也指向 sysroot 副本。
 - **本 VM 的 JVM 出站 TCP 被平台拦截**（连 127.0.0.1 也会被重置/伪应答，curl/python 不受影响），全栈改走 Unix 套接字：
   - MySQL：MariaDB Connector/J + JNA 走 `localSocket`（驱动 jar 放 loader.path 的 lib/，DB 用户需 `mysql_native_password`）
   - Redis：`server/src/main/java/com/gongpu/config/DeploySocketConfig.java`（Lettuce + RedisSocketConfiguration 连 redis.sock；另需 netty epoll 两个 jar 进 lib/）

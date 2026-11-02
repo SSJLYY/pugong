@@ -1,0 +1,149 @@
+/* ============================================================
+ * 《普攻永久增加生命上限》 save.js
+ * 存档系统：3 槽 / 战斗中禁存 / 死亡删档 / 村口自动存 / 导出导入
+ * 依据 DESIGN.md v0.4 §3（硬核死亡制）
+ * ============================================================ */
+
+/* global Decimal, SAVE_KEYS, S, GAME_OVER */
+
+// ---------------- 序列化（大数 → 字符串，由 stringify replacer 统一处理） ----------------
+function serialize() {
+  const o = JSON.parse(JSON.stringify(S, (k, v) => v instanceof Decimal ? v.toString() : v));
+  o.mob = null;                       // 存档不含战斗目标
+  o.savedAt = Date.now();
+  return JSON.stringify(o);
+}
+
+function deserialize(json) {
+  const o = JSON.parse(json);
+  const st = o;
+  // 大数还原
+  st.life.maxHP = new Decimal(o.life.maxHP); st.life.curHP = new Decimal(o.life.curHP);
+  st.life.MP = new Decimal(o.life.MP);       st.life.curMP = new Decimal(o.life.curMP);
+  st.life.PATK = new Decimal(o.life.PATK);   st.life.MATK = new Decimal(o.life.MATK);
+  st.life.PDEF = new Decimal(o.life.PDEF);  st.life.MDEF = new Decimal(o.life.MDEF);
+  st.life.REGEN = new Decimal(o.life.REGEN); st.life.MREGEN = new Decimal(o.life.MREGEN);
+  st.gold = new Decimal(o.gold);
+  st.stats.punches = new Decimal(o.stats.punches);
+  st.stats.lifetimePunches = new Decimal(o.stats.lifetimePunches);
+  st.mob = null;
+  st.buffs = st.buffs || {}; st.cds = st.cds || {};
+  st.equipBag = st.equipBag || [];          // M3 兜底（兼容旧档）
+  st.equipped = st.equipped || {};
+  st.nextUid = st.nextUid || 1;
+  st.skills = st.skills || { passives: [], mastery: {} };  // M4 兜底
+  st.potions = st.potions || {};
+  return st;
+}
+
+// ---------------- 槽位操作 ----------------
+function canSave() {
+  // 战斗中不可存档：非安全区视为战斗状态（村口打木桩可存）
+  const zone = S.zone;
+  const inCombatZone = !((typeof ZONES !== 'undefined') && ZONES[zone] && ZONES[zone].safe);
+  return !GAME_OVER && !inCombatZone;
+}
+
+function saveSlot(n) {
+  if (!canSave()) return { ok: false, msg: '战斗中不可存档' };
+  try {
+    localStorage.setItem(SAVE_KEYS.slots[n - 1], serialize());
+    S.lastSaveTs = Date.now();
+    S.lastSaveSlot = n;
+    return { ok: true, msg: '已存档至槽位 ' + n };
+  } catch (e) { return { ok: false, msg: '存档失败: ' + e.message }; }
+}
+
+function slotInfo(n) {
+  const raw = localStorage.getItem(SAVE_KEYS.slots[n - 1]);
+  if (!raw) return null;
+  try {
+    const o = JSON.parse(raw);
+    return { savedAt: o.savedAt || 0, maxHP: o.life ? o.life.maxHP : '?', gen: o.gen || 0, zone: o.zone || '?' };
+  } catch (e) { return null; }
+}
+
+function loadSlot(n) {
+  const raw = localStorage.getItem(SAVE_KEYS.slots[n - 1]);
+  if (!raw) return { ok: false, msg: '槽位 ' + n + ' 为空' };
+  try {
+    const st = deserialize(raw);
+    const savedAt = st.savedAt || 0;
+    st.lastSaveTs = Date.now();
+    st.lastSaveSlot = n;
+    S = st;
+    GAME_OVER = false; deathInfo = null;
+    playerProg = 0; lastTick = null;
+    spawnMob(S.zone, false);
+    markPanelDirty();
+    // M5: 离线结算
+    if (savedAt > 0 && typeof settleOffline === 'function') {
+      const delta = (Date.now() - savedAt) / 1000;
+      if (delta > 60) {
+        const r = settleOffline(delta);
+        if (!r.skip && !r.died && typeof toast === 'function')
+          toast('🌙 离线结算 ' + Math.floor(r.seconds/60) + ' 分钟');
+      }
+    }
+    return { ok: true, msg: '已读取槽位 ' + n };
+  } catch (e) { return { ok: false, msg: '读档失败: ' + e.message }; }
+}
+
+// ---------------- 村口自动存档 ----------------
+function autoSaveVillage() {
+  if (!S.autoSave || GAME_OVER) return;
+  try {
+    localStorage.setItem(SAVE_KEYS.slots[0], serialize());
+    S.lastSaveTs = Date.now();
+    S.lastSaveSlot = 1;
+  } catch (e) { /* 静默 */ }
+}
+
+// ---------------- 死亡结算 ----------------
+function newGame() {
+  S = newState();
+  starterKit();                // 开局白给新手木棍
+  GAME_OVER = false; deathInfo = null;
+  playerProg = 0; lastTick = null;
+  S.zone = 'village';          // 不走 gotoZone：避免新档立即自动存档覆盖旧自动档
+  spawnMob('village', false);
+  markPanelDirty();
+}
+
+// 回档：死亡画面用，回到最近存档（无存档返回失败）
+function loadLatest() {
+  let best = -1, bestTs = 0;
+  for (let i = 0; i < 3; i++) {
+    const info = slotInfo(i + 1);
+    if (info && info.savedAt > bestTs) { bestTs = info.savedAt; best = i + 1; }
+  }
+  if (best < 0) return { ok: false, msg: '没有任何存档' };
+  return loadSlot(best);
+}
+
+// ---------------- 导出 / 导入 ----------------
+function exportSave() {
+  return btoa(unescape(encodeURIComponent(serialize())));
+}
+
+function importSave(b64) {
+  try {
+    const json = decodeURIComponent(escape(atob(b64.trim())));
+    const st = deserialize(json);
+    S = st; GAME_OVER = false; deathInfo = null;
+    playerProg = 0; lastTick = null;
+    spawnMob(S.zone, false);
+    markPanelDirty();
+    return { ok: true, msg: '导入成功' };
+  } catch (e) { return { ok: false, msg: '导入失败：存档数据无效' }; }
+}
+
+// ---------------- 墓园（M6 预留数据层：写碑/读碑） ----------------
+function graveyardAll() {
+  try { return JSON.parse(localStorage.getItem(SAVE_KEYS.meta) || '[]'); } catch (e) { return []; }
+}
+function graveyardAdd(entry) {
+  const list = graveyardAll();
+  list.push(entry);
+  try { localStorage.setItem(SAVE_KEYS.meta, JSON.stringify(list)); } catch (e) {}
+}

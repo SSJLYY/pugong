@@ -1,0 +1,66 @@
+package com.gongpu.web;
+
+import com.gongpu.account.AccountService;
+import com.gongpu.security.AuthRateLimiter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    public record LoginReq(@NotBlank String username, @NotBlank String password) {
+    }
+
+    private final AccountService account;
+    private final AuthRateLimiter limiter;
+
+    public AuthController(AccountService account, AuthRateLimiter limiter) {
+        this.account = account;
+        this.limiter = limiter;
+    }
+
+    /** 真实客户端 IP:优先 X-Real-IP(nginx 覆写自 $remote_addr),XFF 兜底;
+     *  两者都被边缘 nginx 覆写,客户端伪造的头到不了这里。 */
+    static String clientIp(HttpServletRequest req) {
+        String xri = req.getHeader("X-Real-IP");
+        if (xri != null && !xri.isBlank()) {
+            return xri.trim();
+        }
+        String xff = req.getHeader("X-Forwarded-For");
+        return xff != null && !xff.isBlank()
+                ? xff.split(",")[0].trim()
+                : req.getRemoteAddr();
+    }
+
+    @PostMapping("/register")
+    public Map<String, Object> register(@Valid @RequestBody LoginReq req, HttpServletRequest http) {
+        String ip = clientIp(http);
+        limiter.checkRegisterAllowed(ip);
+        Map<String, Object> out = account.register(req.username(), req.password());
+        limiter.onRegister(ip);
+        return out;
+    }
+
+    @PostMapping("/login")
+    public Map<String, Object> login(@Valid @RequestBody LoginReq req, HttpServletRequest http) {
+        String ip = clientIp(http);
+        limiter.checkLoginAllowed(ip);
+        try {
+            Map<String, Object> out = account.login(req.username(), req.password());
+            limiter.onLoginSuccess(ip);
+            return out;
+        } catch (RuntimeException e) {
+            // 只对"密码错"这类认证失败记账;限流锁定等业务异常不重复计数
+            limiter.onLoginFail(ip);
+            throw e;
+        }
+    }
+}

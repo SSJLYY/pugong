@@ -1,0 +1,61 @@
+package com.gongpu.web;
+
+import com.gongpu.common.ApiException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/** 统一错误响应：{ ok:false, code, message }。 */
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<Map<String, Object>> handleApi(ApiException e) {
+        return ResponseEntity.status(e.getStatus()).body(body(e.getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValid(MethodArgumentNotValidException e) {
+        String msg = e.getBindingResult().getFieldErrors().stream()
+                .findFirst().map(f -> f.getField() + " " + f.getDefaultMessage())
+                .orElse("参数不合法");
+        return ResponseEntity.badRequest().body(body("BAD_REQUEST", msg));
+    }
+
+    /** 坏 JSON 请求体:此前落进兜底 500 并打 error 日志,实际是客户端 400。 */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnreadable(Exception e) {
+        return ResponseEntity.badRequest().body(body("BAD_REQUEST", "请求体不是合法 JSON"));
+    }
+
+    /** 缺必填 query/参数:同理 400 而非 500。 */
+    @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingParam(
+            org.springframework.web.bind.MissingServletRequestParameterException e) {
+        return ResponseEntity.badRequest().body(body("BAD_REQUEST", "缺少参数: " + e.getParameterName()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleOther(Exception e, HttpServletRequest req) {
+        // 500 必须带请求上下文:只有堆栈没有 URI,排障时要靠猜
+        log.error("未处理异常: {} {}", req.getMethod(), req.getRequestURI(), e);
+        return ResponseEntity.internalServerError().body(body("INTERNAL", "服务器开小差了，请稍后再试"));
+    }
+
+    private Map<String, Object> body(String code, String msg) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", false);
+        m.put("code", code);
+        m.put("message", msg);
+        return m;
+    }
+}

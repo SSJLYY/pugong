@@ -1,0 +1,82 @@
+server:
+  port: 8081
+  shutdown: graceful
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: gongpu-server
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/gongpu?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&useSSL=false
+    username: gongpu_app
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 16
+      minimum-idle: 4
+      connection-timeout: 5000
+      pool-name: gongpu-pool
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        jdbc.batch_size: 50
+        format_sql: false
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+  jackson:
+    default-property-inclusion: non_null
+    generator:
+      write-bigdecimal-as-plain: true
+
+gongpu:
+  admin:
+    # 运维端密码：从环境变量注入（/etc/gongpu/app.env 的 ADMIN_PASSWORD），缺失则管理端不可用
+    password: ${ADMIN_PASSWORD:}
+  jwt:
+    # 无默认值：环境变量缺失时启动失败，避免弱密钥静默签发
+    secret: ${JWT_SECRET}
+    ttl-hours: 168
+  cors:
+    # CORS 白名单(逗号分隔通配模式);部署源经 nginx 同源反代,此处只需覆盖直连调试来源
+    origins: "http://127.0.0.1:*,http://localhost:*,http://192.168.215.136:*"
+  game:
+    # 注意:离线收益参数(offercap/eff)实际由 GameConst 常量生效,这里不配置,避免改了不生效的假配置
+    state-cache-ttl-min: 30
+    leaderboard-key: gongpu:lb:maxhp
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  file:
+    name: /data/gongpu/logs/gongpu-server.log
+  logback:
+    rollingpolicy:
+      # 滚动文件用 ${LOG_FILE} 锚定(= file.name 的值),与活动日志永远同目录:
+      # 136 上即 /data/gongpu/logs/gongpu-server.*.gz,本地(local profile)为 logs/ 下,不依赖工作目录
+      file-name-pattern: "${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz"
+      max-file-size: 20MB        # 单文件 20MB,滚出的历史按天+序号压缩成 .gz
+      max-history: 14            # 保留 14 天,过期自动清理
+      total-size-cap: 200MB      # 归档总量上限 200MB,超出删最老的,磁盘不会被日志吃满
+  level:
+    root: INFO
+    com.gongpu: INFO

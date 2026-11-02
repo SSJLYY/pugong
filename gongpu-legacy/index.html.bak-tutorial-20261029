@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>普攻永久增加生命上限</title>
+<link rel="stylesheet" href="css/style.css?v=20261029-effects2">
+</head>
+<body>
+
+<!-- ======== 游戏标题 ======== -->
+<header class="game-header">
+  <h1 class="game-title"><span class="fist">👊</span> 普攻永久增加生命上限</h1>
+  <p class="game-sub">一拳一点命 · <em>万世不修仙</em> · 死了就重开</p>
+</header>
+
+<!-- ======== 顶栏：大数字 + 状态条 ======== -->
+<header class="topbar">
+  <div class="hp-line">
+    <span class="hp-icon">❤️</span>
+    <span class="hp-max-label">生命上限</span>
+    <span id="hpMax" class="hp-max">100</span>
+  </div>
+  <div id="blessRow" class="bless-row">🧬 赋能: HP+1/拳</div>
+  <div class="bars">
+    <div class="bar hp"><div id="hpBar" class="fill"></div><span class="bar-txt"><span id="hpCur">100</span> HP</span></div>
+    <div class="bar mp"><div id="mpBar" class="fill"></div><span class="bar-txt"><span id="mpCur">50</span> MP</span></div>
+  </div>
+  <div class="meta-row">
+    <span id="gen" class="gen">第 0 世</span>
+    <span id="saveState" class="saveok">⚠️ 从未存档</span>
+  </div>
+</header>
+
+<!-- ======== 单屏工作台：属性 / 战斗地图 / 标签式操作区 ======== -->
+<main class="game-shell">
+  <aside class="panel stats-panel">
+    <h2>📋 属性面板</h2>
+    <table class="stats">
+      <tr><td>🗡️ 物攻</td><td id="stPATK">1</td></tr>
+      <tr><td>✨ 魔攻</td><td id="stMATK">0</td></tr>
+      <tr><td>🛡️ 物防</td><td id="stPDEF">1</td></tr>
+      <tr><td>🔮 魔防</td><td id="stMDEF">0</td></tr>
+      <tr><td>⚡ 攻速</td><td id="stASPD">1.00/s</td></tr>
+      <tr><td>🏹 射程</td><td id="stRNG">1.0 步</td></tr>
+      <tr><td>👢 移速</td><td id="stSPD">100</td></tr>
+      <tr><td>💥 暴击率</td><td id="stCRIT">5.0%</td></tr>
+      <tr><td>💢 暴击伤害</td><td id="stCRITD">1.50×</td></tr>
+      <tr><td>🎯 命中</td><td id="stACC">95.0%</td></tr>
+      <tr><td>🍃 闪避</td><td id="stEVA">0.0%</td></tr>
+      <tr><td>💚 回血</td><td id="stREGEN">0/s</td></tr>
+      <tr><td>💰 金币</td><td id="stGold">0</td></tr>
+    </table>
+    <h2>📈 本世统计</h2>
+    <table class="stats lifetime-stats">
+      <tr><td>👊 出拳</td><td id="stPunch">0</td></tr>
+      <tr><td>💀 击杀</td><td id="stKill">0</td></tr>
+      <tr><td>⏱️ 存活</td><td id="stLived">0分</td></tr>
+    </table>
+    <h2>✨ 生效效果</h2>
+    <div id="effectArea" class="effect-area">
+      <div class="effect-group"><div class="effect-group-title">🧬 天赋</div><div class="effect-none">尚未觉醒天赋</div></div>
+      <div class="effect-group"><div class="effect-group-title">📖 被动</div><div class="effect-none">打怪学习被动技能</div></div>
+      <div class="effect-group"><div class="effect-group-title">⚡ 状态</div><div class="effect-none">暂无增益 / 减益</div></div>
+    </div>
+  </aside>
+
+  <div class="play-column">
+    <section class="panel combat">
+      <h2 id="zoneName">🏡 村口</h2>
+      <div class="mob">
+        <div id="mobEmoji" class="mob-emoji">🪵</div>
+        <div class="mob-info">
+          <div id="mobName" class="mob-name">木桩（无限血）</div>
+          <div class="bar mob"><div id="mobBar" class="fill"></div><span id="mobHp" class="bar-txt">∞</span></div>
+          <div id="mobDesc" class="mob-desc">无限血挨打桩，出拳就是修行</div>
+        </div>
+      </div>
+      <div class="combat-btns">
+        <button id="btnBurn" class="skill-btn">🔥 燃烧生命</button>
+        <button id="btnFlee" class="skill-btn">🏃 逃跑回村</button>
+        <button id="btnRebirth" class="skill-btn rebirth-btn" style="display:none">🌟 飞升转世</button>
+      </div>
+      <div id="burnBuff" class="burn-buff"></div>
+    </section>
+
+    <section class="panel map-panel">
+      <h2>🗺️ 地图 <span class="panel-tip">战斗与切图始终可见</span></h2>
+      <div class="zones">
+        <button data-zone="village" class="zone-btn">🏡 村口</button>
+        <button data-zone="plain" class="zone-btn">🌾 平原<span class="req">≥500血</span></button>
+        <button data-zone="forest" class="zone-btn">🌲 森林<span class="req">≥3千血/5防</span></button>
+        <button data-zone="mine" class="zone-btn">⛏️ 矿洞<span class="req">≥1.2万血</span></button>
+        <button data-zone="swamp" class="zone-btn">🐸 沼泽<span class="req">≥4万血/50回</span></button>
+        <button data-zone="snow" class="zone-btn">🏔️ 雪山<span class="req">≥10万血/30魔防</span></button>
+        <button data-zone="volcano" class="zone-btn">🌋 火山<span class="req">≥30万血/双防80</span></button>
+      </div>
+      <button id="btnGraveyard" class="grave-btn">🪦 查看墓园</button>
+    </section>
+  </div>
+
+  <section class="panel utility-panel">
+    <nav class="game-tabs" role="tablist" aria-label="游戏操作">
+      <button id="tabBtnEquip" class="game-tab active" role="tab" aria-selected="true" aria-controls="tabEquip" data-tab="equip">🎒 装备</button>
+      <button id="tabBtnSkills" class="game-tab" role="tab" aria-selected="false" aria-controls="tabSkills" data-tab="skills">✋ 技能药剂</button>
+      <button id="tabBtnSave" class="game-tab" role="tab" aria-selected="false" aria-controls="tabSave" data-tab="save">💾 存档</button>
+    </nav>
+
+    <div id="tabEquip" class="tab-pane active" role="tabpanel" aria-labelledby="tabBtnEquip" data-pane="equip">
+      <div class="equip-cols">
+        <div class="equipped-box">
+          <h2>👤 已装备</h2>
+          <div id="equippedSlots" class="equipped-grid"></div>
+        </div>
+        <div class="bag-box">
+          <h2>🎒 背包 <span id="bagCount" class="bag-count">0/30</span></h2>
+          <div id="bagList" class="bag-list"><p class="empty-hint">击杀怪物掉落装备</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tabSkills" class="tab-pane" role="tabpanel" aria-labelledby="tabBtnSkills" data-pane="skills" hidden>
+      <div class="skill-cols">
+        <div class="active-box">
+          <h2>✋ 主动技能</h2>
+          <div id="activeList" class="active-list"></div>
+        </div>
+        <div class="potion-box">
+          <h2>🧪 药剂商店</h2>
+          <div id="potionList" class="potion-list"></div>
+        </div>
+        <div class="passive-box">
+          <h2>📖 被动技能</h2>
+          <div id="passiveList" class="passive-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tabSave" class="tab-pane" role="tabpanel" aria-labelledby="tabBtnSave" data-pane="save" hidden>
+      <div class="save-box">
+        <h2>💾 存档槽位</h2>
+        <p id="saveRuleHint" class="save-rule-hint">当前位于安全区，可以存档</p>
+        <div class="save-slots">
+          <div id="saveSlot1" class="save-slot empty">
+            <div class="slot-head"><strong>槽位 1</strong><span id="slotState1" class="slot-state empty">空槽</span></div>
+            <div id="slotMeta1" class="slot-meta">还没有存档，可安全写入</div>
+            <div class="slot-actions"><button data-save="1">写入槽 1</button><button data-load="1" disabled>读取存档</button></div>
+          </div>
+          <div id="saveSlot2" class="save-slot empty">
+            <div class="slot-head"><strong>槽位 2</strong><span id="slotState2" class="slot-state empty">空槽</span></div>
+            <div id="slotMeta2" class="slot-meta">还没有存档，可安全写入</div>
+            <div class="slot-actions"><button data-save="2">写入槽 2</button><button data-load="2" disabled>读取存档</button></div>
+          </div>
+          <div id="saveSlot3" class="save-slot empty">
+            <div class="slot-head"><strong>槽位 3</strong><span id="slotState3" class="slot-state empty">空槽</span></div>
+            <div id="slotMeta3" class="slot-meta">还没有存档，可安全写入</div>
+            <div class="slot-actions"><button data-save="3">写入槽 3</button><button data-load="3" disabled>读取存档</button></div>
+          </div>
+        </div>
+        <label class="autosave"><input type="checkbox" id="autoSaveChk" checked> 村口自动存档（槽1）</label>
+        <h2>📤 存档备份</h2>
+        <textarea id="ioText" placeholder="存档文本（导出后复制保存 / 粘贴后导入）"></textarea>
+        <div class="save-grid">
+          <button id="btnExport">导出</button>
+          <button id="btnImport">导入</button>
+        </div>
+        <button id="btnRestart" class="restart-btn">🔄 重新开档（放弃当前进度）</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ======== 死亡画面 ======== -->
+<div id="deathMask" class="death-mask" style="display:none">
+  <div class="death-box">
+    <h2>💀 你死了。</h2>
+    <p>击杀者：<span id="deathKiller">-</span></p>
+    <p>你的生命定格在：<b id="deathHP">-</b></p>
+    <p>本档出拳：<span id="deathPunches">-</span> 次 · 存活：<span id="deathLived">-</span></p>
+    <p class="death-save-info" id="deathSave">-</p>
+    <input id="deathEpitaph" class="death-epitaph" placeholder="墓志铭（可选，最多30字）" maxlength="30">
+    <div id="deathAutopsy" class="death-autopsy"></div>
+    <div class="death-btns">
+      <button id="btnLoadLast" class="d-btn load">📂 回档到最近存档</button>
+      <button id="btnNewGame" class="d-btn new">⚰️ 尘归尘，重新开档</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 墓园面板（M6） ======== -->
+<div id="graveyardMask" class="death-mask" style="display:none">
+  <div class="graveyard-box">
+    <h2>🪦 墓园</h2>
+    <div id="graveyardList" class="graveyard-list"></div>
+    <button id="btnCloseGrave" class="d-btn new">关闭墓园</button>
+  </div>
+</div>
+
+<!-- ======== 飞升面板（M7） ======== -->
+<div id="rebirthMask" class="death-mask" style="display:none">
+  <div class="rebirth-box">
+    <h2>🌟 飞升</h2>
+    <p>拳至一载，肉身成圣。选择下一世普攻永久成长的新属性：</p>
+    <div id="rebirthChoices" class="rebirth-choices"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- ======== 重新开档确认（M8） ======== -->
+<div id="restartMask" class="death-mask" style="display:none">
+  <div class="restart-box">
+    <h2>🔄 重新开档？</h2>
+    <p>当前进度将<u>全部丢失</u>（生命上限、装备、技能、金币清零，回到第 0 世）。<br>已存入槽位的存档和墓园墓碑不受影响。</p>
+    <div class="death-btns">
+      <button id="btnRestartYes" class="d-btn new">⚰️ 确认重开（当前进度作废）</button>
+      <button id="btnRestartNo" class="d-btn load">↩️ 我再想想</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/vendor/break_infinity.min.js"></script>
+<script src="js/config.js?v=20261029-effects2"></script>
+<script src="js/game.js?v=20261029-effects2"></script>
+<script src="js/save.js?v=20261029-effects2"></script>
+<script src="js/ui.js?v=20261029-effects2"></script>
+<script src="autobot.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  bindUI();
+  startEngine();
+});
+</script>
+</body>
+</html>

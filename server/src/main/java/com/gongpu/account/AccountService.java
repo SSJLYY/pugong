@@ -1,0 +1,89 @@
+package com.gongpu.account;
+
+import com.gongpu.common.ApiException;
+import com.gongpu.security.JwtService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+/** 账号服务：注册 / 登录 / 当前用户。 */
+@Service
+public class AccountService {
+
+    private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9_\\u4e00-\\u9fa5]{2,16}$");
+    private static final int MIN_PASSWORD = 6;
+
+    private final UserRepository users;
+    private final JwtService jwt;
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    public AccountService(UserRepository users, JwtService jwt) {
+        this.users = users;
+        this.jwt = jwt;
+    }
+
+    @Transactional
+    public Map<String, Object> register(String username, String password) {
+        String u = username == null ? "" : username.trim();
+        if (!USERNAME.matcher(u).matches()) {
+            throw ApiException.badRequest("用户名需 2~16 位，仅限中英文、数字、下划线");
+        }
+        if (password == null || password.length() < MIN_PASSWORD) {
+            throw ApiException.badRequest("密码至少 " + MIN_PASSWORD + " 位");
+        }
+        if (users.existsByUsername(u)) {
+            throw ApiException.conflict("该用户名已被占用");
+        }
+        User user = new User();
+        user.setUsername(u);
+        user.setPasswordHash(encoder.encode(password));
+        user.setCreatedAt(Instant.now());
+        user.setLastLoginAt(Instant.now());
+        try {
+            users.save(user);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // 并发注册同一用户名：唯一约束兜底，转成友好 409
+            throw ApiException.conflict("该用户名已被占用");
+        }
+        return tokenPayload(user);
+    }
+
+    @Transactional
+    public Map<String, Object> login(String username, String password) {
+        User user = users.findByUsername(username == null ? "" : username.trim())
+                .orElseThrow(() -> ApiException.unauthorized("用户名或密码错误"));
+        if (!encoder.matches(password == null ? "" : password, user.getPasswordHash())) {
+            throw ApiException.unauthorized("用户名或密码错误");
+        }
+        user.setLastLoginAt(Instant.now());
+        users.save(user);
+        return tokenPayload(user);
+    }
+
+    public User require(long userId) {
+        return users.findById(userId).orElseThrow(() -> ApiException.unauthorized("账号不存在"));
+    }
+
+    /**
+     * 原子每日签到：DB 条件更新按影响行数判定，防同账号多槽并发重复领奖。
+     * 返回 false = 今天已领过。
+     */
+    @Transactional
+    public boolean claimDailyAtomic(long userId, java.time.LocalDate today) {
+        return users.claimDaily(userId, today) > 0;
+    }
+
+    private Map<String, Object> tokenPayload(User user) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("token", jwt.issue(user.getId(), user.getUsername()));
+        m.put("expiresIn", jwt.ttlSeconds());
+        m.put("userId", user.getId());
+        m.put("username", user.getUsername());
+        return m;
+    }
+}

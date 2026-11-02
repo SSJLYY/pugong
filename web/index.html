@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gongpu</title>
+<link rel="stylesheet" href="css/style.css?v=49">
+<link rel="stylesheet" href="css/v2.css?v=49">
+</head>
+<body>
+
+<!-- ======== 登录/注册 ======== -->
+<div id="authMask" class="death-mask" style="display:flex">
+  <div class="death-box auth-box">
+    <h2>👊 普攻永久增加生命上限</h2>
+    <p class="auth-sub">一拳一点命 · 万世不修仙 · 死了就重开</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-mode="login">登录</button>
+      <button class="auth-tab" data-mode="register">注册</button>
+    </div>
+    <input id="authUser" class="auth-input" placeholder="用户名（2~16 位）" maxlength="16" autocomplete="username">
+    <input id="authPass" class="auth-input" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password">
+    <div id="authErr" class="auth-err"></div>
+    <button id="authSubmit" class="d-btn load auth-submit">进入江湖</button>
+  </div>
+</div>
+
+<!-- ======== 存档选择 ======== -->
+<div id="slotMask" class="death-mask" style="display:none">
+  <div class="death-box slot-select-box">
+    <h2>💾 选择存档</h2>
+    <div id="slotChoices" class="slot-choices"></div>
+    <div class="slot-foot">
+      <span id="whoami" class="whoami"></span>
+      <button id="btnLogout" class="d-btn">退出登录</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 游戏主体 ======== -->
+<div id="gameRoot">
+<header class="game-header">
+  <h1 class="game-title"><span class="fist">👊</span> 普攻永久增加生命上限</h1>
+  <p class="game-sub">一拳一点命 · <em>万世不修仙</em> · 死了就重开</p>
+</header>
+
+<header class="topbar">
+  <div id="charBadge" class="char-badge" title="属性面板（悬浮 / 点击）" tabindex="0" role="button" aria-label="查看详细属性">
+    <span class="char-emoji">🥋</span>
+    <div class="char-hpbar"><div id="charHpFill" class="fill"></div></div>
+  </div>
+
+  <!-- 属性悬浮卡：悬浮/点击头像展开，不占主画面布局 -->
+  <div id="statCard" class="stat-hover-card">
+    <div id="freePointLine" class="sp-line" hidden></div>
+    <h2>📋 属性面板</h2>
+    <table class="stats">
+      <tr data-stat="PATK"><td>🗡️ 物攻</td><td id="stPATK">1</td></tr>
+      <tr data-stat="MATK"><td>✨ 魔攻</td><td id="stMATK">0</td></tr>
+      <tr data-stat="PDEF"><td>🛡️ 物防</td><td id="stPDEF">1</td></tr>
+      <tr data-stat="MDEF"><td>🔮 魔防</td><td id="stMDEF">0</td></tr>
+      <tr data-stat="ASPD"><td>⚡ 攻速</td><td id="stASPD">1.00/s</td></tr>
+      <tr data-stat="RNG"><td>🏹 射程</td><td id="stRNG">1.0 步</td></tr>
+      <tr data-stat="SPD"><td>👢 移速</td><td id="stSPD">100</td></tr>
+      <tr data-stat="CRIT"><td>💥 暴击率</td><td id="stCRIT">5.0%</td></tr>
+      <tr data-stat="CRITD"><td>💢 暴击伤害</td><td id="stCRITD">1.50×</td></tr>
+      <tr data-stat="ACC"><td>🎯 命中</td><td id="stACC">95.0%</td></tr>
+      <tr data-stat="EVA"><td>🍃 闪避</td><td id="stEVA">0.0%</td></tr>
+      <tr data-stat="REGEN"><td>💚 回血</td><td id="stREGEN">0/s</td></tr>
+      <tr data-stat="MREGEN"><td>💧 魔回</td><td id="stMREGEN">0/s</td></tr>
+      <tr data-stat="LIFESTEAL"><td>🩸 吸血</td><td id="stLIFESTEAL">0</td></tr>
+      <tr><td>💰 金币</td><td id="stGold">0</td></tr>
+    </table>
+    <h2>📈 本世统计</h2>
+    <table class="stats lifetime-stats">
+      <tr><td>👊 出拳</td><td id="stPunch">0</td></tr>
+      <tr><td>💀 击杀</td><td id="stKill">0</td></tr>
+      <tr><td>⏱️ 存活</td><td id="stLived">0分</td></tr>
+    </table>
+    <h2>✨ 生效效果</h2>
+    <div id="effectArea" class="effect-area">
+      <div class="effect-group"><div class="effect-group-title">🧬 天赋</div><div class="effect-none">尚未觉醒天赋</div></div>
+      <div class="effect-group"><div class="effect-group-title">📖 被动</div><div class="effect-none">打怪学习被动技能</div></div>
+      <div class="effect-group"><div class="effect-group-title">⚡ 状态</div><div class="effect-none">暂无增益 / 减益</div></div>
+    </div>
+  </div>
+
+  <div class="hp-line">
+    <span class="hp-icon">❤️</span>
+    <span class="hp-max-label">生命上限</span>
+    <span id="hpMax" class="hp-max">100</span>
+  </div>
+  <div class="bars">
+    <div class="bar hp"><div id="hpBar" class="fill"></div><span class="bar-txt"><span id="hpCur">100</span><span id="shieldVal" hidden></span> HP</span></div>
+    <div class="bar mp"><div id="mpBar" class="fill"></div><span class="bar-txt"><span id="mpCur">50</span>/<span id="mpMax">80</span> MP</span></div>
+  </div>
+  <div id="blessRow" class="bless-row">🧬 赋能: HP+1/拳</div>
+  <div class="meta-row">
+    <span id="gen" class="gen">第 0 世</span>
+    <span id="talentBadge" class="talent-badge" style="display:none" title="当前觉醒天赋"></span>
+    <span id="saveState" class="saveok">✅ 云端已同步</span>
+    <button id="btnDaily" class="daily-btn" title="每日签到：金币+药剂礼包">🎁 签到</button>
+    <span id="netState" class="netok">●</span>
+  </div>
+</header>
+
+<div id="bulletinBar" class="bulletin-bar" style="display:none"></div>
+
+<main class="game-shell">
+  <div class="play-column">
+    <section class="panel combat">
+      <h2 id="zoneName">🏡 村口</h2>
+      <div class="mob">
+        <div id="mobEmoji" class="mob-emoji">🪵</div>
+        <div class="mob-info">
+          <div id="mobName" class="mob-name">木桩（无限血）</div>
+          <div class="bar mob"><div id="mobBar" class="fill"></div><span id="mobHp" class="bar-txt">∞</span></div>
+          <div id="mobDesc" class="mob-desc">无限血挨打桩，出拳就是修行</div>
+        </div>
+      </div>
+      <div class="combat-btns">
+        <button id="btnBurn" class="skill-btn">🔥 燃烧生命</button>
+        <button id="btnRapid" class="skill-btn">⚡ 急速射击</button>
+        <button id="btnHeavy" class="skill-btn">💥 蓄力重击</button>
+        <button id="btnBlock" class="skill-btn">🛡️ 格挡反击</button>
+        <button id="btnSurge" class="skill-btn">✨ 魔力涌动</button>
+        <button id="btnRoar" class="skill-btn">😤 怒吼</button>
+        <button id="btnFlee" class="skill-btn">🏃 逃跑回村</button>
+        <button id="btnRebirth" class="skill-btn rebirth-btn" style="display:none">🌟 飞升转世</button>
+      </div>
+      <div id="buffBar" class="buff-bar" title="当前生效的增益 / 减益"></div>
+      <div id="burnBuff" class="burn-buff"></div>
+    </section>
+
+    <section class="panel map-panel">
+      <h2>🗺️ 地图 <span class="panel-tip">战斗与切图始终可见</span></h2>
+      <div class="zones" id="zoneBtns"></div>
+      <button id="btnBoss" class="boss-btn">👑 挑战 Boss</button>
+      <button id="btnAuto" class="boss-btn" title="服务端一直在自动挂机结算;此按钮只是暂停本页面刷新(死亡弹窗也会暂停)">🤖 自动挂机（开）</button>
+    </section>
+  </div>
+
+  <section class="panel utility-panel">
+    <nav class="game-tabs" role="tablist">
+      <button id="tabBtnEquip" class="game-tab active" data-tab="equip">🎒 装备</button>
+      <button id="tabBtnSkills" class="game-tab" data-tab="skills">✋ 技能药剂</button>
+      <button id="tabBtnQuest" class="game-tab" data-tab="quest">📜 委托</button>
+      <button id="tabBtnRole" class="game-tab" data-tab="role">👤 角色</button>
+      <button id="tabBtnSave" class="game-tab" data-tab="save">💾 存档</button>
+      <button id="tabBtnSocial" class="game-tab" data-tab="social">🏮 江湖</button>
+      <button id="tabBtnRank" class="game-tab" data-tab="rank">🏆 榜单</button>
+    </nav>
+
+    <div id="tabEquip" class="tab-pane active" data-pane="equip">
+      <div class="equip-cols">
+        <div class="equipped-box">
+          <h2>👤 已装备</h2>
+          <div id="equippedSlots" class="equipped-grid"></div>
+          <div id="extraStripWrap" class="extra-strip-wrap" hidden>
+            <div class="extra-strip-head">🧳 无相位栏 <span id="extraStripCount" class="panel-tip"></span></div>
+            <div id="extraStrip" class="extra-strip"></div>
+          </div>
+        </div>
+        <div class="bag-box">
+          <h2>🎒 背包 <span id="bagCount" class="bag-count">0/30</span></h2>
+          <div id="bagList" class="bag-list"><p class="empty-hint">击杀怪物掉落装备</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tabSkills" class="tab-pane" data-pane="skills" hidden>
+      <div class="skill-cols">
+        <div class="potion-box">
+          <h2>🧪 药剂</h2>
+          <div id="potionList" class="potion-list"></div>
+        </div>
+        <div class="passive-box">
+          <h2>📖 被动技能</h2>
+          <div id="passiveList" class="passive-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tabQuest" class="tab-pane" data-pane="quest" hidden>
+      <div class="save-box">
+        <h2>📜 冒险公会委托</h2>
+        <p class="save-rule-hint">按属性门槛接取，击杀任意怪物计入进度，回来交付领赏（最多同时 3 个）</p>
+        <div id="questList" class="graveyard-list"><p class="empty-hint">加载中…</p></div>
+      </div>
+    </div>
+
+    <div id="tabRole" class="tab-pane" data-pane="role" hidden>
+      <div class="save-box">
+        <h2>🏅 成就</h2>
+        <div id="achArea" class="effect-area"></div>
+        <h2>🎖️ 称号</h2>
+        <div id="titleArea" class="effect-area"></div>
+        <h2>📖 怪物图鉴</h2>
+        <div id="codexArea" class="effect-area codex-area"></div>
+      </div>
+    </div>
+
+    <div id="tabSave" class="tab-pane" data-pane="save" hidden>
+      <div class="save-box">
+        <h2>💾 云端存档</h2>
+        <p id="saveRuleHint" class="save-rule-hint">当前位于安全区，可以存档</p>
+        <p class="save-rule-hint">本版本所有进度实时同步到服务器（MySQL）。战斗中不可手动存档，死亡将失去本世面板。</p>
+        <div class="save-grid">
+          <button id="btnManualSave">💾 立即存档</button>
+          <button id="btnBackToSlots">📂 切换存档槽</button>
+        </div>
+        <h2>🪦 墓园</h2>
+        <div id="graveList" class="graveyard-list"><p class="empty-hint">还没有碑</p></div>
+      </div>
+    </div>
+
+    <div id="tabSocial" class="tab-pane" data-pane="social" hidden>
+      <div class="skill-cols">
+        <div class="potion-box">
+          <h2>⚔️ 切磋</h2>
+          <div id="duelBox" class="potion-list"></div>
+        </div>
+        <div class="passive-box">
+          <h2>🕯️ 世界墓园 <span class="panel-tip">祭奠他人的碑，为他添一炷香火</span></h2>
+          <div id="worldGraveBox" class="graveyard-list"><p class="empty-hint">加载中…</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tabRank" class="tab-pane" data-pane="rank" hidden>
+      <div class="save-box">
+        <h2>🏆 生命上限榜</h2>
+        <div id="rankList" class="graveyard-list"><p class="empty-hint">加载中…</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<!-- ======== 死亡画面 ======== -->
+<div id="deathMask" class="death-mask" style="display:none">
+  <div class="death-box">
+    <h2>💀 你死了。</h2>
+    <p>击杀者：<span id="deathKiller">-</span></p>
+    <p>你的生命上限定格在：<b id="deathHP">-</b></p>
+    <p>本档出拳：<span id="deathPunches">-</span> 次 · 存活：<span id="deathLived">-</span></p>
+    <p class="death-save-info" id="deathSave">-</p>
+    <p class="death-incense" id="deathIncenseInfo"></p>
+    <div id="deathAutopsy" class="death-autopsy"></div>
+    <div class="death-btns">
+      <button id="btnIncense" class="d-btn load">🕯️ 香火复活（满血原地）</button>
+      <button id="btnLoadLast" class="d-btn load">📂 回档到最近存档</button>
+      <button id="btnNewGame" class="d-btn new">⚰️ 尘归尘，重新开档</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 天赋觉醒 ======== -->
+<div id="talentMask" class="death-mask" style="display:none">
+  <div class="rebirth-box talent-box">
+    <h2>✨ 觉醒仪式</h2>
+    <p>每个灵魂降生时，可触摸一次命运。<br>认命随机——命运在水晶触碎的瞬间定格：</p>
+    <div id="talentChoices" class="rebirth-choices"></div>
+  </div>
+</div>
+
+<!-- ======== 飞升面板 ======== -->
+<div id="rebirthMask" class="death-mask" style="display:none">
+  <div class="rebirth-box">
+    <h2>🌟 飞升</h2>
+    <p id="rebirthTip">拳至一载，肉身成圣。选择下一世普攻永久成长的新属性：</p>
+    <div id="rebirthChoices" class="rebirth-choices"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/vendor/break_infinity.min.js"></script>
+<script src="js/audio.js?v=49"></script>
+<script src="js/api.js?v=49"></script>
+<script src="js/achievements.js?v=49"></script>
+<script src="js/tutorial.js?v=49"></script>
+<script src="js/app.js?v=49"></script>
+</body>
+</html>

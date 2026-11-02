@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gongpu Ops</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<!-- ======== 登录遮罩 ======== -->
+<div id="loginMask" class="mask" style="display:flex">
+  <div class="login-box">
+    <h2>🛡️ 普攻 · 运维端</h2>
+    <p class="login-sub">仅限管理员 · 请输入管理密码</p>
+    <input id="loginPass" class="adm-input" type="password" placeholder="管理密码" autocomplete="current-password" maxlength="64">
+    <div id="loginErr" class="login-err"></div>
+    <button id="loginBtn" class="adm-btn gold">进入</button>
+  </div>
+</div>
+
+<!-- ======== 主界面 ======== -->
+<div id="adminRoot" style="display:none">
+
+  <header class="adm-topbar">
+    <div class="adm-title">👊 普攻 · 运维端</div>
+    <div class="adm-overview">
+      <span class="ov-item">账号 <b id="ovUsers">-</b></span>
+      <span class="ov-item">存档 <b id="ovSaves">-</b></span>
+      <span class="ov-item">墓碑 <b id="ovGraves">-</b></span>
+      <span class="ov-item" id="ovToday" title="今日运营增量(每小时聚合)" style="display:none"></span>
+    </div>
+    <div class="adm-actions">
+      <button id="btnReloadCfg" class="adm-btn small">🔄 刷新配置</button>
+      <button id="btnLogout" class="adm-btn small danger">退出</button>
+    </div>
+  </header>
+
+  <!-- ======== 概览：近 30 天运营趋势（纯 CSS 柱状图，无图表库） ======== -->
+  <section class="trend-card">
+    <div class="trend-head">
+      <h2>📈 近 30 天趋势</h2>
+      <div class="trend-tabs" id="trendTabs">
+        <button class="trend-tab active" data-metric="punches" type="button">出拳</button>
+        <button class="trend-tab" data-metric="kills" type="button">击杀</button>
+        <button class="trend-tab" data-metric="deaths" type="button">死亡</button>
+        <button class="trend-tab" data-metric="rebirths" type="button">转生</button>
+        <button class="trend-tab" data-metric="activeSaves" type="button">活跃档</button>
+      </div>
+      <button id="trendRefresh" class="adm-btn small" type="button" title="重新拉取趋势数据">刷新</button>
+    </div>
+    <div class="trend-scroll">
+      <div class="trend-chart" id="trendChart" style="display:none"></div>
+    </div>
+    <div class="trend-empty" id="trendEmpty" style="display:flex">加载中…</div>
+    <div class="trend-foot">
+      <span id="trendRange">-</span>
+      <span id="trendStat" class="trend-stat"></span>
+    </div>
+  </section>
+
+  <div class="adm-layout">
+    <nav class="adm-nav">
+      <button class="nav-btn active" data-tab="users">👤 账号</button>
+      <button class="nav-btn" data-tab="equipment">⚔️ 装备</button>
+      <button class="nav-btn" data-tab="affix">✨ 词条</button>
+      <button class="nav-btn" data-tab="item">🛒 商品</button>
+      <button class="nav-btn" data-tab="skill">📖 技能</button>
+      <button class="nav-btn" data-tab="buff">🌀 状态</button>
+      <button class="nav-btn" data-tab="droprate">🎲 爆率</button>
+      <button class="nav-btn" data-tab="audit">📜 审计</button>
+    </nav>
+
+    <main class="adm-main">
+      <!-- 账号页 -->
+      <section id="page-users" class="adm-page active">
+        <div class="page-head">
+          <h2>👤 账号管理</h2>
+          <div class="page-tools">
+            <input id="userKw" class="adm-input" placeholder="搜索用户名，回车查询" maxlength="32">
+            <button id="userSearchBtn" class="adm-btn small">查询</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table class="adm-table" id="userTable"></table></div>
+      </section>
+
+      <!-- 六个配置页由 admin.js 动态生成并插入到 audit 页之前 -->
+
+      <!-- 审计页 -->
+      <section id="page-audit" class="adm-page">
+        <div class="page-head">
+          <h2>📜 操作审计</h2>
+          <div class="page-tools"><button id="auditRefresh" class="adm-btn small">刷新</button></div>
+        </div>
+        <div class="table-wrap"><table class="adm-table" id="auditTable"></table></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ======== 实体表单弹层（配置页新增/编辑共用） ======== -->
+<div id="formMask" class="mask form-mask" style="display:none">
+  <div class="form-box">
+    <h3 id="formTitle">新增</h3>
+    <form id="entityForm" autocomplete="off"></form>
+    <div class="form-btns">
+      <button id="formCancel" class="adm-btn" type="button">取消</button>
+      <button id="formSave" class="adm-btn gold" type="button">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

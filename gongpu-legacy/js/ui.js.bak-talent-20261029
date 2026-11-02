@@ -1,0 +1,611 @@
+/* ============================================================
+ * 《普攻永久增加生命上限》 ui.js
+ * 纯文字 + emoji 渲染层（DESIGN.md §13 界面规划）
+ * 大数字格式化（中文大数）/ +1 跳动 / 死亡画面
+ * ============================================================ */
+
+/* global S, GAME_OVER, deathInfo, ZONES, SKILLS, CN_UNITS, getPanel,
+          gotoZone, flee, castBurn, saveSlot, loadSlot, loadLatest, newGame,
+          exportSave, importSave, graveyardAdd, markPanelDirty */
+
+// ---------------- 中文大数格式化 ----------------
+function fmt(d) {
+  if (!(d instanceof Decimal)) d = new Decimal(d);
+  if (d.lt(10000)) return Math.floor(d.toNumber()).toLocaleString('zh-CN');
+  const n = d.toNumber();
+  // 到 1e44（载）；超过后走 break_infinity 科学计数法
+  for (let i = CN_UNITS.length - 1; i >= 1; i--) {
+    const [name, scale] = CN_UNITS[i];
+    if (n >= scale && n < scale * 10000) {
+      return (n / scale).toFixed(2) + name;
+    }
+  }
+  if (n >= 1e44) return d.toString().slice(0, 12); // 兜底
+  return Math.floor(n).toLocaleString('zh-CN');
+}
+function fmtPct(x) { return (x * 100).toFixed(1) + '%'; }
+
+// ---------------- 装备渲染（M3） ----------------
+function slotLabel(slot) {
+  const m = { weapon:'武器', offhand:'副手', bow:'弓', head:'头', chest:'胸', legs:'腿', boots:'鞋', ring1:'戒1', ring2:'戒2', necklace:'项链' };
+  return m[slot] || slot;
+}
+// 属性键 → 中文名 + 格式化
+const STAT_LABEL = { PATK:'物攻', MATK:'魔攻', PDEF:'物防', MDEF:'魔防', maxHP:'生命', MP:'蓝量',
+                     ASPD:'攻速', RNG:'射程', SPD:'移速', CRIT:'暴击', CRITD:'暴伤', ACC:'命中',
+                     EVA:'闪避', REGEN:'回血', MREGEN:'回蓝', LIFESTEAL:'吸血', REGEN_PCT:'生命泉涌' };
+function fmtStatVal(key, val, type) {
+  const sign = val >= 0 ? '+' : '';
+  if (key === 'REGEN_PCT') return '每秒回 ' + (val * 100).toFixed(0) + '% 生命上限';
+  if (key === 'LIFESTEAL') return sign + (val * 100).toFixed(1) + '% 吸血';
+  if (key === 'ASPD') return sign + val.toFixed(2) + ' 攻速';
+  if (key === 'CRIT' || key === 'ACC' || key === 'EVA') return sign + (val * 100).toFixed(1) + '% ' + STAT_LABEL[key];
+  if (key === 'CRITD') return sign + (val * 100).toFixed(0) + '% 暴伤';
+  if (type === 'pct') return sign + (val * 100).toFixed(0) + '% ' + (STAT_LABEL[key] || key);
+  return sign + (Number.isInteger(val) ? val : val.toFixed(1)) + ' ' + (STAT_LABEL[key] || key);
+}
+// 词条稀有度颜色
+const RARITY_COLOR = { common:'#9a978c', uncommon:'#5cb87e', rare:'#4a9eff', epic:'#b366ff' };
+// 装备底子摘要（如 +2物攻 +1射程）
+function baseSummary(base) {
+  return Object.keys(base || {}).map(k => fmtStatVal(k, base[k], 'flat')).join(' ');
+}
+// 词条行 HTML（含稀有度上色 + 副作用）
+function affixHtml(a) {
+  const c = RARITY_COLOR[a.rarity] || '#9a978c';
+  let t = '<span style="color:' + c + '">' + a.name + ' ' + fmtStatVal(a.key, a.val, a.type) + '</span>';
+  if (a.side) t += ' <span style="color:#a03a3a">' + fmtStatVal(a.side.key, a.side.val, 'pct') + '</span>';
+  return t;
+}
+let equipRenderKey = -1;
+function renderEquip() {
+  // 每 100ms 的游戏 tick 不应重建按钮；装备数据实际变化时 invVersion（game.js 维护）才会 +1。
+  const renderKey = invVersion;
+  if (renderKey === equipRenderKey) return;
+  equipRenderKey = renderKey;
+
+  // 已装备区
+  let eqHtml = '';
+  for (const slot of EQUIP_SLOTS) {
+    const item = S.equipped[slot];
+    if (item) {
+      const q = QUALITY[item.quality];
+      const enh = 1 + (item.enhance || 0) * ENHANCE.statBonus;
+      // 底子属性（含强化加成）
+      const baseStats = Object.keys(item.base || {}).map(k => fmtStatVal(k, item.base[k] * enh, 'flat')).join(' ');
+      const affs = (item.affixes || []).map(a => affixHtml(a)).join('<br>');
+      eqHtml += '<div class="eq-slot" style="border-color:'+q.color+'">'+
+        '<div class="eq-line1"><span class="eq-emoji">'+item.emoji+'</span>'+
+        '<span class="eq-name" style="color:'+q.color+'">'+item.name+(item.enhance?'+'+item.enhance:'')+'</span>'+
+        '<button class="eq-btn" data-unequip="'+slot+'">卸</button></div>'+
+        '<div class="eq-base">'+baseStats+'</div>'+
+        (affs?'<div class="eq-affs">'+affs+'</div>':'')+
+        '</div>';
+    } else {
+      eqHtml += '<div class="eq-slot empty"><span class="eq-emoji">▢</span><span class="eq-name">'+slotLabel(slot)+'</span></div>';
+    }
+  }
+  $('equippedSlots').innerHTML = eqHtml;
+  // 背包区
+  $('bagCount').textContent = S.equipBag.length + '/' + BAG_MAX;
+  const bagEl = $('bagList');
+  if (S.equipBag.length === 0) { bagEl.innerHTML = '<p class="empty-hint">击杀怪物掉落装备</p>'; return; }
+  let bh = '';
+  for (let i = 0; i < S.equipBag.length; i++) {
+    const it = S.equipBag[i]; const q = QUALITY[it.quality];
+    const enh = 1 + (it.enhance || 0) * ENHANCE.statBonus;
+    const baseStats = Object.keys(it.base || {}).map(k => fmtStatVal(k, it.base[k] * enh, 'flat')).join(' ');
+    const affs = (it.affixes || []).map(a => affixHtml(a)).join('<br>');
+    bh += '<div class="bag-item" style="border-color:'+q.color+'">'+
+      '<div class="bag-line1"><span class="bag-emoji">'+it.emoji+'</span>'+
+      '<span class="bag-name" style="color:'+q.color+'">'+it.name+(it.enhance?'+'+it.enhance:'')+'</span>'+
+      '<span class="bag-slot">'+slotLabel(it.slot)+'</span></div>'+
+      '<div class="bag-base">'+baseStats+'</div>'+
+      (affs?'<div class="bag-affs">'+affs+'</div>':'')+
+      '<div class="bag-btns">'+
+      '<button data-act="equip" data-idx="'+i+'">装</button>'+
+      '<button data-act="enhance" data-idx="'+i+'">强化</button>'+
+      '<button data-act="sell" data-idx="'+i+'">卖</button>'+
+      '<button data-act="discard" data-idx="'+i+'">丢</button></div></div>';
+  }
+  bagEl.innerHTML = bh;
+}
+
+// ---------------- 技能/药剂渲染（M4） ----------------
+let passiveRenderKey = '';
+// 按钮/行引用缓存：构建一次，之后每 tick 直接更新，不重复 querySelector
+const skillBtnMap = {};   // id -> { btn, cd }
+const potRowMap = {};     // id -> { row, stock, use, buy }
+function renderSkills() {
+  // 被动列表只在学会/读档时变化。
+  const passives = S.skills.passives || [];
+  const nextPassiveKey = JSON.stringify(passives);
+  if (nextPassiveKey !== passiveRenderKey) {
+    passiveRenderKey = nextPassiveKey;
+    let ph = '';
+    if (passives.length === 0) {
+      ph = '<p class="empty-hint">击杀怪物有概率获得技能书</p>';
+    } else {
+      for (const id of passives) {
+        const ps = PASSIVE_SKILLS[id]; if (!ps) continue;
+        ph += '<div class="skill-item passive"><span class="sk-emoji">' + ps.emoji + '</span><span class="sk-name">' + ps.name + '</span><span class="sk-desc">' + ps.desc + '</span></div>';
+      }
+    }
+    $('passiveList').innerHTML = ph;
+  }
+
+  // 主动技能按钮只创建一次，之后仅更新文字和禁用状态，避免点击中 DOM 被替换。
+  if (!skillBtnMap.__built) {
+    let ah = '';
+    for (const id of Object.keys(ACTIVE_SKILLS)) {
+      const sk = ACTIVE_SKILLS[id];
+      ah += '<button class="sk-btn" data-skill="' + id + '">'
+        + '<span class="sk-label">' + sk.emoji + ' ' + sk.name + '</span>'
+        + ' <span class="cd"></span>'
+        + (sk.mp > 0 ? ' <span class="mp">' + sk.mp + '蓝</span>' : '')
+        + '</button>';
+    }
+    $('activeList').innerHTML = ah;
+    for (const id of Object.keys(ACTIVE_SKILLS)) {
+      const btn = $('activeList').querySelector('[data-skill="' + id + '"]');
+      skillBtnMap[id] = { btn, cd: btn.querySelector('.cd') };
+    }
+    skillBtnMap.__built = true;
+  }
+  for (const id of Object.keys(ACTIVE_SKILLS)) {
+    const sk = ACTIVE_SKILLS[id];
+    const ref = skillBtnMap[id];
+    const cd = S.cds[id] || 0;
+    const mpOk = (S.buffs.surge || 0) > 0 || sk.mp === 0 || S.life.curMP.gte(sk.mp);
+    const disabled = cd > 0 || !mpOk || GAME_OVER;
+    const burning = id === 'burn' && (S.buffs.burn || 0) > 0;
+    ref.btn.disabled = disabled;
+    ref.btn.classList.toggle('disabled', disabled);
+    ref.btn.classList.toggle('burning', burning);
+    ref.cd.textContent = cd > 0 ? Math.ceil(cd) + 's' : '';
+  }
+
+  // 药剂行同样保持稳定，只刷新库存与按钮状态。
+  if (!potRowMap.__built) {
+    let pt = '';
+    for (const id of Object.keys(POTIONS)) {
+      const pot = POTIONS[id];
+      pt += '<div class="pot-item" data-potion-row="' + id + '">'
+        + '<span class="pot-emoji">' + pot.emoji + '</span>'
+        + '<span class="pot-name">' + pot.name + '</span>'
+        + '<span class="pot-stock">×0</span>'
+        + '<button class="pot-btn use" data-potion="' + id + '" data-act="use">用</button>'
+        + '<button class="pot-btn buy" data-potion="' + id + '" data-act="buy">买' + pot.price + '</button>'
+        + '</div>';
+    }
+    $('potionList').innerHTML = pt;
+    for (const id of Object.keys(POTIONS)) {
+      const row = $('potionList').querySelector('[data-potion-row="' + id + '"]');
+      potRowMap[id] = {
+        row,
+        stock: row.querySelector('.pot-stock'),
+        use: row.querySelector('[data-act="use"]'),
+        buy: row.querySelector('[data-act="buy"]')
+      };
+    }
+    potRowMap.__built = true;
+  }
+  for (const id of Object.keys(POTIONS)) {
+    const ref = potRowMap[id];
+    const stock = S.potions[id] || 0;
+    ref.stock.textContent = '×' + stock;
+    ref.use.disabled = stock <= 0 || GAME_OVER;
+    ref.buy.disabled = GAME_OVER;
+  }
+}
+
+// ---------------- 存档槽状态 ----------------
+let saveSlotsRenderKey = '';
+function renderSaveSlots() {
+  // 槽位内容只在写入存档时变化（saveSlot 会更新 lastSaveTs/lastSaveSlot），无需每 tick 读 localStorage。
+  const renderKey = S.lastSaveTs + '|' + S.lastSaveSlot + '|' + S.zone;
+  if (renderKey === saveSlotsRenderKey) return;
+  saveSlotsRenderKey = renderKey;
+
+  for (let n = 1; n <= 3; n++) {
+    const info = slotInfo(n);
+    const card = $('saveSlot' + n);
+    const state = $('slotState' + n);
+    const meta = $('slotMeta' + n);
+    const loadBtn = card.querySelector('[data-load]');
+    card.classList.toggle('empty', !info);
+    card.classList.toggle('has-save', !!info);
+    card.classList.toggle('latest', !!info && S.lastSaveSlot === n);
+    loadBtn.disabled = !info;
+
+    if (!info) {
+      state.textContent = '空槽';
+      state.className = 'slot-state empty';
+      meta.textContent = '还没有存档，可安全写入';
+      continue;
+    }
+    const latest = S.lastSaveSlot === n;
+    state.textContent = latest ? '● 最近使用' : '✓ 已有存档';
+    state.className = 'slot-state ' + (latest ? 'latest' : 'saved');
+    const time = info.savedAt ? new Date(info.savedAt).toLocaleString('zh-CN', { hour12:false }) : '时间未知';
+    const zone = ZONES[info.zone] ? ZONES[info.zone].name : info.zone;
+    meta.textContent = '第 ' + info.gen + ' 世 · ' + fmt(new Decimal(info.maxHP)) + ' 血 · ' + zone + '\n' + time;
+  }
+  if ($('saveRuleHint')) $('saveRuleHint').textContent = canSave() ? '当前位于安全区，可以存档' : '⚠️ 战斗区域不可存档，可先逃跑回村';
+}
+
+// ---------------- 墓园渲染（M6） ----------------
+function renderGraveyard() {
+  const list = graveyardAll();
+  const el = $('graveyardList');
+  if (list.length === 0) { el.innerHTML = '<p class="empty-hint">墓园空荡荡，尚无人长眠</p>'; return; }
+  let html = '';
+  for (const g of list) {
+    const isGold = g.type === 'rebirth';
+    html += '<div class="grave-item' + (isGold?' gold':'') + '">'
+      + (isGold?'🟡':'⚫') + ' ' + (g.name||'无名氏') + ' · 第' + g.gen + '世 · 存活' + (g.lived||'?')
+      + ' · 定格' + (g.maxHP ? fmt(new Decimal(g.maxHP)) : '?') + '血'
+      + (g.cause ? ' · 亡于' + g.cause : ' · 飞升')
+      + (g.epitaph ? '<br><span class="epitaph">「' + g.epitaph + '」</span>' : '')
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+// ---------------- DOM 快捷 ----------------
+const $ = (id) => document.getElementById(id);
+
+// 文本写入缓存：值未变时跳过 DOM 写，降低每 tick 的写入次数
+const textCache = new Map();
+function setText(id, value) {
+  const v = String(value);
+  if (textCache.get(id) === v) return;
+  textCache.set(id, v);
+  $(id).textContent = v;
+}
+// bindUI 时缓存的静态引用，避免每个 tick 重复 querySelector(All)
+let zoneBtnList = [];
+let combatEl = null;
+
+// ---------------- 渲染 ----------------
+let lastMaxHPShown = '0';
+
+const UI = {
+  render(dt) {
+    if (GAME_OVER) return;
+    const p = getPanel();
+
+    // 大数字跳动（+1 动画）
+    const hpStr = fmt(p.maxHP);
+    if (hpStr !== lastMaxHPShown) {
+      $('hpMax').textContent = hpStr;
+      pulse('hpMax');
+      lastMaxHPShown = hpStr;
+    }
+    $('hpCur').textContent = fmt(p.curHP);
+    $('hpBar').style.width = p.curHP.div(p.maxHP).times(100).toNumber().toFixed(1) + '%';
+    $('mpCur').textContent = fmt(p.curMP);
+    $('mpBar').style.width = p.curMP.div(p.MP).times(100).toNumber().toFixed(1) + '%';
+
+    // 世代
+    setText('gen', '第 ' + S.gen + ' 世');
+    // 赋能行
+    const bl = Object.keys(S.blessings).map(k => k + '+' + (BLESS_STEP[k] * (1 + S.blessings[k].lv)) + '/拳').join(' · ');
+    setText('blessRow', '🧬 赋能: ' + bl);
+
+    // 存档状态
+    const gap = S.lastSaveTs ? Math.floor((Date.now() - S.lastSaveTs) / 60000) : -1;
+    $('saveState').innerHTML = gap < 0
+      ? '<span style="color:#e74c3c">⚠️ 从未存档</span>'
+      : (gap === 0 ? '✅ 刚刚已存档' : '✅ ' + gap + ' 分钟前已存档（槽' + S.lastSaveSlot + '）');
+    const unsafeGap = gap < 0 || gap > 5 || ZONES[S.zone].safe === false;
+    $('saveState').className = unsafeGap && gap !== 0 ? 'savewarn' : 'saveok';
+
+    // 属性面板（燃烧期物攻/魔攻高亮）
+    const burnOn = (S.buffs.burn || 0) > 0;
+    setText('stPATK', fmt(p.PATK));
+    setText('stMATK', fmt(p.MATK));
+    $('stPATK').classList.toggle('burn-val', burnOn);
+    $('stMATK').classList.toggle('burn-val', burnOn);
+    setText('stPDEF', fmt(p.PDEF));
+    setText('stMDEF', fmt(p.MDEF));
+    setText('stASPD', p.ASPD.toFixed(2) + '/s');
+    setText('stRNG', p.RNG.toFixed(1) + ' 步');
+    setText('stSPD', fmt(p.SPD));
+    setText('stCRIT', fmtPct(p.CRIT));
+    setText('stCRITD', p.CRITD.toFixed(2) + '×');
+    setText('stACC', fmtPct(p.ACC));
+    setText('stEVA', fmtPct(p.EVA));
+    setText('stREGEN', fmt(p.REGEN) + '/s');
+    setText('stGold', fmt(p.gold));
+
+    // 统计
+    setText('stPunch', fmt(S.stats.punches));
+    setText('stKill', S.stats.kills);
+    setText('stLived', fmtDur(Date.now() - S.stats.born));
+
+    // 战斗区
+    const mob = S.mob;
+    if (mob) {
+      setText('mobEmoji', mob.def.emoji);
+      setText('mobName', mob.def.name + (mob.def.maxHP === Infinity ? '（无限血）' : ''));
+      if (mob.def.maxHP === Infinity) {
+        setText('mobHp', '∞');
+        $('mobBar').style.width = '100%';
+      } else {
+        setText('mobHp', fmt(mob.curHP.max(0)) + ' / ' + mob.def.maxHP.toLocaleString('zh-CN'));
+        $('mobBar').style.width = (mob.curHP.div(mob.def.maxHP).times(100).max(0).toNumber().toFixed(1)) + '%';
+      }
+      setText('mobDesc', mob.def.desc || '');
+    }
+    // 燃烧生命按钮 + 战斗区燃烧视觉
+    const burnCd = S.cds.burn || 0;
+    setText('btnBurn', burnCd > 0
+      ? '🔥 燃烧生命 (CD ' + Math.ceil(burnCd) + 's)'
+      : '🔥 燃烧生命');
+    $('btnBurn').disabled = burnCd > 0 || S.life.curHP.lte(S.life.maxHP.times(0.3));
+    setText('burnBuff', burnOn ? '🔥 攻击翻倍中 ' + S.buffs.burn.toFixed(1) + 's' : '');
+    $('burnBuff').classList.toggle('on', burnOn);
+    if (combatEl) combatEl.classList.toggle('burning', burnOn);
+
+    // 区域名
+    setText('zoneName', ZONES[S.zone].emoji + ' ' + ZONES[S.zone].name);
+
+    // M7: 飞升检测
+    $('btnRebirth').style.display = checkRebirthReady() ? '' : 'none';
+
+    // 地图按钮门槛禁用
+    for (const btn of zoneBtnList) {
+      const zid = btn.dataset.zone;
+      const chk = checkZoneReq(zid);
+      btn.classList.toggle('locked', !chk.ok);
+      btn.disabled = !chk.ok && zid !== 'village';
+    }
+    // 装备区（M3）
+    renderEquip();
+    // 技能+药剂区（M4）
+    renderSkills();
+    // 存档槽状态（仅存档内容变化时更新）
+    renderSaveSlots();
+  },
+
+  // ---------------- 死亡画面 ----------------
+  showDeath(info) {
+    const k = info.killer;
+    $('deathKiller').textContent = k ? k.emoji + ' ' + k.name : '未知';
+    $('deathHP').textContent = fmt(info.panel.maxHP);
+    $('deathPunches').textContent = fmt(new Decimal(info.punches));
+    $('deathLived').textContent = fmtDur(info.livedMs);
+    const gapMin = S.lastSaveTs ? Math.floor((Date.now() - S.lastSaveTs) / 60000) : -1;
+    $('deathSave').textContent = gapMin < 0 ? '你从未存过档' : '最近存档：' + gapMin + ' 分钟前（生命 ' + fmt(slotInfoHP()) + '）';
+    $('btnLoadLast').style.display = S.lastSaveTs ? '' : 'none';
+    // M5: 尸检报告
+    if (info.analysis) {
+      const a = info.analysis;
+      let html = '📋 尸检：死因 ' + a.cause;
+      if (a.physDmg > 0) html += '（物伤缺口 ' + a.physDmg + '）';
+      if (a.magDmg > 0) html += '（魔伤缺口 ' + a.magDmg + '）';
+      if (a.suggestions && a.suggestions.length) html += '<br>建议：' + a.suggestions.join('；');
+      $('deathAutopsy').innerHTML = html;
+    }
+    $('deathMask').style.display = 'flex';
+  },
+
+  hideDeath() { $('deathMask').style.display = 'none'; }
+};
+
+function slotInfoHP() {
+  // 读最近槽位面板（仅显示用）
+  try {
+    const best = loadLatestPreview();
+    return best ? best : '?';
+  } catch (e) { return '?'; }
+}
+function loadLatestPreview() {
+  let bestTs = 0, hp = '?';
+  for (let i = 0; i < 3; i++) {
+    const raw = localStorage.getItem(SAVE_KEYS.slots[i]);
+    if (!raw) continue;
+    const o = JSON.parse(raw);
+    if ((o.savedAt || 0) > bestTs) { bestTs = o.savedAt; hp = o.life ? o.life.maxHP : '?'; }
+  }
+  return hp;
+}
+
+// ---------------- 小工具 ----------------
+function pulse(id) {
+  const el = $(id);
+  el.classList.remove('pulse');
+  void el.offsetWidth;          // 重启动画
+  el.classList.add('pulse');
+}
+function fmtDur(ms) {
+  const m = Math.floor(ms / 60000), h = Math.floor(m / 60), d = Math.floor(h / 24);
+  if (d > 0) return d + '天' + (h % 24) + '时';
+  if (h > 0) return h + '时' + (m % 60) + '分';
+  return m + '分';
+}
+
+// ---------------- 单屏标签页 ----------------
+function bindGameTabs() {
+  const tabs = Array.from(document.querySelectorAll('.game-tab[data-tab]'));
+  const panes = Array.from(document.querySelectorAll('.tab-pane[data-pane]'));
+  if (!tabs.length) return;
+
+  function activate(name, focus) {
+    if (!tabs.some(tab => tab.dataset.tab === name)) name = 'equip';
+    tabs.forEach(tab => {
+      const active = tab.dataset.tab === name;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      tab.tabIndex = active ? 0 : -1;
+      if (active && focus) tab.focus();
+    });
+    panes.forEach(pane => {
+      const active = pane.dataset.pane === name;
+      pane.classList.toggle('active', active);
+      pane.hidden = !active;
+    });
+    try { localStorage.setItem('gp-ui-tab', name); } catch (e) { /* 隐私模式下仅不记忆 */ }
+  }
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => activate(tab.dataset.tab, false));
+    tab.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      const step = event.key === 'ArrowRight' ? 1 : -1;
+      activate(tabs[(index + step + tabs.length) % tabs.length].dataset.tab, true);
+    });
+  });
+
+  let initial = 'equip';
+  try { initial = localStorage.getItem('gp-ui-tab') || initial; } catch (e) { /* 使用默认页 */ }
+  activate(initial, false);
+}
+
+// 用户操作后同步刷新，不等下一次 100ms tick。
+function finishAction(result) {
+  UI.render(0);
+  if (result) toast(result.msg);
+}
+
+// ---------------- 按钮绑定 ----------------
+function bindUI() {
+  bindGameTabs();
+  zoneBtnList = Array.from(document.querySelectorAll('[data-zone]'));
+  combatEl = document.querySelector('.combat');
+
+  // 地图
+  document.querySelectorAll('[data-zone]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (GAME_OVER) return;
+      const zid = btn.dataset.zone;
+      const ok = gotoZone(zid);              // 内部检查门槛，失败会 toast
+      if (ok && zid !== 'village') {
+        toast('⚠️ 进入 ' + ZONES[zid].name + '：战斗中不可存档，死亡只能回档');
+      }
+    });
+  });
+  $('btnBurn').addEventListener('click', () => castBurn());
+  $('btnFlee').addEventListener('click', () => flee());
+
+  // 装备操作（事件委托，背包内容动态）
+  $('bagList').addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]'); if (!btn || GAME_OVER) return;
+    const act = btn.dataset.act, idx = Number(btn.dataset.idx);
+    let r = null;
+    if (act === 'equip') r = equipItem(idx);
+    else if (act === 'enhance') r = enhanceItem(idx);
+    else if (act === 'sell') r = sellItem(idx);
+    else if (act === 'discard') r = discardItem(idx);
+    finishAction(r);
+  });
+  $('equippedSlots').addEventListener('click', e => {
+    const btn = e.target.closest('[data-unequip]'); if (!btn || GAME_OVER) return;
+    finishAction(unequipItem(btn.dataset.unequip));
+  });
+
+  // 主动技能（M4）
+  $('activeList').addEventListener('click', e => {
+    const btn = e.target.closest('[data-skill]'); if (!btn || GAME_OVER) return;
+    const ok = castSkill(btn.dataset.skill);
+    finishAction(ok ? null : { msg:'无法施放（CD中/蓝不足/血不足）' });
+  });
+  // 药剂（M4）
+  $('potionList').addEventListener('click', e => {
+    const btn = e.target.closest('[data-potion]'); if (!btn || GAME_OVER) return;
+    const act = btn.dataset.act, id = btn.dataset.potion;
+    finishAction(act === 'use' ? usePotion(id) : buyPotion(id));
+  });
+
+  // 墓园（M6）
+  $('btnGraveyard').addEventListener('click', () => {
+    renderGraveyard();
+    $('graveyardMask').style.display = 'flex';
+  });
+  $('btnCloseGrave').addEventListener('click', () => { $('graveyardMask').style.display = 'none'; });
+
+  // 飞升（M7）
+  $('btnRebirth').addEventListener('click', () => {
+    if (GAME_OVER) return;
+    let html = '';
+    for (const key of BLESS_ORDER) {
+      const step = BLESS_STEP[key];
+      const has = !!S.blessings[key];
+      const label = has ? '强化 ' + key + '（步长升级）' : '新增 ' + key + '（+' + step + '/拳）';
+      html += '<button class="rebirth-choice" data-bless="' + key + '">' + label + '</button>';
+    }
+    $('rebirthChoices').innerHTML = html;
+    $('rebirthMask').style.display = 'flex';
+  });
+  $('rebirthChoices').addEventListener('click', e => {
+    const btn = e.target.closest('[data-bless]'); if (!btn) return;
+    const r = rebirth(btn.dataset.bless);
+    $('rebirthMask').style.display = 'none';
+    toast(r.msg);
+  });
+
+  // 存档
+  document.querySelectorAll('[data-save]').forEach(btn =>
+    btn.addEventListener('click', () => finishAction(saveSlot(Number(btn.dataset.save)))));
+  document.querySelectorAll('[data-load]').forEach(btn =>
+    btn.addEventListener('click', () => finishAction(loadSlot(Number(btn.dataset.load)))));
+
+  // 导出导入
+  $('btnExport').addEventListener('click', () => {
+    const code = exportSave();
+    $('ioText').value = code;
+    $('ioText').select();
+    toast('存档已生成，Ctrl+C 复制保存');
+  });
+  $('btnImport').addEventListener('click', () => {
+    const t = $('ioText').value.trim();
+    if (!t) return toast('先粘贴存档文本');
+    toast(importSave(t).msg);
+  });
+
+  // 自动存档开关
+  $('autoSaveChk').addEventListener('change', e => { S.autoSave = e.target.checked; });
+
+  // 重新开档（活着时主动重开，带确认）
+  $('btnRestart').addEventListener('click', () => {
+    if (GAME_OVER) return;
+    $('restartMask').style.display = 'flex';
+  });
+  $('btnRestartNo').addEventListener('click', () => { $('restartMask').style.display = 'none'; });
+  $('btnRestartYes').addEventListener('click', () => {
+    $('restartMask').style.display = 'none';
+    newGame();
+    toast('第 0 世，重新来过（旧档进度已清空）');
+  });
+
+  // 死亡画面
+  $('btnLoadLast').addEventListener('click', () => {
+    const r = loadLatest();
+    if (r.ok) { UI.hideDeath(); toast(r.msg); } else toast(r.msg);
+  });
+  $('btnNewGame').addEventListener('click', () => {
+    if (deathInfo) {
+      const epitaph = $('deathEpitaph').value.trim() || '安息';
+      graveyardAdd({
+        name: '无名氏', gen: deathInfo.gen, lived: fmtDur(deathInfo.livedMs),
+        maxHP: deathInfo.panel.maxHP.toString(), cause: deathInfo.killer ? deathInfo.killer.name : '未知',
+        type: 'death', epitaph, ts: Date.now()
+      });
+      $('deathEpitaph').value = '';
+    }
+    newGame();
+    UI.hideDeath();
+    toast('第 0 世，重新来过');
+  });
+}
+
+// ---------------- toast ----------------
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}

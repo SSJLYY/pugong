@@ -39,15 +39,9 @@ public class SocialController {
     }
 
     /** 写端点统一加锁：与 GameController.run() 同一把锁，防止读-算-写交错。 */
+    /** 锁模板已收口到 StateCache.withLock，此处仅保留一行转发（语义：短等重试，不再瞬时拒绝）。 */
     private <T> T locked(long uid, int slot, java.util.function.Supplier<T> body) {
-        if (!cache.lock(uid, slot, 10)) {
-            throw com.gongpu.common.ApiException.conflict("操作太快了，稍等一下");
-        }
-        try {
-            return body.get();
-        } finally {
-            cache.unlock(uid, slot);
-        }
+        return cache.withLock(uid, slot, body);
     }
 
     /** 世界墓园（公开，未登录也能看）。 */

@@ -116,6 +116,46 @@ public class StateCache {
         }
     }
 
+    /**
+     * 统一锁模板（全项目写端点唯一实现）：短等重试拿锁——正常争锁（轮询持锁约百毫秒、
+     * 双开页签）等对方让完即可，不直接 409；真并发双结算耗尽重试仍拒。
+     * 拿到锁后执行 body，finally 释放。新写端点一律用它，不要再手写 lock/try/finally。
+     */
+    /** 拿锁（含短等重试）：成功返回 true；耗尽重试返回 false。withLock 与旧 try 块共用这一份实现。 */
+    public boolean lockRetry(long userId, int slot) {
+        boolean locked = lock(userId, slot, 10);
+        int tries = 0;
+        while (!locked && tries++ < 3) {
+            try {
+                Thread.sleep(120);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+            locked = lock(userId, slot, 10);
+        }
+        return locked;
+    }
+
+    public <T> T withLock(long userId, int slot, java.util.function.Supplier<T> body) {
+        if (!lockRetry(userId, slot)) {
+            throw com.gongpu.common.ApiException.conflict("操作太快了，稍等一下");
+        }
+        try {
+            return body.get();
+        } finally {
+            unlock(userId, slot);
+        }
+    }
+
+    /** void 版（与 Supplier 版同语义）。 */
+    public void withLock(long userId, int slot, Runnable body) {
+        withLock(userId, slot, () -> {
+            body.run();
+            return null;
+        });
+    }
+
     public boolean ping() {
         try {
             String pong = redis.execute((org.springframework.data.redis.core.RedisCallback<String>)

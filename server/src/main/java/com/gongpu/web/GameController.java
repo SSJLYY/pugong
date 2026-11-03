@@ -93,95 +93,80 @@ public class GameController {
      */
     private Map<String, Object> run(long uid, int slot, String username,
                                     java.util.function.Function<PlayerState, Map<String, Object>> action) {
-        // 正常争锁(轮询每秒持锁约百毫秒/双开页签)不应直接 409:短等重试几轮再拒;
-        // 真·并发双结算(极端时序)依旧被拒——锁语义不变,只是给对方一个让完的机会
-        boolean locked = cache.lock(uid, slot, 10);
-        int tries = 0;
-        while (!locked && tries++ < 3) {
+        return cache.withLock(uid, slot, () -> runLocked(uid, slot, username, action));
+    }
+
+    private Map<String, Object> runLocked(long uid, int slot, String username,
+                                          java.util.function.Function<PlayerState, Map<String, Object>> action) {
+        PlayerState s = saves.load(uid, slot);
+        // 用户名优先取 JWT claim（拦截器已解析），免去每秒轮询一次账号查库；
+        // 无 claim 的老令牌才回源查一次
+        String name = username != null ? username : accounts.require(uid).getUsername();
+        s.bulletinName = name;
+        com.gongpu.game.GameEngine.AdvanceResult advanceResult = saves.advanceNow(uid, slot, s);
+        // 自动飞升(legacy autobot autoRebirth):通关线达成且管家开关开启 → 立即转生
+        // (必须在 persist 之前改状态,否则转生不落库)
+        if (advanceResult.cleared() && s.autoRebirth && !s.dead) {
             try {
-                Thread.sleep(120);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-            locked = cache.lock(uid, slot, 10);
-        }
-        if (!locked) {
-            throw com.gongpu.common.ApiException.conflict("操作太快了，稍等一下");
-        }
-        try {
-            PlayerState s = saves.load(uid, slot);
-            // 用户名优先取 JWT claim（拦截器已解析），免去每秒轮询一次账号查库；
-            // 无 claim 的老令牌才回源查一次
-            String name = username != null ? username : accounts.require(uid).getUsername();
-            s.bulletinName = name;
-            com.gongpu.game.GameEngine.AdvanceResult advanceResult = saves.advanceNow(uid, slot, s);
-            // 自动飞升(legacy autobot autoRebirth):通关线达成且管家开关开启 → 立即转生
-            // (必须在 persist 之前改状态,否则转生不落库)
-            if (advanceResult.cleared() && s.autoRebirth && !s.dead) {
+                // 先选目标再校验:validateRebirth(s, null) 两个分支恒抛,
+                // 旧顺序(先 validate 后选 chosen)让自动飞升从未生效过
+                String chosen = com.gongpu.game.GameService.autoRebirthChoice(s);
+                game.validateRebirth(s, chosen);
                 try {
-                    // 先选目标再校验:validateRebirth(s, null) 两个分支恒抛,
-                    // 旧顺序(先 validate 后选 chosen)让自动飞升从未生效过
-                    String chosen = com.gongpu.game.GameService.autoRebirthChoice(s);
-                    game.validateRebirth(s, chosen);
-                    try {
-                        graves.addAscend(uid, s, chosen);                              // 立金碑(与手动转生一致)
-                    } catch (RuntimeException ignored) {
-                    }
-                    game.rebirth(s, chosen);
+                    graves.addAscend(uid, s, chosen);                              // 立金碑(与手动转生一致)
                 } catch (RuntimeException ignored) {
-                    // 转生前置不满足(数据异常)则跳过,下帧再试
                 }
-            }
-            // 挂机自动管护(v3.13):结算掉落立即「卖白装→吞噬→穿最强」,背包不堆积——
-            // 不开关也零开销;开了之后每秒轮询顺带完成,无需手动点按钮
-            if (s.autoEquipBest) {
-                com.gongpu.game.GameService.autoMaintain(s);
-            }
-            Map<String, Object> extra;
-            try {
-                extra = action == null ? null : action.apply(s);
-            } finally {
-                // 动作抛异常也要落库（例如燃烧生命可能直接致死）
-                // 纯轮询帧（无动作）走节流落库，避免每秒一次 MySQL 写入
-                if (action == null) {
-                    saves.persistThrottled(uid, slot, s);
-                } else {
-                    saves.persist(uid, slot, s, null);
-                }
-            }
-            // 榜单（生命/金币/世代三榜统一上报,带内部节流,静默失败）
-            try {
-                board.submit(uid, name,
-                        s.life.maxHP, s.gen, s.gold);
+                game.rebirth(s, chosen);
             } catch (RuntimeException ignored) {
-                // 榜单不影响游戏
+                // 转生前置不满足(数据异常)则跳过,下帧再试
             }
-            Map<String, Object> out = game.fullView(s);
-            if (extra != null) {
-                out.put("result", extra);
-            }
-            // Boss 首杀播报
-            if (advanceResult != null && advanceResult.bossFirstKill() != null) {
-                Map<String, Object> bk = new LinkedHashMap<>();
-                bk.put("boss", advanceResult.bossFirstKill());
-                bk.put("gold", advanceResult.bossFirstKillGold());
-                out.put("bossFirstKill", bk);
-            }
-            // 离线收益摘要：挂机回来一次性提示（seconds>60 才算离线）
-            if (advanceResult != null && advanceResult.seconds() > com.gongpu.game.GameConst.OFFLINE_MIN_SEC) {
-                Map<String, Object> off = new LinkedHashMap<>();
-                off.put("seconds", (long) advanceResult.seconds());
-                off.put("punches", advanceResult.punches());
-                off.put("kills", advanceResult.kills());
-                off.put("drops", advanceResult.drops());
-                off.put("died", advanceResult.died());
-                out.put("offline", off);
-            }
-            return out;
-        } finally {
-            cache.unlock(uid, slot);
         }
+        // 挂机自动管护(v3.13):结算掉落立即「卖白装→吞噬→穿最强」,背包不堆积——
+        // 不开关也零开销;开了之后每秒轮询顺带完成,无需手动点按钮
+        if (s.autoEquipBest) {
+            com.gongpu.game.GameService.autoMaintain(s);
+        }
+        Map<String, Object> extra;
+        try {
+            extra = action == null ? null : action.apply(s);
+        } finally {
+            // 动作抛异常也要落库（例如燃烧生命可能直接致死）
+            // 纯轮询帧（无动作）走节流落库，避免每秒一次 MySQL 写入
+            if (action == null) {
+                saves.persistThrottled(uid, slot, s);
+            } else {
+                saves.persist(uid, slot, s, null);
+            }
+        }
+        // 榜单（生命/金币/世代三榜统一上报,带内部节流,静默失败）
+        try {
+            board.submit(uid, name,
+                    s.life.maxHP, s.gen, s.gold);
+        } catch (RuntimeException ignored) {
+            // 榜单不影响游戏
+        }
+        Map<String, Object> out = game.fullView(s);
+        if (extra != null) {
+            out.put("result", extra);
+        }
+        // Boss 首杀播报
+        if (advanceResult != null && advanceResult.bossFirstKill() != null) {
+            Map<String, Object> bk = new LinkedHashMap<>();
+            bk.put("boss", advanceResult.bossFirstKill());
+            bk.put("gold", advanceResult.bossFirstKillGold());
+            out.put("bossFirstKill", bk);
+        }
+        // 离线收益摘要：挂机回来一次性提示（seconds>60 才算离线）
+        if (advanceResult != null && advanceResult.seconds() > com.gongpu.game.GameConst.OFFLINE_MIN_SEC) {
+            Map<String, Object> off = new LinkedHashMap<>();
+            off.put("seconds", (long) advanceResult.seconds());
+            off.put("punches", advanceResult.punches());
+            off.put("kills", advanceResult.kills());
+            off.put("drops", advanceResult.drops());
+            off.put("died", advanceResult.died());
+            out.put("offline", off);
+        }
+        return out;
     }
 
     @GetMapping("/{slot}/state")
@@ -395,7 +380,7 @@ public class GameController {
     @PostMapping("/{slot}/daily")
     public Map<String, Object> daily(HttpServletRequest req, @PathVariable int slot) {
         long uid = AuthInterceptor.userId(req);
-        if (!cache.lock(uid, slot, 10)) {
+        if (!cache.lockRetry(uid, slot)) {
             throw com.gongpu.common.ApiException.conflict("操作太快了，稍等一下");
         }
         try {
@@ -447,7 +432,7 @@ public class GameController {
     public Map<String, Object> rebirth(HttpServletRequest req, @PathVariable int slot,
                                        @RequestBody RebirthReq body) {
         long uid = AuthInterceptor.userId(req);
-        if (!cache.lock(uid, slot, 10)) {
+        if (!cache.lockRetry(uid, slot)) {
             throw com.gongpu.common.ApiException.conflict("操作太快了，稍等一下");
         }
         try {
@@ -489,7 +474,7 @@ public class GameController {
     public Map<String, Object> death(HttpServletRequest req, @PathVariable int slot,
                                      @RequestBody Map<String, String> body) {
         long uid = AuthInterceptor.userId(req);
-        if (!cache.lock(uid, slot, 10)) {
+        if (!cache.lockRetry(uid, slot)) {
             throw com.gongpu.common.ApiException.conflict("操作太快了，稍等一下");
         }
         try {

@@ -166,6 +166,8 @@ public final class GameConst {
     public static final int TRAIT_CRYSTAL_MATS = 2;
     /** 潜行的伤害乘区（攻击落空等价：玩家对它造成的伤害 ×0.9）。 */
     public static final double TRAIT_STEALTH_MUL = 0.9;
+    /** 被动「幸运星」的掉落率乘区。 */
+    public static final double LUCKY_STAR_MUL = 1.1;
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
@@ -289,17 +291,18 @@ public final class GameConst {
     public record PassiveDef(String id, String name, String emoji, String desc) {
     }
 
-    public static final Map<String, PassiveDef> PASSIVE_SKILLS = Map.of(
-            "combo", new PassiveDef("combo", "连击", "👊", "15% 概率一拳变两拳"),
-            "vitality", new PassiveDef("vitality", "健体", "💪", "每 100 次普攻额外 +50 生命上限"),
-            "iron", new PassiveDef("iron", "铁布衫", "🛡️", "物防 ×1.2"),
-            "resist", new PassiveDef("resist", "魔抗皮肤", "🔮", "魔防 ×1.2"),
-            "swift", new PassiveDef("swift", "疾风步", "💨", "+20% 移速"),
-            "hawkeye", new PassiveDef("hawkeye", "鹰眼", "🦅", "+5% 命中"),
-            "brute", new PassiveDef("brute", "蛮力", "💢", "物攻 ×1.15，-3% 命中"),
-            "element", new PassiveDef("element", "元素亲和", "⚡", "附魔魔伤 +25%"),
-            "boss_hunter", new PassiveDef("boss_hunter", "巨人杀手", "🗡️", "对 Boss 伤害 +20%"),
-            "diamond_body", new PassiveDef("diamond_body", "金刚体", "💎", "物防与魔防 ×1.15"));
+    public static final Map<String, PassiveDef> PASSIVE_SKILLS = Map.ofEntries(
+            Map.entry("combo", new PassiveDef("combo", "连击", "👊", "15% 概率一拳变两拳")),
+            Map.entry("vitality", new PassiveDef("vitality", "健体", "💪", "每 100 次普攻额外 +50 生命上限")),
+            Map.entry("iron", new PassiveDef("iron", "铁布衫", "🛡️", "物防 ×1.2")),
+            Map.entry("resist", new PassiveDef("resist", "魔抗皮肤", "🔮", "魔防 ×1.2")),
+            Map.entry("swift", new PassiveDef("swift", "疾风步", "💨", "+20% 移速")),
+            Map.entry("hawkeye", new PassiveDef("hawkeye", "鹰眼", "🦅", "+5% 命中")),
+            Map.entry("brute", new PassiveDef("brute", "蛮力", "💢", "物攻 ×1.15，-3% 命中")),
+            Map.entry("element", new PassiveDef("element", "元素亲和", "⚡", "附魔魔伤 +25%")),
+            Map.entry("boss_hunter", new PassiveDef("boss_hunter", "巨人杀手", "🗡️", "对 Boss 伤害 +20%")),
+            Map.entry("diamond_body", new PassiveDef("diamond_body", "金刚体", "💎", "物防与魔防 ×1.15")),
+            Map.entry("lucky_star", new PassiveDef("lucky_star", "幸运星", "⭐", "装备与图纸掉落率 +10%")));
 
     public static final double COMBO_CHANCE = 0.15;
     /** 被动「巨人杀手」对 Boss 的伤害乘区。 */

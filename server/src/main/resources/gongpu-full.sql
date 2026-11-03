@@ -906,6 +906,11 @@ DELETE FROM `cfg_skill` WHERE `code` IN ('diamond_body');
 INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('diamond_body', '金刚体', '💎', 'passive', 300, 0, 0, 0, '{"effect":"mul2","keys":["PDEF","MDEF"],"mul":1.15}', '物防与魔防 ×1.15', 1, 16);
+-- 第 26 轮：新被动「幸运星」（掉落率 +10%）
+DELETE FROM `cfg_skill` WHERE `code` IN ('lucky_star');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('lucky_star', '幸运星', '⭐', 'passive', 300, 0, 0, 0, '{"effect":"drop_mul","mul":1.1}', '装备与图纸掉落率 +10%', 1, 17);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

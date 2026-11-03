@@ -685,7 +685,12 @@ public final class GameEngine {
 
     /** 幸运药剂（luck_pot）掉落倍率：生效中 1.5，否则 1.0。装备/图纸/溢出期望三处掉落同口径。 */
     static double dropLuckMul(PlayerState s) {
-        return buffLeft(s, "luck_pot") > 0 ? 1.5 : 1.0;
+        double mul = buffLeft(s, "luck_pot") > 0 ? 1.5 : 1.0;
+        // 被动·幸运星：掉落率 +10%（与鸿运药剂乘算；被动受沉默压制）
+        if (s.passives.contains("lucky_star") && !PanelCalculator.isSilenced(s)) {
+            mul *= GameConst.LUCKY_STAR_MUL;
+        }
+        return mul;
     }
 
     private static double buffLeft(PlayerState s, String buff) {

@@ -44,6 +44,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body("BAD_REQUEST", "缺少参数: " + e.getParameterName()));
     }
 
+    /** 路径/参数类型不符（如槽位传了非数字）:客户端 400,而非落进兜底 500。 */
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException e) {
+        return ResponseEntity.badRequest().body(body("BAD_REQUEST", "参数类型不合法: " + e.getName()));
+    }
+
+    /** 不存在的路径:404,而非 500「服务器开小差」(拼错 API 地址时误导排障)。 */
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResource(
+            org.springframework.web.servlet.resource.NoResourceFoundException e) {
+        return ResponseEntity.status(404).body(body("NOT_FOUND", "接口不存在"));
+    }
+
+    /** 方法不允许（如对只读接口发 POST）:405,而非 500。 */
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodNotSupported(
+            org.springframework.web.HttpRequestMethodNotSupportedException e) {
+        return ResponseEntity.status(405).body(body("METHOD_NOT_ALLOWED", "请求方法不允许: " + e.getMethod()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleOther(Exception e, HttpServletRequest req) {
         // 500 必须带请求上下文:只有堆栈没有 URI,排障时要靠猜

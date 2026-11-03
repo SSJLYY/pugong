@@ -959,6 +959,16 @@ INSERT INTO `cfg_equipment_template`
   (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
   ('lava_greaves', '熔岩护腿', '🌋', 'legs', 4, 'volcano', '{"PDEF":"22","MDEF":"12","REGEN":"2"}', 10, 80, '熔岩冷却后的岩甲护腿', 1, 52);
 
+-- 第六批第 83 轮：新委托 ×2（火山终局长线 + 平原高计数挂机委托；奖励用第六批新药剂）
+DELETE FROM `cfg_quest` WHERE `code` IN ('volcano_heart');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('volcano_heart', '熔火之心', '❤️‍🔥', '炎魔的心火未熄，公会要趁热打铁——在火山清剿到底', 'volcano', '{"maxHP":500000,"ATK":800}', 25, 3000, 'giant', 1, 1, 1, 12);
+DELETE FROM `cfg_quest` WHERE `code` IN ('plain_veteran');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('plain_veteran', '平原老兵', '🎖️', '功成身退的老兵想看看后辈的拳头：平原连战三十场', 'plain', '{"maxHP":2000}', 30, 200, 'might', 1, 1, 1, 13);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16

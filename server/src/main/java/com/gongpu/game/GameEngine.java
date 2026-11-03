@@ -244,10 +244,20 @@ public final class GameEngine {
         if (m.boss && s.passives.contains("boss_hunter")) {
             perHit = Num.mul(perHit, Num.of(GameConst.BOSS_HUNTER_MUL));
         }
+        // 被动·处决者（第七批）：Boss 残血（<30%）专伤乘区，与巨人杀手乘算
+        if (m.boss && s.passives.contains("executioner") && bossLowHp(m)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.EXECUTIONER_MUL));
+        }
         if (m.boss && buffOn(s, p, "giant_pot")) {
             perHit = Num.mul(perHit, Num.of(GameConst.GIANT_POT_MUL));
         }
         return perHit;
+    }
+
+    /** Boss 是否残血（处决者触发口径：当前/上限 < EXECUTIONER_HP_LINE；上限非正不触发）。 */
+    static boolean bossLowHp(PlayerState.MobState m) {
+        return m.maxHP != null && m.maxHP.signum() > 0
+                && Num.lt(Num.div(m.curHP, m.maxHP), Num.of(GameConst.EXECUTIONER_HP_LINE));
     }
 
     static int dealDamage(PlayerState s, PanelCalculator.Panel p, BigDecimal punches, double seconds) {
@@ -279,6 +289,10 @@ public final class GameEngine {
         // 被动·巨人杀手：对 Boss 专伤乘区
         if (m.boss && s.passives.contains("boss_hunter")) {
             perHit = Num.mul(perHit, Num.of(GameConst.BOSS_HUNTER_MUL));
+        }
+        // 被动·处决者（第七批）：Boss 残血专伤（与预估口径一致，见 expectedPerHit 侧同名分支）
+        if (m.boss && s.passives.contains("executioner") && bossLowHp(m)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.EXECUTIONER_MUL));
         }
         // 药剂·巨人：对 Boss 专伤乘区（与被动乘算叠加，沉默压制）
         if (m.boss && buffOn(s, p, "giant_pot")) {

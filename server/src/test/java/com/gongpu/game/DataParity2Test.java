@@ -59,9 +59,9 @@ class DataParity2Test {
         for (String id : GameConst.ACTIVE_SKILLS.keySet()) {
             assertTrue(sql.contains("'" + id + "'"), "主动技能 " + id + " 应在 SQL 技能表里");
         }
-        // 主动技能总数 = 11（元老 6 + 治愈/嗜血/铁壁/净化/冲锋）；被动 14（+ 第七批血怒）
+        // 主动技能总数 = 11（元老 6 + 治愈/嗜血/铁壁/净化/冲锋）；被动 15（+ 第七批血怒/处决者）
         assertEquals(11, GameConst.ACTIVE_SKILLS.size());
-        assertEquals(14, GameConst.PASSIVE_SKILLS.size());
+        assertEquals(15, GameConst.PASSIVE_SKILLS.size());
     }
 
     @Test

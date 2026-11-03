@@ -348,7 +348,8 @@ public final class GameConst {
             Map.entry("lucky_star", new PassiveDef("lucky_star", "幸运星", "⭐", "装备与图纸掉落率 +10%")),
             Map.entry("eagle_bone", new PassiveDef("eagle_bone", "鹰骨", "🦴", "射程 +1")),
             Map.entry("material_sense", new PassiveDef("material_sense", "材料嗅觉", "👃", "击杀材料掉率 +25 个百分点（50%→75%），锻造党的鼻子")),
-            Map.entry("bloodrage", new PassiveDef("bloodrage", "血怒", "🩸", "生命低于 30% 时物理与魔法攻击 +15%，越残越怒")));
+            Map.entry("bloodrage", new PassiveDef("bloodrage", "血怒", "🩸", "生命低于 30% 时物理与魔法攻击 +15%，越残越怒")),
+            Map.entry("executioner", new PassiveDef("executioner", "处决者", "🪓", "Boss 生命低于 30% 时对其伤害 +25%，斩尽杀绝")));
 
     public static final double COMBO_CHANCE = 0.15;
 
@@ -356,6 +357,9 @@ public final class GameConst {
     public static final int REROLL_PITY_MAX = 10;
     /** 被动「巨人杀手」对 Boss 的伤害乘区。 */
     public static final double BOSS_HUNTER_MUL = 1.2;
+    /** 被动「处决者」（第七批）：Boss 血线（当前/上限）低于此值触发，伤害乘区。 */
+    public static final double EXECUTIONER_HP_LINE = 0.30;
+    public static final double EXECUTIONER_MUL = 1.25;
     /** 被动「血怒」（第七批）：触发血线（当前生命/上限）与双攻乘区。 */
     public static final double BLOODRAGE_HP_LINE = 0.30;
     public static final double BLOODRAGE_ATK_MUL = 1.15;

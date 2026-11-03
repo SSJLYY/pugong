@@ -1088,6 +1088,12 @@ INSERT INTO `cfg_affix`
   (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
   ('juesha', '绝杀', 'CRIT', 'flat', 0.15, 0.25, 'epic', NULL, NULL, 1, 24);
 
+-- 第七批第 85 轮：新被动「处决者」（Boss 生命低于 30% 时对其伤害 +25%）
+DELETE FROM `cfg_skill` WHERE `code` IN ('executioner');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('executioner', '处决者', '🪓', 'passive', 400, 0, 0, 0, '{"effect":"executioner","mul":1.25}', 'Boss 生命低于 30% 时对其伤害 +25%', 1, 26);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

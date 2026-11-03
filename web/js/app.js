@@ -610,6 +610,17 @@
     $('mpBar').style.width = mpPct.toFixed(1) + '%';
 
     $('gen').textContent = '第 ' + view.gen + ' 世';
+    // 页签标题速览：切到别的标签页也能瞄见血量与所在区（5% 分桶，变化才写）
+    {
+      const pct = Math.max(0, Math.min(100, Math.round(new Decimal(p.curHP).div(new Decimal(p.maxHP).max(1)).toNumber() * 20) * 5));
+      const zt = $('zoneName') ? $('zoneName').textContent : '';
+      const tsig = pct + '|' + zt + '|' + (view.dead ? 1 : 0);
+      if (tsig !== applyView._titleSig) {
+        applyView._titleSig = tsig;
+        document.title = view.dead ? '💀 已阵亡 | 普攻永久增加生命上限'
+          : '❤' + pct + '% ' + zt + ' | 普攻永久增加生命上限';
+      }
+    }
     const hg = $('hudGold');
     if (hg) hg.textContent = '💰 ' + fmt(view.gold || 0);
     const hk = $('hudKills');

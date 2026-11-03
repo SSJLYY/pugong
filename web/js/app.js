@@ -981,7 +981,9 @@
         '<div class="trait-row"><b>⚒️ 锻造分解</b><span>装备可分解为来源区域材料，图纸打 Boss/野怪掉落；材料还能 3:1 跨区兑换，锻造页材料筹码标注了来源区域。</span></div>',
         '<div class="trait-row"><b>🎁 每日连签</b><span>每天签到得金币礼包，连签每天多 +50 金（封顶 +350），每连签 7 天另奖大血药 ×2。</span></div>',
         '<div class="trait-row"><b>🏅 成就</b><span>角色页成就带进度条与金币奖励，解锁后记得领取（可一键全领）。</span></div>',
-        '<div class="trait-row"><b>⌨️ 快捷键</b><span>1 小血药 · 2 大血药 · 3 蓝药 · 4 治愈术 · F 逃跑 · B 挑战 Boss。</span></div>',
+        '<div class="trait-row"><b>✋ 扩展技能</b><span>战斗区第二行：治愈术（回 35% 血）/ 嗜血术 / 铁壁 / 净化（清中毒·灼烧·沉默·时滞，克剧毒与时滞词条）。</span></div>',
+        '<div class="trait-row"><b>🧧 聚宝与嗅觉</b><span>聚宝药剂 300s 金币 +50%；被动「材料嗅觉」让材料掉率升到 75%，配晶化词条刷材料最快。</span></div>',
+        '<div class="trait-row"><b>⌨️ 快捷键</b><span>1 小血药 · 2 大血药 · 3 蓝药 · 4 治愈术 · 5 净化 · F 逃跑 · B 挑战 Boss。</span></div>',
         '<div class="trait-row"><b>📖 词条图鉴</b><span>地图区按钮查看野怪词条（狂暴/破甲/富饶/晶化…）的效果与应对。</span></div>'
       ].join(''));
     });

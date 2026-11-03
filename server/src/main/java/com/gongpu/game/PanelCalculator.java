@@ -67,7 +67,10 @@ public final class PanelCalculator {
         BigDecimal rapidMul = (active(s, "rapid") && !silenced) ? Num.of(3) : Num.of(1);
         BigDecimal spdPotMul = (active(s, "spd_pot") && !silenced) ? Num.of(1.2) : Num.of(1);
         BigDecimal ironPotMul = (active(s, "iron_pot") && !silenced) ? Num.of(1.5) : Num.of(1);
-        BigDecimal regenFood = (active(s, "regen_food") && !silenced) ? Num.of(20) : Num.ZERO;
+        // 饱食回血：基础 20/秒；铁胃天赋（第七批）×1.5（天赋不受沉默压制，但 buff 本身仍受压制）
+        BigDecimal regenFood = (active(s, "regen_food") && !silenced)
+                ? Num.of(GameConst.FOOD_REGEN * ("iron_gut".equals(s.talent) ? GameConst.IRON_GUT_MUL : 1.0))
+                : Num.ZERO;
         // v3.14 药剂乘区(全部受沉默压制,与既有药剂同语义)
         BigDecimal atkPotMul = (active(s, "atk_pot") && !silenced) ? Num.of(1.5) : Num.of(1);
         BigDecimal defPotMul = (active(s, "def_pot") && !silenced) ? Num.of(1.5) : Num.of(1);

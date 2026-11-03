@@ -527,10 +527,15 @@ public final class GameConst {
             "wind", new TalentDef("wind", "疾风之躯", "💨", "移速 +15%"),
             "goldhand", new TalentDef("goldhand", "点金手", "🪙", "击杀金币 +20%"),
             "master", new TalentDef("master", "武学奇才", "📕", "主动技能冷却 -15%"),
-            "lucky", new TalentDef("lucky", "幸运儿", "🍀", "装备与图纸掉落率 +15%"));
+            "lucky", new TalentDef("lucky", "幸运儿", "🍀", "装备与图纸掉落率 +15%"),
+            "iron_gut", new TalentDef("iron_gut", "铁胃", "🍲", "食物回血效果 +50%、持续时间 +50%"));
 
     /** 天赋「幸运儿」（第七批）：掉落率乘区（与鸿运药剂/幸运星被动乘算）。 */
     public static final double LUCKY_TALENT_MUL = 1.15;
+    /** 天赋「铁胃」（第七批）：食物（regen_food）效果与时长乘区。 */
+    public static final double IRON_GUT_MUL = 1.5;
+    /** 饱食回血基础强度（/秒），铁胃时 ×IRON_GUT_MUL。 */
+    public static final double FOOD_REGEN = 20;
 
     /** 顶级机缘(被动永续/无限装备栏/无限属性点)抽中概率各 30%;其余天赋平分剩余 10%。 */
     public static final double TOP_TALENT_RATE = 0.30;

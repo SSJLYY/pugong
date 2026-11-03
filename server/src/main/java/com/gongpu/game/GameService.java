@@ -193,7 +193,10 @@ public class GameService {
             s.buffs.remove("frost");
         }
         if (def.buff() != null) {
-            s.buffs.put(def.buff(), def.buffDur());
+            // 铁胃（第七批）：食物类 buff 时长 ×1.5（与自动进食同口径 GameEngine.foodDur）
+            double dur = "regen_food".equals(def.buff())
+                    ? GameEngine.foodDur(s, def.buffDur()) : def.buffDur();
+            s.buffs.put(def.buff(), dur);
             // 护盾药剂(v3.14):授予 buffVal×生命上限的护盾,先于生命扣除;
             // 到期/重复嗑按新盾值覆盖(tickBuff 里 buff 消失时清盾)
             if ("shield_pot".equals(def.buff())) {

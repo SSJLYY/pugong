@@ -970,7 +970,12 @@ public final class GameEngine {
             return;
         }
         s.potions.put("food", have - 1);
-        s.buffs.put(def.buff(), def.buffDur());
+        s.buffs.put(def.buff(), foodDur(s, def.buffDur()));
+    }
+
+    /** 食物时长口径（第七批）：铁胃天赋 ×1.5，手动服用与自动进食共用。 */
+    static double foodDur(PlayerState s, double baseDur) {
+        return "iron_gut".equals(s.talent) ? baseDur * GameConst.IRON_GUT_MUL : baseDur;
     }
 
     private static void autoBuffTick(PlayerState s) {

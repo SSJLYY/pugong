@@ -61,7 +61,7 @@
 
   // ---------------- 战斗飘字（预算节流防爆屏） ----------------
   let _floatLayer = null, _floatBudget = 0, _floatLast = 0;
-  function floatDmg(text, cls) {
+  function floatDmg(text, cls, anchorId) {
     const now = performance.now();
     if (now - _floatLast > 120) { _floatBudget = 4; _floatLast = now; }
     if (_floatBudget <= 0) return;
@@ -72,7 +72,7 @@
       _floatLayer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9000;overflow:hidden;';
       document.body.appendChild(_floatLayer);
     }
-    const mob = document.getElementById('mobEmoji');
+    const mob = document.getElementById(anchorId || 'mobEmoji');
     const r = mob ? mob.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0 };
     const el = document.createElement('span');
     el.className = 'float-dmg ' + (cls || '');
@@ -606,6 +606,20 @@
       } catch (e) { /* 忽略 */ }
     }
     S.lastMaxHP = p.maxHP;
+    // 受击飘字（第七批）：玩家掉血达上限 0.5% 才飘（小额刮痧不刷屏），锚在血条上
+    try {
+      if (S.lastCurHP != null && !view.dead) {
+        const cur = new Decimal(p.curHP);
+        const prev = new Decimal(S.lastCurHP);
+        if (cur.lt(prev)) {
+          const drop = prev.minus(cur);
+          if (drop.gte(new Decimal(p.maxHP).mul(0.005))) {
+            floatDmg('-' + fmt(drop), 'hurt', 'hpBar');
+          }
+        }
+      }
+    } catch (e) { /* 忽略 */ }
+    S.lastCurHP = p.curHP;
     const hpPct = Math.min(100, new Decimal(p.curHP).div(new Decimal(p.maxHP).max(1)).toNumber() * 100);
     $('hpBar').style.width = hpPct.toFixed(1) + '%';
     // 头像方块内的迷你血条同步
@@ -750,7 +764,15 @@
       if (view.mob.curHP !== 'Infinity' && S.lastMobHp !== 'Infinity' && S.lastMobId && S.lastMobId !== view.mob.id && S.lastMobHp !== null) {
         floatDmg('💀 击杀', 'kill');
         sfx('kill');
+        // 击杀金币飘字（第七批）：与上一帧金币差额即本杀收益（含富饶词条加成）
+        try {
+          if (S.lastGold != null) {
+            const g = new Decimal(view.gold).minus(new Decimal(S.lastGold));
+            if (g.gt(0)) floatDmg('+' + fmt(g) + ' 金', 'gold');
+          }
+        } catch (e) { /* 忽略 */ }
       }
+      S.lastGold = view.gold;
       S.lastMobId = view.mob.id;
       S.lastMobHp = view.mob.curHP;
       const mhp = view.mob.maxHP;

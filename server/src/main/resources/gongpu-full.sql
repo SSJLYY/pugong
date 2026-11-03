@@ -851,6 +851,11 @@ INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`,
 DELETE FROM `cfg_buff` WHERE `code` IN ('regen_pot_l');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('regen_pot_l', '回春', '🌸', 'good', 'passive', '{"regenFlat":100}', '60s 内回血 +100/秒', 1, 48);
+-- 第 11 轮：高阶词条「血契」（吸血上位版）
+DELETE FROM `cfg_affix` WHERE `code` IN ('bloodpact');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('bloodpact', '血契', 'LIFESTEAL', 'flat', 0.03, 0.06, 'epic', NULL, NULL, 1, 17);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

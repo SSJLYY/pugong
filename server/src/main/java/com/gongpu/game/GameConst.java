@@ -377,7 +377,9 @@ public final class GameConst {
             new Affix("延伸", "RNG", "flat", 1, 2, "epic", null, null),
             // 第四批新增：闪避（此前只有药剂能加）与生命上限（此前任何词条都不加）
             new Affix("轻盈", "EVA", "flat", 0.02, 0.10, "uncommon", null, null),
-            new Affix("活力", "maxHP", "flat", 50, 300, "rare", null, null));
+            new Affix("活力", "maxHP", "flat", 50, 300, "rare", null, null),
+            // ---- 第六批：高阶词条（既有维度上位版，史诗池） ----
+            new Affix("血契", "LIFESTEAL", "flat", 0.03, 0.06, "epic", null, null));
 
     /** 掉落概率（按区域）。 */
     public static final Map<String, Double> DROP_RATE = Map.of(

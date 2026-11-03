@@ -298,7 +298,8 @@ public final class GameConst {
             "hawkeye", new PassiveDef("hawkeye", "鹰眼", "🦅", "+5% 命中"),
             "brute", new PassiveDef("brute", "蛮力", "💢", "物攻 ×1.15，-3% 命中"),
             "element", new PassiveDef("element", "元素亲和", "⚡", "附魔魔伤 +25%"),
-            "boss_hunter", new PassiveDef("boss_hunter", "巨人杀手", "🗡️", "对 Boss 伤害 +20%"));
+            "boss_hunter", new PassiveDef("boss_hunter", "巨人杀手", "🗡️", "对 Boss 伤害 +20%"),
+            "diamond_body", new PassiveDef("diamond_body", "金刚体", "💎", "物防与魔防 ×1.15"));
 
     public static final double COMBO_CHANCE = 0.15;
     /** 被动「巨人杀手」对 Boss 的伤害乘区。 */

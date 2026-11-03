@@ -47,6 +47,10 @@ public final class PanelCalculator {
                 switch (id) {
                     case "iron" -> pmul.merge("PDEF", Num.of(1.2), Num::mul);
                     case "resist" -> pmul.merge("MDEF", Num.of(1.2), Num::mul);
+                    case "diamond_body" -> {
+                        pmul.merge("PDEF", Num.of(1.15), Num::mul);
+                        pmul.merge("MDEF", Num.of(1.15), Num::mul);
+                    }
                     case "swift" -> pmul.merge("SPD", Num.of(1.2), Num::mul);
                     case "brute" -> {
                         pmul.merge("PATK", Num.of(1.15), Num::mul);

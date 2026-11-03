@@ -901,6 +901,11 @@ DELETE FROM `cfg_equipment_template` WHERE `code` IN ('snow_wolf_armor');
 INSERT INTO `cfg_equipment_template`
   (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
   ('snow_wolf_armor', '雪狼皮甲', '🐺', 'chest', 3, 'snow', '{"PDEF":"16","MDEF":"10","maxHP":"120"}', 10, 60, '雪狼皮保暖坚韧', 1, 50);
+-- 第 25 轮：新被动「金刚体」（双防 ×1.15）
+DELETE FROM `cfg_skill` WHERE `code` IN ('diamond_body');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('diamond_body', '金刚体', '💎', 'passive', 300, 0, 0, 0, '{"effect":"mul2","keys":["PDEF","MDEF"],"mul":1.15}', '物防与魔防 ×1.15', 1, 16);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

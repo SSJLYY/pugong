@@ -1843,6 +1843,9 @@
     const rows = [];
     S.meta.zones.forEach(z => {
       (z.mobs || []).forEach(m => {
+        // 无限血木桩不可击杀、不入图鉴：不列行也不计入总数（与服务端 GameConst.codexTotal 同口径，
+        // 否则图鉴永远差 1 集不满）
+        if (m.maxHP === 'Infinity') return;
         if (has(m.id)) seenN++;
         rows.push('<div class="codex-item' + (has(m.id) ? '' : ' unseen') + '">' +
           (has(m.id) ? m.emoji : '❓') + ' ' + (has(m.id) ? m.name : '未知怪物') +

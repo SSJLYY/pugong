@@ -2134,7 +2134,9 @@
           '<i>' + (bossSeen ? '已击杀' : '首杀后解锁') + '</i></div>');
       }
     });
-    holder.innerHTML = '<div class="effect-group-title">📖 已见识 ' + seenN + '/' + rows.length + '</div>' + rows.join('');
+    const pct = rows.length ? Math.floor(seenN * 100 / rows.length) : 0;
+    holder.innerHTML = '<div class="effect-group-title">📖 已见识 ' + seenN + '/' + rows.length +
+      '（' + pct + '%） <span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span></div>' + rows.join('');
   }
 
   function num(x) {

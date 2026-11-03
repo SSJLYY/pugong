@@ -886,6 +886,11 @@ DELETE FROM `cfg_equipment_template` WHERE `code` IN ('vine_armor');
 INSERT INTO `cfg_equipment_template`
   (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
   ('vine_armor', '藤甲', '🌿', 'chest', 1, 'forest', '{"PDEF":"6","MDEF":"3","maxHP":"40"}', 10, 25, '藤蔓编织轻便耐用', 1, 47);
+-- 第 18 轮：矿洞补头盔「矿工盔」（矿洞此前无头部装备）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('miner_helm');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('miner_helm', '矿工盔', '⛑️', 'head', 2, 'mine', '{"PDEF":"7","ACC":"0.03"}', 10, 30, '头灯照亮矿道', 1, 48);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

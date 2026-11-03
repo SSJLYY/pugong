@@ -335,7 +335,8 @@ public final class GameConst {
             java.util.Map.entry("luck", new PotionDef("luck", "鸿运药剂", "🍀", "300s 内装备与图纸掉落率 ×1.5", 0, 0, "luck_pot", 1.5, 300, 500)),
             // ---- 第六批扩充：上限/防御/攻击/减伤/反弹/专伤/蓝上限/强回复 ----
             java.util.Map.entry("vital", new PotionDef("vital", "生命药剂", "💗", "120s 内生命上限 ×1.3", 0, 0, "vital_pot", 1.3, 120, 600)),
-            java.util.Map.entry("guard", new PotionDef("guard", "金钟药剂", "🔔", "120s 内物防魔防 +15", 0, 0, "guard_pot", 15, 120, 500)));
+            java.util.Map.entry("guard", new PotionDef("guard", "金钟药剂", "🔔", "120s 内物防魔防 +15", 0, 0, "guard_pot", 15, 120, 500)),
+            java.util.Map.entry("might", new PotionDef("might", "大力药剂", "🏋️", "120s 内物攻魔攻 +20", 0, 0, "might_pot", 20, 120, 500)));
 
     /** 跨界使用蓝药的蓝量上限保护：技能 MP 消耗按当前 MP 判定。 */
     public static final double MP_REGEN_BASE = 2;

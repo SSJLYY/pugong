@@ -809,6 +809,13 @@ INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`,
 DELETE FROM `cfg_buff` WHERE `code` IN ('guard_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('guard_pot', '金钟', '🔔', 'good', 'passive', '{"defFlat":15}', '120s 内物防魔防 +15', 1, 42);
+-- 第 3 轮：大力药剂（物攻魔攻 +20）
+DELETE FROM `cfg_item` WHERE `code` IN ('might');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('might', '大力药剂', '🏋️', 'potion', 500, '{"buff":"might_pot","buffVal":20,"buffDur":120}', '120s 内物攻魔攻 +20', 1, 43);
+DELETE FROM `cfg_buff` WHERE `code` IN ('might_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('might_pot', '大力', '🏋️', 'good', 'passive', '{"atkFlat":20}', '120s 内物攻魔攻 +20', 1, 43);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

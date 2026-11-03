@@ -64,6 +64,10 @@ class DataParityTest {
         for (String id : GameConst.PASSIVE_SKILLS.keySet()) {
             assertTrue(sql.contains("'" + id + "'"), "被动技能 " + id + " 应在 SQL 技能表里");
         }
+        // 委托覆盖：总数 ≥12 且矿洞/沼泽/雪原各 ≥2（第五批第 10 轮补缺）
+        for (String code : new String[]{"mine_deep", "swamp_venom", "snow_alpha"}) {
+            assertTrue(sql.contains("'" + code + "'"), "新委托 " + code + " 应在 SQL 中");
+        }
         assertEquals(16, GameConst.AFFIXES.size());
     }
 

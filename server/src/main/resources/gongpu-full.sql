@@ -601,6 +601,9 @@ VALUES
   ('swamp_clean',  '沼泽除害',   '🐸', '毒蟾的毒液污染了水源',                 'swamp',   '{"maxHP":40000,"REGEN":50}',      15, 750,  'growth',  1, 1, 1, 6),
   ('snow_hunt',    '雪山狩猎',   '🏔️', '雪人皮毛是上等护甲材料',               'snow',    '{"maxHP":100000,"MDEF":30}',      15, 1100, 'ironpot', 1, 1, 1, 7),
   ('volcano_final','火山斩魔',   '🌋', '炎魔不除，大陆永无宁日',               'volcano', '{"maxHP":300000,"PDEF":80,"MDEF":80}', 20, 2000, 'growth', 2, 1, 1, 8),
+  ('mine_deep',    '深入矿脉',   '💎', '矿脉深处有异响，老矿工不敢下去了',     'mine',    '{"maxHP":30000,"PDEF":20}',         15, 700,  'far',     1, 1, 1, 9),
+  ('swamp_venom',  '毒雾深处',   '☠️', '瘴气最浓处盘踞着老毒物，公会出重赏',   'swamp',   '{"maxHP":80000,"MDEF":20}',         18, 950,  'luck',    1, 1, 1, 10),
+  ('snow_alpha',   '雪原狼王',   '🐺', '雪原狼群有了头狼，商路又断了',         'snow',    '{"maxHP":200000,"PDEF":40}',        18, 1500, 'elixir',  1, 1, 1, 11),
   ('guild_init',   '入会试炼',   '🎖️', '新人的入会考核：证明你的拳头够硬',     'plain',   '{"maxHP":500}',                    3,  300,  'hp_s',    5, 0, 1, 0)
 ON DUPLICATE KEY UPDATE `name`=VALUES(`name`), `desc`=VALUES(`desc`), `target_zone`=VALUES(`target_zone`),
   `req_json`=VALUES(`req_json`), `target_kills`=VALUES(`target_kills`), `reward_gold`=VALUES(`reward_gold`),

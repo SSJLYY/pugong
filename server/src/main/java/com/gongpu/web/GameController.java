@@ -141,6 +141,11 @@ public class GameController {
         if (s.autoEquipBest) {
             com.gongpu.game.GameService.autoMaintain(s);
         }
+        // 每日系统签发（第七批实测修复）：每日任务/黑市的签发必须在落库前完成——
+        // 落库在动作后的 finally 里、fullView 在落库之后才建，签发若只活在视图里，
+        // 下一帧读档又是未签发状态（dailyDay 为空）→ 每次重签、基线永远贴着当前计数、进度恒 0
+        com.gongpu.game.DailyQuests.ensure(s);
+        com.gongpu.game.BlackMarket.ensure(s);
         // 经济审计基线：advance/autoMaintain 之后、动作之前取金币（挂机收益不算进动作账）
         java.math.BigDecimal goldBefore = auditLabel == null ? null : s.gold;
         Map<String, Object> extra;

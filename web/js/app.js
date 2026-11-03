@@ -821,16 +821,23 @@
     }
 
     // 区域按钮状态：当前区高亮 + 未达标区锁定样式（门槛与服务端 gotoZone 同口径，面板逐项比对）
+    // 就绪标记（第七批）：达标未进入的区带 ✓、未达标带 🔒（CSS ::after 渲染，不改按钮结构）
     document.querySelectorAll('.zone-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.zone === view.zone);
+      const isCur = b.dataset.zone === view.zone;
+      b.classList.toggle('active', isCur);
       const z = S.meta && S.meta.zones.find(x => x.id === b.dataset.zone);
-      if (!z || !z.req) { b.classList.remove('locked'); return; }
+      if (!z || !z.req) {
+        b.classList.remove('locked');
+        b.classList.toggle('ready', !isCur);
+        return;
+      }
       let met = true;
       for (const [k, v] of Object.entries(z.req)) {
         const have = k === 'ATK' ? Math.max(Number(p.PATK), Number(p.MATK)) : Number(p[k]);
         if (!(have >= Number(v))) { met = false; break; }
       }
       b.classList.toggle('locked', !met);
+      b.classList.toggle('ready', met && !isCur);
       b.title = met ? '' : ('尚未达标：' + (ZONE_REQ_TEXT[z.id] || '') + '（点击查看具体差距）');
     });
 

@@ -1119,3 +1119,8 @@ body.theme-light .zone-btn.req{color:#7a6c46}
 /* 药剂置顶（第七批） */
 .potion-item.pinned{border-left:3px solid #ffb300}
 .pin-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;min-height:0;opacity:.85}
+
+/* 区域就绪标记（第七批） */
+.zone-btn.ready::after{content:' ✓';color:#7dd87d;font-weight:700}
+.zone-btn.locked::after{content:' 🔒';font-size:11px}
+body.theme-light .zone-btn.ready::after{color:#3d7a34}

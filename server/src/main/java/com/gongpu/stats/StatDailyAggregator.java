@@ -106,21 +106,44 @@ public class StatDailyAggregator {
         long deaths = 0;
         long rebirths = 0;
         try {
-            for (GameSave g : saves.findAll()) {
-                try {
-                    com.gongpu.state.PlayerState s = com.gongpu.state.StateCodec.decode(g.getStateJson());
-                    punches = Num.add(punches, s.stats.punches);
-                    kills = Num.add(kills, s.stats.kills);
-                    deaths += s.stats.deaths;
-                    rebirths += s.stats.rebirths;
-                } catch (RuntimeException ignored) {
-                    // 坏档跳过
+            // 分页拉取（200/页）避免全表 List 常驻内存；每档只读 JSON 树的 stats 子树
+            // 累加四个计数，不再把整份存档（装备/词条/赋能）反序列化成对象图——
+            // 聚合成本从「全量对象图」降到「四个数字」，精确口径不变（decimalValue 精确解析）
+            int pageNo = 0;
+            org.springframework.data.domain.Page<GameSave> page;
+            do {
+                page = saves.findAll(org.springframework.data.domain.PageRequest.of(pageNo++, 200));
+                for (GameSave g : page) {
+                    try {
+                        com.fasterxml.jackson.databind.JsonNode stats =
+                                STATS_JSON.readTree(g.getStateJson()).get("stats");
+                        if (stats == null) {
+                            continue;
+                        }
+                        punches = Num.add(punches, decimalOf(stats.get("punches")));
+                        kills = Num.add(kills, decimalOf(stats.get("kills")));
+                        deaths += longOf(stats.get("deaths"));
+                        rebirths += longOf(stats.get("rebirths"));
+                    } catch (RuntimeException | java.io.IOException ignored) {
+                        // 坏档跳过
+                    }
                 }
-            }
+            } while (page.hasNext());
         } catch (RuntimeException e) {
             log.warn("stat_daily 采集失败：{}", e.getMessage());
         }
         return new Snapshot(Num.plain(punches), Num.plain(kills), deaths, rebirths);
+    }
+
+    private static final com.fasterxml.jackson.databind.ObjectMapper STATS_JSON =
+            new com.fasterxml.jackson.databind.ObjectMapper();
+
+    private static java.math.BigDecimal decimalOf(com.fasterxml.jackson.databind.JsonNode n) {
+        return n == null || n.isNull() ? Num.ZERO : n.decimalValue();
+    }
+
+    private static long longOf(com.fasterxml.jackson.databind.JsonNode n) {
+        return n == null || n.isNull() ? 0L : n.longValue();
     }
 
     /** 日切：午夜后把昨日行定为最终值。与 aggregate() 同口径写「当日增量」，

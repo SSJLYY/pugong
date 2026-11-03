@@ -174,6 +174,8 @@ public class PlayerState {
         public boolean locked;
         /** 来源区域（掉落时打标）：分解产出按区域材料结算；旧档为 null（按平原兽皮兜底）。 */
         public String zone;
+        /** 模板 code（套装判定用）：掉落/合成时打标；旧档为 null，由 Sets.codeOf 按名回退查模板。 */
+        public String code;
     }
 
     public static class AffixInst {

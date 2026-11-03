@@ -123,6 +123,7 @@ public final class EquipFactory {
         it.enhance = 0;
         it.desc = desc;
         it.zone = zoneId;
+        it.code = tpl != null ? tpl.code() : null;
         for (Map.Entry<String, BigDecimal> e : baseStats.entrySet()) {
             it.base.put(e.getKey(), e.getValue());
         }
@@ -331,6 +332,7 @@ public final class EquipFactory {
         it.quality = Math.max(0, Math.min(3, quality));
         it.enhance = 0;
         it.desc = tpl.remark();
+        it.code = tpl.code();
         it.base.putAll(tpl.base());
         // 词条随机（品质决定条数）
         List<GameConst.Affix> pool = new ArrayList<>(com.gongpu.cfg.GameData.instance().affixPool());

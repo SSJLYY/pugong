@@ -296,6 +296,19 @@ public final class GameEngine {
 
         BigDecimal totalDmg = Num.mul(perHit, punches);
 
+        // 弱点打击（第七批）：每第 10 拳必暴击——该拳按暴击倍率与期望倍率之比放大，
+        // 差额计入整帧伤害（节拍跨帧/跨世累计，punchAcc 持久化；暴击倍率 ≤ 期望时无加成）
+        BigDecimal weakCount = weakCritsThisFrame(s, punches);
+        if (Num.gt(weakCount, Num.ZERO)) {
+            BigDecimal weakPerHit = Num.mul(perHit, Num.div(p.CRITD(), critMul));
+            if (Num.gt(weakPerHit, perHit)) {
+                totalDmg = Num.add(totalDmg, Num.mul(Num.sub(weakPerHit, perHit), weakCount));
+                long add = weakCount.longValue();
+                s.stats.weakCrits = add > Long.MAX_VALUE - s.stats.weakCrits
+                        ? Long.MAX_VALUE : s.stats.weakCrits + add;
+            }
+        }
+
         // 战绩统计（终身口径）：总伤害按帧累加，最高单击取代表拳伤（木桩陪练同样计入）
         s.stats.totalDamage = Num.add(s.stats.totalDamage, totalDmg);
         if (Num.gt(perHit, s.stats.bestHit)) {
@@ -408,6 +421,19 @@ public final class GameEngine {
             m.phase2 = true;
             pushEvent(s, "🔥 Boss「" + (m.name == null ? "?" : m.name) + "」狂怒了！进入二阶段：攻速 +30%、攻击 +20%");
         }
+    }
+
+    /** 弱点打击节拍（第七批）：把本帧拳数计入累加器，返回本帧触发的必暴次数（每满 10 拳一次）。 */
+    private static BigDecimal weakCritsThisFrame(PlayerState s, BigDecimal punches) {
+        if (s.punchAcc == null) {
+            s.punchAcc = BigDecimal.ZERO;
+        }
+        s.punchAcc = Num.add(s.punchAcc, punches);
+        BigDecimal tens = Num.floor(Num.div(s.punchAcc, Num.of(10)));
+        if (Num.gt(tens, Num.ZERO)) {
+            s.punchAcc = Num.sub(s.punchAcc, Num.mul(tens, Num.of(10)));
+        }
+        return tens;
     }
 
     private static void healByLifesteal(PlayerState s, PanelCalculator.Panel p, BigDecimal dmg) {

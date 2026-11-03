@@ -48,6 +48,8 @@ public class PlayerState {
 
     /** 护盾值(v3.14 护盾药剂):先于生命扣除,随 shield_pot buff 到期清零。 */
     public BigDecimal shield = BigDecimal.ZERO;
+    /** 弱点打击节拍累加器（第七批）：累计出拳数的小数余量，每满 10 拳触发一次必暴并扣回。 */
+    public BigDecimal punchAcc = BigDecimal.ZERO;
 
     /** 当前目标怪物（运行时态，不落库为长期数据也行）。 */
     public MobState mob;
@@ -254,6 +256,8 @@ public class PlayerState {
         public long rerolls = 0;
         public long potionsUsed = 0;
         public long dailyClaims = 0;
+        /** 弱点打击触发次数（第七批，终身口径）。 */
+        public long weakCrits = 0;
         public long born = 0;
         public long playSeconds = 0;
         public long bestMaxHP = 0;

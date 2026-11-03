@@ -1388,7 +1388,7 @@ public class GameService {
             if (s.achievements.contains(d.id())) {
                 continue;
             }
-            long[] pr = Achievements.progressOf(s, d.id());
+            long[] pr = Achievements.progressOf(s, d.id(), p);
             if (pr != null) {
                 achProgress.put(d.id(), List.of(pr[0], pr[1]));
             }

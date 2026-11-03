@@ -76,6 +76,11 @@ public final class Achievements {
      * 与 evaluate 的判定口径逐项一致（改判定必须同步这里）。
      */
     public static long[] progressOf(PlayerState s, String id) {
+        return progressOf(s, id, null);
+    }
+
+    /** 带预建面板的版本：fullView 每帧调用时复用其面板，避免 hp 类进度再算两遍面板。 */
+    public static long[] progressOf(PlayerState s, String id, PanelCalculator.Panel panel) {
         if (s == null || s.stats == null) {
             return null;
         }
@@ -83,8 +88,8 @@ public final class Achievements {
             case "punch_10k" -> new long[]{sat(s.stats.lifetimePunches), 10_000};
             case "kill_100" -> new long[]{sat(s.stats.kills), 100};
             case "kill_10k" -> new long[]{sat(s.stats.lifetimeKills), 10_000};
-            case "hp_5000" -> new long[]{sat(PanelCalculator.of(s).maxHP()), 5_000};
-            case "hp_1m" -> new long[]{sat(PanelCalculator.of(s).maxHP()), 1_000_000};
+            case "hp_5000" -> new long[]{sat((panel == null ? PanelCalculator.of(s) : panel).maxHP()), 5_000};
+            case "hp_1m" -> new long[]{sat((panel == null ? PanelCalculator.of(s) : panel).maxHP()), 1_000_000};
             case "gold_10k" -> new long[]{sat(s.gold), 10_000};
             case "gold_1m" -> new long[]{sat(s.gold), 1_000_000};
             case "lived_1h" -> new long[]{com.gongpu.state.StateCodec.aliveSeconds(s), 3600};

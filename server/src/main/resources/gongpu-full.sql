@@ -1011,7 +1011,9 @@ INSERT INTO `cfg_affix`
   ('thunderstep', '疾雷', 'ASPD', 'flat', 0.10, 0.20, 'epic', NULL, NULL, 1, 22);
 
 -- ============================================================
--- 整合完毕。验收参考（2026-11-03 口径）：
---   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16
---   cfg_craft 14 / cfg_skill、cfg_buff、cfg_quest、cfg_drop_rate 见库内计数
+-- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
+--   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22
+--   cfg_craft 16 / cfg_quest 14 / cfg_skill 23（主动 10 + 被动 13）
+--   怪物词条 12（代码 GameConst.MOB_TRAITS）/ 成就 34（代码 Achievements）
+--   运行时可用 /api/health 的 content 指纹交叉核对
 -- ============================================================

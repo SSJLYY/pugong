@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import javax.sql.DataSource;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -29,6 +30,26 @@ class MetaControllerTest {
                 mock(ItemTemplateRepository.class), mock(SkillTemplateRepository.class),
                 mock(BuffTemplateRepository.class), mock(DropRateRuleRepository.class),
                 mock(CraftTemplateRepository.class));
+    }
+
+    /** 第七批第 43 轮：meta 词条图鉴与引擎 MOB_TRAITS 同源（含新词条诅咒/寒霜，共 14 条）。 */
+    @Test
+    void metaTraitsMirrorEngineDefs() {
+        MetaController c = new MetaController(mock(StateCache.class), mock(DataSource.class));
+        Map<String, Object> meta = c.meta();
+        @SuppressWarnings("unchecked")
+        java.util.List<Map<String, Object>> traits =
+                (java.util.List<Map<String, Object>>) meta.get("traits");
+        assertEquals(com.gongpu.game.GameConst.MOB_TRAITS.size(), traits.size(),
+                "图鉴条数应与引擎词条定义一致");
+        java.util.Set<String> ids = new java.util.HashSet<>();
+        for (Map<String, Object> t : traits) {
+            ids.add(String.valueOf(t.get("id")));
+        }
+        assertTrue(ids.contains("curse"), "图鉴应含诅咒");
+        assertTrue(ids.contains("frost"), "图鉴应含寒霜");
+        assertTrue(ids.containsAll(com.gongpu.game.GameConst.MOB_TRAITS.keySet()),
+                "图鉴 id 集合应与引擎定义完全一致");
     }
 
     @Test

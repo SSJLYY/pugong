@@ -69,7 +69,9 @@ public class MetaController {
                     + ",affixes=" + snap.affixes().size()
                     + ",equipment=" + snap.equipment().size()
                     + ",skills=" + snap.skills().size()
-                    + ",crafts=" + snap.crafts().size());
+                    + ",crafts=" + snap.crafts().size()
+                    // 词条是代码侧常量（不在 cfg 表），单独计入指纹以便核对新代码是否生效
+                    + ",traits=" + GameConst.MOB_TRAITS.size());
         } catch (RuntimeException ignored) {
             // GameData 未就绪时省略
         }

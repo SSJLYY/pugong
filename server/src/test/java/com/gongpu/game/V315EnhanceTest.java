@@ -75,8 +75,8 @@ class V315EnhanceTest {
         assertTrue(sawFrenzy, "平原 300 次掷骰应至少出一次狂暴（单次 10%）");
         for (int i = 0; i < 300; i++) {
             String t = GameConst.rollMobTrait("forest");
-            // 森林池：狂暴/破甲（v3.15）+ 富饶（第五批第 3 轮加入）；疾影要矿洞起，不应出现
-            assertTrue(t == null || "frenzy".equals(t) || "sunder".equals(t) || "rich".equals(t),
+            // 森林池：狂暴/破甲（v3.15）+ 富饶（第五批）+ 晶化（第六批第 23 轮）；疾影要矿洞起，不应出现
+            assertTrue(t == null || "frenzy".equals(t) || "sunder".equals(t) || "rich".equals(t) || "crystal".equals(t),
                     "森林词条池不应出现缴械/疾影，实际=" + t);
         }
         boolean sawDisarm = false;

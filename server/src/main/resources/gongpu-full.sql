@@ -929,6 +929,14 @@ INSERT INTO `cfg_skill`
 DELETE FROM `cfg_buff` WHERE `code` IN ('bloodlust');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('bloodlust', '嗜血', '🩸', 'good', 'passive', '{"lifesteal":0.2}', '10s 内吸血 +20%', 1, 49);
+-- 第 30 轮：新主动「铁壁」（8s 受击减半）
+DELETE FROM `cfg_skill` WHERE `code` IN ('iron_wall');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('iron_wall', '铁壁', '🧱', 'active', 300, 35, 40, 8, '{"id":"iron_wall","dmgTaken":0.5}', '8s 内受击减半', 1, 21);
+DELETE FROM `cfg_buff` WHERE `code` IN ('iron_wall');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('iron_wall', '铁壁', '🧱', 'good', 'passive', '{"dmgTaken":0.5}', '8s 内受击减半', 1, 50);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

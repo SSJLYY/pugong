@@ -586,6 +586,10 @@ public final class GameEngine {
         if (buffOn(s, p, "stone_pot")) {
             perHit = Num.mul(perHit, Num.of(GameConst.STONE_POT_MUL));
         }
+        // 技能·铁壁：受击减半（纯防御无反弹，与格挡同乘区叠加；防御技口径同格挡不查沉默）
+        if (PanelCalculator.active(s, "iron_wall")) {
+            perHit = Num.mul(perHit, Num.of(0.5));
+        }
         BigDecimal total = Num.mul(perHit, Num.of(hits));
         if (total.signum() <= 0) {
             return;

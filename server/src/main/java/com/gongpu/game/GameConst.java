@@ -290,7 +290,8 @@ public final class GameConst {
             "burn", new SkillDef("burn", "燃烧生命", "🔥", 0, 300, 300, "烧当前血 25%，300s 内攻击 ×2"),
             "surge", new SkillDef("surge", "魔力涌动", "✨", 50, 180, 10, "10s 内技能不耗蓝"),
             "heal", new SkillDef("heal", "治愈术", "💚", 40, 60, 0, "立即恢复 35% 生命上限"),
-            "bloodlust", new SkillDef("bloodlust", "嗜血术", "🩸", 30, 45, 10, "10s 内吸血 +20%"));
+            "bloodlust", new SkillDef("bloodlust", "嗜血术", "🩸", 30, 45, 10, "10s 内吸血 +20%"),
+            "iron_wall", new SkillDef("iron_wall", "铁壁", "🧱", 35, 40, 8, "8s 内受击减半"));
 
     public record PassiveDef(String id, String name, String emoji, String desc) {
     }

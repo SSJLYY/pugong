@@ -73,4 +73,36 @@ class SkillBatch6Test {
         assertEquals(0, PanelCalculator.of(s).LIFESTEAL().subtract(base).compareTo(Num.of(0.20)),
                 "嗜血术应让吸血 +20%");
     }
+
+    @Test
+    void round30IronWall() {
+        PlayerState s = NewState.create();
+        PlayerState.MobState m = new PlayerState.MobState();
+        m.id = "boar";
+        m.name = "野猪";
+        m.maxHP = Num.of(100000);
+        m.curHP = Num.of(100000);
+        m.PATK = Num.of(100);
+        m.MATK = Num.ZERO;
+        m.PDEF = Num.ZERO;
+        m.MDEF = Num.ZERO;
+        m.ASPD = 1;
+        m.RNG = 1;
+        m.SPD = 10;
+        s.mob = m;
+        s.zone = "plain";
+        s.fixed.EVA = java.math.BigDecimal.ZERO;
+        s.fixed.RNG = Num.of(1);
+        s.fixed.SPD = Num.of(10);
+        s.life.set("PDEF", Num.ZERO);
+        s.life.set("MDEF", Num.ZERO);
+        s.life.maxHP = Num.of(10000);
+        s.life.curHP = Num.of(10000);
+        s.life.curMP = Num.of(100);
+        GameService.castSkill(s, "iron_wall");
+        GameEngine.mobAttack(s, PanelCalculator.of(s), 1.0);
+        assertEquals(0, s.life.curHP.compareTo(Num.of(9950)), "铁壁应把 100 伤减半为 50，实际余血=" + s.life.curHP);
+        assertEquals(21, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(),
+                "技能总数应达 21（15 + 第六批 6）");
+    }
 }

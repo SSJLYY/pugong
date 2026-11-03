@@ -579,7 +579,7 @@ public class GameService {
     }
 
     /** 装备评分：品质×1000 + 词条数×100 + 底子数值和，强化 +5%/级。 */
-    private static double equipScore(PlayerState.Item it) {
+    static double equipScore(PlayerState.Item it) {
         double score = (it.quality + 1) * 1000 + (it.affixes == null ? 0 : it.affixes.size() * 100);
         if (it.base != null) {
             for (BigDecimal v : it.base.values()) {
@@ -1135,6 +1135,22 @@ public class GameService {
         return m;
     }
 
+    /** 视图评分附件：与 bag 数组同序的评分表 + 已穿装备按部位评分（前端做强弱对比，不污染 Item 持久化）。 */
+    static void attachScores(Map<String, Object> m, PlayerState s, List<PlayerState.Item> bagView) {
+        List<Double> scores = new ArrayList<>();
+        for (PlayerState.Item it : bagView) {
+            scores.add(equipScore(it));
+        }
+        m.put("bagScores", scores);
+        Map<String, Double> eq = new LinkedHashMap<>();
+        for (Map.Entry<String, PlayerState.Item> e : s.equipped.entrySet()) {
+            if (e.getValue() != null) {
+                eq.put(e.getKey(), equipScore(e.getValue()));
+            }
+        }
+        m.put("equippedScores", eq);
+    }
+
     public Map<String, Object> inventoryView(PlayerState s) {
         Map<String, Object> m = new LinkedHashMap<>();
         // 与 fullView 同口径截断(v3.13):操作响应携带背包视图,同样防巨包
@@ -1143,6 +1159,7 @@ public class GameService {
                 ? new ArrayList<>(s.equipBag.subList(0, GameConst.BAG_VIEW_LIMIT))
                 : s.equipBag;
         m.put("bag", bagView);
+        attachScores(m, s, bagView);
         m.put("bagTotal", bagTotal);
         m.put("equipped", s.equipped);
         m.put("gold", Num.plain(s.gold));
@@ -1205,6 +1222,7 @@ public class GameService {
                 ? new ArrayList<>(s.equipBag.subList(0, GameConst.BAG_VIEW_LIMIT))
                 : s.equipBag;
         m.put("bag", bagView);
+        attachScores(m, s, bagView);
         m.put("bagTotal", bagTotal);
         m.put("bagMax", bagCap(s));
         // 无限装备栏天赋:当前开放的额外栏数(前端渲染 extra_N 格)

@@ -1292,10 +1292,15 @@
       const d = document.createElement('div');
       d.className = 'bag-item';
       d.style.borderLeftColor = QUALITY_COLOR[it.quality];
+      // 评分与同部位已穿对比（服务端 equipScore 下发，bagScores 与 bag 同序）
+      const sc = (view.bagScores || [])[idx];
+      const eqSc = (view.equippedScores || {})[it.slot];
+      const scoreChip = sc == null ? '' : ` <span class="bi-score" title="装备评分（与自动换装/整理同口径）">⚖${Math.round(sc)}${eqSc == null ? '' : sc > eqSc
+        ? ` <b style="color:#4caf50">⬆${Math.round(sc - eqSc)}</b>` : ` <b style="color:#999">⬇${Math.round(eqSc - sc)}</b>`}</span>`;
       d.innerHTML = `
         <div class="bi-head" style="color:${QUALITY_COLOR[it.quality]}">
           ${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}${it.locked ? ' 🔒' : ''}
-          <span class="bi-q">${QUALITY_NAME[it.quality]}</span>
+          <span class="bi-q">${QUALITY_NAME[it.quality]}</span>${scoreChip}
         </div>
         <div class="bi-affix">${(it.affixes || []).map(affixText).join(' · ') || '（无词条）'}</div>
         <div class="bi-actions">

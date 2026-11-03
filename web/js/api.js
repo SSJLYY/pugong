@@ -183,7 +183,7 @@
     questDeliver: (slot, code) => request('POST', '/api/game/' + slot + '/quest/deliver', { code }),
     questAbandon: (slot, code) => request('POST', '/api/game/' + slot + '/quest/abandon', { code }),
     enchantItem: (slot, scroll, index) => request('POST', '/api/game/' + slot + '/enchant', { scroll, index }),
-    autoConfig: (slot, hpLine, mpLine, autoCure, fleeLine, autoBurn, autoSkill, autoRebirth, autoSellKeep, autoEquipBest, autoEat, autoSmeltKeep, autoAdvance) => request('POST', '/api/game/' + slot + '/autoconfig', { hpLine, mpLine, autoCure, fleeLine, autoBurn, autoSkill, autoRebirth, autoSellKeep, autoEquipBest, autoEat, autoSmeltKeep, autoAdvance }),
+    autoConfig: (slot, hpLine, mpLine, autoCure, fleeLine, autoBurn, autoSkill, autoRebirth, autoSellKeep, autoEquipBest, autoEat, autoSmeltKeep, autoAdvance, autoBoss) => request('POST', '/api/game/' + slot + '/autoconfig', { hpLine, mpLine, autoCure, fleeLine, autoBurn, autoSkill, autoRebirth, autoSellKeep, autoEquipBest, autoEat, autoSmeltKeep, autoAdvance, autoBoss }),
     startBoss: (slot) => request('POST', '/api/game/' + slot + '/boss'),
     learnPassive: (slot, id) => request('POST', '/api/game/' + slot + '/learn', { id }),
     dailyClaim: (slot) => request('POST', '/api/game/' + slot + '/daily'),

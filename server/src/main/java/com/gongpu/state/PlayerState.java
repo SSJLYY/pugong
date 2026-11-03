@@ -113,6 +113,8 @@ public class PlayerState {
     public boolean autoEat = false;
     /** 自动推进：Boss 击杀后若下一区门槛达标则直接推进（否则回村）。 */
     public boolean autoAdvance = false;
+    /** Boss 连战：Boss 击杀后留在本区立即再刷 Boss（优先于自动推进）。 */
+    public boolean autoBoss = false;
     /** 尸检用：最近 10 条击杀序列（"存活秒数 怪名"，环形覆盖）。 */
     public java.util.List<String> recentKills = new java.util.ArrayList<>();
     /** 战斗日志：最近事件（Boss 击杀/图纸/史诗掉落），环形保留 20 条。 */

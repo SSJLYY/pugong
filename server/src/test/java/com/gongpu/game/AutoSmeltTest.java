@@ -53,9 +53,9 @@ class AutoSmeltTest {
     void configClamp() {
         PlayerState s = NewState.create();
         GameService g = new GameService();
-        g.setAutoLines(s, null, null, null, null, null, null, null, null, null, null, 99, null);
+        g.setAutoLines(s, null, null, null, null, null, null, null, null, null, null, 99, null, null);
         assertEquals(4, s.autoSmeltKeep, "自动分解档位应钳制到 4");
-        g.setAutoLines(s, null, null, null, null, null, null, null, null, null, null, -2, null);
+        g.setAutoLines(s, null, null, null, null, null, null, null, null, null, null, -2, null, null);
         assertEquals(0, s.autoSmeltKeep, "负档位应钳制到 0");
     }
 }

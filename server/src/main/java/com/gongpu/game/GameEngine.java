@@ -553,6 +553,12 @@ public final class GameEngine {
                 s.bossFirstKillName = m.name;
                 s.bossFirstKillGold = bonus;
             }
+            // Boss 连战：留在本区立即再刷 Boss（优先于自动推进，专刷首杀外收益/图纸）
+            if (s.autoBoss) {
+                spawnBoss(s);
+                pushEvent(s, "👑 Boss 连战：新的 Boss 已经出现");
+                return true;
+            }
             // 自动推进：下一区存在且门槛达标 → 直接推进刷怪（写战斗日志）；否则回村
             if (s.autoAdvance) {
                 String next = nextZoneId(s.zone);

@@ -55,7 +55,9 @@
     { id: 'phase_breaker', name: '破相者', emoji: '🔥', desc: '击破 1 只二阶段 Boss' },
     { id: 'weak_100', name: '弱点猎手', emoji: '🎯', desc: '累计触发 100 次弱点打击' },
     { id: 'market_1', name: '黑市客', emoji: '🌑', desc: '首次在每日黑市购买药剂' },
-    { id: 'merchant', name: '商贾之道', emoji: '🧮', desc: '卖材料累计收入 50,000 金币' }
+    { id: 'merchant', name: '商贾之道', emoji: '🧮', desc: '卖材料累计收入 50,000 金币' },
+    { id: 'slow_20', name: '迟缓大师', emoji: '🐌', desc: '迟缓咒熟练度达到 20' },
+    { id: 'epic_affix', name: '史诗词条', emoji: '🟣', desc: '拥有 3 条史诗词条（已装备与背包合计）' }
   ];
 
   var byId = {};

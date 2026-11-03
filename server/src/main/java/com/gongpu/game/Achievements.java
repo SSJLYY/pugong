@@ -66,7 +66,9 @@ public final class Achievements {
             new Def("phase_breaker", "破相者", "🔥", "击破 1 只二阶段 Boss"),
             new Def("weak_100", "弱点猎手", "🎯", "累计触发 100 次弱点打击"),
             new Def("market_1", "黑市客", "🌑", "首次在每日黑市购买药剂"),
-            new Def("merchant", "商贾之道", "🧮", "卖材料累计收入 50,000 金币")
+            new Def("merchant", "商贾之道", "🧮", "卖材料累计收入 50,000 金币"),
+            new Def("slow_20", "迟缓大师", "🐌", "迟缓咒熟练度达到 20"),
+            new Def("epic_affix", "史诗词条", "🟣", "拥有 3 条史诗词条（已装备与背包合计）")
     );
 
     private Achievements() {
@@ -79,7 +81,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord" -> 5_000L;
             default -> 500L;
         };
@@ -118,6 +120,30 @@ public final class Achievements {
             }
         }
         return max;
+    }
+
+    /** 史诗词条总数（已装备 + 背包，epic_affix 成就口径）。 */
+    static int epicAffixCount(PlayerState s) {
+        int n = 0;
+        List<PlayerState.Item> all = new ArrayList<>();
+        for (PlayerState.Item it : s.equipped.values()) {
+            if (it != null) {
+                all.add(it);
+            }
+        }
+        if (s.equipBag != null) {
+            all.addAll(s.equipBag);
+        }
+        for (PlayerState.Item it : all) {
+            if (it.affixes != null) {
+                for (PlayerState.AffixInst a : it.affixes) {
+                    if ("epic".equals(a.rarity)) {
+                        n++;
+                    }
+                }
+            }
+        }
+        return n;
     }
 
     public static long[] progressOf(PlayerState s, String id) {
@@ -165,6 +191,9 @@ public final class Achievements {
             case "weak_100" -> new long[]{s.stats.weakCrits, 100};
             case "market_1" -> new long[]{s.stats.marketBuys, 1};
             case "merchant" -> new long[]{s.stats.matSoldGold, 50_000};
+            case "slow_20" -> new long[]{s.mastery == null ? 0
+                    : s.mastery.getOrDefault("hex_slow", java.math.BigDecimal.ZERO).longValue(), 20};
+            case "epic_affix" -> new long[]{epicAffixCount(s), 3};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
             case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
@@ -241,6 +270,9 @@ public final class Achievements {
                 case "weak_100" -> s.stats.weakCrits >= 100;
                 case "market_1" -> s.stats.marketBuys >= 1;
                 case "merchant" -> s.stats.matSoldGold >= 50_000;
+                case "slow_20" -> s.mastery != null
+                        && s.mastery.getOrDefault("hex_slow", java.math.BigDecimal.ZERO).longValue() >= 20;
+                case "epic_affix" -> epicAffixCount(s) >= 3;
                 default -> false;
             };
             if (ok) {

@@ -3,6 +3,9 @@ server:
   shutdown: graceful
   compression:
     enabled: true
+    # 第七批调优：1KB 起压（全量视图 JSON 动辄数 KB，小回执不压省 CPU），类型显式含 JSON 与前端静态文本
+    min-response-size: 1024
+    mime-types: application/json,application/*+json,text/html,text/css,text/javascript,application/javascript,text/plain
 
 spring:
   application:

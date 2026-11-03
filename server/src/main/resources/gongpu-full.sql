@@ -1111,9 +1111,11 @@ INSERT INTO `cfg_quest`
   ('snow_throne', '雪原王座', '👑', '雪狼王盘踞王座已久：于雪原猎杀五十只魔物，向公会证明你的实力', 'snow', '{"maxHP":200000,"ATK":1500}', 50, 22000, 'fortune', 1, 1, 1, 18);
 
 -- ============================================================
--- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
---   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22
---   cfg_craft 16 / cfg_quest 14 / cfg_skill 23（主动 10 + 被动 13）
---   怪物词条 12（代码 GameConst.MOB_TRAITS）/ 成就 34（代码 Achievements）
---   运行时可用 /api/health 的 content 指纹交叉核对
+-- 整合完毕。验收参考（2026-11-03 第七批 100 轮收官口径）：
+--   cfg_equipment_template 58 / cfg_item 药剂 36 / cfg_affix 24
+--   cfg_craft 18 / cfg_quest 18 / cfg_skill 27（主动 12 + 被动 15）
+--   怪物词条 14（代码 GameConst.MOB_TRAITS）/ 成就 48（代码 Achievements）
+--   天赋 10 / 套装 6（代码 GameConst.TALENTS / Sets）/ 区域 8（含深渊裂隙）
+--   运行时可用 /api/health 的 content 指纹交叉核对：
+--   items=36,affixes=24,equipment=58,skills=27,crafts=18,traits=14
 -- ============================================================

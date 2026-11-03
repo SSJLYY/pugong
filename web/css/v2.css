@@ -1046,3 +1046,10 @@
   .map-panel .zone-btn { min-height: 38px; }
   #btnBoss, #btnAuto { grid-column: 1 / -1; }
 }
+
+/* 深渊裂隙区域按钮（第七批）：深紫裂隙主题，与火山区分 */
+.zone-btn[data-zone="abyss"]{
+  background:linear-gradient(135deg, rgba(88,28,135,.35), rgba(24,16,44,.65));
+  border-color:rgba(168,85,247,.55); color:#e9d5ff;
+}
+.zone-btn[data-zone="abyss"]:hover:not(:disabled){ border-color:#a855f7; box-shadow:0 0 10px rgba(168,85,247,.35); }

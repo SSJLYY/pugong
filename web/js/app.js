@@ -123,7 +123,8 @@
 
   const ZONE_REQ_TEXT = {
     village: '', plain: '≥500血', forest: '≥3千血/5防', mine: '≥1.2万血/攻60',
-    swamp: '≥4万血/50回/攻150', snow: '≥10万血/30魔防/攻400', volcano: '≥30万血/双防80/攻1200'
+    swamp: '≥4万血/50回/攻150', snow: '≥10万血/30魔防/攻400', volcano: '≥30万血/双防80/攻1200',
+    abyss: '≥200万血/双防150/攻4000'
   };
 
   function toast(msg, kind) {

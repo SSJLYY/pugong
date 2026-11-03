@@ -614,6 +614,20 @@
     if (hg) hg.textContent = '💰 ' + fmt(view.gold || 0);
     const hk = $('hudKills');
     if (hk && view.stats) hk.textContent = '💀 ' + fmt(view.stats.kills || 0);
+    // 击杀速率：会话内滚动采样（5 分钟窗口），挂机效率一眼可见
+    const hr = $('hudRate');
+    if (hr && view.stats) {
+      const now = Date.now();
+      const kills = Number(view.stats.kills) || 0;
+      const smp = S._killSamples || (S._killSamples = []);
+      if (!smp.length || smp[smp.length - 1].k !== kills) smp.push({ t: now, k: kills });
+      while (smp.length > 2 && now - smp[0].t > 300000) smp.shift();
+      if (smp.length >= 2) {
+        const mins = (now - smp[0].t) / 60000;
+        const rate = mins >= 0.5 ? (kills - smp[0].k) / mins : 0;
+        hr.textContent = rate > 0 ? '⚔️ ' + (rate >= 10 ? Math.round(rate) : rate.toFixed(1)) + '/分' : '';
+      }
+    }
 
     // 顶栏天赋徽章：当前觉醒天赋常驻可见
     const TAL_META = {

@@ -373,6 +373,43 @@ public class GameService {
         return m;
     }
 
+    /**
+     * 一键分解：把背包里品质低于 keep 的全部装备分解成区域材料（档位语义与一键卖出一致，
+     * 1=白及以下…4=全部；锁定件跳过）。与一键卖出并列的第二条回收通道，喂合成经济。
+     */
+    public Map<String, Object> dismantleAll(PlayerState s, int keep) {
+        if (keep < 0 || keep > 4) {
+            throw ApiException.badRequest("保留品质不合法");
+        }
+        java.util.Map<String, Integer> yields = new java.util.LinkedHashMap<>();
+        int count = 0;
+        for (int i = s.equipBag.size() - 1; i >= 0; i--) {
+            PlayerState.Item it = s.equipBag.get(i);
+            if (it.locked) {
+                continue;   // 锁定件永不被一键处置（与一键卖出口径一致）
+            }
+            if (it.quality < keep) {
+                Object[] y = grantDismantle(s, it);
+                yields.merge((String) y[0], (Integer) y[1], Integer::sum);
+                s.equipBag.remove(i);
+                count++;
+            }
+        }
+        Map<String, Object> m = inventoryView(s);
+        m.put("dismantledCount", count);
+        m.put("yields", yields);
+        StringBuilder text = new StringBuilder();
+        yields.forEach((mat, c) -> {
+            String[] info = GameConst.MAT_INFO.get(mat);
+            if (text.length() > 0) {
+                text.append("、");
+            }
+            text.append(info == null ? mat : info[0]).append("×").append(c);
+        });
+        m.put("yieldsText", text.toString());
+        return m;
+    }
+
     public Map<String, Object> enhance(PlayerState s, int bagIdx) {
         if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
             throw ApiException.badRequest("背包索引越界");

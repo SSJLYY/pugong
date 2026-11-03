@@ -271,6 +271,13 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.dismantle(s, reqIdx(body.index(), "index")));
     }
 
+    @PostMapping("/{slot}/dismantle-all")
+    public Map<String, Object> dismantleAll(HttpServletRequest req, @PathVariable int slot,
+                                            @RequestBody(required = false) Map<String, Integer> body) {
+        int keep = body == null || body.get("keep") == null ? 1 : body.get("keep");
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.dismantleAll(s, keep));
+    }
+
     @PostMapping("/{slot}/enhance")
     public Map<String, Object> enhance(HttpServletRequest req, @PathVariable int slot,
                                        @RequestBody IdxReq body) {

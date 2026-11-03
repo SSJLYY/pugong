@@ -1281,6 +1281,31 @@
         $('bagCount').parentNode.appendChild(btn);
       }
     }
+    // 一键分级分解按钮组：与卖出同档位（材料回收喂锻造），只挂一次
+    if (!$('btnDismantleAll1')) {
+      const smeltTiers = [
+        { keep: 1, label: '♻️ 分白装', text: '普通（白）' },
+        { keep: 2, label: '分绿装及以下', text: '精良（绿）及以下' },
+        { keep: 3, label: '分蓝装及以下', text: '稀有（蓝）及以下' },
+        { keep: 4, label: '分紫装及以下', text: '史诗（紫）及以下，即全部装备' },
+      ];
+      for (const t of smeltTiers) {
+        const btn = document.createElement('button');
+        btn.id = 'btnDismantleAll' + t.keep;
+        btn.textContent = t.label;
+        btn.title = '一键分解背包内' + t.text + '品质装备为区域材料';
+        btn.addEventListener('click', async () => {
+          if (!confirm('分解背包内' + t.text + '品质的全部装备？（材料按装备来源区域产出）')) return;
+          try {
+            const r = await call(() => API.dismantleAll(API.state.slot, t.keep));
+            const res = r.result || {};
+            toast('分解 ' + (res.dismantledCount || 0) + ' 件' + (res.yieldsText ? ' → ' + res.yieldsText : ''), 'ok');
+            applyView(r);
+          } catch (e) { /* call 已 toast */ }
+        });
+        $('bagCount').parentNode.appendChild(btn);
+      }
+    }
     const bag = $('bagList');
     bag.innerHTML = '';
     if (!view.bag || !view.bag.length) {

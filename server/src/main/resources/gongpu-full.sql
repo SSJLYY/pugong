@@ -891,6 +891,11 @@ DELETE FROM `cfg_equipment_template` WHERE `code` IN ('miner_helm');
 INSERT INTO `cfg_equipment_template`
   (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
   ('miner_helm', '矿工盔', '⛑️', 'head', 2, 'mine', '{"PDEF":"7","ACC":"0.03"}', 10, 30, '头灯照亮矿道', 1, 48);
+-- 第 19 轮：沼泽补腿甲「沼泽绑腿」（沼泽此前无腿部位）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('marsh_leggings');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('marsh_leggings', '沼泽绑腿', '🦵', 'legs', 2, 'swamp', '{"PDEF":"9","MDEF":"8","REGEN":"1"}', 10, 40, '防水防毒', 1, 49);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

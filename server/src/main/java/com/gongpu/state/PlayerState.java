@@ -176,6 +176,8 @@ public class PlayerState {
         public String zone;
         /** 模板 code（套装判定用）：掉落/合成时打标；旧档为 null，由 Sets.codeOf 按名回退查模板。 */
         public String code;
+        /** 淬炼等级（0..TEMPER_MAX_LV）：底子额外乘区 +4%/级，与强化独立计层；旧档默认 0。 */
+        public int temper;
     }
 
     public static class AffixInst {

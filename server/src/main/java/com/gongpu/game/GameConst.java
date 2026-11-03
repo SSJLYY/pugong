@@ -445,6 +445,9 @@ public final class GameConst {
     public static final int BAG_VIEW_LIMIT = 200;
     public static final int ENHANCE_MAX_LV = 10;
     public static final double ENHANCE_STAT_BONUS = 0.05;
+    /** 淬炼（第七批）：与强化独立的第二成长线，满 5 级，底子 +4%/级（成本属性不吃乘区，同强化口径）。 */
+    public static final int TEMPER_MAX_LV = 5;
+    public static final double TEMPER_STAT_BONUS = 0.04;
     public static final int ENHANCE_COST_BASE = 100;
     public static final double ENHANCE_COST_MUL = 1.5;
 

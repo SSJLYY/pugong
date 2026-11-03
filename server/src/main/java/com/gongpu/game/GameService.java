@@ -258,6 +258,36 @@ public class GameService {
         return m;
     }
 
+    /** 一键补给包构成（第七批）：出门四件套的目标库存。 */
+    public static final Map<String, Integer> FILL_KIT = Map.of(
+            "hp_s", 10, "mp", 5, "cure", 3, "food", 3);
+
+    /**
+     * 一键补给包（第七批）：把出门四件套逐件补到目标库存（单件走 buyFill 同口径，
+     * 金币不足时该件停在当前库存、不影响其余件）。返回逐件实际买入数。
+     */
+    public static Map<String, Object> buyFillKit(PlayerState s) {
+        Map<String, Object> perItem = new LinkedHashMap<>();
+        int total = 0;
+        for (Map.Entry<String, Integer> e : FILL_KIT.entrySet()) {
+            int bought = 0;
+            try {
+                Map<String, Object> r = buyFill(s, e.getKey(), e.getValue());
+                bought = ((Number) r.get("bought")).intValue();
+            } catch (RuntimeException ignored) {
+                // 药剂缺失等单件异常不拖垮整包
+            }
+            perItem.put(e.getKey(), bought);
+            total += bought;
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("bought", total);
+        m.put("perItem", perItem);
+        m.put("gold", Num.plain(s.gold));
+        return m;
+    }
+
     // ==================== 装备 ====================
 
     /** 动态背包容量：基础 100 + 装备 BAG_CAP 词条（负重腰带 +20）。 */

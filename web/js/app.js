@@ -1010,6 +1010,18 @@
         '<p class="pick-intro">野怪出生时按区域深度掷词条：平原 10% 起、每深一层 +3%，词条池随深度解锁。Boss 与木桩不带词条。</p>' + rows);
     });
 
+    const kitBtn = $('btnBuyKit');
+    if (kitBtn) kitBtn.addEventListener('click', async () => {
+      kitBtn.disabled = true;
+      try {
+        const r = await call(() => API.buyFillKit(API.state.slot));
+        const res = (r && r.result) || {};
+        toast(res.bought > 0 ? '🎒 补给包已补齐：共购入 ' + res.bought + ' 件' : '🎒 补给已满或金币不足', res.bought > 0 ? 'ok' : 'err');
+        if (r) applyView(r);
+      } catch (e) { toast(e.message, 'err'); }
+      kitBtn.disabled = false;
+    });
+
     $('btnSets').addEventListener('click', () => {
       const sets = (S.meta && S.meta.sets) || [];
       if (!sets.length) { toast('套装数据未加载', 'err'); return; }

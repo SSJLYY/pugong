@@ -255,6 +255,12 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> GameService.buyFill(s, reqStr(body.id(), "id"), target));
     }
 
+    /** 一键补给包（第七批）：出门四件套（血药 10/蓝药 5/解毒 3/食物 3）一次补齐。 */
+    @PostMapping("/{slot}/buyfill-kit")
+    public Map<String, Object> buyFillKit(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), GameService::buyFillKit);
+    }
+
     @PostMapping("/{slot}/equip")
     public Map<String, Object> equip(HttpServletRequest req, @PathVariable int slot,
                                      @RequestBody IdxReq body) {

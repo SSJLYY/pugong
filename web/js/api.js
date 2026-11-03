@@ -183,6 +183,7 @@
     matExchange: (slot, from, to) => request('POST', '/api/game/' + slot + '/mat-exchange', { from, to }),
     sellMaterial: (slot, id, count) => request('POST', '/api/game/' + slot + '/sell-material', { id, count }),
     buyFill: (slot, id, target) => request('POST', '/api/game/' + slot + '/buyfill', { id, target }),
+    buyFillKit: (slot) => request('POST', '/api/game/' + slot + '/buyfill-kit', {}),
     questAccept: (slot, code) => request('POST', '/api/game/' + slot + '/quest/accept', { code }),
     questDeliver: (slot, code) => request('POST', '/api/game/' + slot + '/quest/deliver', { code }),
     questAbandon: (slot, code) => request('POST', '/api/game/' + slot + '/quest/abandon', { code }),

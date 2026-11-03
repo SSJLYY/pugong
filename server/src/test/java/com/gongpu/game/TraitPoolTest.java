@@ -20,8 +20,9 @@ class TraitPoolTest {
         assertTrue(GameConst.traitPool(3).contains("venom"), "矿洞起解锁剧毒");
         assertTrue(GameConst.traitPool(4).contains("stealth"), "沼泽起解锁潜行");
         assertTrue(GameConst.traitPool(4).contains("leech"), "沼泽起解锁嗜血");
-        assertEquals(11, GameConst.traitPool(5).size(), "雪山/火山全池 11 条");
+        assertEquals(12, GameConst.traitPool(5).size(), "雪山/火山全池 12 条");
         assertTrue(GameConst.traitPool(5).contains("bulwark"), "深区解锁堡垒");
+        assertTrue(GameConst.traitPool(4).contains("slow"), "沼泽起解锁时滞");
         assertTrue(GameConst.traitPool(5).contains("thorns"), "深区解锁荆棘");
         // 池内每条都必须有词条定义（防池里写了不存在的 id）
         for (int i = 1; i <= 6; i++) {

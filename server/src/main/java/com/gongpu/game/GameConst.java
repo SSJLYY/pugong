@@ -141,7 +141,8 @@ public final class GameConst {
             Map.entry("bulwark", new TraitDef("bulwark", "堡垒", "🛡️", "皮糙肉厚如堡垒：你对它造成的伤害 -20%，得靠耐心磨")),
             Map.entry("venom", new TraitDef("venom", "剧毒", "☠️", "獠牙带毒：命中可能让你中毒持续掉血，出门记得带解毒剂")),
             Map.entry("crystal", new TraitDef("crystal", "晶化", "💎", "通体晶化：击杀必额外掉 2 份本区材料，锻造党的福星")),
-            Map.entry("stealth", new TraitDef("stealth", "潜行", "🌫️", "身形飘忽：你的攻击屡屡落空，对它的伤害 -10%，堆命中克它")));
+            Map.entry("stealth", new TraitDef("stealth", "潜行", "🌫️", "身形飘忽：你的攻击屡屡落空，对它的伤害 -10%，堆命中克它")),
+            Map.entry("slow", new TraitDef("slow", "时滞", "🐌", "黏液缠身：命中可能让你陷入时滞 4 秒，出拳速度 -20%，速战速决或备好净化")));
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -166,6 +167,10 @@ public final class GameConst {
     public static final int TRAIT_CRYSTAL_MATS = 2;
     /** 潜行的伤害乘区（攻击落空等价：玩家对它造成的伤害 ×0.9）。 */
     public static final double TRAIT_STEALTH_MUL = 0.9;
+    /** 时滞：命中上时滞的每秒概率（与剧毒同口径）/ 时滞时长（秒）/ 时滞时攻速倍率。 */
+    public static final double TRAIT_SLOW_CHANCE = 0.3;
+    public static final double TRAIT_SLOW_DUR = 4.0;
+    public static final double TRAIT_SLOW_ASPD_MUL = 0.8;
     /** 被动「幸运星」的掉落率乘区。 */
     public static final double LUCKY_STAR_MUL = 1.1;
     /** 主动「治愈术」的即时回复比例（按生命上限）。 */
@@ -203,8 +208,8 @@ public final class GameConst {
                         : zoneIdx == 3
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : zoneIdx == 4
-                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth")
-                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth");
+                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow")
+                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow");
     }
 
     private static Map<String, ZoneDef> buildZones() {

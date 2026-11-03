@@ -58,6 +58,6 @@ class StealthTraitTest {
         }
         assertFalse(mine.contains("stealth"), "矿洞池不应有潜行");
         assertTrue(swamp.contains("stealth"), "沼泽池应能掷出潜行");
-        assertEquals(11, GameConst.MOB_TRAITS.size(), "怪物词条总数应达 11（7 + 第六批 4）");
+        assertEquals(12, GameConst.MOB_TRAITS.size(), "怪物词条总数应达 12（7 + 第六批 5）");
     }
 }

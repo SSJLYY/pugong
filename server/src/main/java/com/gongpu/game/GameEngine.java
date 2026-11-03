@@ -744,6 +744,10 @@ public final class GameEngine {
         if ("venom".equals(m.trait) && Math.random() < Math.min(1, 0.3 * seconds)) {
             s.buffs.put("poison", GameConst.TRAIT_VENOM_DUR);
         }
+        // 词条·时滞：黏液缠身，命中概率让玩家攻速 -20% 持续 4 秒（面板 ASPD 消费）
+        if ("slow".equals(m.trait) && Math.random() < Math.min(1, GameConst.TRAIT_SLOW_CHANCE * seconds)) {
+            s.buffs.put("slow", GameConst.TRAIT_SLOW_DUR);
+        }
         // 毒 / 灼烧
         if (m.id != null) {
             if (m.id.contains("toad") && Math.random() < Math.min(1, 0.3 * seconds)) {

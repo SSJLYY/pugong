@@ -987,6 +987,11 @@ INSERT INTO `cfg_craft`
   (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
   ('c_lava_greaves', '熔岩护腿铸造', '📐', 'lava_greaves', '{"fire_crystal":4,"ore":6}', 1500, 1, 1, 27);
 
+-- 第六批第 87 轮：新怪物词条「时滞」的状态行（攻速 -20%，沼泽起入池，词条总数 12）
+DELETE FROM `cfg_buff` WHERE `code` IN ('slow');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('slow', '时滞', '🐌', 'bad', 'status', '{"aspdMul":0.8}', '出拳速度 -20%', 1, 51);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16

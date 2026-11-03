@@ -42,4 +42,13 @@ class SkillBatch6Test {
         s.buffs.put("silence", 5.0);
         assertEquals(1.5, GameEngine.dropLuckMul(s), 1e-9, "沉默时被动失效、药剂照旧");
     }
+
+    @Test
+    void round27EagleBone() {
+        PlayerState s = NewState.create();
+        java.math.BigDecimal base = PanelCalculator.of(s).RNG();
+        s.passives.add("eagle_bone");
+        assertEquals(0, PanelCalculator.of(s).RNG().subtract(base).compareTo(Num.of(1)),
+                "鹰骨应让射程 +1");
+    }
 }

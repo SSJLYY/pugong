@@ -88,6 +88,8 @@ public final class PanelCalculator {
         BigDecimal mightPot = (active(s, "might_pot") && !silenced) ? Num.of(20) : Num.ZERO;
         BigDecimal spiritPot = (active(s, "spirit_pot") && !silenced) ? Num.of(300) : Num.ZERO;
         BigDecimal regenPotL = (active(s, "regen_pot_l") && !silenced) ? Num.of(100) : Num.ZERO;
+        // 被动·鹰骨：射程 +1（与远眺药剂同加区，被动受沉默压制）
+        BigDecimal rngPassive = (!silenced && s.passives.contains("eagle_bone")) ? Num.of(1) : Num.ZERO;
 
         // 装备：底子 + 词条 + 强化
         Map<String, BigDecimal> flat = new HashMap<>();
@@ -150,7 +152,7 @@ public final class PanelCalculator {
                 Num.mul(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
                 Num.mul(Num.mul(Num.mul(aspdWithBonus(s.fixed.ASPD, flat, pct), rapidMul), spdPotMul), aspdPotMul),
-                Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot),
+                Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),
                 Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot)),

@@ -911,6 +911,11 @@ DELETE FROM `cfg_skill` WHERE `code` IN ('lucky_star');
 INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('lucky_star', '幸运星', '⭐', 'passive', 300, 0, 0, 0, '{"effect":"drop_mul","mul":1.1}', '装备与图纸掉落率 +10%', 1, 17);
+-- 第 27 轮：新被动「鹰骨」（射程 +1）
+DELETE FROM `cfg_skill` WHERE `code` IN ('eagle_bone');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('eagle_bone', '鹰骨', '🦴', 'passive', 300, 0, 0, 0, '{"effect":"add","key":"RNG","val":1}', '射程 +1', 1, 18);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

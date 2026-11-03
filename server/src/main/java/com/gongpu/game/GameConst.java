@@ -302,7 +302,8 @@ public final class GameConst {
             Map.entry("element", new PassiveDef("element", "元素亲和", "⚡", "附魔魔伤 +25%")),
             Map.entry("boss_hunter", new PassiveDef("boss_hunter", "巨人杀手", "🗡️", "对 Boss 伤害 +20%")),
             Map.entry("diamond_body", new PassiveDef("diamond_body", "金刚体", "💎", "物防与魔防 ×1.15")),
-            Map.entry("lucky_star", new PassiveDef("lucky_star", "幸运星", "⭐", "装备与图纸掉落率 +10%")));
+            Map.entry("lucky_star", new PassiveDef("lucky_star", "幸运星", "⭐", "装备与图纸掉落率 +10%")),
+            Map.entry("eagle_bone", new PassiveDef("eagle_bone", "鹰骨", "🦴", "射程 +1")));
 
     public static final double COMBO_CHANCE = 0.15;
     /** 被动「巨人杀手」对 Boss 的伤害乘区。 */

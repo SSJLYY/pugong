@@ -610,6 +610,10 @@
     $('mpBar').style.width = mpPct.toFixed(1) + '%';
 
     $('gen').textContent = '第 ' + view.gen + ' 世';
+    const hg = $('hudGold');
+    if (hg) hg.textContent = '💰 ' + fmt(view.gold || 0);
+    const hk = $('hudKills');
+    if (hk && view.stats) hk.textContent = '💀 ' + fmt(view.stats.kills || 0);
 
     // 顶栏天赋徽章：当前觉醒天赋常驻可见
     const TAL_META = {

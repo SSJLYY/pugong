@@ -1098,6 +1098,8 @@
     weapon: '武器', offhand: '副手', bow: '弓', head: '头',
     chest: '胸', legs: '腿', boots: '鞋', ring1: '戒指1', ring2: '戒指2', necklace: '项链'
   };
+  // 背包筛选状态（纯前端展示层：部位/品质过滤 + 排序方式，操作仍走原始下标）
+  const bagFilter = { slot: 'all', quality: 'all', sort: 'orig' };
   const QUALITY_COLOR = ['#aaa', '#5cb85c', '#4a9eff', '#b366ff'];
   const QUALITY_NAME = ['普通', '精良', '稀有', '史诗'];
 
@@ -1190,7 +1192,7 @@
   function renderBag(view) {
     // 内容签名守卫:挂机时背包/穿戴不变就跳过重建——每秒销毁重建 40+ 节点×7 按钮
     // 会导致移动端掉帧、按钮监听器每秒换新引发偶发点击丢失(签名范式同 renderPotions)
-    const sig = JSON.stringify([view.bag, view.equipped, view.extraSlots, view.bagMax, view.bagTotal]);
+    const sig = JSON.stringify([view.bag, view.equipped, view.extraSlots, view.bagMax, view.bagTotal, bagFilter]);
     if (sig === renderBag._sig) return;
     renderBag._sig = sig;
     const box = $('equippedSlots');

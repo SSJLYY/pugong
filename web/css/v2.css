@@ -938,3 +938,9 @@
 .mat-src{font-style:normal;opacity:.65;font-size:11px}
 .hotkey-hint{font-size:11px;color:#9a917e;margin-top:4px}
 .hotkey-hint b{color:#d8c98a}
+
+/* 背包筛选条（第六批：部位/品质筹码） */
+.bag-filter-bar{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.bf-chip{font-size:12px;padding:2px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#bbb;cursor:pointer}
+.bf-chip.on{background:#c9a227;color:#1a1503;border-color:#c9a227;font-weight:700}
+.bf-sep{width:10px}

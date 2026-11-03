@@ -844,6 +844,13 @@ INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`,
 DELETE FROM `cfg_buff` WHERE `code` IN ('spirit_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('spirit_pot', '聚灵', '🔮', 'good', 'passive', '{"mpFlat":300}', '120s 内蓝量上限 +300', 1, 47);
+-- 第 8 轮：回春药剂（回血 +100/秒）
+DELETE FROM `cfg_item` WHERE `code` IN ('regen2');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('regen2', '回春药剂', '🌸', 'potion', 650, '{"buff":"regen_pot_l","buffVal":100,"buffDur":60}', '60s 内回血 +100/秒', 1, 48);
+DELETE FROM `cfg_buff` WHERE `code` IN ('regen_pot_l');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('regen_pot_l', '回春', '🌸', 'good', 'passive', '{"regenFlat":100}', '60s 内回血 +100/秒', 1, 48);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

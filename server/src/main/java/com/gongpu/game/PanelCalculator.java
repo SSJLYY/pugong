@@ -83,6 +83,7 @@ public final class PanelCalculator {
         BigDecimal guardPot = (active(s, "guard_pot") && !silenced) ? Num.of(15) : Num.ZERO;
         BigDecimal mightPot = (active(s, "might_pot") && !silenced) ? Num.of(20) : Num.ZERO;
         BigDecimal spiritPot = (active(s, "spirit_pot") && !silenced) ? Num.of(300) : Num.ZERO;
+        BigDecimal regenPotL = (active(s, "regen_pot_l") && !silenced) ? Num.of(100) : Num.ZERO;
 
         // 装备：底子 + 词条 + 强化
         Map<String, BigDecimal> flat = new HashMap<>();
@@ -142,7 +143,7 @@ public final class PanelCalculator {
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MATK, flat, pct, "MATK"), pmul.getOrDefault("MATK", Num.of(1))), burnMul), atkPotMul), mightPot),
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.PDEF, flat, pct, "PDEF"), pmul.getOrDefault("PDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
-                Num.mul(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), pmul.getOrDefault("REGEN", Num.of(1))),
+                Num.mul(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
                 Num.mul(Num.mul(Num.mul(aspdWithBonus(s.fixed.ASPD, flat, pct), rapidMul), spdPotMul), aspdPotMul),
                 Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot),

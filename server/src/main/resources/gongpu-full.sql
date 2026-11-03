@@ -802,6 +802,13 @@ INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`,
 DELETE FROM `cfg_buff` WHERE `code` IN ('vital_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('vital_pot', '生命', '💗', 'good', 'passive', '{"maxHpMul":1.3}', '120s 内生命上限 ×1.3', 1, 41);
+-- 第 2 轮：金钟药剂（物防魔防 +15）
+DELETE FROM `cfg_item` WHERE `code` IN ('guard');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('guard', '金钟药剂', '🔔', 'potion', 500, '{"buff":"guard_pot","buffVal":15,"buffDur":120}', '120s 内物防魔防 +15', 1, 42);
+DELETE FROM `cfg_buff` WHERE `code` IN ('guard_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('guard_pot', '金钟', '🔔', 'good', 'passive', '{"defFlat":15}', '120s 内物防魔防 +15', 1, 42);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

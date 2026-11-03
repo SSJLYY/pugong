@@ -80,6 +80,7 @@ public final class PanelCalculator {
         BigDecimal fleetPot = (active(s, "fleet_pot") && !silenced) ? Num.of(40) : Num.ZERO;
         // 第六批药剂：生命上限乘区（同受沉默压制）
         BigDecimal vitalPotMul = (active(s, "vital_pot") && !silenced) ? Num.of(1.3) : Num.of(1);
+        BigDecimal guardPot = (active(s, "guard_pot") && !silenced) ? Num.of(15) : Num.ZERO;
 
         // 装备：底子 + 词条 + 强化
         Map<String, BigDecimal> flat = new HashMap<>();
@@ -137,8 +138,8 @@ public final class PanelCalculator {
                 Num.add(L.curMP, flat.getOrDefault("curMP", Num.ZERO)),
                 Num.mul(Num.mul(Num.mul(pctApply(L.PATK, flat, pct, "PATK"), pmul.getOrDefault("PATK", Num.of(1))), burnMul), atkPotMul),
                 Num.mul(Num.mul(Num.mul(pctApply(L.MATK, flat, pct, "MATK"), pmul.getOrDefault("MATK", Num.of(1))), burnMul), atkPotMul),
-                Num.mul(Num.mul(Num.mul(pctApply(L.PDEF, flat, pct, "PDEF"), pmul.getOrDefault("PDEF", Num.of(1))), ironPotMul), defPotMul),
-                Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul),
+                Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.PDEF, flat, pct, "PDEF"), pmul.getOrDefault("PDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
+                Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
                 Num.mul(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
                 Num.mul(Num.mul(Num.mul(aspdWithBonus(s.fixed.ASPD, flat, pct), rapidMul), spdPotMul), aspdPotMul),

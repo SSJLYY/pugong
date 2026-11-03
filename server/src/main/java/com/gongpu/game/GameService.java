@@ -1381,6 +1381,8 @@ public class GameService {
             }
         }
         m.put("achProgress", achProgress);
+        // 材料库存（管家面板总览用：六区材料 + 图纸计数，原始 code 由前端映射名称）
+        m.put("materials", s.materials == null ? Map.of() : new LinkedHashMap<>(s.materials));
         // 技能熟练度：casts=累计施放(封顶100),lv=熟练档位(每20次+1,最高5,每档 CD-3%)
         Map<String, Object> masteryView = new LinkedHashMap<>();
         for (Map.Entry<String, BigDecimal> e : s.mastery.entrySet()) {

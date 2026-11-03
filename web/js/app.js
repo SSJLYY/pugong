@@ -488,6 +488,7 @@
       el.id = 'butlerPanel';
       el.innerHTML =
         '<div class="bp-row bp-mob" id="bpMob"></div>' +
+        '<div class="bp-row bp-mats" id="bpMats" title="材料库存（锻造原料，详情见锻造页）"></div>' +
         '<div class="bp-bar"><div class="bp-fill hp" id="bpHp"></div><span id="bpHpTx"></span></div>' +
         '<div class="bp-bar"><div class="bp-fill mp" id="bpMp"></div><span id="bpMpTx"></span></div>' +
         '<label class="bp-row"><input type="checkbox" id="bpMaintain"> 自动管护（卖/吞噬/穿最强）</label>' +
@@ -532,9 +533,13 @@
     const hpPct = Math.max(0, Math.min(100, new Decimal(p.curHP).div(new Decimal(p.maxHP).max(1)).toNumber() * 100));
     const mpPct = Math.max(0, Math.min(100, new Decimal(p.curMP).div(new Decimal(p.MP).max(1)).toNumber() * 100));
     const pot = view.potions || {};
+    const mats = view.materials || {};
+    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥']];
+    const bpCount = Object.keys(mats).filter(k => k.startsWith('bp_')).reduce((t, k) => t + (mats[k] || 0), 0);
     const sig = [Math.round(hpPct / 5), Math.round(mpPct / 5), view.zone, view.mob ? view.mob.name : '',
       view.autoEquipBest ? 1 : 0, view.autoSellKeep || 0, view.autoSmeltKeep || 0,
-      pot.hp_s || 0, pot.hp_l || 0, pot.mp || 0, pot.food || 0, view.dead ? 1 : 0].join('|');
+      pot.hp_s || 0, pot.hp_l || 0, pot.mp || 0, pot.food || 0, view.dead ? 1 : 0,
+      MAT6.map(([c]) => mats[c] || 0).join(','), bpCount].join('|');
     if (renderButlerPanel._sig === sig) return;
     renderButlerPanel._sig = sig;
     $('bpHp').style.width = hpPct.toFixed(0) + '%';
@@ -548,6 +553,8 @@
     if (String(bs.value) !== String(view.autoSellKeep || 0)) bs.value = String(view.autoSellKeep || 0);
     const bsm = $('bpSmelt');
     if (bsm && String(bsm.value) !== String(view.autoSmeltKeep || 0)) bsm.value = String(view.autoSmeltKeep || 0);
+    const bm = $('bpMats');
+    if (bm) bm.textContent = MAT6.map(([c, e]) => e + (mats[c] || 0)).join(' ') + ' · 📐' + bpCount;
     $('bpDrinkHp').textContent = '🧪 血药 ×' + ((pot.hp_s || 0) + (pot.hp_l || 0));
     $('bpDrinkMp').textContent = '🔵 蓝药 ×' + (pot.mp || 0);
     $('bpEat').textContent = '🍖 吃食 ×' + (pot.food || 0);

@@ -143,7 +143,8 @@ public final class GameConst {
             Map.entry("crystal", new TraitDef("crystal", "晶化", "💎", "通体晶化：击杀必额外掉 2 份本区材料，锻造党的福星")),
             Map.entry("stealth", new TraitDef("stealth", "潜行", "🌫️", "身形飘忽：你的攻击屡屡落空，对它的伤害 -10%，堆命中克它")),
             Map.entry("slow", new TraitDef("slow", "时滞", "🐌", "黏液缠身：命中可能让你陷入时滞 4 秒，出拳速度 -20%，速战速决或备好净化")),
-            Map.entry("curse", new TraitDef("curse", "诅咒", "💀", "阴气蚀体：与它交战时你的一切回血（回复/吸血/喝药）减半，先解决它再续航")));
+            Map.entry("curse", new TraitDef("curse", "诅咒", "💀", "阴气蚀体：与它交战时你的一切回血（回复/吸血/喝药）减半，先解决它再续航")),
+            Map.entry("frost", new TraitDef("frost", "寒霜", "🧊", "寒气侵体：命中让你寒霜附体 5 秒、出拳速度 -15%，解毒剂与净化可解")));
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -174,6 +175,10 @@ public final class GameConst {
     public static final double TRAIT_SLOW_CHANCE = 0.3;
     public static final double TRAIT_SLOW_DUR = 4.0;
     public static final double TRAIT_SLOW_ASPD_MUL = 0.8;
+    /** 寒霜：命中上霜概率（/秒）/持续秒数/攻速乘区（与时滞同机制、不同 buff 键，可叠加）。 */
+    public static final double TRAIT_FROST_CHANCE = 0.3;
+    public static final double TRAIT_FROST_DUR = 5.0;
+    public static final double TRAIT_FROST_ASPD_MUL = 0.85;
     /** 被动「幸运星」的掉落率乘区。 */
     public static final double LUCKY_STAR_MUL = 1.1;
     /** 主动「治愈术」的即时回复比例（按生命上限）。 */
@@ -212,7 +217,7 @@ public final class GameConst {
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : zoneIdx == 4
                                         ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow", "curse")
-                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse");
+                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost");
     }
 
     private static Map<String, ZoneDef> buildZones() {

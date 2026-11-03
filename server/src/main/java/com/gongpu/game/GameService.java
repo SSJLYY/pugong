@@ -126,8 +126,8 @@ public class GameService {
                 s.life.curHP = Num.min(Num.add(s.life.curHP, healAmt), p.maxHP());
             }
             case "cleanse" -> {
-                // 净化：清除全部负面状态（毒/灼烧/沉默/时滞）——解毒剂的技能版，不消耗库存
-                for (String debuff : new String[]{"poison", "burn_dot", "silence", "slow"}) {
+                // 净化：清除全部负面状态（毒/灼烧/沉默/时滞/寒霜）——解毒剂的技能版，不消耗库存
+                for (String debuff : new String[]{"poison", "burn_dot", "silence", "slow", "frost"}) {
                     if (s.buffs.remove(debuff) != null) {
                         cleansed++;
                     }
@@ -182,6 +182,8 @@ public class GameService {
             s.buffs.remove("burn_dot");
             // 兼清沉默：Boss 沉默是与毒/灼烧同类的负面状态，一剂全清（解毒剂定位扩为净化剂）
             s.buffs.remove("silence");
+            // 兼清寒霜（第七批）：同为怪物词条减益，一剂全清
+            s.buffs.remove("frost");
         }
         if (def.buff() != null) {
             s.buffs.put(def.buff(), def.buffDur());

@@ -74,6 +74,8 @@ public final class PanelCalculator {
         BigDecimal aspdPotMul = (active(s, "aspd_pot") && !silenced) ? Num.of(1.5) : Num.of(1);
         // 时滞减益（怪物词条）：黏液缠身攻速打折；减益不走沉默压制口径
         BigDecimal slowMul = active(s, "slow") ? Num.of(GameConst.TRAIT_SLOW_ASPD_MUL) : Num.of(1);
+        // 寒霜减益（第七批，怪物词条）：与时滞同乘区叠加
+        BigDecimal frostMul = active(s, "frost") ? Num.of(GameConst.TRAIT_FROST_ASPD_MUL) : Num.of(1);
         BigDecimal critPot = (active(s, "crit_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal critdPot = (active(s, "critd_pot") && !silenced) ? Num.of(0.50) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -160,7 +162,7 @@ public final class PanelCalculator {
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
                 Num.mul(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
-                Num.mul(Num.mul(Num.mul(Num.mul(aspdWithBonus(s.fixed.ASPD, flat, pct), rapidMul), spdPotMul), aspdPotMul), slowMul),
+                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(aspdWithBonus(s.fixed.ASPD, flat, pct), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
                 Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),

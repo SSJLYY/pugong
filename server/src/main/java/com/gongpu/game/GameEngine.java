@@ -765,6 +765,10 @@ public final class GameEngine {
         if ("slow".equals(m.trait) && Math.random() < Math.min(1, GameConst.TRAIT_SLOW_CHANCE * seconds)) {
             s.buffs.put("slow", GameConst.TRAIT_SLOW_DUR);
         }
+        // 词条·寒霜（第七批）：寒气侵体，命中概率上霜 5 秒、攻速 -15%（与时滞独立 buff 键、可叠加）
+        if ("frost".equals(m.trait) && Math.random() < Math.min(1, GameConst.TRAIT_FROST_CHANCE * seconds)) {
+            s.buffs.put("frost", GameConst.TRAIT_FROST_DUR);
+        }
         // 毒 / 灼烧
         if (m.id != null) {
             if (m.id.contains("toad") && Math.random() < Math.min(1, 0.3 * seconds)) {

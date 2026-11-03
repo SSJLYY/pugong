@@ -921,6 +921,14 @@ DELETE FROM `cfg_skill` WHERE `code` IN ('heal');
 INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('heal', '治愈术', '💚', 'active', 300, 40, 60, 0, '{"id":"heal","healRatio":0.35}', '立即恢复 35% 生命上限', 1, 19);
+-- 第 29 轮：新主动「嗜血术」（10s 吸血 +20%）
+DELETE FROM `cfg_skill` WHERE `code` IN ('bloodlust');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('bloodlust', '嗜血术', '🩸', 'active', 300, 30, 45, 10, '{"id":"bloodlust","lifesteal":0.2}', '10s 内吸血 +20%', 1, 20);
+DELETE FROM `cfg_buff` WHERE `code` IN ('bloodlust');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('bloodlust', '嗜血', '🩸', 'good', 'passive', '{"lifesteal":0.2}', '10s 内吸血 +20%', 1, 49);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

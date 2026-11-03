@@ -75,6 +75,7 @@ public final class PanelCalculator {
         BigDecimal critPot = (active(s, "crit_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal critdPot = (active(s, "critd_pot") && !silenced) ? Num.of(0.50) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
+        BigDecimal bloodlustBuff = (active(s, "bloodlust") && !silenced) ? Num.of(0.20) : Num.ZERO;
         BigDecimal accPot = (active(s, "acc_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal evaPot = (active(s, "eva_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal mregenPot = (active(s, "mregen_pot") && !silenced) ? Num.of(10) : Num.ZERO;
@@ -160,7 +161,7 @@ public final class PanelCalculator {
                 Num.min(GameConst.BLESS_CAP.get("ACC"),
                         Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot)),
                 Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot)),
-                Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot),
+                Num.add(Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot), bloodlustBuff),
                 // 枪械：纯魔法弹每发耗蓝标记（BULLET_MP，来自武器 base_stats；非枪/物理弹武器为 0）
                 flat.getOrDefault("BULLET_MP", Num.ZERO),
                 silenced,

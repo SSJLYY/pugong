@@ -63,4 +63,14 @@ class SkillBatch6Test {
                 "治愈术应回 35% 上限（3500），实际=" + s.life.curHP);
         assertEquals(0, s.life.curMP.compareTo(Num.of(60)), "应扣 40 蓝");
     }
+
+    @Test
+    void round29Bloodlust() {
+        PlayerState s = NewState.create();
+        s.life.curMP = Num.of(100);
+        java.math.BigDecimal base = PanelCalculator.of(s).LIFESTEAL();
+        GameService.castSkill(s, "bloodlust");
+        assertEquals(0, PanelCalculator.of(s).LIFESTEAL().subtract(base).compareTo(Num.of(0.20)),
+                "嗜血术应让吸血 +20%");
+    }
 }

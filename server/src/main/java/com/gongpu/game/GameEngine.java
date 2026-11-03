@@ -623,6 +623,10 @@ public final class GameEngine {
             }
         }
 
+        // 词条·剧毒：任意物种带毒，命中概率上毒（与物种毒同口径 0.3/秒，时长较短）
+        if ("venom".equals(m.trait) && Math.random() < Math.min(1, 0.3 * seconds)) {
+            s.buffs.put("poison", GameConst.TRAIT_VENOM_DUR);
+        }
         // 毒 / 灼烧
         if (m.id != null) {
             if (m.id.contains("toad") && Math.random() < Math.min(1, 0.3 * seconds)) {

@@ -793,6 +793,17 @@ INSERT INTO `cfg_equipment_template`
 -- SELECT min_zone, COUNT(*) FROM cfg_equipment_template WHERE enabled=1 GROUP BY min_zone;
 
 -- ============================================================
+-- §4.1 第六批内容（v3.25 起，逐轮追加；全部 DELETE+INSERT 幂等）
+-- ============================================================
+-- 第 1 轮：生命药剂（生命上限 ×1.3）
+DELETE FROM `cfg_item` WHERE `code` IN ('vital');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('vital', '生命药剂', '💗', 'potion', 600, '{"buff":"vital_pot","buffVal":1.3,"buffDur":120}', '120s 内生命上限 ×1.3', 1, 41);
+DELETE FROM `cfg_buff` WHERE `code` IN ('vital_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('vital_pot', '生命', '💗', 'good', 'passive', '{"maxHpMul":1.3}', '120s 内生命上限 ×1.3', 1, 41);
+
+-- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16
 --   cfg_craft 14 / cfg_skill、cfg_buff、cfg_quest、cfg_drop_rate 见库内计数

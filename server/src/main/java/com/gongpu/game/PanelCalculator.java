@@ -78,6 +78,8 @@ public final class PanelCalculator {
         BigDecimal regenPot = (active(s, "regen_pot") && !silenced) ? Num.of(25) : Num.ZERO;
         BigDecimal rngPot = (active(s, "rng_pot") && !silenced) ? Num.of(1) : Num.ZERO;
         BigDecimal fleetPot = (active(s, "fleet_pot") && !silenced) ? Num.of(40) : Num.ZERO;
+        // 第六批药剂：生命上限乘区（同受沉默压制）
+        BigDecimal vitalPotMul = (active(s, "vital_pot") && !silenced) ? Num.of(1.3) : Num.of(1);
 
         // 装备：底子 + 词条 + 强化
         Map<String, BigDecimal> flat = new HashMap<>();
@@ -125,7 +127,7 @@ public final class PanelCalculator {
         // 天赋加成（觉醒抽得，永久生效）
         applyTalent(s, flat, pct);
 
-        BigDecimal maxHP = pctApply(L.maxHP, flat, pct, "maxHP");
+        BigDecimal maxHP = Num.mul(pctApply(L.maxHP, flat, pct, "maxHP"), vitalPotMul);
         BigDecimal curHP = Num.add(L.curHP, flat.getOrDefault("curHP", Num.ZERO));
 
         return new Panel(

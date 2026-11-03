@@ -56,6 +56,11 @@ public final class GameEngine {
         }
         double seconds = Math.max(0, (now - s.lastTickAt) / 1000.0);
         if (seconds <= 0) {
+            // 时钟回拨（NTP 校正/改时区）：重锚 lastTickAt，否则回拨窗口内每帧都算负时长、
+            // 玩家会被冻结推进直到真实时间追过旧锚点（最坏数小时零收益）
+            if (now < s.lastTickAt) {
+                s.lastTickAt = now;
+            }
             return new AdvanceResult(false, null, 0, "0", 0, 0, false, false, null, null);
         }
         double capped = Math.min(seconds, GameConst.MAX_ADVANCE_SECONDS);

@@ -59,6 +59,21 @@ public class SaveController {
         return saves.list(AuthInterceptor.userId(req));
     }
 
+    /**
+     * 导出存档 JSON（玩家自备备份/申诉举证）。
+     * 只出不进：导入会绕过全部服务端数值校验与成就/锁语义，明确不开放。
+     */
+    @GetMapping("/{slot}/export")
+    public org.springframework.http.ResponseEntity<String> export(HttpServletRequest req,
+                                                                  @PathVariable int slot) {
+        PlayerState s = saves.load(AuthInterceptor.userId(req), slot);
+        return org.springframework.http.ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"gongpu-save-slot" + slot + ".json\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(com.gongpu.state.StateCodec.encode(s));
+    }
+
     @PostMapping("/{slot}")
     public Map<String, Object> create(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody(required = false) CreateReq body) {

@@ -262,6 +262,7 @@
           <div class="sc-meta">生命上限 ${fmt(slot.maxHp)} · 存活 ${fmtDur(slot.aliveSeconds)}</div>
           <div class="sc-actions">
             <button class="sc-btn play">继续</button>
+            <button class="sc-btn exp">导出</button>
             <button class="sc-btn del">删除</button>
           </div>`;
         div.querySelector('.play').addEventListener('click', async () => {
@@ -271,6 +272,26 @@
             // 载入失败(网络/档坏)必须回退到选槽界面,不能留一块空白卡死
             $('gameRoot').classList.remove('on');
             $('slotMask').style.display = 'flex';
+          }
+        });
+        div.querySelector('.exp').addEventListener('click', async () => {
+          try {
+            // 带令牌 fetch 后转 blob 下载（普通链接带不上 Authorization 头）；
+            // 前缀算法与 api.js 的 apiBase 保持一致（兼容 /gongpu 与后端根两种部署）
+            const m = location.pathname.match(/^(\/[^/.]+)(?=\/|$)/);
+            const resp = await fetch((m ? m[1] : '') + '/api/saves/' + slot.slot + '/export', {
+              headers: { 'Authorization': 'Bearer ' + API.state.token }
+            });
+            if (!resp.ok) throw new Error('导出失败');
+            const blob = await resp.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'gongpu-save-slot' + slot.slot + '.json';
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+            toast('存档已导出（仅备份留存，游戏不提供导入）', 'ok');
+          } catch (e) {
+            toast('导出失败，请稍后再试', 'err');
           }
         });
         div.querySelector('.del').addEventListener('click', async () => {

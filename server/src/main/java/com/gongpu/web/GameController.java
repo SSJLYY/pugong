@@ -299,6 +299,12 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.enhance(s, reqIdx(body.index(), "index")));
     }
 
+    @PostMapping("/{slot}/temper")
+    public Map<String, Object> temper(HttpServletRequest req, @PathVariable int slot,
+                                      @RequestBody IdxReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.temper(s, reqIdx(body.index(), "index")));
+    }
+
     @PostMapping("/{slot}/reroll")
     public Map<String, Object> reroll(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody RerollReq body) {

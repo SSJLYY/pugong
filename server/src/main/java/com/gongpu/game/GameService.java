@@ -494,6 +494,56 @@ public class GameService {
         return m;
     }
 
+    /** 淬炼消耗的区域材料 key（按装备来源区域，旧档无 zone 按平原兽皮）。 */
+    public static String temperMatKey(PlayerState.Item it) {
+        return GameConst.ZONE_MAT.getOrDefault(it.zone != null ? it.zone : "plain", "pelt");
+    }
+
+    /** 淬炼材料成本：第 n 级需 2×n 个来源区域材料。 */
+    public static int temperMatCost(PlayerState.Item it) {
+        return 2 * (it.temper + 1);
+    }
+
+    /** 淬炼金币成本：300 × 下一级 ×（品质+1）。 */
+    public static java.math.BigDecimal temperGoldCost(PlayerState.Item it) {
+        return Num.of(300L * (it.temper + 1) * (it.quality + 1));
+    }
+
+    /**
+     * 淬炼（第七批）：给装备底子叠第二成长线（+4%/级，满 5 级，与强化独立）。
+     * 耗来源区域材料 + 金币；锁定件可淬炼（纯增益不毁物，锁定只防处置类操作）。
+     */
+    public Map<String, Object> temper(PlayerState s, int bagIdx) {
+        if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
+            throw ApiException.badRequest("背包索引越界");
+        }
+        PlayerState.Item it = s.equipBag.get(bagIdx);
+        if (it.temper >= GameConst.TEMPER_MAX_LV) {
+            throw ApiException.badRequest("已淬炼满级");
+        }
+        String mat = temperMatKey(it);
+        int matCost = temperMatCost(it);
+        java.math.BigDecimal goldCost = temperGoldCost(it);
+        if (s.materials.getOrDefault(mat, 0) < matCost) {
+            String[] info = GameConst.MAT_INFO.get(mat);
+            throw ApiException.badRequest("材料不足：淬炼需要 " + matCost + " 个"
+                    + (info == null ? mat : info[0]) + "（分解同区域装备可得）");
+        }
+        if (Num.lt(s.gold, goldCost)) {
+            throw ApiException.badRequest("金币不足，淬炼需要 " + Num.cn(goldCost));
+        }
+        s.materials.merge(mat, -matCost, Integer::sum);
+        s.gold = Num.sub(s.gold, goldCost);
+        it.temper++;
+        s.stats.tempers++;
+        Map<String, Object> m = inventoryView(s);
+        m.put("temperedTo", it.temper);
+        m.put("matKey", mat);
+        m.put("matCost", matCost);
+        m.put("goldCost", Num.plain(goldCost));
+        return m;
+    }
+
     /** 一键卖出：把背包里品质低于 keepQuality 的全部卖掉（1=白及以下…4=紫及以下即全卖）。 */
     public Map<String, Object> autoSell(PlayerState s, int keepQuality) {
         if (keepQuality < 0 || keepQuality > 4) {
@@ -700,7 +750,7 @@ public class GameService {
                 score += v.doubleValue();
             }
         }
-        return score * (1 + it.enhance * 0.05);
+        return score * (1 + it.enhance * 0.05) * (1 + it.temper * 0.04);
     }
 
     public Map<String, Object> discard(PlayerState s, int bagIdx) {

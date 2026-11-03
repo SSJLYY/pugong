@@ -171,6 +171,7 @@
     toggleLock: (slot, index) => request('POST', '/api/game/' + slot + '/lock', { index }),
     sortBag: (slot) => request('POST', '/api/game/' + slot + '/sortbag'),
     rerollItem: (slot, index, lockIndex) => request('POST', '/api/game/' + slot + '/reroll', { index, lockIndex: lockIndex == null ? -1 : lockIndex }),
+    temperItem: (slot, index) => request('POST', '/api/game/' + slot + '/temper', { index }),
     autoSell: (slot, keep) => request('POST', '/api/game/' + slot + '/autosell', { keep: keep }),
     flee: (slot) => request('POST', '/api/game/' + slot + '/flee'),
     autoEquip: (slot) => request('POST', '/api/game/' + slot + '/autoequip'),

@@ -227,6 +227,7 @@ public class PlayerState {
         /** 终身 Boss 击杀次数（每次击杀计数，区别于 bossKills 首杀名单）。 */
         public long bossKillCount = 0;
         public long enchants = 0;
+        public long tempers = 0;
         public long born = 0;
         public long playSeconds = 0;
         public long bestMaxHP = 0;

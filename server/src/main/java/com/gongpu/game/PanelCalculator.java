@@ -129,6 +129,9 @@ public final class PanelCalculator {
         }
         BigDecimal regenHpPct = pctHp.getOrDefault("REGEN_HP", Num.ZERO);
 
+        // 套装加成（第七批）：已穿套装件数达标的 flat 加成，与装备词条同区（不受沉默压制）
+        Sets.activeBonus(s).forEach((k, v) -> flat.merge(k, v, Num::add));
+
         // 无限属性点天赋(statlord):自由加点并入 flat 区——全部属性走既有读法
         // (含 min(BLESS_CAP) 封顶),加点单位见 GameConst.STAT_POINT_STEP
         for (Map.Entry<String, BigDecimal> e : s.statPoints.entrySet()) {

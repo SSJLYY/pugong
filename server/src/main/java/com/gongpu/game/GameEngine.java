@@ -240,6 +240,12 @@ public final class GameEngine {
 
         BigDecimal totalDmg = Num.mul(perHit, punches);
 
+        // 战绩统计（终身口径）：总伤害按帧累加，最高单击取代表拳伤（木桩陪练同样计入）
+        s.stats.totalDamage = Num.add(s.stats.totalDamage, totalDmg);
+        if (Num.gt(perHit, s.stats.bestHit)) {
+            s.stats.bestHit = perHit;
+        }
+
         // 无限血木桩：不打血，只结算吸血
         if (m.maxHP == null || Num.lte(m.maxHP, Num.ZERO)) {
             healByLifesteal(s, p, totalDmg);

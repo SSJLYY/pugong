@@ -658,6 +658,8 @@
 
     $('stPunch').textContent = fmt(view.stats.punches);
     $('stKill').textContent = fmt(view.stats.kills);
+    const sd = $('stDmg'); if (sd) sd.textContent = fmt(view.stats.totalDamage || 0);
+    const sb = $('stBestHit'); if (sb) sb.textContent = fmt(view.stats.bestHit || 0);
     $('stLived').textContent = fmtDur(view.stats.aliveSeconds);
 
     // 区域与怪物

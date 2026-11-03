@@ -1198,6 +1198,8 @@ public class GameService {
         st.put("playSeconds", s.stats.playSeconds);
         st.put("rebirths", s.stats.rebirths);
         st.put("bestMaxHP", s.stats.bestMaxHP);
+        st.put("totalDamage", Num.plain(s.stats.totalDamage));
+        st.put("bestHit", Num.plain(s.stats.bestHit));
         m.put("stats", st);
         // 无限属性点天赋:当前自由属性点(非 statlord 恒 0)
         m.put("freePoints", Num.plain(s.freePoints));

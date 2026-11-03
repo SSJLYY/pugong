@@ -1004,6 +1004,12 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('cleanse', '净化', '🕊️', 'active', 300, 20, 30, 0, '{"id":"cleanse","cleanse":true}', '清除中毒/灼烧/沉默/时滞全部负面状态', 1, 23);
 
+-- 第六批第 90 轮：高阶词条「疾雷」（攻速上位版，迅捷 0.02~0.10 → 0.10~0.20）
+DELETE FROM `cfg_affix` WHERE `code` IN ('thunderstep');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('thunderstep', '疾雷', 'ASPD', 'flat', 0.10, 0.20, 'epic', NULL, NULL, 1, 22);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16

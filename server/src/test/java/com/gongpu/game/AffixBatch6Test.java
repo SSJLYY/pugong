@@ -59,6 +59,6 @@ class AffixBatch6Test {
         assertEquals("MP", a.key());
         assertEquals("epic", a.rarity());
         assertTrue(a.min() >= 500 && a.max() <= 1200, "魔力源泉区间应为 500~1200：" + a.min() + "~" + a.max());
-        assertEquals(21, GameConst.AFFIXES.size(), "词条总数应达 21（16 + 第六批 5）");
+        assertEquals(22, GameConst.AFFIXES.size(), "词条总数应达 22（21 + 疾雷）");
     }
 }

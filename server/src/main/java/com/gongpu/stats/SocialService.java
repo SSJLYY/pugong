@@ -5,7 +5,6 @@ import com.gongpu.account.UserRepository;
 import com.gongpu.common.ApiException;
 import com.gongpu.common.Num;
 import com.gongpu.game.PanelCalculator;
-import com.gongpu.config.StateCache;
 import com.gongpu.state.GameSaveRepository;
 import com.gongpu.state.Grave;
 import com.gongpu.state.GraveRepository;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -43,7 +41,7 @@ public class SocialService {
     private final UserRepository users;
     private final GraveRepository graves;
     private final GameSaveRepository saves;
-    private final StateCache cache;
+    private final com.gongpu.state.SaveService saveService;
     private final org.springframework.data.redis.core.StringRedisTemplate redis;
 
     /** 世界公告 Redis key（史诗掉落播报）。 */
@@ -51,12 +49,12 @@ public class SocialService {
     private static final int BULLETIN_MAX = 20;
 
     public SocialService(UserRepository users, GraveRepository graves,
-                         GameSaveRepository saves, StateCache cache,
+                         GameSaveRepository saves, com.gongpu.state.SaveService saveService,
                          org.springframework.data.redis.core.StringRedisTemplate redis) {
         this.users = users;
         this.graves = graves;
         this.saves = saves;
-        this.cache = cache;
+        this.saveService = saveService;
         this.redis = redis;
         HOLDER = this;
     }
@@ -119,19 +117,14 @@ public class SocialService {
         if (g.getUserId() == actorId) {
             throw ApiException.badRequest("不能祭奠自己的墓碑");
         }
-        // 从行动者存档扣金币
-        var gs = saves.findByUserIdAndSlotNo(actorId, slot)
-                .orElseThrow(() -> ApiException.notFound("你的槽位 " + slot + " 没有存档"));
-        PlayerState actor = StateCodec.decode(gs.getStateJson());
+        // 从行动者存档扣金币：统一走 SaveService.load+persist（缓存优先读、
+        // 成就评估与冗余列维护与主流程同口径；旧实现直读 DB 会拿到节流落库前的旧金币）
+        PlayerState actor = saveService.load(actorId, slot);
         if (Num.lt(actor.gold, Num.of(TRIBUTE_COST))) {
             throw ApiException.badRequest("金币不足，祭奠需要 " + TRIBUTE_COST + " 金币");
         }
         actor.gold = Num.sub(actor.gold, Num.of(TRIBUTE_COST));
-        gs.setStateJson(StateCodec.encode(actor));
-        gs.setUpdatedAt(Instant.now());
-        saves.save(gs);
-        // DB 与缓存同步，防止下次轮询用旧缓存覆盖
-        cache.evict(actorId, slot);
+        saveService.persist(actorId, slot, actor, null);
         // 墓主 +1 香火(原子,并发祭奠不丢)
         User owner = users.findById(g.getUserId())
                 .orElseThrow(() -> ApiException.notFound("墓主账号已注销"));
@@ -166,9 +159,7 @@ public class SocialService {
             throw ApiException.badRequest("香火不足（需要 " + REVIVE_INCENSE_COST + " 炷，现有 "
                     + have + " 炷）。去帮助别的玩家，或者等别人来祭奠你。");
         }
-        var gs = saves.findByUserIdAndSlotNo(userId, slot)
-                .orElseThrow(() -> ApiException.notFound("槽位 " + slot + " 没有存档"));
-        PlayerState s = StateCodec.decode(gs.getStateJson());
+        PlayerState s = saveService.load(userId, slot);
         if (!s.dead) {
             throw ApiException.badRequest("当前并未死亡");
         }
@@ -188,11 +179,9 @@ public class SocialService {
         s.buffs.remove("burn_dot");
         s.buffs.remove("silence");
         s.lastTickAt = System.currentTimeMillis();
-        gs.setStateJson(StateCodec.encode(s));
-        gs.setUpdatedAt(Instant.now());
-        saves.save(gs);
-        // 关键：复活必须失效缓存，否则轮询会用旧死亡态把 DB 覆盖回去
-        cache.evict(userId, slot);
+        // 走 persist 刷新缓存（旧实现手写 encode+save+evict：缓存被清后下轮询回源
+        // DB 才恢复，且冗余列 gen/zone/maxHp 与成就评估都被跳过）
+        saveService.persist(userId, slot, s, null);
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("ok", true);
         out.put("incenseLeft", have - REVIVE_INCENSE_COST);

@@ -151,6 +151,15 @@ public final class PanelCalculator {
         BigDecimal maxHP = Num.mul(pctApply(L.maxHP, flat, pct, "maxHP"), vitalPotMul);
         BigDecimal curHP = Num.add(L.curHP, flat.getOrDefault("curHP", Num.ZERO));
 
+        // 被动·血怒（第七批）：残血狂怒——当前生命低于 30% 上限时双攻 ×1.15
+        // （需在 maxHP/curHP 定型后判定，故不走前置被动乘区循环；沉默压制口径同其他被动）
+        if (!silenced && s.passives.contains("bloodrage")
+                && Num.gt(maxHP, Num.ZERO)
+                && Num.lt(Num.div(curHP, maxHP), Num.of(GameConst.BLOODRAGE_HP_LINE))) {
+            pmul.merge("PATK", Num.of(GameConst.BLOODRAGE_ATK_MUL), Num::mul);
+            pmul.merge("MATK", Num.of(GameConst.BLOODRAGE_ATK_MUL), Num::mul);
+        }
+
         return new Panel(
                 maxHP,
                 curHP,

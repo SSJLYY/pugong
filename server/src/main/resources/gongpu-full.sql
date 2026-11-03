@@ -1041,6 +1041,12 @@ INSERT INTO `cfg_affix`
   (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
   ('thunderstep', '疾雷', 'ASPD', 'flat', 0.10, 0.20, 'epic', NULL, NULL, 1, 22);
 
+-- 第七批第 44 轮：新被动「血怒」（生命低于 30% 时双攻 +15%）
+DELETE FROM `cfg_skill` WHERE `code` IN ('bloodrage');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('bloodrage', '血怒', '🩸', 'passive', 300, 0, 0, 0, '{"effect":"bloodrage","mul":1.15}', '生命低于 30% 时物理与魔法攻击 +15%', 1, 24);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

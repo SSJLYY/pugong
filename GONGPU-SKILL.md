@@ -9,8 +9,9 @@
 前端纯静态（nginx），后端 Spring Boot 3.2.5 + Java 21（8081），
 MySQL 8 持久 + Redis 缓存/锁/榜单。数值全部服务端结算，前端只发意图。
 
-## 0.5 当前状态速览（2026-11-03 更新，第六批 100 轮后）
+## 0.5 当前状态速览（2026-11-03 更新，第七批 100 轮后）
 
+- **第七批一百轮增强（2026-11-03，每轮独立提交；本地内网自测）**：新系统——装备套装（Sets.java 六套区域 4 件套，2/4 件两档加成、沉默不压制，SetParityTest 锁成员与区域）/ 装备淬炼（Item.temper 0–5，底子 +4%/级与强化分层乘区，区域材料 + 金币成本）/ 洗炼保底（rerollPity 10 次必出史诗）+ 双锁（成本 ×3/×5）/ 新区域深渊裂隙 abyss（8 区之末，4 怪 + Boss 无光君王 30M 血、深渊结晶、装备 52→58、委托/配方各 +2、图鉴 23）/ 每日任务（DailyQuests 7 模板抽 3、终身计数基线口径、全清 +5000）/ 每日黑市（BlackMarket 16 池抽 3、3–5 折、单品限购 5）/ 材料出售（MAT_SELL_PRICE 七种区域材料）/ 一键补给包 / 总伤害榜（第四榜 damage）/ 每日首祭免费。战斗深化——怪物词条 12→14（💀诅咒回血减半、🧊寒霜攻速 -15%，healMul 单点口径）/ Boss 二阶段（phase2 血线 50% 攻速 +30% 攻击 +20%）/ 弱点打击（punchAcc 每第 10 拳必暴，期望口径差额结算）/ 🌵荆棘反扎封顶修复（基数 min(整帧伤害, 开帧目标剩余血)，死因带词条标注）。内容——药剂 34→36（狂怒复合暴击/时之砂平直攻速）、词条 22→24（破军/绝杀史诗上位）、技能 23→27（血怒/冲锋/处决者/迟缓咒 MobState.slowT）、天赋 8→10（幸运儿/铁胃）、委托 16→18、成就 34→48。前端——布局重构 v3.2（三列网格/顶栏品牌/页签滚动）、加点阶梯放大（最高 +1 亿 + 全部）、飘字三路（伤害/金币/受击）、低特效模式、宣纸主题、药剂置顶、区域就绪标记、成就筛选置顶、快捷键扩展、背包可售总价；升 **v=136**。稳健——serverTime 过期帧守卫、存档滚动备份环（backup_ring 列，decodeOrRecover 三级自愈）、慢请求指标进 health（perf 段）、BCrypt 72 字节守卫、18 端点经济审计日志（economy-audit）、弱网自适应轮询、响应压缩调优、宽松性能守卫。单测 **513+ 全绿**（收官口径见第 100 轮）；deploy.sh 验收口径同步（58/36/18/18/24/27）。详见 README「变更记录（2026-11-03 · 第七批一百轮增强）」。
 - **第六批一百轮增强（2026-11-03，每轮独立提交；本地内网自测）**：内容总数——药剂 25→**34**（生命/金钟/大力/石肤/荆棘/巨人/聚灵/回春 + 聚宝金币维度）、词条 16→**22**（血契/磐石/猎风/生命之源/魔力源泉 + 疾雷）、装备 45→**52**（平原弓/森林胸/矿洞盔/沼泽腿/雪山胸+头/火山腿补缺）、怪物词条 7→**12**（堡垒/剧毒/晶化/潜行/时滞）、技能 15→**23**（金刚体/幸运星/鹰骨/材料嗅觉 + 治愈/嗜血/铁壁/净化）、委托 12→**14**、配方 14→**16**、成就 28→**34**（含进度条 progressOf 与一键全领）。玩法系统：战斗日志 events（环形 20）/ 自动推进 autoAdvance / Boss 连战 autoBoss / 一键分解 / 材料 3:1 兑换 / 按目标数量补给 buyfill / 每日连签（claim_streak 列 + 周奖）/ 存档改名。稳健：改密令牌版本失效（token_version 列 + claim v + 拦截器 30s 缓存比对）/ 登录防爆破（5 次锁 5 分钟）/ 存档解码自愈（主档坏回退快照）/ 时钟回拨重锚 / 415 异常映射 / 技能按钮重复绑定修复 / 管护签名跳过 / 成就进度复用面板 / health 内容指纹。前端：背包筛选+显示排序、区域锁定提示、补给预警、顶栏速览（金币/击杀/击杀速率）、图鉴进度、词条图鉴、击杀预估（estPunches 与 dealDamage 同口径）、快捷键 1-5/F/B、战绩摘要复制、帮助弹窗、页签标题速览。SQL 仍是单一 gongpu-full.sql（§4.1 逐轮 DELETE+INSERT 幂等追加；新增守卫列 claim_streak/token_version）。前端升 **v=103**，单测 **373 全绿**；deploy.sh 验收口径同步（52/34/14/16/22/23）。详见 README「变更记录（2026-11-03 · 第六批一百轮增强）」。
 - **第五批十轮增强（2026-11-03，本地内网自测）**：装备分解系统（Item.zone 打标按区域出材料、旧档兜底兽皮）+ 自动分解档位 autoSmeltKeep（dropIntercept 单点、分解优先于售卖）/ 怪物词条扩至 7 种（💰富饶金币 ×3 森林起、⚡疾影攻速 +50% 矿洞起，结算抽 traitGoldMul/traitHasteMul）/ 战绩统计（Stats.totalDamage/bestHit 终身口径）/ 成就 24→28 且可领奖（rewardOf 四档 100/500/2000/5000、ach-claim 一成就一领、金额 view 单源下发）/ 背包评分对比（bagScores/equippedScores 视图附件，equipScore 单一口径）/ 新被动巨人杀手（Boss 伤害 +20%，PASSIVE_SKILLS 镜像与 SQL、Parity 锁三同步）/ 委托 9→12。前端升 v=72，单测 **262 全绿**；内网实测分解/领奖/自动分解全链路通过。详见 README「变更记录（2026-11-03 · 第五批十轮增强）」。
 - **SQL 整合 + 136 同步（2026-11-03）**：①拉入 136 环境提交（shaun88）：deploy.sh 迁移清单补全 v3.16~v3.24、DeploySocketConfig 改 @ConditionalOnProperty(gongpu.redis.socket)——**本机 start-gongpu.sh 已补 --gongpu.redis.socket 参数**（旧版是硬编码路径，下次本机重建不补会断 Redis）。②resources 下 22 个 SQL 文件整合为单一 **gongpu-full.sql**（§1 表结构/§2 守卫式加列与一次性回填/§3 基线种子/§4 内容迁移按序），全程幂等：临时库实测全新导入与现行库 cfg 内容逐行一致（除自增 id）、二次导入无错；deploy.sh 已改为单一入口并删除 migrate() 内联与 CONTENT_MIGRATIONS 清单。GunplayTest 改读整合文件。单测 242 全绿。
@@ -157,6 +158,20 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 登录防爆破（第六批） | AccountService.login | 同用户名连错 5 次锁 5 分钟回 429（与 AuthRateLimiter 的 IP 维度互补）；成功清零；LoginThrottleTest 锁 |
 | 存档自愈（第六批） | SaveService.decodeOrRecover | 主档 JSON 损坏回退快照解码，双坏报 500 SAVE_CORRUPT；rollback 快照坏按无快照重开；SaveRecoverTest 锁 |
 | 击杀预估（第六批） | fullView mob.estPunches/estSeconds | GameEngine.expectedPerHit 与 dealDamage 前段同口径（暴击期望/防御/词条/巨人乘区，不含蓄力），改伤害公式必须同步 |
+| 装备套装（第七批） | Sets.java + fullView.sets / meta.sets | 六套区域 4 件套按不同成员 code 计数（同名重复不刷数），2/4 件两档叠加；PanelCalculator 装备循环后并入、沉默不压制（装备来源）；前端已穿/背包 🧩 徽章 + 套装图鉴弹窗；SetParityTest 锁成员在 SQL 且 min_zone 对应 |
+| 装备淬炼（第七批） | POST /{slot}/temper {index} | Item.temper 0–5，底子乘区 ×(1+4%/级) 与强化分层（BULLET_MP 排除），equipScore 同乘；成本 = Item.zone 区域材料 2×(级+1) + 金币 300×(级+1)×(品质+1)，锁定件可淬炼 |
+| 洗炼保底/双锁（第七批） | PlayerState.rerollPity + POST /{slot}/reroll | 连 9 次未出史诗第 10 次强制（rerollAffixes forceEpic，锁定位不换）；双锁需 ≥3 条词条、成本 ×1/×3/×5；响应带 pity/pityTriggered |
+| 深渊裂隙（第七批） | zone abyss（ZONES 末位） | 门槛 maxHP 200 万/双防 150/ATK 4000；4 怪 + Boss 无光君王（30M）；材料 abyss_crystal；深度 7 词条率 28%、全 14 词条池；autoAdvance 链尾自动到达（nextZoneId 按序） |
+| 每日任务（第七批） | DailyQuests + POST /{slot}/daily-claim | 7 模板每日抽 3、随机档位；进度 = 终身计数 − 签发基线（DailyTask.baseline 字符串存大数），跨世保留；三任务全领全清奖 +5000（dailyBonusGiven 日切重置） |
+| 每日黑市（第七批） | BlackMarket + POST /{slot}/market-buy | 16 种增益药池每日抽 3、折扣 30–50%、单品限购 5（marketBought 日切清零）；种子 = 日期 hash×31 + born，同日同号同单；购买不写 potionBought 不影响商店阶梯价 |
+| 材料出售/补给包（第七批） | POST /{slot}/sell-material、/{slot}/buyfill-kit | MAT_SELL_PRICE 仅七种区域材料（图纸/卷轴不可卖），count≤0 全卖、超量封顶；补给包 = hp_s 10/mp 5/cure 3/food 3 走 buyFill 同口径、单件失败不拖垮整包 |
+| Boss 二阶段/弱点打击（第七批） | MobState.phase2 / PlayerState.punchAcc | 二阶段血线 50%：攻速 ×1.3 攻击 ×1.2 + events 播报，Stats.bossPhaseKills；弱点打击每第 10 拳按 (CRITD/期望倍率) 放大差额（CRITD≤期望不计），Stats.weakCrits；estPunches 口径不含弱点差额 |
+| 荆棘反扎口径（第七批修复） | GameEngine.dealDamage 帧首快照 | 反扎基数 = min(整帧伤害, 开帧目标剩余血)，溢出不再反杀玩家；deathCause 追加词条标注（如 ·🌵荆棘）；TraitThornsTest 锁 |
+| 怪物词条诅咒/寒霜（第七批） | MOB_TRAITS curse/frost | 诅咒：交战回血减半（GameEngine.healMul 单点覆盖吸血/回复 tick/自动喝药/手动喝药），沼泽起；寒霜：命中 30% 挂 frost 5s 攻速 ×0.85（与时滞叠乘），雪原起；净化与解毒剂可清寒霜 |
+| 存档备份环（第七批） | game_save.backup_ring + SaveService.rotateBackupRing | persist 每 ≥10 分钟轮转一份主档 JSON 进环（[{t,j}] 留 3 份）；decodeOrRecover 自愈链：主档 → 备份环（新→旧）→ 存档点快照 → SAVE_CORRUPT；BackupRingTest 锁 |
+| 经济审计（第七批） | GameController.run 审计标签重载 | 18 个经济端点传标签，runLocked 在 advance 后取金币基线、落库后按变动记 economy-audit 日志（uid/slot/action/delta/gold 全精度）；无变动与挂机帧不记 |
+| 过期帧守卫（第七批） | fullView.serverTime + app.js applyView | 服务端单时钟戳，客户端丢弃 serverTime 小于已应用帧的乱序旧帧；与 lastWriteAt 写后守卫互补（慢网/多标签页防 UI 回退） |
+| 慢请求指标（第七批） | GET /api/health 的 perf 段 | TimingInterceptor 静态原子计数（requests/slow/slowMs/maxMs，record 单点判定），阈值默认 500ms |
 | 怪物词条·时滞（第六批） | MOB_TRAITS slow（沼泽起） | 🐌 命中概率上 slow 4s：面板 ASPD ×0.8（PanelCalculator slowMul，减益不查沉默）；净化技能/解毒可清；SlowTraitTest 锁 |
 | 内容计数（第六批终版） | /api/health content 指纹 | 药剂 34/词条 22/装备 52/怪物词条 12/技能 23/委托 14/配方 16/成就 34；计数锁分布于 PotionsV314/Affix*/DataParity*/EconomySanity/Achievements* 测试与 deploy.sh 验收行，改内容必须全链同步 |
 | 排行榜 | GET /api/leaderboard?board=maxhp\|gold\|gen | 三榜统一上报(LeaderboardService.submit,60s 节流)；分数 log10 防 1e308 溢出；member=uid\|名\|世代\|值明文,单榜旧条目兼容 |

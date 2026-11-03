@@ -305,6 +305,11 @@ public final class GameEngine {
 
         healByLifesteal(s, p, totalDmg);
 
+        // 荆棘反扎基数快照：开帧目标与其剩余血量——反扎只按它实际承受的伤害计（见帧尾结算）
+        PlayerState.MobState startMob = m;
+        String startTrait = m.trait;
+        BigDecimal startMobHp = m.curHP == null ? BigDecimal.ZERO : m.curHP;
+
         // 批量结算：溢出伤害按比例折算击杀数（后期攻速爆炸时一秒百万杀）
         int drops = 0;
         BigDecimal dmgLeft = totalDmg;
@@ -371,13 +376,16 @@ public final class GameEngine {
                 break;
             }
         }
-        // 词条「荆棘」：本帧（以开帧时目标词条为准）所造伤害的 10% 反扎玩家，护盾先吸；
+        // 词条「荆棘」：开帧目标实际承受伤害的 10% 反扎玩家，护盾先吸；
+        // 反扎基数封顶在它开帧时的剩余血量——溢出伤害打在后续连锁怪身上，不该由它反扎
+        // （旧口径按整帧总伤害反扎：高伤玩家一拳溢出上亿倍于怪血量，反扎无视双防一击致命，属事故）
         // 扎死当场死亡——advance 后续阶段（嗑药/怪反击/DoT）均以 !dead 守卫，不会二次结算
-        if ("thorns".equals(m.trait) && !s.dead && Num.gt(totalDmg, Num.ZERO)) {
-            BigDecimal reflect = Num.mul(totalDmg, Num.of(GameConst.TRAIT_THORNS_MUL));
+        if ("thorns".equals(startTrait) && !s.dead && Num.gt(totalDmg, Num.ZERO)) {
+            BigDecimal absorbed = Num.min(totalDmg, startMobHp);
+            BigDecimal reflect = Num.mul(absorbed, Num.of(GameConst.TRAIT_THORNS_MUL));
             s.life.curHP = Num.sub(s.life.curHP, absorbShield(s, reflect));
             if (Num.lte(s.life.curHP, Num.ZERO)) {
-                kill(s, m);
+                kill(s, startMob);
             }
         }
         return drops;
@@ -1042,7 +1050,15 @@ public final class GameEngine {
         s.dead = true;
         s.life.curHP = Num.ZERO;
         s.stats.deaths++;
-        s.deathCause = m != null ? (m.name + "（" + zoneName(s.zone) + "）") : "力竭而亡";
+        // 死因带上怪物词条（如 ·🌵荆棘）：否则被反扎/毒杀时死亡画面只显示怪名，玩家无从知晓死因
+        String traitTxt = "";
+        if (m != null && m.trait != null) {
+            GameConst.TraitDef td = GameConst.MOB_TRAITS.get(m.trait);
+            if (td != null) {
+                traitTxt = "·" + td.emoji() + td.name();
+            }
+        }
+        s.deathCause = m != null ? (m.name + "（" + zoneName(s.zone) + "）" + traitTxt) : "力竭而亡";
     }
 
     private static String zoneName(String zone) {

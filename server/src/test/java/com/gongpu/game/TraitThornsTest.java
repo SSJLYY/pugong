@@ -74,6 +74,32 @@ class TraitThornsTest {
         assertTrue(s.deathCause.contains("雪怪"), "死因应记在荆棘怪头上");
     }
 
+    /**
+     * 溢出反扎封顶（实测事故修复）：玩家一拳 1e12 打 8 万血荆棘雪人，
+     * 旧口径按整帧伤害反扎 1e11 无视双防一击致命；新口径只按怪实际承受的 8 万计，反扎 8000。
+     */
+    @Test
+    void overkillReflectCappedAtMobHp() {
+        PlayerState s = fighter(new BigDecimal("100000"));
+        s.mob.maxHP = new BigDecimal("80000");
+        s.mob.curHP = new BigDecimal("80000");
+        s.life.maxHP = new BigDecimal("100000");
+        s.life.set("PATK", new BigDecimal("1000000000000"));
+        GameEngine.dealDamage(s, PanelCalculator.of(s), BigDecimal.ONE, 1.0);
+        assertFalse(s.dead, "溢出伤害不该被荆棘全额反扎致死");
+        assertEquals(0, s.life.curHP.compareTo(new BigDecimal("92000")),
+                "反扎应封顶在怪血量 80000 的 10% = 8000");
+    }
+
+    /** 死因标注词条：被荆棘扎死时死亡画面能看出死因。 */
+    @Test
+    void deathCauseNamesTrait() {
+        PlayerState s = fighter(new BigDecimal("50"));
+        GameEngine.dealDamage(s, PanelCalculator.of(s), new BigDecimal("10"), 1.0);
+        assertTrue(s.dead);
+        assertTrue(s.deathCause.contains("荆棘"), "死因应标注词条，实际：" + s.deathCause);
+    }
+
     @Test
     void poolUnlocksAtSnow() {
         boolean sawThornsAtSnow = false;

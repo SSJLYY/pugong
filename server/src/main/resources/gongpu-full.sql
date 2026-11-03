@@ -1008,6 +1008,16 @@ INSERT INTO `cfg_craft`
   (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
   ('c_lava_greaves', '熔岩护腿铸造', '📐', 'lava_greaves', '{"fire_crystal":4,"ore":6}', 1500, 1, 1, 27);
 
+-- 第七批第 26 轮：深渊配方 ×2（深渊结晶喂毕业装铸造，图纸掉落池自动纳入新配方）
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_abyss_blade');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_abyss_blade', '渊噬之刃铸造', '📐', 'abyss_blade', '{"abyss_crystal":6,"fire_crystal":4}', 5000, 1, 1, 28);
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_void_ring');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_void_ring', '虚空指环铸造', '📐', 'void_ring', '{"abyss_crystal":4,"mana_dust":6}', 4000, 1, 1, 29);
+
 -- 第六批第 87 轮：新怪物词条「时滞」的状态行（攻速 -20%，沼泽起入池，词条总数 12）
 DELETE FROM `cfg_buff` WHERE `code` IN ('slow');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES

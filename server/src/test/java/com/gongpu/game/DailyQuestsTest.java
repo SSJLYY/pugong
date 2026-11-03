@@ -181,6 +181,26 @@ class DailyQuestsTest {
         }
     }
 
+    /** 第 35 轮：转生不吞每日进度（计数终身口径 + resetForNewLife 不动每日字段）。 */
+    @Test
+    void rebirthKeepsDailyProgress() {
+        PlayerState s = NewState.create();
+        PlayerState.DailyTask t = new PlayerState.DailyTask();
+        t.id = "hunt";
+        t.baseline = "10";
+        t.target = 30;
+        t.rewardGold = 1800;
+        s.dailyDay = DailyQuests.today();
+        s.dailyTasks = new java.util.ArrayList<>(List.of(t));
+        s.stats.lifetimeKills = Num.of(25);
+        assertEquals(15, DailyQuests.progressOf(s, t));
+        com.gongpu.state.SaveService.resetForNewLife(s);
+        assertEquals(DailyQuests.today(), s.dailyDay, "转生不应换掉当日任务");
+        assertEquals(1, s.dailyTasks.size(), "转生不应清空任务列表");
+        assertEquals(15, DailyQuests.progressOf(s, s.dailyTasks.get(0)),
+                "终身计数不随转生重置，每日进度应原样保留");
+    }
+
     @Test
     void usePotionIncrementsLifetimeCounter() {
         GameService game = new GameService();

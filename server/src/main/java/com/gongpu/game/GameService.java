@@ -822,6 +822,16 @@ public class GameService {
         return m;
     }
 
+    /** 每日黑市购买（第七批）：货单/限购/折扣价规则在 BlackMarket，返回小回执。 */
+    public Map<String, Object> buyBlackMarket(PlayerState s, String id) {
+        long paid = BlackMarket.buy(s, id);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("id", id);
+        m.put("paid", paid);
+        return m;
+    }
+
     /** 成就奖励领取：已解锁未领取才发金币（一成就一次），金额 Achievements.rewardOf 权威。 */
     public Map<String, Object> claimAchievement(PlayerState s, String id) {
         boolean known = Achievements.ALL.stream().anyMatch(d -> d.id().equals(id));
@@ -942,6 +952,7 @@ public class GameService {
         m.put("autoBoss", s.autoBoss);
         m.put("rerollPity", s.rerollPity);
         m.put("dailyTasks", DailyQuests.viewOf(s));
+        m.put("blackMarket", BlackMarket.viewOf(s));
         return m;
     }
 

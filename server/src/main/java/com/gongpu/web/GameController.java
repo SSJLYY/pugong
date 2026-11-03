@@ -472,6 +472,14 @@ public class GameController {
                 s -> game.claimDaily(s, reqStr(body.id(), "id")));
     }
 
+    /** 每日黑市购买（第七批）：当日货单内打折药剂，限购校验在 BlackMarket。 */
+    @PostMapping("/{slot}/market-buy")
+    public Map<String, Object> marketBuy(HttpServletRequest req, @PathVariable int slot,
+                                         @RequestBody AchReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
+                s -> game.buyBlackMarket(s, reqStr(body.id(), "id")));
+    }
+
     /** 成就奖励领取（已解锁未领取，金币入账）。 */
     @PostMapping("/{slot}/ach-claim")
     public Map<String, Object> achClaim(HttpServletRequest req, @PathVariable int slot,

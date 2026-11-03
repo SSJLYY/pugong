@@ -130,6 +130,20 @@ public class PlayerState {
     /** 当日全清奖励是否已发（第七批第 36 轮）。 */
     public boolean dailyBonusGiven = false;
 
+    /** 每日黑市刷新日期（第七批，Asia/Shanghai）；跨日由 BlackMarket.ensure 重刷。 */
+    public String marketDay;
+    /** 当日黑市货单（生成时快照折扣价，整日不变）。 */
+    public List<MarketOffer> marketOffers = new ArrayList<>();
+    /** 当日黑市已购计数（药剂 id → 件数，每件限购由 BlackMarket.LIMIT_PER_ITEM 守卫）。 */
+    public Map<String, Integer> marketBought = new LinkedHashMap<>();
+
+    /** 黑市货单条目：price 为折后价（金币），discount 为折扣百分比（30–50）。 */
+    public static class MarketOffer {
+        public String id;
+        public int price;
+        public int discount;
+    }
+
     /** 每日任务实例：baseline 为签发时终身计数的 plain 字符串（伤害为大数，统一字符串存）。 */
     public static class DailyTask {
         public String id;
@@ -261,6 +275,8 @@ public class PlayerState {
         /** 材料出售累计（第七批，终身口径）：份数与金币收入（商贾成就口径）。 */
         public long matSold = 0;
         public long matSoldGold = 0;
+        /** 黑市累计购买件数（第七批，终身口径）。 */
+        public long marketBuys = 0;
         public long born = 0;
         public long playSeconds = 0;
         public long bestMaxHP = 0;

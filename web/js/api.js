@@ -173,6 +173,7 @@
     rerollItem: (slot, index, lockIndex, lockIndex2) => request('POST', '/api/game/' + slot + '/reroll', { index, lockIndex: lockIndex == null ? -1 : lockIndex, lockIndex2: lockIndex2 == null ? -1 : lockIndex2 }),
     temperItem: (slot, index) => request('POST', '/api/game/' + slot + '/temper', { index }),
     claimDaily: (slot, id) => request('POST', '/api/game/' + slot + '/daily-claim', { id }),
+    marketBuy: (slot, id) => request('POST', '/api/game/' + slot + '/market-buy', { id }),
     autoSell: (slot, keep) => request('POST', '/api/game/' + slot + '/autosell', { keep: keep }),
     flee: (slot) => request('POST', '/api/game/' + slot + '/flee'),
     autoEquip: (slot) => request('POST', '/api/game/' + slot + '/autoequip'),

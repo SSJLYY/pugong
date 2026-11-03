@@ -42,4 +42,13 @@ class AffixBatch6Test {
         assertEquals("epic", a.rarity());
         assertTrue(a.min() >= 30 && a.max() <= 60, "猎风区间应为 30~60：" + a.min() + "~" + a.max());
     }
+
+    @Test
+    void round14Lifespring() {
+        GameConst.Affix a = byName("生命之源");
+        assertNotNull(a, "生命之源应进词条池");
+        assertEquals("maxHP", a.key());
+        assertEquals("epic", a.rarity());
+        assertTrue(a.min() >= 300 && a.max() <= 800, "生命之源区间应为 300~800：" + a.min() + "~" + a.max());
+    }
 }

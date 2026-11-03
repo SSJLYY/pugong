@@ -381,7 +381,8 @@ public final class GameConst {
             // ---- 第六批：高阶词条（既有维度上位版，史诗池） ----
             new Affix("血契", "LIFESTEAL", "flat", 0.03, 0.06, "epic", null, null),
             new Affix("磐石", "PDEF", "flat", 20, 45, "epic", null, null),
-            new Affix("猎风", "SPD", "flat", 30, 60, "epic", null, null));
+            new Affix("猎风", "SPD", "flat", 30, 60, "epic", null, null),
+            new Affix("生命之源", "maxHP", "flat", 300, 800, "epic", null, null));
 
     /** 掉落概率（按区域）。 */
     public static final Map<String, Double> DROP_RATE = Map.of(

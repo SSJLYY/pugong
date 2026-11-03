@@ -215,6 +215,36 @@ public final class GameEngine {
     // ==================== 伤害 ====================
 
     /** 对目标造成伤害，返回本次掉落件数。包内可见:反弹击杀/溢出金币回归单测用。 */
+    /**
+     * 每拳期望伤害（与 dealDamage 前段同口径：暴击期望 + 防御减伤 + 缴械/堡垒/潜行词条 + 巨人乘区；
+     * 不含蓄力重击等一次性 buff）。供 mobView 的击杀预估展示，改伤害公式必须同步这里。
+     */
+    static BigDecimal expectedPerHit(PlayerState s, PanelCalculator.Panel p, PlayerState.MobState m) {
+        BigDecimal critMul = Num.add(Num.of(1), Num.mul(p.CRIT(), Num.sub(p.CRITD(), Num.of(1))));
+        BigDecimal pd = Num.max(Num.of(1),
+                Num.sub(Num.mul(p.PATK(), critMul), Num.mul(m.PDEF, Num.of(GameConst.DMG_DEF_FACTOR))));
+        BigDecimal md = Num.gt(p.MATK(), Num.ZERO)
+                ? Num.max(Num.of(1), Num.sub(Num.mul(p.MATK(), critMul), Num.mul(m.MDEF, Num.of(GameConst.DMG_DEF_FACTOR))))
+                : Num.ZERO;
+        BigDecimal perHit = Num.add(pd, md);
+        if ("disarm".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_DISARM_MUL));
+        }
+        if ("bulwark".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_BULWARK_MUL));
+        }
+        if ("stealth".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_STEALTH_MUL));
+        }
+        if (m.boss && s.passives.contains("boss_hunter")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.BOSS_HUNTER_MUL));
+        }
+        if (m.boss && buffOn(s, p, "giant_pot")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.GIANT_POT_MUL));
+        }
+        return perHit;
+    }
+
     static int dealDamage(PlayerState s, PanelCalculator.Panel p, BigDecimal punches, double seconds) {
         PlayerState.MobState m = s.mob;
         if (m == null) {

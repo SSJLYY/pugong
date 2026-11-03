@@ -737,7 +737,9 @@
         $('mobHp').textContent = '∞';
         $('mobBar').style.width = '100%';
       } else {
-        $('mobHp').textContent = fmt(view.mob.curHP) + ' / ' + fmt(mhp);
+        $('mobHp').textContent = fmt(view.mob.curHP) + ' / ' + fmt(mhp) +
+          (view.mob.estPunches ? ' · 约 ' + fmt(view.mob.estPunches) + ' 拳' +
+            (view.mob.estSeconds ? '（' + view.mob.estSeconds + ' 秒）' : '') : '');
         const pct = Math.max(0, Math.min(100, new Decimal(view.mob.curHP).div(new Decimal(mhp).max(1)).toNumber() * 100));
         $('mobBar').style.width = pct.toFixed(1) + '%';
       }

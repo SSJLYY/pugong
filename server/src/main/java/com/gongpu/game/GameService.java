@@ -1310,7 +1310,20 @@ public class GameService {
         m.put("gold", Num.plain(s.gold));
         m.put("blessings", PanelCalculator.blessLine(s));
         m.put("blessLevels", blessLevels(s));
-        m.put("mob", mobView(s));
+        Map<String, Object> mobV = mobView(s);
+        // 击杀预估：按当前面板每拳期望伤害推算剩余拳数/秒数（木桩无限血不估）
+        if (mobV != null && s.mob != null && s.mob.maxHP != null) {
+            BigDecimal perHit = GameEngine.expectedPerHit(s, p, s.mob);
+            if (Num.gt(perHit, Num.ZERO)) {
+                long est = s.mob.curHP.divide(perHit, 0, java.math.RoundingMode.CEILING).longValue();
+                mobV.put("estPunches", est);
+                double aspd = p.ASPD().doubleValue();
+                if (aspd > 0) {
+                    mobV.put("estSeconds", Math.round(est / aspd * 10) / 10.0);
+                }
+            }
+        }
+        m.put("mob", mobV);
         m.put("buffs", s.buffs);
         m.put("cds", s.cds);
         m.put("passives", s.passives);

@@ -876,6 +876,11 @@ DELETE FROM `cfg_affix` WHERE `code` IN ('manaspring');
 INSERT INTO `cfg_affix`
   (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
   ('manaspring', '魔力源泉', 'MP', 'flat', 500, 1200, 'epic', NULL, NULL, 1, 21);
+-- 第 16 轮：平原补弓「竹弓」（平原此前无远程武器）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('bamboo_bow');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('bamboo_bow', '竹弓', '🎋', 'bow', 0, 'plain', '{"PATK":"3","RNG":"3"}', 10, 20, '新手远程启蒙', 1, 46);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

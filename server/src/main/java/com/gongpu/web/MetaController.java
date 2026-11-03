@@ -142,6 +142,18 @@ public class MetaController {
         }
         m.put("zones", zones);
 
+        // 怪物词条图鉴（前端图例弹窗用：id/名称/图标/说明，与引擎 MOB_TRAITS 同源）
+        List<Map<String, Object>> traits = new ArrayList<>();
+        for (GameConst.TraitDef t : GameConst.MOB_TRAITS.values()) {
+            Map<String, Object> tm = new LinkedHashMap<>();
+            tm.put("id", t.id());
+            tm.put("name", t.name());
+            tm.put("emoji", t.emoji());
+            tm.put("desc", t.desc());
+            traits.add(tm);
+        }
+        m.put("traits", traits);
+
         List<Map<String, Object>> skills = new ArrayList<>();
         for (GameConst.SkillDef d : com.gongpu.cfg.GameData.instance().skillList()) {
             Map<String, Object> sm = new LinkedHashMap<>();

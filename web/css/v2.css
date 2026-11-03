@@ -948,3 +948,10 @@
 /* 成就进度条（第六批：未解锁的可量化成就） */
 .ach-prog{display:inline-block;width:90px;height:7px;border-radius:4px;background:rgba(255,255,255,.14);vertical-align:middle;overflow:hidden}
 .ach-prog-fill{display:block;height:100%;background:#c9a227;border-radius:4px}
+
+/* 词条图鉴弹窗（第六批） */
+.info-body{text-align:left;max-height:55vh;overflow:auto;margin:8px 0}
+.trait-row{display:flex;gap:8px;padding:5px 2px;border-top:1px dashed rgba(255,255,255,.1);font-size:13px}
+.trait-row b{white-space:nowrap;color:#d8c98a}
+.trait-row span{color:#ccc}
+.info-close{width:100%}

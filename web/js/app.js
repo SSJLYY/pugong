@@ -921,6 +921,15 @@
 
     $('btnRebirth').addEventListener('click', () => showRebirth(S.view));
 
+    $('btnTraits').addEventListener('click', () => {
+      const traits = (S.meta && S.meta.traits) || [];
+      if (!traits.length) { toast('词条数据未加载', 'err'); return; }
+      const rows = traits.map(t =>
+        '<div class="trait-row"><b>' + t.emoji + ' ' + esc(t.name) + '</b><span>' + esc(t.desc) + '</span></div>').join('');
+      infoModal('📖 怪物词条图鉴',
+        '<p class="pick-intro">野怪出生时按区域深度掷词条：平原 10% 起、每深一层 +3%，词条池随深度解锁。Boss 与木桩不带词条。</p>' + rows);
+    });
+
     $('btnManualSave').addEventListener('click', async () => {
       await call(() => API.manualSave(API.state.slot), '已存档到云端');
     });
@@ -1174,6 +1183,20 @@
       });
       document.body.appendChild(mask);
     });
+  }
+
+  // 通用信息弹窗（标题 + HTML 内容 + 关闭按钮），词条图鉴等只读展示用
+  function infoModal(title, html) {
+    const mask = document.createElement('div');
+    mask.className = 'death-mask';
+    mask.innerHTML = `<div class="death-box pick-box">
+      <h2>${title}</h2>
+      <div class="info-body">${html}</div>
+      <button class="rebirth-choice info-close">知道了</button>
+    </div>`;
+    mask.querySelector('.info-close').addEventListener('click', () => mask.remove());
+    mask.addEventListener('click', e => { if (e.target === mask) mask.remove(); });
+    document.body.appendChild(mask);
   }
 
   // 战斗日志：最近 6 条大事倒序（签名守卫，无变化不重建）

@@ -553,12 +553,57 @@ public final class GameEngine {
                 s.bossFirstKillName = m.name;
                 s.bossFirstKillGold = bonus;
             }
+            // 自动推进：下一区存在且门槛达标 → 直接推进刷怪（写战斗日志）；否则回村
+            if (s.autoAdvance) {
+                String next = nextZoneId(s.zone);
+                if (next != null && zoneReqMet(s, next)) {
+                    s.zone = next;
+                    s.mob = null;
+                    spawnMob(s, next);
+                    pushEvent(s, "🗺️ 自动推进至「" + zoneName(next) + "」");
+                    return true;
+                }
+            }
             s.mob = null;
             s.zone = "village";
             return true;
         }
         spawnMob(s, s.zone);
         return false;
+    }
+
+    /** 区域顺序中的下一区（无下一区返回 null）。 */
+    static String nextZoneId(String zone) {
+        java.util.List<String> order = new ArrayList<>(GameConst.ZONES.keySet());
+        int i = order.indexOf(zone);
+        return i >= 0 && i + 1 < order.size() ? order.get(i + 1) : null;
+    }
+
+    /** 区域进入门槛是否达标（与 GameService.gotoZone 同口径：面板属性逐项比对）。 */
+    static boolean zoneReqMet(PlayerState s, String zoneId) {
+        GameConst.ZoneDef z = GameConst.ZONES.get(zoneId);
+        if (z == null) {
+            return false;
+        }
+        if (z.req() == null) {
+            return true;
+        }
+        PanelCalculator.Panel p = PanelCalculator.of(s);
+        for (java.util.Map.Entry<String, String> e : z.req().entrySet()) {
+            java.math.BigDecimal need = new java.math.BigDecimal(e.getValue());
+            java.math.BigDecimal have = switch (e.getKey()) {
+                case "maxHP" -> p.maxHP();
+                case "PDEF" -> p.PDEF();
+                case "MDEF" -> p.MDEF();
+                case "REGEN" -> p.REGEN();
+                case "ATK" -> p.PATK().max(p.MATK());
+                default -> Num.ZERO;
+            };
+            if (Num.lt(have, need)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // ==================== 怪物反击 ====================

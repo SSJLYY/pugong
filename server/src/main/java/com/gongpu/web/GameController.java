@@ -37,7 +37,8 @@ public class GameController {
     public record AutoCfgReq(Double hpLine, Double mpLine, Boolean autoCure, Double fleeLine,
                              Boolean autoBurn, Boolean autoSkill,
                              Boolean autoRebirth, Integer autoSellKeep,
-                             Boolean autoEquipBest, Boolean autoEat, Integer autoSmeltKeep) {
+                             Boolean autoEquipBest, Boolean autoEat, Integer autoSmeltKeep,
+                             Boolean autoAdvance) {
     }
 
     public record QuestReq(String code) {
@@ -335,7 +336,7 @@ public class GameController {
     public Map<String, Object> autoConfig(HttpServletRequest req, @PathVariable int slot,
                                           @RequestBody AutoCfgReq body) {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.setAutoLines(s, body.hpLine(), body.mpLine(), body.autoCure(), body.fleeLine(),
-                        body.autoBurn(), body.autoSkill(), body.autoRebirth(), body.autoSellKeep(), body.autoEquipBest(), body.autoEat(), body.autoSmeltKeep()));
+                        body.autoBurn(), body.autoSkill(), body.autoRebirth(), body.autoSellKeep(), body.autoEquipBest(), body.autoEat(), body.autoSmeltKeep(), body.autoAdvance()));
     }
 
     /** 无限属性点天赋：自由属性点加点（statlord 专属）。 */

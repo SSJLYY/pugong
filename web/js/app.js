@@ -508,7 +508,8 @@
           patch.autoSellKeep !== undefined ? patch.autoSellKeep : v.autoSellKeep,
           patch.autoEquipBest !== undefined ? patch.autoEquipBest : v.autoEquipBest,
           v.autoEat,
-          patch.autoSmeltKeep !== undefined ? patch.autoSmeltKeep : v.autoSmeltKeep));
+          patch.autoSmeltKeep !== undefined ? patch.autoSmeltKeep : v.autoSmeltKeep,
+          patch.autoAdvance !== undefined ? patch.autoAdvance : v.autoAdvance));
         if (r) applyView(r);
       };
       $('bpMaintain').addEventListener('change', (e) => saveAuto({ autoEquipBest: e.target.checked }));
@@ -1464,6 +1465,7 @@
             <label><input id="autoRebirthChk" type="checkbox" ${view.autoRebirth ? 'checked' : ''}> 🌟 自动飞升（打到 1 载自动转生，新手保底每世重来）</label> ·
             <label><input id="autoEquipChk" type="checkbox" ${view.autoEquipBest ? 'checked' : ''}> 🧲 自动管护（掉落自动卖白装+吞噬同名+穿最强，背包不再堆积）</label> ·
             <label><input id="autoEatChk" type="checkbox" ${view.autoEat ? 'checked' : ''}> 🍖 自动进食（饱食回血断了自动吃食物续上）</label> ·
+            <label><input id="autoAdvanceChk" type="checkbox" ${view.autoAdvance ? 'checked' : ''}> 🗺️ 自动推进（Boss 击杀后门槛达标则进入下一区）</label> ·
             <span title="挂机打到的装备按档位直接折现金币，不进背包">⚖️ 自动卖装备</span> <select id="autoSellSel" class="auto-line-input" style="width:104px" title="挂机打到的装备按档位直接折现金币，不进背包">
               <option value="0" ${!view.autoSellKeep ? 'selected' : ''}>关闭</option>
               <option value="1" ${view.autoSellKeep === 1 ? 'selected' : ''}>白色及以下</option>
@@ -1517,7 +1519,8 @@
         const aet = $('autoEatChk').checked;
         const ask = Number($('autoSellSel').value) || 0;
         const asm = Number($('autoSmeltSel').value) || 0;
-        const r = await call(() => API.autoConfig(API.state.slot, hp, mp, cu, fl, ab, as2, ar, ask, aeq, aet, asm), '挂机策略已保存');
+        const adv = $('autoAdvanceChk') ? $('autoAdvanceChk').checked : false;
+        const r = await call(() => API.autoConfig(API.state.slot, hp, mp, cu, fl, ab, as2, ar, ask, aeq, aet, asm, adv), '挂机策略已保存');
         S._cfgTouchedAt = 0;   // 保存成功,解除抑制让服务端真值即时回填
         applyView(r);
       });
@@ -1540,6 +1543,8 @@
       if (aeqEl) aeqEl.checked = !!view.autoEquipBest;
       const aetEl = $('autoEatChk');
       if (aetEl) aetEl.checked = !!view.autoEat;
+      const advEl = $('autoAdvanceChk');
+      if (advEl) advEl.checked = !!view.autoAdvance;
       const asl = $('autoSellSel');
       if (asl && String(asl.value) !== String(view.autoSellKeep || 0)) asl.value = String(view.autoSellKeep || 0);
       const asmEl = $('autoSmeltSel');
@@ -2361,7 +2366,7 @@
     castSkill: (id) => API.castSkill(API.state.slot, id),
     usePotion: (id) => API.usePotion(API.state.slot, id),
     buyPotion: (id, n) => API.buyPotion(API.state.slot, id, n || 1),
-    autoConfig: (cfg) => API.autoConfig(API.state.slot, cfg.hpLine, cfg.mpLine, cfg.autoCure, cfg.fleeLine, cfg.autoBurn, cfg.autoSkill, cfg.autoRebirth, cfg.autoSellKeep, cfg.autoEquipBest, cfg.autoEat),
+    autoConfig: (cfg) => API.autoConfig(API.state.slot, cfg.hpLine, cfg.mpLine, cfg.autoCure, cfg.fleeLine, cfg.autoBurn, cfg.autoSkill, cfg.autoRebirth, cfg.autoSellKeep, cfg.autoEquipBest, cfg.autoEat, cfg.autoSmeltKeep, cfg.autoAdvance),
     autoSell: (keep) => API.autoSell(API.state.slot, keep),
     rebirth: (key) => API.rebirth(API.state.slot, key)
   };

@@ -289,6 +289,12 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.discard(s, reqIdx(body.index(), "index")));
     }
 
+    @PostMapping("/{slot}/lock")
+    public Map<String, Object> toggleLock(HttpServletRequest req, @PathVariable int slot,
+                                          @RequestBody IdxReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.toggleLock(s, reqIdx(body.index(), "index")));
+    }
+
     /** 挂机策略：自动嗑药血线/蓝线。 */
     @PostMapping("/{slot}/autoconfig")
     public Map<String, Object> autoConfig(HttpServletRequest req, @PathVariable int slot,

@@ -156,6 +156,8 @@ public class PlayerState {
         public int quality;
         public int enhance;
         public String desc;
+        /** 装备锁定：锁定件不被一键卖/自动售卖/管护吞噬等批量流程处置（防分级售卖误删心头好）。 */
+        public boolean locked;
     }
 
     public static class AffixInst {

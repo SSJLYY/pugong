@@ -302,6 +302,9 @@ public class GameService {
         if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
             throw ApiException.badRequest("背包索引越界");
         }
+        if (s.equipBag.get(bagIdx).locked) {
+            throw ApiException.badRequest("装备已锁定，先解锁再卖出");
+        }
         PlayerState.Item it = s.equipBag.remove(bagIdx);
         BigDecimal price = EquipFactory.sellPrice(it);
         s.gold = Num.add(s.gold, price);
@@ -362,6 +365,9 @@ public class GameService {
         int count = 0;
         for (int i = s.equipBag.size() - 1; i >= 0; i--) {
             PlayerState.Item it = s.equipBag.get(i);
+            if (it.locked) {
+                continue;   // 锁定件永不被一键卖处置
+            }
             if (it.quality < keepQuality) {
                 total = Num.add(total, EquipFactory.sellPrice(it));
                 s.equipBag.remove(i);
@@ -409,7 +415,7 @@ public class GameService {
             BigDecimal total = Num.ZERO;
             List<PlayerState.Item> kept = new ArrayList<>(s.equipBag.size());
             for (PlayerState.Item x : s.equipBag) {
-                if (x.quality < 1) {
+                if (x.quality < 1 && !x.locked) {
                     total = Num.add(total, EquipFactory.sellPrice(x));
                 } else {
                     kept.add(x);
@@ -442,6 +448,21 @@ public class GameService {
         // —— 阶段二:无限装备栏(baglord 专属)——剩余背包按评分从高到低全部穿入 ——
         // 排序一次取代逐件全量扫;同名吞噬按名字哈希索引 O(1);
         // 全部穿入/吞噬后整体 clear,杜绝逐件 remove 的 O(n²)
+        // 锁定件不参与本阶段(不吞噬不穿入,原样留在背包):先摘出、阶段后按原序回填
+        List<PlayerState.Item> lockedHold = null;
+        if ("baglord".equals(s.talent) && !bag.isEmpty()) {
+            for (PlayerState.Item x : bag) {
+                if (x.locked) {
+                    if (lockedHold == null) {
+                        lockedHold = new ArrayList<>();
+                    }
+                    lockedHold.add(x);
+                }
+            }
+            if (lockedHold != null) {
+                bag.removeAll(lockedHold);
+            }
+        }
         if ("baglord".equals(s.talent) && !bag.isEmpty()) {
             Map<String, PlayerState.Item> worn = new LinkedHashMap<>();
             for (PlayerState.Item w : s.equipped.values()) {
@@ -471,6 +492,9 @@ public class GameService {
                 changed++;
             }
             bag.clear();
+        }
+        if (lockedHold != null) {
+            bag.addAll(lockedHold);
         }
         return changed;
     }
@@ -516,8 +540,23 @@ public class GameService {
         if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
             throw ApiException.badRequest("背包索引越界");
         }
+        if (s.equipBag.get(bagIdx).locked) {
+            throw ApiException.badRequest("装备已锁定，先解锁再丢弃");
+        }
         s.equipBag.remove(bagIdx);
         return inventoryView(s);
+    }
+
+    /** 切换装备锁定：锁定件受保护，不被一键卖/丢弃/管护吞噬处置。 */
+    public Map<String, Object> toggleLock(PlayerState s, int bagIdx) {
+        if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
+            throw ApiException.badRequest("背包索引越界");
+        }
+        PlayerState.Item it = s.equipBag.get(bagIdx);
+        it.locked = !it.locked;
+        Map<String, Object> m = inventoryView(s);
+        m.put("locked", it.locked);
+        return m;
     }
 
     // ==================== 逃跑 / Boss ====================

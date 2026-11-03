@@ -1217,11 +1217,12 @@
       d.style.borderLeftColor = QUALITY_COLOR[it.quality];
       d.innerHTML = `
         <div class="bi-head" style="color:${QUALITY_COLOR[it.quality]}">
-          ${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}
+          ${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}${it.locked ? ' 🔒' : ''}
           <span class="bi-q">${QUALITY_NAME[it.quality]}</span>
         </div>
         <div class="bi-affix">${(it.affixes || []).map(affixText).join(' · ') || '（无词条）'}</div>
         <div class="bi-actions">
+          <button data-act="lock" title="锁定后不被一键卖出/丢弃/自动管护处置">${it.locked ? '🔓 解锁' : '🔒 锁定'}</button>
           <button data-act="equip">装备</button>
           ${(Number(view.extraSlots) > 0) ? '<button data-act="equipExtra" title="穿入无相位栏;同名装备自动吞噬合并,属性累加">加穿</button>' : ''}
           <button data-act="enhance">强化</button>
@@ -1268,14 +1269,15 @@
             } catch (e) { toast(e.message, 'err'); }
             return;
           }
-          const fn = act === 'equip' ? () => API.equip(API.state.slot, idx)
+          const fn = act === 'lock' ? () => API.toggleLock(API.state.slot, idx)
+            : act === 'equip' ? () => API.equip(API.state.slot, idx)
             : act === 'equipExtra' ? () => API.equipExtra(API.state.slot, idx)
             : act === 'enhance' ? () => API.enhanceItem(API.state.slot, idx)
               : act === 'reroll' ? () => API.rerollItem(API.state.slot, idx, lockIdx)
               : act === 'discard' ? () => API.discardItem(API.state.slot, idx)
               : () => API.sellItem(API.state.slot, idx);
           sfx(act === 'sell' ? 'sell' : 'click');
-          const r = await call(fn, act === 'equip' || act === 'equipExtra' ? '已装备' : act === 'enhance' ? '强化成功'
+          const r = await call(fn, act === 'lock' ? (it.locked ? '已解锁' : '已锁定') : act === 'equip' || act === 'equipExtra' ? '已装备' : act === 'enhance' ? '强化成功'
             : act === 'reroll' ? '词条已重刷' : '已卖出');
           applyView(r);
         });

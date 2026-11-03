@@ -38,7 +38,9 @@ public final class Achievements {
             new Def("gen_12", "万世圆满", "🧬", "达到第 12 世（集齐 13 条赋能）"),
             new Def("talent", "觉醒者", "✨", "觉醒一项天赋"),
             new Def("bless_3", "三线成长", "🧬", "同时拥有 3 条赋能"),
-            new Def("duelist", "切磋者", "⚔️", "觉醒天赋并击杀 10 只怪物")
+            new Def("duelist", "切磋者", "⚔️", "觉醒天赋并击杀 10 只怪物"),
+            new Def("codex_10", "图鉴·十种", "📖", "图鉴记录 10 种怪物"),
+            new Def("codex_all", "万物图鉴", "📚", "集齐全部怪物图鉴（含各区域 Boss）")
     );
 
     private Achievements() {
@@ -82,6 +84,8 @@ public final class Achievements {
                 case "talent" -> s.talent != null && !s.talent.isBlank();
                 case "bless_3" -> s.blessings.size() >= 3;
                 case "duelist" -> s.talent != null && !s.talent.isBlank() && kills >= 10;
+                case "codex_10" -> s.codex != null && s.codex.size() >= 10;
+                case "codex_all" -> s.codex != null && s.codex.size() >= GameConst.codexTotal();
                 default -> false;
             };
             if (ok) {

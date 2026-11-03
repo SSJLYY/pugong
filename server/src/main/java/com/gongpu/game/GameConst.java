@@ -104,6 +104,25 @@ public final class GameConst {
 
     public static final Map<String, ZoneDef> ZONES = buildZones();
 
+    /**
+     * 图鉴可收集总数：各区域可击杀怪种（无限血木桩不可杀、不入图鉴）+ 各区域 Boss 条目（boss_区域）。
+     * 与 GameEngine 击杀时 codex 的写入规则同口径，供「全图鉴」成就判定。
+     */
+    public static int codexTotal() {
+        int n = 0;
+        for (ZoneDef z : ZONES.values()) {
+            for (MobDef d : z.mobs()) {
+                if (d.maxHP() != null) {
+                    n++;
+                }
+            }
+            if (z.boss() != null) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     // ==================== 怪物词条（v3.15） ====================
     // 野怪个体词条:出生时按区域深度掷骰,给同一张脸的怪一点脾气——残血狂暴、
     // 破甲无视防御、缴械压普攻。Boss 不带词条(已有沉默机制),村口木桩永远温顺。

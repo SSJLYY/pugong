@@ -27,7 +27,9 @@
     { id: 'gen_12', name: '万世圆满', emoji: '🧬', desc: '达到第 12 世（集齐 13 条赋能）' },
     { id: 'talent', name: '觉醒者', emoji: '✨', desc: '觉醒一项天赋' },
     { id: 'bless_3', name: '三线成长', emoji: '🧬', desc: '同时拥有 3 条赋能' },
-    { id: 'duelist', name: '切磋者', emoji: '⚔️', desc: '觉醒天赋并击杀 10 只怪物（切磋入口在江湖页）' }
+    { id: 'duelist', name: '切磋者', emoji: '⚔️', desc: '觉醒天赋并击杀 10 只怪物（切磋入口在江湖页）' },
+    { id: 'codex_10', name: '图鉴·十种', emoji: '📖', desc: '图鉴记录 10 种怪物' },
+    { id: 'codex_all', name: '万物图鉴', emoji: '📚', desc: '集齐全部怪物图鉴（含各区域 Boss）' }
   ];
 
   var byId = {};

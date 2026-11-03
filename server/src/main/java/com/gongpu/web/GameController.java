@@ -91,7 +91,8 @@ public class GameController {
      * 统一包装：加锁 → 推进时间 → 执行动作 → 落库 → 榜单上报。
      * <p>Redis 锁防止前端轮询与玩家操作并发推进同一档（双计出拳）。</p>
      */
-    private Map<String, Object> run(long uid, int slot, java.util.function.Function<PlayerState, Map<String, Object>> action) {
+    private Map<String, Object> run(long uid, int slot, String username,
+                                    java.util.function.Function<PlayerState, Map<String, Object>> action) {
         // 正常争锁(轮询每秒持锁约百毫秒/双开页签)不应直接 409:短等重试几轮再拒;
         // 真·并发双结算(极端时序)依旧被拒——锁语义不变,只是给对方一个让完的机会
         boolean locked = cache.lock(uid, slot, 10);
@@ -110,8 +111,10 @@ public class GameController {
         }
         try {
             PlayerState s = saves.load(uid, slot);
-            String username = accounts.require(uid).getUsername();
-            s.bulletinName = username;
+            // 用户名优先取 JWT claim（拦截器已解析），免去每秒轮询一次账号查库；
+            // 无 claim 的老令牌才回源查一次
+            String name = username != null ? username : accounts.require(uid).getUsername();
+            s.bulletinName = name;
             com.gongpu.game.GameEngine.AdvanceResult advanceResult = saves.advanceNow(uid, slot, s);
             // 自动飞升(legacy autobot autoRebirth):通关线达成且管家开关开启 → 立即转生
             // (必须在 persist 之前改状态,否则转生不落库)
@@ -149,7 +152,7 @@ public class GameController {
             }
             // 榜单（生命/金币/世代三榜统一上报,带内部节流,静默失败）
             try {
-                board.submit(uid, username,
+                board.submit(uid, name,
                         s.life.maxHP, s.gen, s.gold);
             } catch (RuntimeException ignored) {
                 // 榜单不影响游戏
@@ -183,7 +186,7 @@ public class GameController {
 
     @GetMapping("/{slot}/state")
     public Map<String, Object> state(HttpServletRequest req, @PathVariable int slot) {
-        return run(AuthInterceptor.userId(req), slot, null);
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), null);
     }
 
     // ==================== 请求体兜底校验 ====================
@@ -227,57 +230,57 @@ public class GameController {
     @PostMapping("/{slot}/zone")
     public Map<String, Object> zone(HttpServletRequest req, @PathVariable int slot,
                                     @RequestBody ZoneReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.gotoZone(s, reqStr(body.zone(), "zone")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.gotoZone(s, reqStr(body.zone(), "zone")));
     }
 
     @PostMapping("/{slot}/skill")
     public Map<String, Object> skill(HttpServletRequest req, @PathVariable int slot,
                                      @RequestBody SkillReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> GameService.castSkill(s, reqStr(body.id(), "id")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> GameService.castSkill(s, reqStr(body.id(), "id")));
     }
 
     @PostMapping("/{slot}/potion")
     public Map<String, Object> potion(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody PotionReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.usePotion(s, reqStr(body.id(), "id")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.usePotion(s, reqStr(body.id(), "id")));
     }
 
     @PostMapping("/{slot}/buy")
     public Map<String, Object> buy(HttpServletRequest req, @PathVariable int slot,
                                    @RequestBody PotionReq body) {
         int count = body.count() == null ? 1 : body.count();
-        return run(AuthInterceptor.userId(req), slot, s -> GameService.buyPotion(s, reqStr(body.id(), "id"), count));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> GameService.buyPotion(s, reqStr(body.id(), "id"), count));
     }
 
     @PostMapping("/{slot}/equip")
     public Map<String, Object> equip(HttpServletRequest req, @PathVariable int slot,
                                      @RequestBody IdxReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.equip(s, reqIdx(body.index(), "index")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.equip(s, reqIdx(body.index(), "index")));
     }
 
     /** 加穿到额外装备栏（无限装备栏天赋）：进第一个空的 extra_N 栏,不占原生相位。 */
     @PostMapping("/{slot}/equip-extra")
     public Map<String, Object> equipExtra(HttpServletRequest req, @PathVariable int slot,
                                           @RequestBody IdxReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.equipExtra(s, reqIdx(body.index(), "index")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.equipExtra(s, reqIdx(body.index(), "index")));
     }
 
     @PostMapping("/{slot}/unequip")
     public Map<String, Object> unequip(HttpServletRequest req, @PathVariable int slot,
                                        @RequestBody SlotReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.unequip(s, reqStr(body.slot(), "slot")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.unequip(s, reqStr(body.slot(), "slot")));
     }
 
     @PostMapping("/{slot}/sell")
     public Map<String, Object> sell(HttpServletRequest req, @PathVariable int slot,
                                     @RequestBody IdxReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.sell(s, reqIdx(body.index(), "index")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.sell(s, reqIdx(body.index(), "index")));
     }
 
     @PostMapping("/{slot}/enhance")
     public Map<String, Object> enhance(HttpServletRequest req, @PathVariable int slot,
                                        @RequestBody IdxReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.enhance(s, reqIdx(body.index(), "index")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.enhance(s, reqIdx(body.index(), "index")));
     }
 
     @PostMapping("/{slot}/reroll")
@@ -285,27 +288,27 @@ public class GameController {
                                       @RequestBody RerollReq body) {
         // lockIndex 可选(旧客户端/快捷洗炼不锁),缺省 -1 = 不锁定
         Integer lock = body.lockIndex() == null ? -1 : body.lockIndex();
-        return run(AuthInterceptor.userId(req), slot, s -> game.reroll(s, reqIdx(body.index(), "index"), lock));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.reroll(s, reqIdx(body.index(), "index"), lock));
     }
 
     @PostMapping("/{slot}/autosell")
     public Map<String, Object> autoSell(HttpServletRequest req, @PathVariable int slot,
                                         @RequestBody(required = false) Map<String, Integer> body) {
         int keep = body == null || body.get("keep") == null ? 1 : body.get("keep");
-        return run(AuthInterceptor.userId(req), slot, s -> game.autoSell(s, keep));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.autoSell(s, keep));
     }
 
     @PostMapping("/{slot}/discard")
     public Map<String, Object> discard(HttpServletRequest req, @PathVariable int slot,
                                        @RequestBody IdxReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.discard(s, reqIdx(body.index(), "index")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.discard(s, reqIdx(body.index(), "index")));
     }
 
     /** 挂机策略：自动嗑药血线/蓝线。 */
     @PostMapping("/{slot}/autoconfig")
     public Map<String, Object> autoConfig(HttpServletRequest req, @PathVariable int slot,
                                           @RequestBody AutoCfgReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.setAutoLines(s, body.hpLine(), body.mpLine(), body.autoCure(), body.fleeLine(),
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.setAutoLines(s, body.hpLine(), body.mpLine(), body.autoCure(), body.fleeLine(),
                         body.autoBurn(), body.autoSkill(), body.autoRebirth(), body.autoSellKeep(), body.autoEquipBest()));
     }
 
@@ -313,7 +316,7 @@ public class GameController {
     @PostMapping("/{slot}/statpoint")
     public Map<String, Object> statPoint(HttpServletRequest req, @PathVariable int slot,
                                          @RequestBody StatPointReq body) {
-        return run(AuthInterceptor.userId(req), slot,
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
                 s -> game.allocateStatPoint(s, reqStr(body.stat(), "stat"), reqIdx(body.count(), "count")));
     }
 
@@ -327,49 +330,49 @@ public class GameController {
     @PostMapping("/{slot}/quest/accept")
     public Map<String, Object> questAccept(HttpServletRequest req, @PathVariable int slot,
                                            @RequestBody QuestReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> quest.accept(s, reqStr(body.code(), "code")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> quest.accept(s, reqStr(body.code(), "code")));
     }
 
     @PostMapping("/{slot}/quest/deliver")
     public Map<String, Object> questDeliver(HttpServletRequest req, @PathVariable int slot,
                                             @RequestBody QuestReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> quest.deliver(s, reqStr(body.code(), "code")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> quest.deliver(s, reqStr(body.code(), "code")));
     }
 
     @PostMapping("/{slot}/quest/abandon")
     public Map<String, Object> questAbandon(HttpServletRequest req, @PathVariable int slot,
                                             @RequestBody QuestReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> quest.abandon(s, reqStr(body.code(), "code")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> quest.abandon(s, reqStr(body.code(), "code")));
     }
 
     /** 一键穿最强装备（按评分自动换装）。 */
     @PostMapping("/{slot}/autoequip")
     public Map<String, Object> autoEquip(HttpServletRequest req, @PathVariable int slot) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.autoEquip(s));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.autoEquip(s));
     }
 
     /** 附魔：消耗卷轴给武器/弓附加魔伤词条。 */
     @PostMapping("/{slot}/enchant")
     public Map<String, Object> enchant(HttpServletRequest req, @PathVariable int slot,
                                        @RequestBody EnchantReq body) {
-        return run(AuthInterceptor.userId(req), slot,
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
                 s -> game.enchant(s, reqStr(body.scroll(), "scroll"), reqIdx(body.index(), "index")));
     }
 
     @PostMapping("/{slot}/flee")
     public Map<String, Object> flee(HttpServletRequest req, @PathVariable int slot) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.flee(s));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.flee(s));
     }
 
     @PostMapping("/{slot}/boss")
     public Map<String, Object> boss(HttpServletRequest req, @PathVariable int slot) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.startBoss(s));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.startBoss(s));
     }
 
     @PostMapping("/{slot}/learn")
     public Map<String, Object> learn(HttpServletRequest req, @PathVariable int slot,
                                      @RequestBody SkillReq body) {
-        return run(AuthInterceptor.userId(req), slot, s -> game.learnPassive(s, reqStr(body.id(), "id")));
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.learnPassive(s, reqStr(body.id(), "id")));
     }
 
     // ==================== 觉醒 / 转生 ====================
@@ -379,7 +382,7 @@ public class GameController {
                                       @RequestBody(required = false) Map<String, String> body) {
         long uid = AuthInterceptor.userId(req);
         String chosen = body == null ? null : body.get("key");
-        return run(uid, slot, s -> game.drawTalent(s, chosen));
+        return run(uid, slot, null, s -> game.drawTalent(s, chosen));
     }
 
     @GetMapping("/{slot}/talent")

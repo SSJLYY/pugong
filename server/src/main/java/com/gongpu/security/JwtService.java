@@ -41,14 +41,22 @@ public class JwtService {
                 .compact();
     }
 
-    public long verifyAndGetUserId(String token) {
+    /** 一次解析同时拿到 userId 与用户名（claim "u"，签发时写入）。 */
+    public record Verified(long userId, String username) {
+    }
+
+    public Verified verify(String token) {
         try {
             Claims c = Jwts.parser().verifyWith(key).build()
                     .parseSignedClaims(token).getPayload();
-            return Long.parseLong(c.getSubject());
+            return new Verified(Long.parseLong(c.getSubject()), c.get("u", String.class));
         } catch (JwtException | IllegalArgumentException e) {
             throw ApiException.unauthorized("登录状态已失效，请重新登录");
         }
+    }
+
+    public long verifyAndGetUserId(String token) {
+        return verify(token).userId();
     }
 
     public long ttlSeconds() {

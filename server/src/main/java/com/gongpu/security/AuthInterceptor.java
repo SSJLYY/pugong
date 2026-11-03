@@ -15,6 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class AuthInterceptor implements HandlerInterceptor {
 
     public static final String ATTR_USER_ID = "gongpu.userId";
+    public static final String ATTR_USERNAME = "gongpu.username";
 
     private final JwtService jwt;
 
@@ -32,8 +33,11 @@ public class AuthInterceptor implements HandlerInterceptor {
             throw ApiException.unauthorized("请先登录");
         }
         String token = h.substring(7).trim();
-        long userId = jwt.verifyAndGetUserId(token);
-        req.setAttribute(ATTR_USER_ID, userId);
+        JwtService.Verified v = jwt.verify(token);
+        req.setAttribute(ATTR_USER_ID, v.userId());
+        if (v.username() != null) {
+            req.setAttribute(ATTR_USERNAME, v.username());
+        }
         return true;
     }
 
@@ -43,5 +47,11 @@ public class AuthInterceptor implements HandlerInterceptor {
             throw ApiException.unauthorized("请先登录");
         }
         return (Long) v;
+    }
+
+    /** JWT 内的用户名（免查库）；老令牌无此 claim 时返回 null，调用方自行回源。 */
+    public static String username(HttpServletRequest req) {
+        Object v = req.getAttribute(ATTR_USERNAME);
+        return v == null ? null : (String) v;
     }
 }

@@ -61,6 +61,18 @@ public class MetaController {
         }
         m.put("mysql", db);
         addDiskWarn(m);
+        // 内容版本指纹：部署后核对新内容是否生效（数字与库内 cfg 行数一致才算部署到位）；
+        // 探测失败不加字段，绝不拖垮健康检查
+        try {
+            com.gongpu.cfg.GameData.Snapshot snap = com.gongpu.cfg.GameData.instance().snapshot();
+            m.put("content", "items=" + snap.items().size()
+                    + ",affixes=" + snap.affixes().size()
+                    + ",equipment=" + snap.equipment().size()
+                    + ",skills=" + snap.skills().size()
+                    + ",crafts=" + snap.crafts().size());
+        } catch (RuntimeException ignored) {
+            // GameData 未就绪时省略
+        }
         return m;
     }
 

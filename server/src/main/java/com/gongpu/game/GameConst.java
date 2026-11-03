@@ -168,6 +168,8 @@ public final class GameConst {
     public static final double TRAIT_STEALTH_MUL = 0.9;
     /** 被动「幸运星」的掉落率乘区。 */
     public static final double LUCKY_STAR_MUL = 1.1;
+    /** 主动「治愈术」的即时回复比例（按生命上限）。 */
+    public static final double HEAL_SKILL_RATIO = 0.35;
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
@@ -286,7 +288,8 @@ public final class GameConst {
             "roar", new SkillDef("roar", "怒吼", "😤", 15, 60, 0, "吓退当前怪物（移速判定）"),
             "rapid", new SkillDef("rapid", "急速射击", "⚡", 40, 90, 5, "5s 内攻速 ×3"),
             "burn", new SkillDef("burn", "燃烧生命", "🔥", 0, 300, 300, "烧当前血 25%，300s 内攻击 ×2"),
-            "surge", new SkillDef("surge", "魔力涌动", "✨", 50, 180, 10, "10s 内技能不耗蓝"));
+            "surge", new SkillDef("surge", "魔力涌动", "✨", 50, 180, 10, "10s 内技能不耗蓝"),
+            "heal", new SkillDef("heal", "治愈术", "💚", 40, 60, 0, "立即恢复 35% 生命上限"));
 
     public record PassiveDef(String id, String name, String emoji, String desc) {
     }

@@ -916,6 +916,11 @@ DELETE FROM `cfg_skill` WHERE `code` IN ('eagle_bone');
 INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('eagle_bone', '鹰骨', '🦴', 'passive', 300, 0, 0, 0, '{"effect":"add","key":"RNG","val":1}', '射程 +1', 1, 18);
+-- 第 28 轮：新主动「治愈术」（即时回复 35% 生命上限）
+DELETE FROM `cfg_skill` WHERE `code` IN ('heal');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('heal', '治愈术', '💚', 'active', 300, 40, 60, 0, '{"id":"heal","healRatio":0.35}', '立即恢复 35% 生命上限', 1, 19);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

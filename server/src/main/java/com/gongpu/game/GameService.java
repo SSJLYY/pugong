@@ -117,6 +117,11 @@ public class GameService {
             case "heavy" -> s.buffs.put("heavy", 30.0);
             case "block" -> s.buffs.put("block", (double) def.dur());
             case "rapid" -> s.buffs.put("rapid", (double) def.dur());
+            case "heal" -> {
+                // 治愈术：即时回复（首个非 buff 型主动）——按施法前已算好的面板上限结算，封顶不溢出
+                BigDecimal healAmt = Num.mul(p.maxHP(), Num.of(GameConst.HEAL_SKILL_RATIO));
+                s.life.curHP = Num.min(Num.add(s.life.curHP, healAmt), p.maxHP());
+            }
             case "surge" -> s.buffs.put("surge", (double) def.dur());
             case "roar" -> {
                 s.mob = null;

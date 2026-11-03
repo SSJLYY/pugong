@@ -51,4 +51,16 @@ class SkillBatch6Test {
         assertEquals(0, PanelCalculator.of(s).RNG().subtract(base).compareTo(Num.of(1)),
                 "鹰骨应让射程 +1");
     }
+
+    @Test
+    void round28HealSkill() {
+        PlayerState s = NewState.create();
+        s.life.maxHP = Num.of(10000);
+        s.life.curHP = Num.of(1000);
+        s.life.curMP = Num.of(100);
+        GameService.castSkill(s, "heal");
+        assertEquals(0, s.life.curHP.compareTo(Num.of(4500)),
+                "治愈术应回 35% 上限（3500），实际=" + s.life.curHP);
+        assertEquals(0, s.life.curMP.compareTo(Num.of(60)), "应扣 40 蓝");
+    }
 }

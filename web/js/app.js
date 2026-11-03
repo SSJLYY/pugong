@@ -935,6 +935,10 @@
   }
 
   function renderSkillButtons() {
+    // 静态按钮只绑一次：本函数还被元数据 10 分钟重拉（tick）与进游戏各调一次，
+    // 无守卫会让监听器叠加——挂机几小时后点一次技能会发多次施法请求（重复扣蓝/抢 CD）
+    if (renderSkillButtons._bound) return;
+    renderSkillButtons._bound = true;
     const map = {
       btnBurn: 'burn', btnRapid: 'rapid', btnHeavy: 'heavy',
       btnBlock: 'block', btnSurge: 'surge', btnRoar: 'roar'

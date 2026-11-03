@@ -429,6 +429,10 @@ public final class GameEngine {
         if (mat != null && Math.random() < 0.5) {
             s.materials.merge(mat, 1, Integer::sum);
         }
+        // 词条·晶化：击杀必额外掉 2 份本区材料（与基础 50% 掷骰独立，溢出期望击杀不带词条不享受）
+        if ("crystal".equals(m.trait) && mat != null) {
+            s.materials.merge(mat, GameConst.TRAIT_CRYSTAL_MATS, Integer::sum);
+        }
         // 附魔卷轴：特定怪掉落（DESIGN.md §6.2/§8，40% 掉率）
         String scroll = GameConst.SCROLL_DROP.get(m.id);
         if (scroll != null && Math.random() < 0.4) {

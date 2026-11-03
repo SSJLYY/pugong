@@ -139,7 +139,8 @@ public final class GameConst {
             "rich", new TraitDef("rich", "富饶", "💰", "行走的钱袋子：击杀金币 ×3，它不伤人，只散财"),
             "swift", new TraitDef("swift", "疾影", "⚡", "出手如风：攻速 +50%，别被它连绵的攻势磨死"),
             "bulwark", new TraitDef("bulwark", "堡垒", "🛡️", "皮糙肉厚如堡垒：你对它造成的伤害 -20%，得靠耐心磨"),
-            "venom", new TraitDef("venom", "剧毒", "☠️", "獠牙带毒：命中可能让你中毒持续掉血，出门记得带解毒剂"));
+            "venom", new TraitDef("venom", "剧毒", "☠️", "獠牙带毒：命中可能让你中毒持续掉血，出门记得带解毒剂"),
+            "crystal", new TraitDef("crystal", "晶化", "💎", "通体晶化：击杀必额外掉 2 份本区材料，锻造党的福星"));
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -160,6 +161,8 @@ public final class GameConst {
     public static final double TRAIT_BULWARK_MUL = 0.8;
     /** 剧毒上毒时长（秒；物种毒为 10 秒，词条毒略短）。 */
     public static final double TRAIT_VENOM_DUR = 6.0;
+    /** 晶化击杀额外材料份数。 */
+    public static final int TRAIT_CRYSTAL_MATS = 2;
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
@@ -181,12 +184,12 @@ public final class GameConst {
         List<String> pool = idx == 1
                 ? List.of("frenzy")
                 : idx == 2
-                        ? List.of("frenzy", "sunder", "rich")
+                        ? List.of("frenzy", "sunder", "rich", "crystal")
                         : idx == 3
-                                ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom")
+                                ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : idx == 4
-                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom")
-                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom");
+                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal")
+                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal");
         return pool.get((int) (Math.random() * pool.size()));
     }
 

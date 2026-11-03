@@ -165,6 +165,7 @@ public class GameService {
         }
         s.potions.put(potionId, have - 1);
         s.usedPotions.add(potionId);   // 品药成就：记录用过的种类
+        s.stats.potionsUsed++;         // 终身用药次数（每日任务「品药令」计数口径）
 
         PanelCalculator.Panel p = PanelCalculator.of(s);
         if (def.healHP() > 0) {

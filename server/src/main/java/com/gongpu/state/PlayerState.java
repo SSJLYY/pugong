@@ -120,6 +120,22 @@ public class PlayerState {
 
     /** 洗炼保底计数（第七批）：连续未刷出史诗词条的洗炼次数，到 REROLL_PITY_MAX-1 时下一次必出史诗。 */
     public int rerollPity = 0;
+
+    /** 每日任务签发日期（第七批，Asia/Shanghai 的 yyyy-MM-dd）；跨日由 DailyQuests.ensure 重签。 */
+    public String dailyDay;
+    /** 当日每日任务（签发时快照基线，进度 = 终身计数 − 基线，转生不清）。 */
+    public List<DailyTask> dailyTasks = new ArrayList<>();
+    /** 当日全清奖励是否已发（第七批第 36 轮）。 */
+    public boolean dailyBonusGiven = false;
+
+    /** 每日任务实例：baseline 为签发时终身计数的 plain 字符串（伤害为大数，统一字符串存）。 */
+    public static class DailyTask {
+        public String id;
+        public String baseline;
+        public long target;
+        public long rewardGold;
+        public boolean claimed;
+    }
     /** 尸检用：最近 10 条击杀序列（"存活秒数 怪名"，环形覆盖）。 */
     public java.util.List<String> recentKills = new java.util.ArrayList<>();
     /** 战斗日志：最近事件（Boss 击杀/图纸/史诗掉落），环形保留 20 条。 */
@@ -232,6 +248,8 @@ public class PlayerState {
         public long enchants = 0;
         public long tempers = 0;
         public long rerolls = 0;
+        public long potionsUsed = 0;
+        public long dailyClaims = 0;
         public long born = 0;
         public long playSeconds = 0;
         public long bestMaxHP = 0;

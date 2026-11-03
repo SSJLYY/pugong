@@ -638,12 +638,41 @@ public class GameService {
      * 挂机自动管护(v3.13):卖白装 → 同名吞噬 → 穿最强,单次调用内完成。
      * 由 GameController.run() 在结算后按 autoEquipBest 开关触发;全程持锁、无 IO。
      */
+    /**
+     * 管护签名：击杀数（掉落来源）+ 背包/已穿件数 + 全部装备的强化与词条数总和
+     * （洗炼/附魔/强化这类只改评分不变件数的操作也能触发重扫）。构成不变则跳过全量管护扫描。
+     */
+    static long maintainSig(PlayerState s) {
+        long kills = s.stats == null || s.stats.kills == null ? 0 : s.stats.kills.longValue();
+        long equipped = s.equipped == null ? 0
+                : s.equipped.values().stream().filter(it -> it != null).count();
+        long gearMark = 0;
+        if (s.equipBag != null) {
+            for (PlayerState.Item it : s.equipBag) {
+                gearMark += it.enhance * 7L + (it.affixes == null ? 0 : it.affixes.size());
+            }
+        }
+        if (s.equipped != null) {
+            for (PlayerState.Item it : s.equipped.values()) {
+                if (it != null) {
+                    gearMark += it.enhance * 7L + (it.affixes == null ? 0 : it.affixes.size());
+                }
+            }
+        }
+        return kills * 1_000_003L + (s.equipBag == null ? 0 : s.equipBag.size()) * 131L + equipped * 17L + gearMark;
+    }
+
     public static void autoMaintain(PlayerState s) {
         if (s.dead) {
             return;
         }
+        // 每秒轮询都会走到这里：签名未变（没新掉落、没手动换装）就跳过整包扫描，省 CPU
+        if (maintainSig(s) == s.lastMaintainSig) {
+            return;
+        }
         try {
             fastAutoEquip(s, true);
+            s.lastMaintainSig = maintainSig(s);   // 存执行后签名：本帧处置引起的变化不再触发下一帧重扫
         } catch (RuntimeException ex) {
             // 管护失败不影响主流程,下一帧重试;但绝不静默——每秒重复失败必须能在日志里看见
             log.warn("autoMaintain 管护异常(存档 gen={}, zone={}, bag={}): {}",

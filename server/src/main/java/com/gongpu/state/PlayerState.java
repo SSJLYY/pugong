@@ -115,6 +115,8 @@ public class PlayerState {
     public boolean autoAdvance = false;
     /** Boss 连战：Boss 击杀后留在本区立即再刷 Boss（优先于自动推进）。 */
     public boolean autoBoss = false;
+    /** 自动管护上次执行的背包签名（击杀/背包/已穿构成），未变跳过扫描。 */
+    public long lastMaintainSig = -1;
     /** 尸检用：最近 10 条击杀序列（"存活秒数 怪名"，环形覆盖）。 */
     public java.util.List<String> recentKills = new java.util.ArrayList<>();
     /** 战斗日志：最近事件（Boss 击杀/图纸/史诗掉落），环形保留 20 条。 */

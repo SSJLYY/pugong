@@ -2639,7 +2639,7 @@
           try {
             if (!API.state.slot) { toast('先选择一个存档槽再祭奠', 'err'); return; }
             const r = await API.tribute(Number(b.dataset.grave), API.state.slot);
-            toast('🕯️ 已为 ' + r.owner + ' 点上一炷香火', 'ok');
+            toast('🕯️ 已为 ' + r.owner + ' 点上一炷香火' + (r.firstFree ? '（今日首祭免费）' : ''), 'ok');
             loadWorldGrave();
           } catch (e) {
             toast(e.message, 'err');

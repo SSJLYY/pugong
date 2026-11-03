@@ -146,17 +146,25 @@ public class SocialService {
         if (g.getUserId() == actorId) {
             throw ApiException.badRequest("不能祭奠自己的墓碑");
         }
+        // 墓主先行解析：账号已注销时在扣费/占免费名额之前失败，不吞玩家的每日首祭
+        User owner = users.findById(g.getUserId())
+                .orElseThrow(() -> ApiException.notFound("墓主账号已注销"));
         // 从行动者存档扣金币：统一走 SaveService.load+persist（缓存优先读、
         // 成就评估与冗余列维护与主流程同口径；旧实现直读 DB 会拿到节流落库前的旧金币）
         PlayerState actor = saveService.load(actorId, slot);
-        if (Num.lt(actor.gold, Num.of(TRIBUTE_COST))) {
-            throw ApiException.badRequest("金币不足，祭奠需要 " + TRIBUTE_COST + " 金币");
+        // 每日首祭免费（第七批）：每档每天第一次祭奠免单，鼓励日常社交；免费也要先占名额防并发双免
+        String today = java.time.LocalDate.now(com.gongpu.game.GameConst.DAILY_ZONE).toString();
+        boolean firstFree = !today.equals(actor.tributeDay);
+        if (firstFree) {
+            actor.tributeDay = today;
+        } else {
+            if (Num.lt(actor.gold, Num.of(TRIBUTE_COST))) {
+                throw ApiException.badRequest("金币不足，祭奠需要 " + TRIBUTE_COST + " 金币");
+            }
+            actor.gold = Num.sub(actor.gold, Num.of(TRIBUTE_COST));
         }
-        actor.gold = Num.sub(actor.gold, Num.of(TRIBUTE_COST));
         saveService.persist(actorId, slot, actor, null);
         // 墓主 +1 香火(原子,并发祭奠不丢)
-        User owner = users.findById(g.getUserId())
-                .orElseThrow(() -> ApiException.notFound("墓主账号已注销"));
         users.addIncense(owner.getId(), 1);
         graves.addTribute(g.getId());
 
@@ -164,6 +172,7 @@ public class SocialService {
         out.put("ok", true);
         out.put("owner", owner.getUsername());
         out.put("incenseGiven", 1);
+        out.put("firstFree", firstFree);
         out.put("goldLeft", Num.plain(actor.gold));
         return out;
     }

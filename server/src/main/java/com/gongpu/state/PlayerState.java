@@ -50,6 +50,8 @@ public class PlayerState {
     public BigDecimal shield = BigDecimal.ZERO;
     /** 弱点打击节拍累加器（第七批）：累计出拳数的小数余量，每满 10 拳触发一次必暴并扣回。 */
     public BigDecimal punchAcc = BigDecimal.ZERO;
+    /** 每日首祭日期（第七批，Asia/Shanghai）：当日已用掉「首祭免费」时等于今日日期串。 */
+    public String tributeDay;
 
     /** 当前目标怪物（运行时态，不落库为长期数据也行）。 */
     public MobState mob;

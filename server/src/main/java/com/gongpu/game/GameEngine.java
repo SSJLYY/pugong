@@ -311,6 +311,15 @@ public final class GameEngine {
                 break;
             }
         }
+        // 词条「荆棘」：本帧（以开帧时目标词条为准）所造伤害的 10% 反扎玩家，护盾先吸；
+        // 扎死当场死亡——advance 后续阶段（嗑药/怪反击/DoT）均以 !dead 守卫，不会二次结算
+        if ("thorns".equals(m.trait) && !s.dead && Num.gt(totalDmg, Num.ZERO)) {
+            BigDecimal reflect = Num.mul(totalDmg, Num.of(GameConst.TRAIT_THORNS_MUL));
+            s.life.curHP = Num.sub(s.life.curHP, absorbShield(s, reflect));
+            if (Num.lte(s.life.curHP, Num.ZERO)) {
+                kill(s, m);
+            }
+        }
         return drops;
     }
 

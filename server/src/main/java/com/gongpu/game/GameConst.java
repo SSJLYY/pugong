@@ -134,7 +134,8 @@ public final class GameConst {
             "frenzy", new TraitDef("frenzy", "狂暴", "💢", "生命低于 30% 时攻速 +50%，小心它临死反扑"),
             "sunder", new TraitDef("sunder", "破甲", "🪓", "攻击无视你 30% 的物防与魔防"),
             "disarm", new TraitDef("disarm", "缴械", "🔗", "压制你的武器，你的普攻伤害 -15%"),
-            "leech", new TraitDef("leech", "嗜血", "🩸", "命中你时吸回所造成伤害 30% 的生命，拖得越久它越难杀"));
+            "leech", new TraitDef("leech", "嗜血", "🩸", "命中你时吸回所造成伤害 30% 的生命，拖得越久它越难杀"),
+            "thorns", new TraitDef("thorns", "荆棘", "🌵", "你打它时被反扎：所造成伤害的 10% 反弹给你，出手越重扎得越狠"));
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -145,6 +146,8 @@ public final class GameConst {
     public static final double TRAIT_DISARM_MUL = 0.85;
     /** 嗜血的吸血比例（对玩家实际掉血量）。 */
     public static final double TRAIT_LEECH_MUL = 0.30;
+    /** 荆棘的反弹比例（对玩家本帧所造伤害量）。 */
+    public static final double TRAIT_THORNS_MUL = 0.10;
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
@@ -152,7 +155,7 @@ public final class GameConst {
 
     /**
      * 出生掷词条：村口不出；平原 10% 起、每深一层 +3%。
-     * 词条池随深度解锁：平原只有狂暴，森林起加破甲，矿洞起加缴械，沼泽起四种全开（含嗜血）。
+     * 词条池随深度解锁：平原只有狂暴，森林起加破甲，矿洞起加缴械，沼泽起加嗜血，雪原起五种全开（含荆棘）。
      */
     public static String rollMobTrait(String zoneId) {
         int idx = ZONE_ORDER.indexOf(zoneId);
@@ -169,7 +172,9 @@ public final class GameConst {
                         ? List.of("frenzy", "sunder")
                         : idx == 3
                                 ? List.of("frenzy", "sunder", "disarm")
-                                : List.of("frenzy", "sunder", "disarm", "leech");
+                                : idx == 4
+                                        ? List.of("frenzy", "sunder", "disarm", "leech")
+                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns");
         return pool.get((int) (Math.random() * pool.size()));
     }
 

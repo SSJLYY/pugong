@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,8 +21,10 @@ class TraitPoolTest {
         assertTrue(GameConst.traitPool(3).contains("venom"), "矿洞起解锁剧毒");
         assertTrue(GameConst.traitPool(4).contains("stealth"), "沼泽起解锁潜行");
         assertTrue(GameConst.traitPool(4).contains("leech"), "沼泽起解锁嗜血");
-        assertEquals(12, GameConst.traitPool(5).size(), "雪山/火山全池 12 条");
+        assertEquals(13, GameConst.traitPool(5).size(), "雪山/火山全池 13 条");
         assertTrue(GameConst.traitPool(5).contains("bulwark"), "深区解锁堡垒");
+        assertTrue(GameConst.traitPool(4).contains("curse"), "沼泽起解锁诅咒");
+        assertFalse(GameConst.traitPool(3).contains("curse"), "矿洞池不应含诅咒");
         assertTrue(GameConst.traitPool(4).contains("slow"), "沼泽起解锁时滞");
         assertTrue(GameConst.traitPool(5).contains("thorns"), "深区解锁荆棘");
         // 池内每条都必须有词条定义（防池里写了不存在的 id）

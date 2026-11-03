@@ -142,7 +142,8 @@ public final class GameConst {
             Map.entry("venom", new TraitDef("venom", "剧毒", "☠️", "獠牙带毒：命中可能让你中毒持续掉血，出门记得带解毒剂")),
             Map.entry("crystal", new TraitDef("crystal", "晶化", "💎", "通体晶化：击杀必额外掉 2 份本区材料，锻造党的福星")),
             Map.entry("stealth", new TraitDef("stealth", "潜行", "🌫️", "身形飘忽：你的攻击屡屡落空，对它的伤害 -10%，堆命中克它")),
-            Map.entry("slow", new TraitDef("slow", "时滞", "🐌", "黏液缠身：命中可能让你陷入时滞 4 秒，出拳速度 -20%，速战速决或备好净化")));
+            Map.entry("slow", new TraitDef("slow", "时滞", "🐌", "黏液缠身：命中可能让你陷入时滞 4 秒，出拳速度 -20%，速战速决或备好净化")),
+            Map.entry("curse", new TraitDef("curse", "诅咒", "💀", "阴气蚀体：与它交战时你的一切回血（回复/吸血/喝药）减半，先解决它再续航")));
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -155,6 +156,8 @@ public final class GameConst {
     public static final double TRAIT_LEECH_MUL = 0.30;
     /** 荆棘的反弹比例（对玩家本帧所造伤害量）。 */
     public static final double TRAIT_THORNS_MUL = 0.10;
+    /** 诅咒的回血乘区（回复/吸血/喝药同口径减半）。 */
+    public static final double TRAIT_CURSE_HEAL_MUL = 0.5;
     /** 富饶的金币倍率（击杀结算乘区）。 */
     public static final double TRAIT_RICH_GOLD_MUL = 3.0;
     /** 疾影的攻速倍率（常驻乘区，与狂暴残血加速同口径叠加）。 */
@@ -208,8 +211,8 @@ public final class GameConst {
                         : zoneIdx == 3
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : zoneIdx == 4
-                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow")
-                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow");
+                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow", "curse")
+                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse");
     }
 
     private static Map<String, ZoneDef> buildZones() {

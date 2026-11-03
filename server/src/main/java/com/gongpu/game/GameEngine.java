@@ -393,9 +393,18 @@ public final class GameEngine {
 
     private static void healByLifesteal(PlayerState s, PanelCalculator.Panel p, BigDecimal dmg) {
         if (Num.gt(p.LIFESTEAL(), Num.ZERO)) {
-            BigDecimal heal = Num.mul(dmg, p.LIFESTEAL());
+            BigDecimal heal = Num.mul(Num.mul(dmg, p.LIFESTEAL()), healMul(s));
             s.life.curHP = Num.min(Num.add(s.life.curHP, heal), s.life.maxHP);
         }
+    }
+
+    /** 词条「诅咒」（第七批）：当前对手带诅咒时，玩家一切回血减半（回复 tick/吸血/喝药同口径）。 */
+    static boolean cursed(PlayerState s) {
+        return s != null && s.mob != null && "curse".equals(s.mob.trait);
+    }
+
+    static BigDecimal healMul(PlayerState s) {
+        return cursed(s) ? Num.of(GameConst.TRAIT_CURSE_HEAL_MUL) : BigDecimal.ONE;
     }
 
     /**
@@ -996,7 +1005,7 @@ public final class GameEngine {
         }
         s.potions.put(id, have - 1);
         if (def.healHP() > 0) {
-            java.math.BigDecimal heal = Num.mul(p.maxHP(), Num.of(def.healHP()));
+            java.math.BigDecimal heal = Num.mul(Num.mul(p.maxHP(), Num.of(def.healHP())), healMul(s));
             s.life.curHP = Num.min(Num.add(s.life.curHP, heal), p.maxHP());
         }
         if (def.healMP() > 0) {
@@ -1008,8 +1017,8 @@ public final class GameEngine {
 
     private static void regenTick(PlayerState s, double seconds) {
         PanelCalculator.Panel p = PanelCalculator.of(s);
-        // 常规回血 + 「每秒回复 X% 生命上限」类词条(回春戒「生命泉涌」等)
-        BigDecimal heal = Num.mul(Num.add(p.REGEN(), p.regenHpPerSec()), Num.of(seconds));
+        // 常规回血 + 「每秒回复 X% 生命上限」类词条(回春戒「生命泉涌」等)；诅咒在场时回血减半
+        BigDecimal heal = Num.mul(Num.mul(Num.add(p.REGEN(), p.regenHpPerSec()), Num.of(seconds)), healMul(s));
         s.life.curHP = Num.min(Num.add(s.life.curHP, heal), p.maxHP());
         BigDecimal mpHeal = Num.mul(p.MREGEN(), Num.of(seconds));
         s.life.curMP = Num.min(Num.add(s.life.curMP, mpHeal), p.MP());

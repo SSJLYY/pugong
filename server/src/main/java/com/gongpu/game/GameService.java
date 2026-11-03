@@ -169,7 +169,8 @@ public class GameService {
 
         PanelCalculator.Panel p = PanelCalculator.of(s);
         if (def.healHP() > 0) {
-            BigDecimal heal = Num.mul(p.maxHP(), Num.of(def.healHP()));
+            // 诅咒在场时喝药回血同样减半（与回复/吸血同口径）
+            BigDecimal heal = Num.mul(Num.mul(p.maxHP(), Num.of(def.healHP())), GameEngine.healMul(s));
             s.life.curHP = Num.min(Num.add(s.life.curHP, heal), p.maxHP());
         }
         if (def.healMP() > 0) {

@@ -998,6 +998,16 @@
         '<p class="pick-intro">野怪出生时按区域深度掷词条：平原 10% 起、每深一层 +3%，词条池随深度解锁。Boss 与木桩不带词条。</p>' + rows);
     });
 
+    $('btnSets').addEventListener('click', () => {
+      const sets = (S.meta && S.meta.sets) || [];
+      if (!sets.length) { toast('套装数据未加载', 'err'); return; }
+      const rows = sets.map(sm =>
+        '<div class="trait-row"><b>' + sm.emoji + ' ' + esc(sm.name) + '</b><span>成员：' +
+        sm.members.map(esc).join('、') + '<br>2 件：' + esc(sm.bonus2) + '<br>4 件：' + esc(sm.bonus4) + '</span></div>').join('');
+      infoModal('🧩 套装图鉴',
+        '<p class="pick-intro">每个区域有一套四件套，穿同套 2 件 / 4 件激活加成（按不同成员计件，无相位栏同名重复件不刷件数）。</p>' + rows);
+    });
+
     $('btnManualSave').addEventListener('click', async () => {
       await call(() => API.manualSave(API.state.slot), '已存档到云端');
     });

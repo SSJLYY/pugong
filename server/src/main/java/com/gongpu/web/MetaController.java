@@ -166,6 +166,28 @@ public class MetaController {
         }
         m.put("traits", traits);
 
+        // 套装图鉴（第七批）：成员名按模板池解析，加成文案与 state 视图同源（Sets.bonusText）
+        Map<String, String> codeName = new LinkedHashMap<>();
+        for (com.gongpu.cfg.GameData.Tpl t : com.gongpu.cfg.GameData.instance().equipmentPool()) {
+            codeName.put(t.code(), t.name());
+        }
+        List<Map<String, Object>> sets = new ArrayList<>();
+        for (com.gongpu.game.Sets.SetDef d : com.gongpu.game.Sets.ALL) {
+            Map<String, Object> sm = new LinkedHashMap<>();
+            sm.put("id", d.id());
+            sm.put("name", d.name());
+            sm.put("emoji", d.emoji());
+            List<String> names = new ArrayList<>();
+            for (String code : d.members()) {
+                names.add(codeName.getOrDefault(code, code));
+            }
+            sm.put("members", names);
+            sm.put("bonus2", com.gongpu.game.Sets.bonusText(d.bonus2()));
+            sm.put("bonus4", com.gongpu.game.Sets.bonusText(d.bonus4()));
+            sets.add(sm);
+        }
+        m.put("sets", sets);
+
         List<Map<String, Object>> skills = new ArrayList<>();
         for (GameConst.SkillDef d : com.gongpu.cfg.GameData.instance().skillList()) {
             Map<String, Object> sm = new LinkedHashMap<>();

@@ -1307,27 +1307,13 @@ public class GameService {
             int worn = counts.getOrDefault(d.id(), 0);
             m.put("worn", worn);
             m.put("total", d.members().size());
-            m.put("bonus2", bonusText(d.bonus2()));
-            m.put("bonus4", bonusText(d.bonus4()));
+            m.put("bonus2", Sets.bonusText(d.bonus2()));
+            m.put("bonus4", Sets.bonusText(d.bonus4()));
             m.put("active2", worn >= 2);
             m.put("active4", worn >= 4);
             out.add(m);
         }
         return out;
-    }
-
-    /** 套装加成文案：概率类（暴击/暴伤/命中/闪避）按百分比展示，其余按面板原值。 */
-    private static String bonusText(Map<String, java.math.BigDecimal> bonus) {
-        java.util.List<String> parts = new ArrayList<>();
-        bonus.forEach((k, v) -> {
-            String label = GameConst.BLESS_NAME.getOrDefault("maxHP".equals(k) ? "HP" : k, k);
-            if (k.equals("CRIT") || k.equals("CRITD") || k.equals("ACC") || k.equals("EVA")) {
-                parts.add(label + " +" + Num.plain(Num.mul(v, Num.of(100))) + "%");
-            } else {
-                parts.add(label + " +" + Num.plain(v));
-            }
-        });
-        return String.join("、", parts);
     }
 
     public Map<String, Object> inventoryView(PlayerState s) {

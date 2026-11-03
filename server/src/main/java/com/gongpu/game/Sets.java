@@ -141,6 +141,20 @@ public final class Sets {
         return out;
     }
 
+    /** 加成文案：概率类（暴击/暴伤/命中/闪避）按百分比展示，其余按面板原值（state 视图与 meta 图鉴共用）。 */
+    public static String bonusText(Map<String, BigDecimal> bonus) {
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        bonus.forEach((k, v) -> {
+            String label = GameConst.BLESS_NAME.getOrDefault("maxHP".equals(k) ? "HP" : k, k);
+            if (k.equals("CRIT") || k.equals("CRITD") || k.equals("ACC") || k.equals("EVA")) {
+                parts.add(label + " +" + Num.plain(Num.mul(v, Num.of(100))) + "%");
+            } else {
+                parts.add(label + " +" + Num.plain(v));
+            }
+        });
+        return String.join("、", parts);
+    }
+
     /** 当前已激活的套装加成合计（flat 区口径，key 与 PanelCalculator flat 键一致）。 */
     public static Map<String, BigDecimal> activeBonus(PlayerState s) {
         Map<String, BigDecimal> out = new LinkedHashMap<>();

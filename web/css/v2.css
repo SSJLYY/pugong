@@ -926,3 +926,7 @@
 /* 图纸合成：材料筹码（持有量达标常色、不足标红） */
 .mat-chip { display: inline-block; padding: 1px 7px; border-radius: 9px; background: rgba(127,127,127,.16); font-size: 11px; margin: 2px 2px 0 0; }
 .mat-chip.lack { color: #e5484d; background: rgba(229,72,77,.12); }
+
+/* 药剂分组标题（第四批：25 种药剂分回复/增益/功能三组） */
+.potion-group{font-weight:700;font-size:13px;color:#c9a227;margin:10px 0 4px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.12)}
+.potion-group:first-of-type{border-top:none;margin-top:2px}

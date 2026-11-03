@@ -168,6 +168,8 @@ public class MetaController {
             pm.put("emoji", d.emoji());
             pm.put("desc", d.desc());
             pm.put("price", d.price());
+            // 商店分组（前端按组渲染）：回复（回血/回蓝）/ 增益（带 buff）/ 功能（解毒等）
+            pm.put("group", (d.healHP() > 0 || d.healMP() > 0) ? "heal" : (d.buff() != null ? "buff" : "func"));
             potions.add(pm);
         }
         m.put("potions", potions);

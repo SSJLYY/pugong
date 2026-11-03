@@ -1422,8 +1422,24 @@
     const sig = JSON.stringify(view.potions || {});
     if (sig === renderPotions._sig) return;
     renderPotions._sig = sig;
-    box.querySelectorAll('.potion-item:not(.auto-cfg)').forEach(el => el.remove());
-    (S.meta ? S.meta.potions : []).forEach(p => {
+    box.querySelectorAll('.potion-item:not(.auto-cfg), .potion-group').forEach(el => el.remove());
+    // 药剂分组展示（25 种平铺难找）：回复 / 增益 / 功能，组内保持商店顺序
+    const POT_GROUPS = [['heal', '💊 回复药剂'], ['buff', '⚡ 增益药剂'], ['func', '🧰 功能药剂']];
+    const allPots = S.meta ? S.meta.potions : [];
+    const groupedPots = [];
+    POT_GROUPS.forEach(([g, label]) => {
+      const items = allPots.filter(p => (p.group || 'func') === g);
+      if (items.length) groupedPots.push({ header: label }, ...items);
+    });
+    if (!groupedPots.length) groupedPots.push(...allPots);
+    groupedPots.forEach(p => {
+      if (p.header) {
+        const h = document.createElement('div');
+        h.className = 'potion-group';
+        h.textContent = p.header;
+        box.appendChild(h);
+        return;
+      }
       const have = (view.potions && view.potions[p.id]) || 0;
       const d = document.createElement('div');
       d.className = 'potion-item';

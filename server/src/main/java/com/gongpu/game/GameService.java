@@ -1497,6 +1497,8 @@ public class GameService {
     public Map<String, Object> fullView(PlayerState s) {
         PanelCalculator.Panel p = PanelCalculator.of(s);
         Map<String, Object> m = new LinkedHashMap<>();
+        // 过期响应守卫（第七批）：视图构建时刻（服务端单时钟），前端 applyView 丢弃比已应用更旧的帧
+        m.put("serverTime", System.currentTimeMillis());
         m.put("gen", s.gen);
         m.put("zone", s.zone);
         m.put("dead", s.dead);

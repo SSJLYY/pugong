@@ -592,6 +592,11 @@
 
   function applyView(view) {
     if (!view || !view.panel) return;   // 写去重并入的调用在失败时拿到 undefined,直接忽略
+    // 过期帧守卫（第七批）：服务端 serverTime 单调校验——乱序到达的旧帧（慢网/多标签页）直接丢弃防 UI 回退
+    if (view.serverTime) {
+      if (S._lastServerTime && view.serverTime < S._lastServerTime) return;
+      S._lastServerTime = Math.max(S._lastServerTime || 0, view.serverTime);
+    }
     S.view = view;
     renderButlerPanel(view);
     const p = view.panel;

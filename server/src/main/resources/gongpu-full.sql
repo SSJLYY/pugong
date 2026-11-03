@@ -948,6 +948,17 @@ DELETE FROM `cfg_buff` WHERE `code` IN ('iron_wall');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('iron_wall', '铁壁', '🧱', 'good', 'passive', '{"dmgTaken":0.5}', '8s 内受击减半', 1, 50);
 
+-- 第六批第 81 轮：雪山补头盔「雪狼兜帽」（雪山此前无头部位）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('snow_hood');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('snow_hood', '雪狼兜帽', '🎿', 'head', 3, 'snow', '{"PDEF":"10","MDEF":"14","maxHP":"80"}', 10, 55, '雪狼头皮缝制，御寒护头', 1, 51);
+-- 第六批第 82 轮：火山补护腿「熔岩护腿」（火山此前无腿部位）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('lava_greaves');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('lava_greaves', '熔岩护腿', '🌋', 'legs', 4, 'volcano', '{"PDEF":"22","MDEF":"12","REGEN":"2"}', 10, 80, '熔岩冷却后的岩甲护腿', 1, 52);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16

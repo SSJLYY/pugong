@@ -432,6 +432,13 @@
       S._hiddenSkip = ((S._hiddenSkip || 0) + 1) % 5;
       if (S._hiddenSkip !== 0) return;
     }
+    // 弱网自适应（第七批）：往返耗时 EMA >800ms 或系统省流量模式时降为 2 秒一帧，
+    // 避免慢网下请求排队堆积；网络恢复（EMA 回落）自动回到 1 秒
+    const saveData = !!(navigator.connection && navigator.connection.saveData);
+    if (saveData || (S._rttAvg || 0) > 800) {
+      S._slowSkip = ((S._slowSkip || 0) + 1) % 2;
+      if (S._slowSkip !== 0) return;
+    }
     // 失败退避:服务端重启/断网时不每秒硬撞,连败间隔指数放大(2→4→8…封顶 30 秒),
     // 一次成功即清零;切回前台时 visibilitychange 会清退避立即补一帧
     if (S._nextPollAt && Date.now() < S._nextPollAt) return;
@@ -439,6 +446,9 @@
     try {
       const t0 = Date.now();
       const view = await API.gameState(API.state.slot);
+      // 往返耗时指数滑动平均（弱网自适应降频的输入）
+      const rtt = Date.now() - t0;
+      S._rttAvg = S._rttAvg ? S._rttAvg * 0.7 + rtt * 0.3 : rtt;
       setNet(true);
       S._failStreak = 0;
       S._nextPollAt = 0;

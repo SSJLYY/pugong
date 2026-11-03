@@ -47,14 +47,92 @@ public class SaveService {
         return s;
     }
 
+    // ---------------- 滚动备份环（第七批）：主档历史自愈 ----------------
+
+    /** 备份轮转间隔：距上一份备份 ≥10 分钟才收新的一份，避免环里全是同一分钟的近似状态。 */
+    static final long BACKUP_ROTATE_MS = 10 * 60_000L;
+    /** 环容量：保留最近 3 份。 */
+    static final int BACKUP_RING_MAX = 3;
+
+    private static final com.fasterxml.jackson.databind.ObjectMapper RING_MAPPER =
+            new com.fasterxml.jackson.databind.ObjectMapper();
+
     /**
-     * 存档解码自愈：主档 JSON 损坏（截断写/坏迁移）时回退到手动快照解码，
-     * 避免玩家被永久锁在 500 外；主档与快照都坏才报明确错误。
+     * 轮转备份环：newest 在尾部。上一份未满轮转间隔 → 原样返回（同一引用表示未变更）；
+     * 环本身损坏 → 从当前状态重建单元素环。自愈数据宁可少而新，不可多而旧。
+     */
+    static String rotateBackupRing(String ringJson, String stateJson, long now) {
+        List<Map<String, Object>> ring = new ArrayList<>();
+        if (ringJson != null && !ringJson.isBlank()) {
+            try {
+                List<?> parsed = RING_MAPPER.readValue(ringJson, List.class);
+                for (Object o : parsed) {
+                    if (o instanceof Map<?, ?> mm) {
+                        Map<String, Object> e = new LinkedHashMap<>();
+                        e.put("t", mm.get("t"));
+                        e.put("j", mm.get("j"));
+                        ring.add(e);
+                    }
+                }
+            } catch (Exception badRing) {
+                ring.clear(); // 环坏了就重建，不连累主流程
+            }
+        }
+        if (!ring.isEmpty()) {
+            Object t = ring.get(ring.size() - 1).get("t");
+            long lastT = t instanceof Number n ? n.longValue() : 0L;
+            if (now - lastT < BACKUP_ROTATE_MS) {
+                return ringJson;
+            }
+        }
+        Map<String, Object> e = new LinkedHashMap<>();
+        e.put("t", now);
+        e.put("j", stateJson);
+        ring.add(e);
+        while (ring.size() > BACKUP_RING_MAX) {
+            ring.remove(0);
+        }
+        try {
+            return RING_MAPPER.writeValueAsString(ring);
+        } catch (Exception impossible) {
+            return ringJson;
+        }
+    }
+
+    /** 从备份环里按新→旧找第一份能解码的状态；全坏/无环返回 null。 */
+    static PlayerState decodeFromRing(String ringJson) {
+        if (ringJson == null || ringJson.isBlank()) {
+            return null;
+        }
+        try {
+            List<?> parsed = RING_MAPPER.readValue(ringJson, List.class);
+            for (int i = parsed.size() - 1; i >= 0; i--) {
+                if (parsed.get(i) instanceof Map<?, ?> mm && mm.get("j") instanceof String j) {
+                    try {
+                        return StateCodec.decode(j);
+                    } catch (RuntimeException ignored) {
+                        // 继续找更旧的一份
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // 环整体不可解析
+        }
+        return null;
+    }
+
+    /**
+     * 存档解码自愈：主档 JSON 损坏（截断写/坏迁移）时依次回退——滚动备份环（新→旧）、
+     * 存档点快照，都坏才报明确错误，避免玩家被永久锁在 500 外。
      */
     static PlayerState decodeOrRecover(GameSave gs) {
         try {
             return StateCodec.decode(gs.getStateJson());
         } catch (RuntimeException mainBad) {
+            PlayerState fromRing = decodeFromRing(gs.getBackupRing());
+            if (fromRing != null) {
+                return fromRing;
+            }
             String snap = gs.getSnapshotJson();
             if (snap != null && !snap.isBlank()) {
                 try {
@@ -123,7 +201,13 @@ public class SaveService {
             gs.setDeathsTotal(s.stats.deaths);
             gs.setRebirthsTotal(s.stats.rebirths);
         }
-        gs.setStateJson(StateCodec.encode(s));
+        String stateJson = StateCodec.encode(s);
+        gs.setStateJson(stateJson);
+        // 滚动备份环：落库顺手轮转（≥10 分钟一份、留 3 份），主档损坏时 decodeOrRecover 靠它自愈
+        String rotated = rotateBackupRing(gs.getBackupRing(), stateJson, System.currentTimeMillis());
+        if (rotated != gs.getBackupRing()) {
+            gs.setBackupRing(rotated);
+        }
         gs.setUpdatedAt(Instant.now());
         repo.save(gs);
         // 回村自动快照(设计 §3.2"回安全区自动存主槽"):在村口且未死亡时,

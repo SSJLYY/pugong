@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `game_save` (
   `rebirths_total` BIGINT      NOT NULL DEFAULT 0 COMMENT '冗余累计转生（运营统计 SUM 用）',
   `state_json`    LONGTEXT     NOT NULL COMMENT '当前活着的滚动状态',
   `snapshot_json` LONGTEXT     NULL COMMENT '存档点快照（死亡回档读它）',
+  `backup_ring`   LONGTEXT     NULL COMMENT '滚动备份环（JSON 数组，主档自愈）',
   `saved_at`      DATETIME(6)  NULL COMMENT '存档点时间',
   `created_at`    DATETIME(6)  NOT NULL,
   `updated_at`    DATETIME(6)  NOT NULL,
@@ -263,6 +264,12 @@ CREATE TABLE IF NOT EXISTS `admin_audit_log` (
 -- §2 结构守卫（原 migration-v2.1 / v2.2 / v3.16 / v3.17 的加列与回填）
 -- 守卫写法：information_schema 查列 → 缺失才拼 ALTER 执行；回填绑定「本次加列」标志
 -- ============================================================
+
+-- ---- v3.25 滚动备份环（game_save.backup_ring，第七批：主档损坏自愈用） ----
+SET @c := (SELECT COUNT(*) FROM information_schema.columns
+           WHERE table_schema = 'gongpu' AND table_name = 'game_save' AND column_name = 'backup_ring');
+SET @sql := IF(@c = 0, 'ALTER TABLE `game_save` ADD COLUMN `backup_ring` LONGTEXT NULL COMMENT ''滚动备份环（JSON 数组，主档自愈）'' AFTER `snapshot_json`', 'SELECT 1');
+PREPARE st FROM @sql; EXECUTE st; DEALLOCATE PREPARE st;
 
 -- ---- v2.1 存档快照列（game_save.snapshot_json / saved_at） ----
 SET @c := (SELECT COUNT(*) FROM information_schema.columns

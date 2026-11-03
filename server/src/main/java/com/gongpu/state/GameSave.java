@@ -72,6 +72,14 @@ public class GameSave {
     @Column(name = "snapshot_json", columnDefinition = "LONGTEXT")
     private String snapshotJson;
 
+    /**
+     * 滚动备份环（第七批）：JSON 数组 [{t,j}…]，最多 3 份主档历史（每 ≥10 分钟轮转一份），
+     * 只服务于主档损坏自愈（decodeOrRecover），与死亡回档的 snapshot_json 互不相干。
+     */
+    @Lob
+    @Column(name = "backup_ring", columnDefinition = "LONGTEXT")
+    private String backupRing;
+
     @Column(name = "saved_at")
     private Instant savedAt;
 
@@ -159,6 +167,14 @@ public class GameSave {
 
     public void setSnapshotJson(String snapshotJson) {
         this.snapshotJson = snapshotJson;
+    }
+
+    public String getBackupRing() {
+        return backupRing;
+    }
+
+    public void setBackupRing(String backupRing) {
+        this.backupRing = backupRing;
     }
 
     public Instant getSavedAt() {

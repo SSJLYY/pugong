@@ -29,7 +29,8 @@ public final class Sets {
         for (int i = 0; i < kv.length; i += 2) {
             m.put(kv[i], new BigDecimal(kv[i + 1]));
         }
-        return Map.copyOf(m);
+        // 保留声明顺序（文案展示按序拼接）；Map.copyOf 不保序，不能用
+        return java.util.Collections.unmodifiableMap(m);
     }
 
     public static final List<SetDef> ALL = List.of(

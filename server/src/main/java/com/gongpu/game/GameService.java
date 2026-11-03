@@ -1294,6 +1294,41 @@ public class GameService {
         m.put("equippedScores", eq);
     }
 
+    /** 套装进度视图（第七批）：每套已穿件数、两档加成文案与激活状态，前端套装面板直接渲染。 */
+    static java.util.List<Map<String, Object>> setsView(PlayerState s) {
+        Map<String, Integer> counts = Sets.wornCounts(s);
+        java.util.List<Map<String, Object>> out = new ArrayList<>();
+        for (Sets.SetDef d : Sets.ALL) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", d.id());
+            m.put("name", d.name());
+            m.put("emoji", d.emoji());
+            int worn = counts.getOrDefault(d.id(), 0);
+            m.put("worn", worn);
+            m.put("total", d.members().size());
+            m.put("bonus2", bonusText(d.bonus2()));
+            m.put("bonus4", bonusText(d.bonus4()));
+            m.put("active2", worn >= 2);
+            m.put("active4", worn >= 4);
+            out.add(m);
+        }
+        return out;
+    }
+
+    /** 套装加成文案：概率类（暴击/暴伤/命中/闪避）按百分比展示，其余按面板原值。 */
+    private static String bonusText(Map<String, java.math.BigDecimal> bonus) {
+        java.util.List<String> parts = new ArrayList<>();
+        bonus.forEach((k, v) -> {
+            String label = GameConst.BLESS_NAME.getOrDefault("maxHP".equals(k) ? "HP" : k, k);
+            if (k.equals("CRIT") || k.equals("CRITD") || k.equals("ACC") || k.equals("EVA")) {
+                parts.add(label + " +" + Num.plain(Num.mul(v, Num.of(100))) + "%");
+            } else {
+                parts.add(label + " +" + Num.plain(v));
+            }
+        });
+        return String.join("、", parts);
+    }
+
     public Map<String, Object> inventoryView(PlayerState s) {
         Map<String, Object> m = new LinkedHashMap<>();
         // 与 fullView 同口径截断(v3.13):操作响应携带背包视图,同样防巨包
@@ -1370,6 +1405,7 @@ public class GameService {
         m.put("passives", s.passives);
         m.put("potions", s.potions);
         m.put("equipped", s.equipped);
+        m.put("sets", setsView(s));
         // v3.13 背包截断防复发:此前全量下发 3.3 万件=13.9MB JSON,前端每秒解析+渲染
         // 直接卡死。视图只带前 200 件(强化/洗炼/卖出按索引操作,截断段不可及,
         // 服务端管护会先把背包清到安全规模),bagTotal 让前端如实显示总数。

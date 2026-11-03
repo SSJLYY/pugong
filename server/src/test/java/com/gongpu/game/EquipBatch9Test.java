@@ -50,6 +50,6 @@ class EquipBatch9Test {
         while (m.find()) {
             rows += (int) Pattern.compile("^\\s*\\('", Pattern.MULTILINE).matcher(m.group(1)).results().count();
         }
-        assertEquals(52, rows, "装备模板总数应为 52（50 + 雪狼兜帽 + 熔岩护腿）");
+        assertEquals(58, rows, "装备模板总数应为 58（52 + 第七批深渊 6 件）");
     }
 }

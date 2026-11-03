@@ -56,6 +56,26 @@ class ZoneAbyssTest {
         assertEquals(12, GameConst.traitPool(7).size(), "最深区域词条池应全开（12 条）");
     }
 
+    /** 第 23 轮：深渊 6 件毕业装在 SQL 里 min_zone=abyss（掉落池按区域取模板）。 */
+    @Test
+    void abyssGearInSql() throws Exception {
+        java.nio.file.Path testRoot = java.nio.file.Path.of(ZoneAbyssTest.class.getResource("/").toURI());
+        java.nio.file.Path root = testRoot.resolveSibling("classes");
+        StringBuilder sb = new StringBuilder();
+        try (java.util.stream.Stream<java.nio.file.Path> walk = java.nio.file.Files.walk(root)) {
+            for (java.nio.file.Path p : walk.filter(x -> x.getFileName().toString().endsWith(".sql")).toList()) {
+                sb.append(java.nio.file.Files.readString(p, java.nio.charset.StandardCharsets.UTF_8)).append('\n');
+            }
+        }
+        String sql = sb.toString();
+        for (String code : List.of("abyss_blade", "void_bow", "rift_helm", "chaos_plate", "abyss_greaves", "void_ring")) {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile(
+                    "\\('" + code + "',\\s*'[^']*',\\s*'[^']*',\\s*'[a-z0-9]+',\\s*\\d+,\\s*'([a-z]+)'").matcher(sql);
+            assertTrue(m.find(), "深渊装备应在 SQL 模板中：" + code);
+            assertEquals("abyss", m.group(1), code + " 的 min_zone 应为 abyss");
+        }
+    }
+
     @Test
     void gateRejectsWeakAndAdmitsStrong() {
         PlayerState weak = NewState.create();

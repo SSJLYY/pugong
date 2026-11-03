@@ -977,6 +977,16 @@ DELETE FROM `cfg_buff` WHERE `code` IN ('fortune_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('fortune_pot', '聚宝', '🧧', 'good', 'passive', '{"goldMul":1.5}', '300s 内击杀金币 +50%', 1, 51);
 
+-- 第六批第 85 轮：新配方 ×2（给本批新装备雪狼兜帽/熔岩护腿配锻造路线）
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_snow_hood');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_snow_hood', '雪狼兜帽缝制', '🧵', 'snow_hood', '{"mana_dust":3,"pelt":6}', 800, 0, 1, 26);
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_lava_greaves');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_lava_greaves', '熔岩护腿铸造', '📐', 'lava_greaves', '{"fire_crystal":4,"ore":6}', 1500, 1, 1, 27);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16

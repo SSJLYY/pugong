@@ -1884,8 +1884,8 @@
       }
       box.innerHTML = rows.map(g => {
         const gold = g.kind === 'ascend';
-        return `<div class="grave-item">
-          <b>${gold ? '🟡' : '⚫'} ${esc(g.owner)} · 第 ${g.gen} 世${gold ? ' 飞升' : ''}</b>
+        return `<div class="grave-item${g.perfect ? ' perfect-grave' : ''}">
+          <b>${g.perfect ? '🌕' : (gold ? '🟡' : '⚫')} ${esc(g.owner)} · 第 ${g.gen} 世${gold ? ' 飞升' : ''}${g.perfect ? ' · 圆满金碑' : ''}</b>
           <span class="gi-meta">${gold ? esc(g.killer || '飞升') : ('亡于 ' + esc(g.killer || '未知'))} · ${esc(g.finalHpText || '0')}血 · 🕯️${g.tributes || 0}${g.epitaph ? ' ·「' + esc(g.epitaph) + '」' : ''}</span>
           ${g.own ? '' : '<button class="sc-btn tribute-btn" data-grave="' + g.id + '">🕯️ 祭奠（200金）</button>'}
         </div>`;

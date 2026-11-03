@@ -452,6 +452,11 @@ body {
   border: 1px solid rgba(255,255,255,.05);
 }
 .grave-item.gold { background: rgba(232,197,104,.1); border: 1px solid var(--border-strong); }
+.grave-item.perfect-grave {
+  background: linear-gradient(135deg, rgba(232,197,104,.22), rgba(232,197,104,.06));
+  border: 1px solid #e8c568;
+  box-shadow: 0 0 14px rgba(232,197,104,.35);
+}
 .epitaph { color: #948d7c; font-style: italic; }
 
 

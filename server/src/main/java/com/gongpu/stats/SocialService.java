@@ -74,15 +74,44 @@ public class SocialService {
         for (User u : users.findAllById(names.keySet())) {
             names.put(u.getId(), u.getUsername());
         }
+        // 圆满金碑：飞升金碑集齐 12 个不同世代的玩家，其金碑置顶并标注圆满
+        java.util.Set<Long> perfect = perfectUsers(graves.findTop500ByKindOrderByCreatedAtDesc("ascend"));
         List<Map<String, Object>> rows = new ArrayList<>();
         for (Grave g : top) {
             Map<String, Object> view = graveView(g, names.getOrDefault(g.getUserId(), "无名氏"));
             view.put("own", viewerId != null && viewerId.equals(g.getUserId()));
+            if ("ascend".equals(g.getKind()) && perfect.contains(g.getUserId())) {
+                view.put("perfect", true);
+            }
             rows.add(view);
         }
+        // 置顶圆满金碑（稳定排序：组内仍按祭奠热度原序）
+        rows.sort((a, b) -> Boolean.compare(Boolean.TRUE.equals(b.get("perfect")),
+                Boolean.TRUE.equals(a.get("perfect"))));
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("ok", true);
         out.put("rows", rows);
+        return out;
+    }
+
+    /** 圆满金碑门槛：飞升世代种类数（集齐 12 世）。 */
+    public static final int PERFECT_GENS = 12;
+
+    /** 从金碑列表聚合「圆满」玩家集合：kind=ascend 且不同 gen 数 ≥ 12。包内可见供单测。 */
+    static java.util.Set<Long> perfectUsers(List<Grave> ascendGraves) {
+        Map<Long, java.util.Set<Integer>> gensByUser = new HashMap<>();
+        for (Grave g : ascendGraves) {
+            if (!"ascend".equals(g.getKind()) || g.getGen() == null) {
+                continue;
+            }
+            gensByUser.computeIfAbsent(g.getUserId(), k -> new java.util.HashSet<>()).add(g.getGen());
+        }
+        java.util.Set<Long> out = new java.util.HashSet<>();
+        gensByUser.forEach((uid, gens) -> {
+            if (gens.size() >= PERFECT_GENS) {
+                out.add(uid);
+            }
+        });
         return out;
     }
 

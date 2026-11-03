@@ -881,6 +881,11 @@ DELETE FROM `cfg_equipment_template` WHERE `code` IN ('bamboo_bow');
 INSERT INTO `cfg_equipment_template`
   (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
   ('bamboo_bow', '竹弓', '🎋', 'bow', 0, 'plain', '{"PATK":"3","RNG":"3"}', 10, 20, '新手远程启蒙', 1, 46);
+-- 第 17 轮：森林补胸甲「藤甲」（森林此前无胸甲位）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('vine_armor');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('vine_armor', '藤甲', '🌿', 'chest', 1, 'forest', '{"PDEF":"6","MDEF":"3","maxHP":"40"}', 10, 25, '藤蔓编织轻便耐用', 1, 47);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

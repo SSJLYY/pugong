@@ -42,4 +42,9 @@ class EquipBatch6Test {
     void round16BambooBow() throws Exception {
         assertEquip("bamboo_bow", "bow", "plain");
     }
+
+    @Test
+    void round17VineArmor() throws Exception {
+        assertEquip("vine_armor", "chest", "forest");
+    }
 }

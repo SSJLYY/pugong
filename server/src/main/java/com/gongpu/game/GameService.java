@@ -1348,6 +1348,7 @@ public class GameService {
         m.put("autoEquipBest", s.autoEquipBest);
         m.put("autoEat", s.autoEat);
         m.put("recentKills", s.recentKills == null ? new ArrayList<>() : new ArrayList<>(s.recentKills));
+        m.put("events", s.events == null ? new ArrayList<>() : new ArrayList<>(s.events));
         m.put("bossKills", new ArrayList<>(s.bossKills));
         m.put("codex", s.codex);
         m.put("achievements", new ArrayList<>(s.achievements));

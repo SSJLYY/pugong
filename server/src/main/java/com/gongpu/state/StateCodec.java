@@ -113,6 +113,9 @@ public final class StateCodec {
         if (s.materials == null) {
             s.materials = new java.util.LinkedHashMap<>();
         }
+        if (s.events == null) {
+            s.events = new java.util.ArrayList<>();
+        }
         if (s.potionBought == null) {
             s.potionBought = new java.util.LinkedHashMap<>();
         }

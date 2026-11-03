@@ -113,6 +113,8 @@ public class PlayerState {
     public boolean autoEat = false;
     /** 尸检用：最近 10 条击杀序列（"存活秒数 怪名"，环形覆盖）。 */
     public java.util.List<String> recentKills = new java.util.ArrayList<>();
+    /** 战斗日志：最近事件（Boss 击杀/图纸/史诗掉落），环形保留 20 条。 */
+    public java.util.List<String> events = new java.util.ArrayList<>();
 
     /** [legacy] v3.12 前 baglord 按天积累的额外栏数;现为"觉醒即无限",字段仅保留兼容旧档。 */
     public int extraSlots = 0;

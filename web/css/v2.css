@@ -930,3 +930,8 @@
 /* 药剂分组标题（第四批：25 种药剂分回复/增益/功能三组） */
 .potion-group{font-weight:700;font-size:13px;color:#c9a227;margin:10px 0 4px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.12)}
 .potion-group:first-of-type{border-top:none;margin-top:2px}
+
+/* 战斗日志（第六批：Boss 击杀/图纸/史诗掉落，最近 6 条） */
+.event-log{margin-top:6px;font-size:12px;color:#d8c98a}
+.event-log .event-line{padding:1px 0;border-top:1px dashed rgba(255,255,255,.07)}
+.event-log .event-line:first-child{border-top:none}

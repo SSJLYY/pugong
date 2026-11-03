@@ -425,6 +425,7 @@ public final class GameEngine {
         // 图鉴：记录已击杀的怪物（Boss 记 boss_区域 id）
         if (m.boss) {
             s.codex.add("boss_" + s.zone);
+            pushEvent(s, "👑 击败 Boss「" + (m.name == null ? "?" : m.name) + "」");
         } else if (m.id != null) {
             s.codex.add(m.id);
         }
@@ -447,6 +448,7 @@ public final class GameEngine {
             String bp = com.gongpu.cfg.GameData.instance().randomCraftBlueprint(s.zone);
             if (bp != null) {
                 s.materials.merge(com.gongpu.craft.CraftService.blueprintKey(bp), 1, Integer::sum);
+                pushEvent(s, "📐 掉落图纸（见锻造页）");
             }
         }
 
@@ -478,6 +480,7 @@ public final class GameEngine {
                 dropCount = 1;
                 // 史诗掉落 → 世界公告（异步，不影响战斗结算）
                 if (it.quality >= 3) {
+                    pushEvent(s, "🟣 掉落史诗「" + (it.name == null ? "装备" : it.name) + "」");
                     try {
                         com.gongpu.stats.SocialService.publishBulletin(
                                 s.bulletinName == null ? "无名武夫" : s.bulletinName,
@@ -493,6 +496,17 @@ public final class GameEngine {
 
     private static BigDecimal goldMul(PlayerState s) {
         return "goldhand".equals(s.talent) ? Num.of(1.20) : Num.of(1);
+    }
+
+    /** 战斗日志：追加一条事件，环形保留最近 20 条（旧档 events 为 null 时懒建）。 */
+    static void pushEvent(PlayerState s, String text) {
+        if (s.events == null) {
+            s.events = new java.util.ArrayList<>();
+        }
+        s.events.add(text);
+        while (s.events.size() > 20) {
+            s.events.remove(0);
+        }
     }
 
     /** 药剂 buff 是否生效（存在且未被沉默压制），引擎侧消费点统一口径。 */

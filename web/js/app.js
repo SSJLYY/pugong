@@ -785,6 +785,7 @@
       }
     }
     renderBag(view);
+    renderEvents(view);
     renderPotions(view);
     renderPassives(view);
     renderSaveHint(view);
@@ -1169,6 +1170,19 @@
       });
       document.body.appendChild(mask);
     });
+  }
+
+  // 战斗日志：最近 6 条大事倒序（签名守卫，无变化不重建）
+  function renderEvents(view) {
+    const box = $('eventLog');
+    if (!box) return;
+    const evs = view.events || [];
+    const sig = evs.join('|');
+    if (sig === renderEvents._sig) return;
+    renderEvents._sig = sig;
+    box.innerHTML = evs.length
+      ? evs.slice(-6).reverse().map(e => '<div class="event-line">' + esc(e) + '</div>').join('')
+      : '';
   }
 
   function renderBag(view) {

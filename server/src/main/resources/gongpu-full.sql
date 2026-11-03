@@ -1047,6 +1047,12 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('bloodrage', '血怒', '🩸', 'passive', 300, 0, 0, 0, '{"effect":"bloodrage","mul":1.15}', '生命低于 30% 时物理与魔法攻击 +15%', 1, 24);
 
+-- 第七批第 45 轮：新主动「冲锋」（下一击 ×3，一次性消费 buff）
+DELETE FROM `cfg_skill` WHERE `code` IN ('charge');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('charge', '冲锋', '🐎', 'active', 300, 15, 20, 0, '{"id":"charge","mul":3}', '下一击 ×3 伤害（30 秒内有效）', 1, 25);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

@@ -318,17 +318,18 @@ public final class GameConst {
     public record SkillDef(String id, String name, String emoji, int mp, int cd, int dur, String desc) {
     }
 
-    public static final Map<String, SkillDef> ACTIVE_SKILLS = Map.of(
-            "heavy", new SkillDef("heavy", "蓄力重击", "💥", 20, 30, 0, "下一击 ×5 伤害"),
-            "block", new SkillDef("block", "格挡反击", "🛡️", 25, 20, 3, "3s 内受击减半并反弹 50%"),
-            "roar", new SkillDef("roar", "怒吼", "😤", 15, 60, 0, "吓退当前怪物（移速判定）"),
-            "rapid", new SkillDef("rapid", "急速射击", "⚡", 40, 90, 5, "5s 内攻速 ×3"),
-            "burn", new SkillDef("burn", "燃烧生命", "🔥", 0, 300, 300, "烧当前血 25%，300s 内攻击 ×2"),
-            "surge", new SkillDef("surge", "魔力涌动", "✨", 50, 180, 10, "10s 内技能不耗蓝"),
-            "heal", new SkillDef("heal", "治愈术", "💚", 40, 60, 0, "立即恢复 35% 生命上限"),
-            "bloodlust", new SkillDef("bloodlust", "嗜血术", "🩸", 30, 45, 10, "10s 内吸血 +20%"),
-            "iron_wall", new SkillDef("iron_wall", "铁壁", "🧱", 35, 40, 8, "8s 内受击减半"),
-            "cleanse", new SkillDef("cleanse", "净化", "🕊️", 20, 30, 0, "清除中毒/灼烧/沉默/时滞全部负面状态"));
+    public static final Map<String, SkillDef> ACTIVE_SKILLS = Map.ofEntries(
+            Map.entry("heavy", new SkillDef("heavy", "蓄力重击", "💥", 20, 30, 0, "下一击 ×5 伤害")),
+            Map.entry("block", new SkillDef("block", "格挡反击", "🛡️", 25, 20, 3, "3s 内受击减半并反弹 50%")),
+            Map.entry("roar", new SkillDef("roar", "怒吼", "😤", 15, 60, 0, "吓退当前怪物（移速判定）")),
+            Map.entry("rapid", new SkillDef("rapid", "急速射击", "⚡", 40, 90, 5, "5s 内攻速 ×3")),
+            Map.entry("burn", new SkillDef("burn", "燃烧生命", "🔥", 0, 300, 300, "烧当前血 25%，300s 内攻击 ×2")),
+            Map.entry("surge", new SkillDef("surge", "魔力涌动", "✨", 50, 180, 10, "10s 内技能不耗蓝")),
+            Map.entry("heal", new SkillDef("heal", "治愈术", "💚", 40, 60, 0, "立即恢复 35% 生命上限")),
+            Map.entry("bloodlust", new SkillDef("bloodlust", "嗜血术", "🩸", 30, 45, 10, "10s 内吸血 +20%")),
+            Map.entry("iron_wall", new SkillDef("iron_wall", "铁壁", "🧱", 35, 40, 8, "8s 内受击减半")),
+            Map.entry("cleanse", new SkillDef("cleanse", "净化", "🕊️", 20, 30, 0, "清除中毒/灼烧/沉默/时滞/寒霜全部负面状态")),
+            Map.entry("charge", new SkillDef("charge", "冲锋", "🐎", 15, 20, 0, "下一击 ×3 伤害")));
 
     public record PassiveDef(String id, String name, String emoji, String desc) {
     }
@@ -358,6 +359,8 @@ public final class GameConst {
     /** 被动「血怒」（第七批）：触发血线（当前生命/上限）与双攻乘区。 */
     public static final double BLOODRAGE_HP_LINE = 0.30;
     public static final double BLOODRAGE_ATK_MUL = 1.15;
+    /** 主动「冲锋」（第七批）：下一击伤害乘区（一次性消费 buff，与蓄力重击同机制）。 */
+    public static final double CHARGE_MUL = 3.0;
     /** 被动「材料嗅觉」的材料掉率加成（百分点，叠加在基础 50% 上）。 */
     public static final double MAT_SENSE_BONUS = 0.25;
     /** 击杀基础材料掉率。 */

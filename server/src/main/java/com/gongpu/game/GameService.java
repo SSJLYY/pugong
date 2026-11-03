@@ -116,6 +116,7 @@ public class GameService {
                 s.buffs.put("burn", (double) def.dur());
             }
             case "heavy" -> s.buffs.put("heavy", 30.0);
+            case "charge" -> s.buffs.put("charge", 30.0);
             case "block" -> s.buffs.put("block", (double) def.dur());
             case "rapid" -> s.buffs.put("rapid", (double) def.dur());
             case "bloodlust" -> s.buffs.put("bloodlust", (double) def.dur());

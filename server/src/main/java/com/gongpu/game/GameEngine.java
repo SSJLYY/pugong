@@ -288,6 +288,11 @@ public final class GameEngine {
             perHit = Num.mul(perHit, Num.of(5));
             s.buffs.remove("heavy");
         }
+        // 主动·冲锋（第七批）：下一击 ×3，与蓄力重击同为一次性消费 buff（可叠乘至 ×15）
+        if (PanelCalculator.active(s, "charge")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.CHARGE_MUL));
+            s.buffs.remove("charge");
+        }
 
         BigDecimal totalDmg = Num.mul(perHit, punches);
 

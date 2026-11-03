@@ -94,6 +94,13 @@ public class SaveService {
         gs.setZone(s.zone);
         gs.setMaxHp(Num.plain(s.life.maxHP));
         gs.setAliveSeconds(StateCodec.aliveSeconds(s));
+        // 运营统计冗余列：与 JSON 内 stats 同步维护，聚合端一条 SUM 取全服累计
+        if (s.stats != null) {
+            gs.setPunchesTotal(s.stats.punches == null ? java.math.BigDecimal.ZERO : s.stats.punches);
+            gs.setKillsTotal(s.stats.kills == null ? java.math.BigDecimal.ZERO : s.stats.kills);
+            gs.setDeathsTotal(s.stats.deaths);
+            gs.setRebirthsTotal(s.stats.rebirths);
+        }
         gs.setStateJson(StateCodec.encode(s));
         gs.setUpdatedAt(Instant.now());
         repo.save(gs);
@@ -168,6 +175,12 @@ public class SaveService {
         gs.setGen(restored.gen);
         gs.setZone(restored.zone);
         gs.setMaxHp(Num.plain(restored.life.maxHP));
+        if (restored.stats != null) {
+            gs.setPunchesTotal(restored.stats.punches == null ? java.math.BigDecimal.ZERO : restored.stats.punches);
+            gs.setKillsTotal(restored.stats.kills == null ? java.math.BigDecimal.ZERO : restored.stats.kills);
+            gs.setDeathsTotal(restored.stats.deaths);
+            gs.setRebirthsTotal(restored.stats.rebirths);
+        }
         repo.save(gs);
         cache.put(userId, slot, restored);
         return restored;

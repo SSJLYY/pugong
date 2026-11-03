@@ -46,6 +46,19 @@ public class GameSave {
     @Column(name = "alive_seconds", nullable = false)
     private Long aliveSeconds = 0L;
 
+    /** 冗余累计出拳/击杀（运营统计 SUM 聚合用，persist 时与 stats 同步维护，免全表解析 JSON）。 */
+    @Column(name = "punches_total", precision = 65, scale = 0)
+    private java.math.BigDecimal punchesTotal = java.math.BigDecimal.ZERO;
+
+    @Column(name = "kills_total", precision = 65, scale = 0)
+    private java.math.BigDecimal killsTotal = java.math.BigDecimal.ZERO;
+
+    @Column(name = "deaths_total", nullable = false)
+    private Long deathsTotal = 0L;
+
+    @Column(name = "rebirths_total", nullable = false)
+    private Long rebirthsTotal = 0L;
+
     @Lob
     @Column(name = "state_json", nullable = false, columnDefinition = "LONGTEXT")
     private String stateJson;
@@ -170,5 +183,37 @@ public class GameSave {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public java.math.BigDecimal getPunchesTotal() {
+        return punchesTotal;
+    }
+
+    public void setPunchesTotal(java.math.BigDecimal punchesTotal) {
+        this.punchesTotal = punchesTotal;
+    }
+
+    public java.math.BigDecimal getKillsTotal() {
+        return killsTotal;
+    }
+
+    public void setKillsTotal(java.math.BigDecimal killsTotal) {
+        this.killsTotal = killsTotal;
+    }
+
+    public Long getDeathsTotal() {
+        return deathsTotal;
+    }
+
+    public void setDeathsTotal(Long deathsTotal) {
+        this.deathsTotal = deathsTotal;
+    }
+
+    public Long getRebirthsTotal() {
+        return rebirthsTotal;
+    }
+
+    public void setRebirthsTotal(Long rebirthsTotal) {
+        this.rebirthsTotal = rebirthsTotal;
     }
 }

@@ -3,7 +3,6 @@ package com.gongpu.stats;
 import com.gongpu.account.UserRepository;
 import com.gongpu.common.Num;
 import com.gongpu.state.GameSaveRepository;
-import com.gongpu.state.GameSave;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,8 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 每日运营统计聚合（DESIGN.md 运营章节）：每小时把当日累计值快照进 stat_daily。
- * <p>口径：punches/kills 取全服存档 JSON 聚合（当日值 = 累计 - 昨日快照），
- * deaths/rebirths 取存档统计字段；active_saves = 有当日结算的存档数（updated_at 今日）。</p>
+ * <p>口径：punches/kills/deaths/rebirths 取 game_save 冗余列 SUM（persist 时与 JSON 内
+ * stats 同步维护；当日值 = 累计 - 昨日快照）；active_saves = 有当日结算的存档数（updated_at 今日）。</p>
  */
 @Component
 public class StatDailyAggregator {
@@ -100,50 +99,39 @@ public class StatDailyAggregator {
         return new Delta(punches, kills, deaths, rebirths);
     }
 
-    private Snapshot collect() {
-        java.math.BigDecimal punches = Num.ZERO;
-        java.math.BigDecimal kills = Num.ZERO;
-        long deaths = 0;
-        long rebirths = 0;
+    /** 全服累计采集：冗余列一条 SUM 取回（persist 维护），不再拉全表 LONGTEXT 解析 JSON。 */
+    Snapshot collect() {
         try {
-            // 分页拉取（200/页）避免全表 List 常驻内存；每档只读 JSON 树的 stats 子树
-            // 累加四个计数，不再把整份存档（装备/词条/赋能）反序列化成对象图——
-            // 聚合成本从「全量对象图」降到「四个数字」，精确口径不变（decimalValue 精确解析）
-            int pageNo = 0;
-            org.springframework.data.domain.Page<GameSave> page;
-            do {
-                page = saves.findAll(org.springframework.data.domain.PageRequest.of(pageNo++, 200));
-                for (GameSave g : page) {
-                    try {
-                        com.fasterxml.jackson.databind.JsonNode stats =
-                                STATS_JSON.readTree(g.getStateJson()).get("stats");
-                        if (stats == null) {
-                            continue;
-                        }
-                        punches = Num.add(punches, decimalOf(stats.get("punches")));
-                        kills = Num.add(kills, decimalOf(stats.get("kills")));
-                        deaths += longOf(stats.get("deaths"));
-                        rebirths += longOf(stats.get("rebirths"));
-                    } catch (RuntimeException | java.io.IOException ignored) {
-                        // 坏档跳过
-                    }
-                }
-            } while (page.hasNext());
+            Object[] row = saves.sumStatsTotals();
+            if (row == null || row.length < 4) {
+                return new Snapshot("0", "0", 0L, 0L);
+            }
+            return new Snapshot(
+                    Num.plain(asDecimal(row[0])),
+                    Num.plain(asDecimal(row[1])),
+                    asLong(row[2]),
+                    asLong(row[3]));
         } catch (RuntimeException e) {
             log.warn("stat_daily 采集失败：{}", e.getMessage());
+            return new Snapshot("0", "0", 0L, 0L);
         }
-        return new Snapshot(Num.plain(punches), Num.plain(kills), deaths, rebirths);
     }
 
-    private static final com.fasterxml.jackson.databind.ObjectMapper STATS_JSON =
-            new com.fasterxml.jackson.databind.ObjectMapper();
-
-    private static java.math.BigDecimal decimalOf(com.fasterxml.jackson.databind.JsonNode n) {
-        return n == null || n.isNull() ? Num.ZERO : n.decimalValue();
+    private static java.math.BigDecimal asDecimal(Object v) {
+        if (v == null) {
+            return Num.ZERO;
+        }
+        if (v instanceof java.math.BigDecimal bd) {
+            return bd;
+        }
+        if (v instanceof Number n) {
+            return new java.math.BigDecimal(n.toString());
+        }
+        return Num.parse(String.valueOf(v), Num.ZERO);
     }
 
-    private static long longOf(com.fasterxml.jackson.databind.JsonNode n) {
-        return n == null || n.isNull() ? 0L : n.longValue();
+    private static long asLong(Object v) {
+        return v instanceof Number n ? n.longValue() : 0L;
     }
 
     /** 日切：午夜后把昨日行定为最终值。与 aggregate() 同口径写「当日增量」，

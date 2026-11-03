@@ -998,6 +998,12 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('material_sense', '材料嗅觉', '👃', 'passive', 300, 0, 0, 0, '{"effect":"mat_chance","bonus":0.25}', '击杀材料掉率 +25 个百分点（50%→75%）', 1, 22);
 
+-- 第六批第 89 轮：新主动「净化」（清除毒/灼烧/沉默/时滞，解毒剂的技能版）
+DELETE FROM `cfg_skill` WHERE `code` IN ('cleanse');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('cleanse', '净化', '🕊️', 'active', 300, 20, 30, 0, '{"id":"cleanse","cleanse":true}', '清除中毒/灼烧/沉默/时滞全部负面状态', 1, 23);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16

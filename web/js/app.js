@@ -941,7 +941,8 @@
     renderSkillButtons._bound = true;
     const map = {
       btnBurn: 'burn', btnRapid: 'rapid', btnHeavy: 'heavy',
-      btnBlock: 'block', btnSurge: 'surge', btnRoar: 'roar'
+      btnBlock: 'block', btnSurge: 'surge', btnRoar: 'roar',
+      btnHeal: 'heal', btnBloodlust: 'bloodlust', btnIronWall: 'iron_wall', btnCleanse: 'cleanse'
     };
     Object.entries(map).forEach(([btnId, skillId]) => {
       $(btnId).addEventListener('click', async () => {
@@ -2589,6 +2590,7 @@
         case 'Digit2': pot('hp_l', 'hp_s'); break;
         case 'Digit3': pot('mp', 'mp_l'); break;
         case 'Digit4': call(() => API.castSkill(API.state.slot, 'heal')); break;
+        case 'Digit5': call(() => API.castSkill(API.state.slot, 'cleanse')); break;
         case 'KeyF': { const b = $('btnFlee'); if (b) b.click(); break; }
         case 'KeyB': { const b = $('btnBoss'); if (b) b.click(); break; }
         default: return;

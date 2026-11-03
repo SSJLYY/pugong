@@ -102,6 +102,7 @@ public class GameService {
         double cdMul = ("master".equals(s.talent) ? 0.85 : 1.0) * masteryCdCut;
         s.cds.put(skillId, def.cd() * cdMul);
 
+        int cleansed = 0;
         switch (skillId) {
             case "burn" -> {
                 // 燃烧当前生命 25%，不伤上限
@@ -124,6 +125,14 @@ public class GameService {
                 BigDecimal healAmt = Num.mul(p.maxHP(), Num.of(GameConst.HEAL_SKILL_RATIO));
                 s.life.curHP = Num.min(Num.add(s.life.curHP, healAmt), p.maxHP());
             }
+            case "cleanse" -> {
+                // 净化：清除全部负面状态（毒/灼烧/沉默/时滞）——解毒剂的技能版，不消耗库存
+                for (String debuff : new String[]{"poison", "burn_dot", "silence", "slow"}) {
+                    if (s.buffs.remove(debuff) != null) {
+                        cleansed++;
+                    }
+                }
+            }
             case "surge" -> s.buffs.put("surge", (double) def.dur());
             case "roar" -> {
                 s.mob = null;
@@ -135,6 +144,9 @@ public class GameService {
         m.put("ok", true);
         m.put("skill", skillId);
         m.put("cd", s.cds.get(skillId));
+        if ("cleanse".equals(skillId)) {
+            m.put("cleansed", cleansed);
+        }
         m.put("curHP", Num.plain(s.life.curHP));
         m.put("curMP", Num.plain(s.life.curMP));
         return m;

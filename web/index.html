@@ -9,8 +9,8 @@
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="css/style.css?v=101">
-<link rel="stylesheet" href="css/v2.css?v=101">
+<link rel="stylesheet" href="css/style.css?v=102">
+<link rel="stylesheet" href="css/v2.css?v=102">
 </head>
 <body>
 
@@ -140,7 +140,13 @@
         <button id="btnFlee" class="skill-btn">🏃 逃跑回村</button>
         <button id="btnRebirth" class="skill-btn rebirth-btn" style="display:none">🌟 飞升转世</button>
       </div>
-      <div class="hotkey-hint">⌨️ 快捷键：<b>1</b> 小血药 · <b>2</b> 大血药 · <b>3</b> 蓝药 · <b>4</b> 治愈术 · <b>F</b> 逃跑 · <b>B</b> 挑战 Boss</div>
+      <div class="combat-btns">
+        <button id="btnHeal" class="skill-btn" title="治愈术：立即恢复 35% 生命上限（蓝 40 / 冷却 60s）">💚 治愈术</button>
+        <button id="btnBloodlust" class="skill-btn" title="嗜血术：10s 内吸血 +20%（蓝 30 / 冷却 45s）">🩸 嗜血术</button>
+        <button id="btnIronWall" class="skill-btn" title="铁壁：8s 内受击减半（蓝 35 / 冷却 40s）">🧱 铁壁</button>
+        <button id="btnCleanse" class="skill-btn" title="净化：清除中毒/灼烧/沉默/时滞（蓝 20 / 冷却 30s）">🕊️ 净化</button>
+      </div>
+      <div class="hotkey-hint">⌨️ 快捷键：<b>1</b> 小血药 · <b>2</b> 大血药 · <b>3</b> 蓝药 · <b>4</b> 治愈术 · <b>5</b> 净化 · <b>F</b> 逃跑 · <b>B</b> 挑战 Boss</div>
       <div id="buffBar" class="buff-bar" title="当前生效的增益 / 减益"></div>
       <div id="burnBuff" class="burn-buff"></div>
       <div id="eventLog" class="event-log" title="最近的战斗大事（Boss 击杀 / 图纸 / 史诗掉落）"></div>
@@ -302,10 +308,10 @@
 <div id="toast" class="toast"></div>
 
 <script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=101"></script>
-<script src="js/api.js?v=101"></script>
-<script src="js/achievements.js?v=101"></script>
-<script src="js/tutorial.js?v=101"></script>
-<script src="js/app.js?v=101"></script>
+<script src="js/audio.js?v=102"></script>
+<script src="js/api.js?v=102"></script>
+<script src="js/achievements.js?v=102"></script>
+<script src="js/tutorial.js?v=102"></script>
+<script src="js/app.js?v=102"></script>
 </body>
 </html>

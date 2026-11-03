@@ -427,8 +427,9 @@ public final class GameConst {
             java.util.Map.entry("spirit", new PotionDef("spirit", "聚灵药剂", "🔮", "120s 内蓝量上限 +300", 0, 0, "spirit_pot", 300, 120, 450)),
             java.util.Map.entry("regen2", new PotionDef("regen2", "回春药剂", "🌸", "60s 内回血 +100/秒", 0, 0, "regen_pot_l", 100, 60, 650)),
             java.util.Map.entry("fortune", new PotionDef("fortune", "聚宝药剂", "🧧", "300s 内击杀金币 +50%", 0, 0, "fortune_pot", 1.5, 300, 800)),
-            // ---- 第七批扩充：复合暴击（狂怒）/ 攻速上限（时之砂在第 82 轮） ----
-            java.util.Map.entry("rage", new PotionDef("rage", "狂怒药剂", "😤", "90s 内暴击率 +10%、暴击伤害 +30%", 0, 0, "rage_pot", 0.10, 90, 750)));
+            // ---- 第七批扩充：复合暴击（狂怒）/ 平直攻速（时之砂） ----
+            java.util.Map.entry("rage", new PotionDef("rage", "狂怒药剂", "😤", "90s 内暴击率 +10%、暴击伤害 +30%", 0, 0, "rage_pot", 0.10, 90, 750)),
+            java.util.Map.entry("timesand", new PotionDef("timesand", "时之砂", "⌛", "120s 内攻速 +0.2（平直加算，吃攻速乘区）", 0, 0, "sand_pot", 0.2, 120, 800)));
 
     /** 聚宝药剂的金币倍率（与点金手天赋乘算）。 */
     public static final double FORTUNE_POT_MUL = 1.5;

@@ -75,7 +75,7 @@ if [[ -f "$SRC_DIR/src/main/resources/gongpu-full.sql" ]]; then
 else
   err "缺 gongpu-full.sql——检查 server/src 是否完整 scp 上传"
 fi
-log "DB 迁移核对完成（验收口径:cfg_equipment_template 58/cfg_item 35/cfg_quest 16/cfg_craft 18/cfg_affix 22/cfg_skill 25）"
+log "DB 迁移核对完成（验收口径:cfg_equipment_template 58/cfg_item 36/cfg_quest 16/cfg_craft 18/cfg_affix 22/cfg_skill 25）"
 
 # ---------- 4. systemd ----------
 cat > /etc/systemd/system/${SERVICE}.service <<UNIT

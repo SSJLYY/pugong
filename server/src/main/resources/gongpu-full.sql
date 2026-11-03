@@ -1068,6 +1068,14 @@ DELETE FROM `cfg_buff` WHERE `code` IN ('rage_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('rage_pot', '狂怒', '😤', 'good', 'passive', '{"critAdd":0.10,"critdAdd":0.30}', '90s 内暴击率 +10%、暴击伤害 +30%', 1, 52);
 
+-- 第七批第 82 轮：新药剂「时之砂」（平直攻速 +0.2，120s，吃攻速乘区）
+DELETE FROM `cfg_item` WHERE `code` IN ('timesand');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('timesand', '时之砂', '⌛', 'potion', 800, '{"buff":"sand_pot","buffVal":0.2,"buffDur":120}', '120s 内攻速 +0.2（平直加算）', 1, 53);
+DELETE FROM `cfg_buff` WHERE `code` IN ('sand_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('sand_pot', '时之砂', '⌛', 'good', 'passive', '{"aspdAdd":0.2}', '120s 内攻速 +0.2', 1, 53);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

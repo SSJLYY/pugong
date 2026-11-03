@@ -81,6 +81,8 @@ public final class PanelCalculator {
         // 狂怒药剂（第七批）：复合暴击——暴击率与暴伤同补，与锐眼/残暴可叠加
         BigDecimal rageCrit = (active(s, "rage_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal rageCritd = (active(s, "rage_pot") && !silenced) ? Num.of(0.30) : Num.ZERO;
+        // 时之砂（第七批）：平直攻速加算（进乘区之前，与词条平直攻速同口径）
+        BigDecimal sandAspd = (active(s, "sand_pot") && !silenced) ? Num.of(0.2) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal bloodlustBuff = (active(s, "bloodlust") && !silenced) ? Num.of(0.20) : Num.ZERO;
         BigDecimal accPot = (active(s, "acc_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -174,7 +176,7 @@ public final class PanelCalculator {
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
                 Num.mul(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
-                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(aspdWithBonus(s.fixed.ASPD, flat, pct), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
+                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(Num.add(aspdWithBonus(s.fixed.ASPD, flat, pct), sandAspd), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
                 Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),

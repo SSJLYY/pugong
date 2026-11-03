@@ -44,6 +44,10 @@ public class User {
     @Column(name = "last_claim_day")
     private java.time.LocalDate lastClaimDay;
 
+    /** 连续签到天数（断签由原子领取的 CASE 重置为 1）。 */
+    @Column(name = "claim_streak", nullable = false)
+    private Integer claimStreak = 0;
+
     public Long getId() {
         return id;
     }
@@ -114,5 +118,13 @@ public class User {
 
     public void setLastClaimDay(java.time.LocalDate lastClaimDay) {
         this.lastClaimDay = lastClaimDay;
+    }
+
+    public Integer getClaimStreak() {
+        return claimStreak;
+    }
+
+    public void setClaimStreak(Integer claimStreak) {
+        this.claimStreak = claimStreak;
     }
 }

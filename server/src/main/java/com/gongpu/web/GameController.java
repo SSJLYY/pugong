@@ -180,11 +180,14 @@ public class GameController {
     // ==================== 请求体兜底校验 ====================
 
     /** 签到领取失败(并发另一槽抢先)时,按 gen 镜像扣回已入账的奖励。 */
-    private static void revertDailyReward(PlayerState s, int gen) {
+    private static void revertDailyReward(PlayerState s, int gen, long streakGold, boolean weekly) {
         s.gold = com.gongpu.common.Num.sub(s.gold,
-                java.math.BigDecimal.valueOf(200L + gen * 100L));
+                java.math.BigDecimal.valueOf(200L + gen * 100L + streakGold));
         mergeDown(s, "hp_s", 3);
         mergeDown(s, "mp", 2);
+        if (weekly) {
+            mergeDown(s, "hp_l", 2);
+        }
         if (gen >= 1) {
             mergeDown(s, "growth", 1);
         }
@@ -478,10 +481,20 @@ public class GameController {
             // 顺序:奖励入账 → 落库 → 原子领取标记。
             // 旧顺序(先领取标记后入账落库)在 persist 抛异常时标记已置、奖励蒸发;
             // 本顺序 persist 失败时标记未置(下次可重领),领取失败(并发另一槽抢先)则扣回入账。
-            java.math.BigDecimal gold = java.math.BigDecimal.valueOf(200L + s.gen * 100L);
+            // 连签预测与原子领取的 CASE 同口径:并发下只有胜者的 UPDATE 影响行数,
+            // 败者走 revert 全额扣回(含连签加成),DB 里的 streak 也只被胜者推进。
+            var acct = accounts.require(uid);
+            int streak = com.gongpu.account.AccountService.nextStreak(
+                    acct.getLastClaimDay(), acct.getClaimStreak() == null ? 0 : acct.getClaimStreak(), today);
+            long streakGold = com.gongpu.account.AccountService.streakBonusGold(streak);
+            boolean weekly = com.gongpu.account.AccountService.streakWeeklyBonus(streak);
+            java.math.BigDecimal gold = java.math.BigDecimal.valueOf(200L + s.gen * 100L + streakGold);
             s.gold = com.gongpu.common.Num.add(s.gold, gold);
             s.potions.merge("hp_s", 3, Integer::sum);
             s.potions.merge("mp", 2, Integer::sum);
+            if (weekly) {
+                s.potions.merge("hp_l", 2, Integer::sum);
+            }
             if (s.gen >= 1) {
                 s.potions.merge("growth", 1, Integer::sum);
             }
@@ -490,7 +503,7 @@ public class GameController {
             }
             saves.persist(uid, slot, s, null);
             if (!accounts.claimDailyAtomic(uid, today)) {
-                revertDailyReward(s, s.gen);
+                revertDailyReward(s, s.gen, streakGold, weekly);
                 saves.persist(uid, slot, s, null);
                 throw com.gongpu.common.ApiException.badRequest("今天已经签到过了，明天再来");
             }
@@ -499,6 +512,9 @@ public class GameController {
             reward.put("gold", com.gongpu.common.Num.plain(gold));
             reward.put("hp_s", 3);
             reward.put("mp", 2);
+            reward.put("streak", streak);
+            reward.put("streakGold", streakGold);
+            if (weekly) reward.put("hp_l", 2);
             if (s.gen >= 1) reward.put("growth", 1);
             if (s.gen >= 3) reward.put("ironpot", 1);
             Map<String, Object> out = game.fullView(s);

@@ -918,7 +918,9 @@
         sfx('levelup');
         const r = await call(() => API.dailyClaim(API.state.slot));
         const w = r.result && r.result.reward;
-        if (w) toast('🎁 签到成功：金币 ' + fmt(w.gold) + ' + 血药×' + (w.hp_s || 0) + ' 蓝药×' + (w.mp || 0) +
+        if (w) toast('🎁 签到成功' + (w.streak ? '（连签 ' + w.streak + ' 天' + (w.streakGold ? '，连签加成 +' + fmt(w.streakGold) : '') + '）' : '') +
+          '：金币 ' + fmt(w.gold) + ' + 血药×' + (w.hp_s || 0) + ' 蓝药×' + (w.mp || 0) +
+          (w.hp_l ? ' + 大血药×' + w.hp_l + '（连签周奖）' : '') +
           (w.growth ? ' + 修行药剂×1' : '') + (w.ironpot ? ' + 铁壁药剂×1' : ''), 'ok');
         applyView(r);
         markDailyDone();

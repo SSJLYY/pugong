@@ -20,13 +20,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
     java.util.List<User> findTop500ByUsernameContainingOrderByIdAsc(String username);
 
     /**
-     * 原子领取每日签到：仅当今日尚未领取时置 lastClaimDay=today。
+     * 原子领取每日签到：仅当今日尚未领取时置 lastClaimDay=today，并同语句维护连签——
+     * 昨日刚签过则连签 +1，否则重置为 1（同一条 UPDATE 内先算 streak 再置日期，口径一致）。
      * 返回影响行数（0 = 今天已领过），彻底避免"同账号两槽并发签到重复领奖"。
      */
     @Modifying
-    @Query("UPDATE User u SET u.lastClaimDay = :day " +
-           "WHERE u.id = :id AND (u.lastClaimDay IS NULL OR u.lastClaimDay < :day)")
-    int claimDaily(@Param("id") long id, @Param("day") LocalDate day);
+    @Query("UPDATE User u SET u.claimStreak = CASE WHEN u.lastClaimDay = :yesterday THEN u.claimStreak + 1 ELSE 1 END, "
+           + "u.lastClaimDay = :day "
+           + "WHERE u.id = :id AND (u.lastClaimDay IS NULL OR u.lastClaimDay < :day)")
+    int claimDaily(@Param("id") long id, @Param("day") LocalDate day, @Param("yesterday") LocalDate yesterday);
 
     /** 原子扣香火(复活):余额不足影响 0 行,两槽并发复活不可能双双成功。 */
     @Modifying

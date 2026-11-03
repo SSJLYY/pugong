@@ -95,7 +95,22 @@ public class AccountService {
      */
     @Transactional
     public boolean claimDailyAtomic(long userId, java.time.LocalDate today) {
-        return users.claimDaily(userId, today) > 0;
+        return users.claimDaily(userId, today, today.minusDays(1)) > 0;
+    }
+
+    /** 连签预测：与原子领取的 CASE 同口径——昨日签过则 +1，否则从 1 起（今天已签由调用方预检拦截）。 */
+    public static int nextStreak(java.time.LocalDate lastClaimDay, int curStreak, java.time.LocalDate today) {
+        return today.minusDays(1).equals(lastClaimDay) ? curStreak + 1 : 1;
+    }
+
+    /** 连签金币加成：每天 +50，封顶 7 天（350）。 */
+    public static long streakBonusGold(int streak) {
+        return Math.min(Math.max(streak, 0), 7) * 50L;
+    }
+
+    /** 连签周奖：每逢 7 的倍数天额外发大血药。 */
+    public static boolean streakWeeklyBonus(int streak) {
+        return streak > 0 && streak % 7 == 0;
     }
 
     private Map<String, Object> tokenPayload(User user) {

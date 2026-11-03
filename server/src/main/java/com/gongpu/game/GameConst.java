@@ -299,7 +299,7 @@ public final class GameConst {
             java.util.Map.entry("hp_l", new PotionDef("hp_l", "大血药", "🧪", "瞬回 50% 生命上限", 0.50, 0, null, 0, 0, 200)),
             java.util.Map.entry("mp", new PotionDef("mp", "蓝药", "🔵", "瞬回 40% 蓝量", 0, 0.40, null, 0, 0, 40)),
             java.util.Map.entry("food", new PotionDef("food", "兔肉", "🍖", "10s 内回血 +20", 0, 0, "regen_food", 20, 10, 10)),
-            java.util.Map.entry("cure", new PotionDef("cure", "解毒剂", "💊", "清除中毒/灼烧", 0, 0, null, 0, 0, 30)),
+            java.util.Map.entry("cure", new PotionDef("cure", "解毒剂", "💊", "清除中毒/灼烧/沉默", 0, 0, null, 0, 0, 30)),
             java.util.Map.entry("spd", new PotionDef("spd", "速度药剂", "💨", "30s 内攻速 +20%", 0, 0, "spd_pot", 0.20, 30, 100)),
             java.util.Map.entry("growth", new PotionDef("growth", "修行药剂", "🍵", "120s 内普攻成长 ×2", 0, 0, "growth_pot", 2.0, 120, 600)),
             java.util.Map.entry("ironpot", new PotionDef("ironpot", "铁壁药剂", "🛡️", "60s 内物防魔防 ×1.5", 0, 0, "iron_pot", 1.5, 60, 400)),

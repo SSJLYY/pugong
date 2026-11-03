@@ -158,6 +158,8 @@ public class GameService {
         if ("cure".equals(potionId)) {
             s.buffs.remove("poison");
             s.buffs.remove("burn_dot");
+            // 兼清沉默：Boss 沉默是与毒/灼烧同类的负面状态，一剂全清（解毒剂定位扩为净化剂）
+            s.buffs.remove("silence");
         }
         if (def.buff() != null) {
             s.buffs.put(def.buff(), def.buffDur());

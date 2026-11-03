@@ -100,6 +100,15 @@ CONTENT_MIGRATIONS=(
   migration-v3.9-affix-flat.sql
   migration-v3.13-affix-mp.sql
   migration-v3.14-potions.sql
+  migration-v3.16-stats-cols.sql
+  migration-v3.17-lifetime-stats.sql
+  migration-v3.18-potions2.sql
+  migration-v3.19-potions3.sql
+  migration-v3.20-potions4.sql
+  migration-v3.21-cure.sql
+  migration-v3.22-affixes.sql
+  migration-v3.23-equipment2.sql
+  migration-v3.24-equipment3.sql
 )
 for mf in "${CONTENT_MIGRATIONS[@]}"; do
   if [[ -f "$SRC_DIR/src/main/resources/$mf" ]]; then

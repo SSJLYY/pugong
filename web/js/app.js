@@ -1423,6 +1423,31 @@
       // input/change 捕获阶段打时间戳:勾选/下拉/输入后 3s 内轮询不回填
       cfg.addEventListener('input', () => { S._cfgTouchedAt = Date.now(); }, true);
       cfg.addEventListener('change', () => { S._cfgTouchedAt = Date.now(); }, true);
+      // 一键补给条（常驻，不随药剂列表重建）：基础四药补到 10 瓶，金币不足自动停
+      const rb = document.createElement('div');
+      rb.className = 'potion-item auto-cfg restock-bar';
+      rb.innerHTML = `
+        <div class="pi-info"><b>🧺 一键补给</b>
+          <div class="pi-desc">把小血药 / 大血药 / 蓝药 / 解毒剂补到 10 瓶（按当前金币量力买）</div></div>
+        <div class="pi-btns"><button id="btnRestock">补给</button></div>`;
+      box.appendChild(rb);
+      rb.querySelector('#btnRestock').addEventListener('click', async () => {
+        let bought = 0;
+        for (const id of ['hp_s', 'hp_l', 'mp', 'cure']) {
+          const have = (S.view && S.view.potions && S.view.potions[id]) || 0;
+          const need = 10 - have;
+          if (need <= 0) continue;
+          const def = (S.meta && S.meta.potions || []).find(p => p.id === id);
+          const gold = S.view ? Number(S.view.gold) : 0;
+          const afford = def && def.price > 0 ? Math.min(need, Math.floor(gold / def.price)) : 0;
+          if (afford <= 0) break;
+          const r = await call(() => API.buyPotion(API.state.slot, id, afford));
+          if (!r) break;
+          applyView(r);
+          bought += afford;
+        }
+        toast(bought > 0 ? `补给完成：买入 ${bought} 瓶` : '无需补给或金币不足');
+      });
       $('btnAutoCfg').addEventListener('click', async () => {
         const hp = Math.max(0, Math.min(0.9, (Number($('autoHpInput').value) || 0) / 100));
         const mp = Math.max(0, Math.min(0.9, (Number($('autoMpInput').value) || 0) / 100));

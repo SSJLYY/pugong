@@ -345,11 +345,16 @@
       S._hiddenSkip = ((S._hiddenSkip || 0) + 1) % 5;
       if (S._hiddenSkip !== 0) return;
     }
+    // 失败退避:服务端重启/断网时不每秒硬撞,连败间隔指数放大(2→4→8…封顶 30 秒),
+    // 一次成功即清零;切回前台时 visibilitychange 会清退避立即补一帧
+    if (S._nextPollAt && Date.now() < S._nextPollAt) return;
     S.busy = true;
     try {
       const t0 = Date.now();
       const view = await API.gameState(API.state.slot);
       setNet(true);
+      S._failStreak = 0;
+      S._nextPollAt = 0;
       // 写请求(嗑药/穿装/切图等)发起于本次轮询之后 → 轮询快照已过期,丢弃防 UI 回退
       // >= :写请求与轮询同毫秒发起时,旧值同样不能盖掉新写入
       if (S.lastWriteAt >= t0) return;
@@ -380,6 +385,8 @@
       }
     } catch (e) {
       setNet(e.code !== 'NETWORK');
+      S._failStreak = (S._failStreak || 0) + 1;
+      S._nextPollAt = Date.now() + Math.min(30000, 1000 * Math.pow(2, S._failStreak));
     } finally {
       S.busy = false;
     }
@@ -2025,7 +2032,10 @@
       });
     }
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && S.view && !S.view.dead) tick();
+      if (document.visibilityState === 'visible' && S.view && !S.view.dead) {
+        S._nextPollAt = 0;   // 回到前台立即补一帧，不等退避到期
+        tick();
+      }
     });
   }
 

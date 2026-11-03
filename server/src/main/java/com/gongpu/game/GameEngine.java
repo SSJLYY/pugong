@@ -530,7 +530,12 @@ public final class GameEngine {
     }
 
     private static BigDecimal goldMul(PlayerState s) {
-        return "goldhand".equals(s.talent) ? Num.of(1.20) : Num.of(1);
+        BigDecimal mul = "goldhand".equals(s.talent) ? Num.of(1.20) : Num.of(1);
+        // 聚宝药剂：击杀金币 +50%（经济类增益不走战斗面板，与鸿运药剂同口径不查沉默）
+        if (buffLeft(s, "fortune_pot") > 0) {
+            mul = Num.mul(mul, Num.of(GameConst.FORTUNE_POT_MUL));
+        }
+        return mul;
     }
 
     /** 战斗日志：追加一条事件，环形保留最近 20 条（旧档 events 为 null 时懒建）。 */

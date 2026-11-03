@@ -969,6 +969,14 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('plain_veteran', '平原老兵', '🎖️', '功成身退的老兵想看看后辈的拳头：平原连战三十场', 'plain', '{"maxHP":2000}', 30, 200, 'might', 1, 1, 1, 13);
 
+-- 第六批第 84 轮：新药剂「聚宝药剂」（300s 击杀金币 +50%，补齐金币维度）
+DELETE FROM `cfg_item` WHERE `code` IN ('fortune');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('fortune', '聚宝药剂', '🧧', 'potion', 800, '{"buff":"fortune_pot","buffVal":1.5,"buffDur":300}', '300s 内击杀金币 +50%', 1, 51);
+DELETE FROM `cfg_buff` WHERE `code` IN ('fortune_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('fortune_pot', '聚宝', '🧧', 'good', 'passive', '{"goldMul":1.5}', '300s 内击杀金币 +50%', 1, 51);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16

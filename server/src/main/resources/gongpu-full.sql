@@ -1094,6 +1094,12 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('executioner', '处决者', '🪓', 'passive', 400, 0, 0, 0, '{"effect":"executioner","mul":1.25}', 'Boss 生命低于 30% 时对其伤害 +25%', 1, 26);
 
+-- 第七批第 86 轮：新主动「迟缓咒」（当前怪物攻速 -30%，持续 8 秒）
+DELETE FROM `cfg_skill` WHERE `code` IN ('hex_slow');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('hex_slow', '迟缓咒', '🐌', 'active', 350, 20, 25, 8, '{"id":"hex_slow","aspdMul":0.7}', '当前怪物攻速 -30%，持续 8 秒', 1, 27);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

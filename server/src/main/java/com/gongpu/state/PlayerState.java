@@ -243,6 +243,8 @@ public class PlayerState {
         public long gold;
         public boolean boss;
         public double silenceCd;
+        /** 迟缓咒剩余秒数（第七批）：>0 时本怪攻速 ×0.7，随存档持久化、advance 递减。 */
+        public double slowT;
         /** 怪物词条 id（GameConst.MOB_TRAITS 的键）；null=普通怪。旧档无此字段即 null。 */
         public String trait;
         /** Boss 二阶段（第七批）：血量跌破 50% 后置位，攻速/攻击提升，只触发一次。 */

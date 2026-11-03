@@ -329,7 +329,11 @@ public final class GameConst {
             Map.entry("bloodlust", new SkillDef("bloodlust", "嗜血术", "🩸", 30, 45, 10, "10s 内吸血 +20%")),
             Map.entry("iron_wall", new SkillDef("iron_wall", "铁壁", "🧱", 35, 40, 8, "8s 内受击减半")),
             Map.entry("cleanse", new SkillDef("cleanse", "净化", "🕊️", 20, 30, 0, "清除中毒/灼烧/沉默/时滞/寒霜全部负面状态")),
-            Map.entry("charge", new SkillDef("charge", "冲锋", "🐎", 15, 20, 0, "下一击 ×3 伤害")));
+            Map.entry("charge", new SkillDef("charge", "冲锋", "🐎", 15, 20, 0, "下一击 ×3 伤害")),
+            Map.entry("hex_slow", new SkillDef("hex_slow", "迟缓咒", "🐌", 20, 25, 8, "当前怪物攻速 -30%，持续 8 秒")));
+
+    /** 主动「迟缓咒」（第七批）：怪物攻速乘区（MobState.slowT 计时）。 */
+    public static final double HEX_SLOW_ASPD_MUL = 0.7;
 
     public record PassiveDef(String id, String name, String emoji, String desc) {
     }

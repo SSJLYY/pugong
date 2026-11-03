@@ -777,7 +777,8 @@
       $('mobEmoji').textContent = view.mob.emoji;
       $('mobName').textContent = view.mob.name + (view.mob.boss ? ' 👑' : '')
         + (view.mob.trait ? ' ' + view.mob.trait.emoji : '')
-        + (view.mob.phase2 ? ' 🔥二阶段' : '');
+        + (view.mob.phase2 ? ' 🔥二阶段' : '')
+        + (view.mob.slowed ? ' 🐌迟缓' + view.mob.slowed + 's' : '');
       // 战斗飘字：怪物血量下降 → 弹伤害（暴击概率抽样 / 击杀提示）
       if (S.lastMobId === view.mob.id && S.lastMobHp !== null) {
         try {

@@ -117,6 +117,12 @@ public class GameService {
             }
             case "heavy" -> s.buffs.put("heavy", 30.0);
             case "charge" -> s.buffs.put("charge", 30.0);
+            case "hex_slow" -> {
+                // 迟缓咒（第七批）：作用于当前怪物（无目标时空放，仅进 CD 不报错——与怒吼的强校验不同，容错优先）
+                if (s.mob != null) {
+                    s.mob.slowT = def.dur();
+                }
+            }
             case "block" -> s.buffs.put("block", (double) def.dur());
             case "rapid" -> s.buffs.put("rapid", (double) def.dur());
             case "bloodlust" -> s.buffs.put("bloodlust", (double) def.dur());
@@ -1416,6 +1422,10 @@ public class GameService {
         // Boss 二阶段（第七批）：前端血条狂怒标识
         if (s.mob.boss && s.mob.phase2) {
             m.put("phase2", true);
+        }
+        // 迟缓咒（第七批）：怪物减益剩余秒数下发，前端名字后缀 🐌
+        if (s.mob.slowT > 0) {
+            m.put("slowed", Math.round(s.mob.slowT * 10) / 10.0);
         }
         // 怪物词条（v3.15）：下发完整展示信息，前端只渲染徽章不查表
         if (s.mob.trait != null) {

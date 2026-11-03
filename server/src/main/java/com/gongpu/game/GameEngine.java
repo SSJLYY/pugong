@@ -754,6 +754,10 @@ public final class GameEngine {
         if (m.boss && m.phase2) {
             hits *= GameConst.BOSS_PHASE2_ASPD_MUL;
         }
+        // 迟缓咒（第七批）：玩家施放的怪物减益，攻速 ×0.7（与词条/二阶段乘算）
+        if (m.slowT > 0) {
+            hits *= GameConst.HEX_SLOW_ASPD_MUL;
+        }
         // 词条·破甲：结算时玩家的双防按比例打折
         BigDecimal defMul = "sunder".equals(m.trait)
                 ? Num.of(1 - GameConst.TRAIT_SUNDER_IGNORE)
@@ -817,6 +821,11 @@ public final class GameEngine {
                 advanceAfterKill(s, m);
                 return;
             }
+        }
+
+        // 迟缓咒计时（第七批）：到期自动解除
+        if (m.slowT > 0) {
+            m.slowT = Math.max(0, m.slowT - seconds);
         }
 
         // Boss 沉默

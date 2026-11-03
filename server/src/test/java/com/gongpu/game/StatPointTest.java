@@ -31,6 +31,22 @@ class StatPointTest {
         return s;
     }
 
+    /** 亿级余额一次梭哈（玩家实测需求：3.86 亿点、旧前端最高档只给 +10000）。 */
+    @Test
+    void allocateHundredMillionAtOnce() {
+        PlayerState s = statlord();
+        s.freePoints = Num.of(386_000_000L);
+        PanelCalculator.Panel base = PanelCalculator.of(s);
+        game.allocateStatPoint(s, "PATK", 100_000_000);
+        assertEquals(0, s.freePoints.compareTo(Num.of(286_000_000L)), "扣点应精确");
+        PanelCalculator.Panel p = PanelCalculator.of(s);
+        assertEquals(0, p.PATK().compareTo(Num.add(base.PATK(), Num.of(100_000_000L))),
+                "物攻应 +1 亿（每点 +1）");
+        // 剩余全部一次加完
+        game.allocateStatPoint(s, "PATK", 286_000_000);
+        assertEquals(0, s.freePoints.compareTo(Num.ZERO), "全部梭哈后余额清零");
+    }
+
     @Test
     void killsGrantOnePointEach() {
         PlayerState s = statlord();

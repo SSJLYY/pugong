@@ -2527,7 +2527,17 @@
       const stat = tr.dataset.stat;
       const label = tr.querySelector('td').textContent.trim();
       const v = window.__game ? window.__game.view() : null;
-      const choices = [1, 10, 100, 1000, 10000].map(n => ({ label: '+' + n + ' 点', value: n }));
+      // 档位随余额放大：十进制阶梯过滤到余额内（亿级余额能直接看到 +1亿 档），末尾加「全部」一键梭哈
+      // 单次上限 20 亿：后端 count 是 int，超过 Integer.MAX_VALUE 会被参数校验拒绝
+      const avail = v ? Math.floor(Number(v.freePoints)) : 0;
+      const ladder = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000]
+        .filter(n => n <= avail);
+      if (!ladder.length) ladder.push(1);
+      const choices = ladder.map(n => ({ label: '+' + fmt(n) + ' 点', value: n }));
+      if (avail > ladder[ladder.length - 1]) {
+        const all = Math.min(avail, 2000000000);
+        choices.push({ label: '🎯 全部（+' + fmt(all) + ' 点）', value: all });
+      }
       const n = await pickModal('💠 加点 · ' + label,
         '自由属性点:' + (v ? fmt(v.freePoints) : '?') + ' · 每点增量随属性不同(攻/防+1,攻速+0.05,暴击+0.5%…)',
         choices);

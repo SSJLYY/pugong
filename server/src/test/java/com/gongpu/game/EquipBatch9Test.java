@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** 第六批第 81 轮：区域装备补缺——雪山头盔的 SQL 行存在且部位/区域正确。 */
+/** 第六批第 81/82 轮：区域装备补缺——雪山头盔/火山护腿的 SQL 行与装备总数。 */
 class EquipBatch9Test {
 
     private static String allSql() throws Exception {

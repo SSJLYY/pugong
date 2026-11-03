@@ -81,6 +81,35 @@ class TemperTest {
         assertThrows(ApiException.class, () -> game.temper(s, 5), "索引越界应拒绝");
     }
 
+    // ---- 第 13 轮：面板乘区与评分同口径 ----
+
+    @Test
+    void panelAppliesTemperMultiplierButNotToBulletMp() {
+        PlayerState s = NewState.create();
+        PlayerState.Item gun = new PlayerState.Item();
+        gun.name = "魔弹枪";
+        gun.slot = "weapon";
+        gun.base.put("PATK", Num.of(100));
+        gun.base.put("BULLET_MP", Num.of(10));
+        s.equipped.put("weapon", gun);
+        PanelCalculator.Panel p0 = PanelCalculator.of(s);
+        gun.temper = 5;
+        PanelCalculator.Panel p5 = PanelCalculator.of(s);
+        assertEquals(0, p5.PATK().compareTo(Num.add(p0.PATK(), Num.of(20))),
+                "淬炼 5 级应给底子 +20%（100×0.04×5）");
+        assertEquals(0, p5.BULLETMP().compareTo(Num.of(10)), "每发耗蓝是成本，不吃淬炼乘区");
+    }
+
+    @Test
+    void equipScoreGrowsWithTemper() {
+        PlayerState.Item it = bagItem("plain", 1);
+        it.base.put("PATK", Num.of(50));
+        double s0 = GameService.equipScore(it);
+        it.temper = 5;
+        double s5 = GameService.equipScore(it);
+        assertEquals(s0 * 1.2, s5, 1e-9, "评分应与面板同口径计淬炼乘区（自动换装不低估淬炼装）");
+    }
+
     @Test
     void temperLockedItemAllowed() {
         PlayerState s = NewState.create();

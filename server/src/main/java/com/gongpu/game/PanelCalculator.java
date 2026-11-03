@@ -102,7 +102,10 @@ public final class PanelCalculator {
             if (it == null) {
                 continue;
             }
-            BigDecimal enh = Num.of(1 + (double) it.enhance * GameConst.ENHANCE_STAT_BONUS);
+            // 强化与淬炼双乘区（淬炼第七批：+4%/级独立计层）；BULLET_MP 成本不吃任一乘区（下方分支处理）
+            BigDecimal enh = Num.mul(
+                    Num.of(1 + (double) it.enhance * GameConst.ENHANCE_STAT_BONUS),
+                    Num.of(1 + (double) it.temper * GameConst.TEMPER_STAT_BONUS));
             for (Map.Entry<String, BigDecimal> e : it.base.entrySet()) {
                 // BULLET_MP 是每发耗蓝的「成本」而非战力:强化只放大战力,成本不吃强化乘区
                 // (否则魔弹枪越强化越哑火,与吞噬合并的同口径修复,见 GameService.devourInto)

@@ -78,6 +78,9 @@ public final class PanelCalculator {
         BigDecimal frostMul = active(s, "frost") ? Num.of(GameConst.TRAIT_FROST_ASPD_MUL) : Num.of(1);
         BigDecimal critPot = (active(s, "crit_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal critdPot = (active(s, "critd_pot") && !silenced) ? Num.of(0.50) : Num.ZERO;
+        // 狂怒药剂（第七批）：复合暴击——暴击率与暴伤同补，与锐眼/残暴可叠加
+        BigDecimal rageCrit = (active(s, "rage_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
+        BigDecimal rageCritd = (active(s, "rage_pot") && !silenced) ? Num.of(0.30) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal bloodlustBuff = (active(s, "bloodlust") && !silenced) ? Num.of(0.20) : Num.ZERO;
         BigDecimal accPot = (active(s, "acc_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -175,8 +178,8 @@ public final class PanelCalculator {
                 Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),
-                Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot)),
-                Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot),
+                Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit)),
+                Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd),
                 Num.min(GameConst.BLESS_CAP.get("ACC"),
                         Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot)),
                 Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot)),

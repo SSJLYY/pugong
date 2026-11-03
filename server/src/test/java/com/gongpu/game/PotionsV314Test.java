@@ -33,8 +33,8 @@ class PotionsV314Test {
 
     @Test
     void potionTableHas18Entries() {
-        // 18 = v3.14 基线（8 旧 + 10 新）；第四批 25 种；第六批 +8 新维度 + 聚宝 = 34
-        assertEquals(34, GameConst.POTIONS.size(), "GameConst 兜底表应有 34 种药剂(33 + 聚宝)");
+        // 18 = v3.14 基线（8 旧 + 10 新）；第四批 25 种；第六批 +8 新维度 + 聚宝 = 34；第七批 +狂怒 = 35
+        assertEquals(35, GameConst.POTIONS.size(), "GameConst 兜底表应有 35 种药剂(34 + 狂怒)");
         for (String id : new String[]{"crit", "critd", "lifesteal", "atk", "def", "aspd",
                 "acc", "eva", "mregen", "shield"}) {
             assertNotNull(GameConst.POTIONS.get(id), "缺少新药剂: " + id);

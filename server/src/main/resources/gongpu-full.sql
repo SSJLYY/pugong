@@ -1060,6 +1060,14 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('charge', '冲锋', '🐎', 'active', 300, 15, 20, 0, '{"id":"charge","mul":3}', '下一击 ×3 伤害（30 秒内有效）', 1, 25);
 
+-- 第七批第 81 轮：新药剂「狂怒药剂」（复合暴击：暴击率 +10% 且暴伤 +30%，90s）
+DELETE FROM `cfg_item` WHERE `code` IN ('rage');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('rage', '狂怒药剂', '😤', 'potion', 750, '{"buff":"rage_pot","buffVal":0.10,"buffDur":90}', '90s 内暴击率 +10%、暴击伤害 +30%', 1, 52);
+DELETE FROM `cfg_buff` WHERE `code` IN ('rage_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('rage_pot', '狂怒', '😤', 'good', 'passive', '{"critAdd":0.10,"critdAdd":0.30}', '90s 内暴击率 +10%、暴击伤害 +30%', 1, 52);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

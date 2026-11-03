@@ -1076,6 +1076,12 @@ DELETE FROM `cfg_buff` WHERE `code` IN ('sand_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('sand_pot', '时之砂', '⌛', 'good', 'passive', '{"aspdAdd":0.2}', '120s 内攻速 +0.2', 1, 53);
 
+-- 第七批第 83 轮：高阶词条「破军」（物攻上位版，锋利 4~16 → 16~40）
+DELETE FROM `cfg_affix` WHERE `code` IN ('pojun');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('pojun', '破军', 'PATK', 'flat', 16, 40, 'epic', NULL, NULL, 1, 23);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

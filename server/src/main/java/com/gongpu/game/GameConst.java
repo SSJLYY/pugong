@@ -469,7 +469,9 @@ public final class GameConst {
             new Affix("猎风", "SPD", "flat", 30, 60, "epic", null, null),
             new Affix("生命之源", "maxHP", "flat", 300, 800, "epic", null, null),
             new Affix("魔力源泉", "MP", "flat", 500, 1200, "epic", null, null),
-            new Affix("疾雷", "ASPD", "flat", 0.10, 0.20, "epic", null, null));
+            new Affix("疾雷", "ASPD", "flat", 0.10, 0.20, "epic", null, null),
+            // ---- 第七批：攻击维度上位（锋利的史诗版） ----
+            new Affix("破军", "PATK", "flat", 16, 40, "epic", null, null));
 
     /** 掉落概率（按区域）。 */
     public static final Map<String, Double> DROP_RATE = Map.of(

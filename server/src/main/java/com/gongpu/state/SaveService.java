@@ -213,6 +213,9 @@ public class SaveService {
         s.potions.put("hp_s", 3);
         s.buffs = new java.util.LinkedHashMap<>();
         s.cds = new java.util.LinkedHashMap<>();
+        // 护盾是 shield_pot buff 的附属量（到期即清零，见 GameEngine.tickBuff）：
+        // buff 全清时盾必须同清，否则新一世白带一层无 buff 的盾（重置审计补漏）
+        s.shield = java.math.BigDecimal.ZERO;
         s.activeQuests = new java.util.LinkedHashMap<>();
         s.zone = "village";
         s.stats.punches = java.math.BigDecimal.ZERO;

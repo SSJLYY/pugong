@@ -65,6 +65,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(405).body(body("METHOD_NOT_ALLOWED", "请求方法不允许: " + e.getMethod()));
     }
 
+    /** 媒体类型不支持（如表单直发 JSON 接口）：415，而非落进兜底 500。 */
+    @ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleMediaType(
+            org.springframework.web.HttpMediaTypeNotSupportedException e) {
+        return ResponseEntity.status(415).body(body("UNSUPPORTED_MEDIA_TYPE", "请求需使用 application/json"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleOther(Exception e, HttpServletRequest req) {
         // 500 必须带请求上下文:只有堆栈没有 URI,排障时要靠猜

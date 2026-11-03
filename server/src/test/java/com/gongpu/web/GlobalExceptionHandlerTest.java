@@ -42,4 +42,30 @@ class GlobalExceptionHandlerTest {
         assertEquals(405, r.getStatusCode().value());
         assertEquals("METHOD_NOT_ALLOWED", r.getBody().get("code"));
     }
+
+    /** 第七批第 79 轮补锁：坏 JSON / 缺参数同为 400 统一形状，未知异常兜底 500 INTERNAL。 */
+    @Test
+    void badJsonAndMissingParamAre400() {
+        ResponseEntity<Map<String, Object>> r1 = handler.handleUnreadable(new RuntimeException("bad json"));
+        assertEquals(400, r1.getStatusCode().value());
+        assertEquals("BAD_REQUEST", r1.getBody().get("code"));
+        assertEquals(Boolean.FALSE, r1.getBody().get("ok"));
+
+        ResponseEntity<Map<String, Object>> r2 = handler.handleMissingParam(
+                new org.springframework.web.bind.MissingServletRequestParameterException("id", "String"));
+        assertEquals(400, r2.getStatusCode().value());
+        assertEquals("BAD_REQUEST", r2.getBody().get("code"));
+    }
+
+    @Test
+    void unknownExceptionFallsBackToInternal() {
+        jakarta.servlet.http.HttpServletRequest req =
+                org.mockito.Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
+        org.mockito.Mockito.when(req.getMethod()).thenReturn("POST");
+        org.mockito.Mockito.when(req.getRequestURI()).thenReturn("/api/game/1/buy");
+        ResponseEntity<Map<String, Object>> r = handler.handleOther(new IllegalStateException("boom"), req);
+        assertEquals(500, r.getStatusCode().value());
+        assertEquals("INTERNAL", r.getBody().get("code"));
+        assertEquals(Boolean.FALSE, r.getBody().get("ok"));
+    }
 }

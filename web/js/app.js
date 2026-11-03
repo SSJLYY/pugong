@@ -1594,14 +1594,14 @@
           ev.stopPropagation();
           const act = b.dataset.act;
           if (act === 'discard' && !confirm('丢弃该装备？不可恢复。')) return;
-          let lockIdx = -1;
+          let lockIdx = -1, lockIdx2 = -1;
           if (act === 'reroll') {
             const afx = it.affixes || [];
             if (afx.length > 1) {
-              // 多词条：模态点选锁定词条（费用×3），或全部重刷——替代 prompt 输序号
+              // 多词条：模态点选锁定词条，或全部重刷——替代 prompt 输序号
               const choices = afx.map((a, i) => ({
                 label: (i + 1) + '. ' + esc(affixText(a)),
-                sub: '锁定此词条 · 其余重刷 · 费用×3',
+                sub: afx.length >= 3 ? '锁定此词条（下一步可再锁一条）· 费用×3 起' : '锁定此词条 · 其余重刷 · 费用×3',
                 value: i - 0
               })).concat([{ label: '全部重刷', sub: '不锁定 · 费用正常', value: -1 }]);
               const pity = Number(view.rerollPity || 0);
@@ -1609,6 +1609,18 @@
               const pick = await pickModal('🔁 洗炼 · ' + esc(it.name), '底子与强化保留，只重刷未锁定词条。' + pityTxt, choices);
               if (pick === null) return;   // 取消
               lockIdx = pick;
+              if (lockIdx >= 0 && afx.length >= 3) {
+                // 双锁第二步：再锁一条（费用×5）或只锁一条（×3）
+                const choices2 = afx.map((a, i) => ({
+                  label: (i + 1) + '. ' + esc(affixText(a)),
+                  sub: '再锁定此词条 · 双锁费用×5',
+                  value: i - 0
+                })).filter(c => c.value !== lockIdx)
+                  .concat([{ label: '就锁一条', sub: '费用×3 · 其余重刷', value: -1 }]);
+                const pick2 = await pickModal('🔁 洗炼 · 再锁一条？', '双锁：两条词条都不动、其余重刷（费用 ×5）。', choices2);
+                if (pick2 === null) return;   // 取消整个洗炼
+                lockIdx2 = pick2;
+              }
             } else if (!confirm('洗炼会重刷全部词条（底子与强化保留）。确认？')) {
               return;   // 单词条无可锁,保留一道确认防误点
             }
@@ -1641,7 +1653,7 @@
             : act === 'equipExtra' ? () => API.equipExtra(API.state.slot, idx)
             : act === 'enhance' ? () => API.enhanceItem(API.state.slot, idx)
               : act === 'temper' ? () => API.temperItem(API.state.slot, idx)
-              : act === 'reroll' ? () => API.rerollItem(API.state.slot, idx, lockIdx)
+              : act === 'reroll' ? () => API.rerollItem(API.state.slot, idx, lockIdx, lockIdx2)
               : act === 'discard' ? () => API.discardItem(API.state.slot, idx)
               : act === 'dismantle' ? () => API.dismantleItem(API.state.slot, idx)
               : () => API.sellItem(API.state.slot, idx);

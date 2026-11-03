@@ -70,6 +70,26 @@ public class AccountService {
     }
 
     /**
+     * 修改密码（已登录）：验原密码后换新哈希。原密码错走 401（前端不会误清会话，
+     * 因 /api/auth/* 的 401 不触发过期广播）；新密码规则与注册一致（至少 6 位）且不能与原密码相同。
+     */
+    @Transactional
+    public void changePassword(long userId, String oldPassword, String newPassword) {
+        User user = require(userId);
+        if (!encoder.matches(oldPassword == null ? "" : oldPassword, user.getPasswordHash())) {
+            throw ApiException.unauthorized("原密码不正确");
+        }
+        if (newPassword == null || newPassword.length() < 6) {
+            throw ApiException.badRequest("新密码至少 6 位");
+        }
+        if (encoder.matches(newPassword, user.getPasswordHash())) {
+            throw ApiException.badRequest("新密码不能与原密码相同");
+        }
+        user.setPasswordHash(encoder.encode(newPassword));
+        users.save(user);
+    }
+
+    /**
      * 原子每日签到：DB 条件更新按影响行数判定，防同账号多槽并发重复领奖。
      * 返回 false = 今天已领过。
      */

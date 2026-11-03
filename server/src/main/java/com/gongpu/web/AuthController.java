@@ -19,6 +19,9 @@ public class AuthController {
     public record LoginReq(@NotBlank String username, @NotBlank String password) {
     }
 
+    public record PwReq(@NotBlank String oldPassword, @NotBlank String newPassword) {
+    }
+
     private final AccountService account;
     private final AuthRateLimiter limiter;
 
@@ -47,6 +50,14 @@ public class AuthController {
         Map<String, Object> out = account.register(req.username(), req.password());
         limiter.onRegister(ip);
         return out;
+    }
+
+    /** 修改密码（需登录态，拦截器放行名单外）：成功后旧密码立即失效，当前会话不受影响。 */
+    @PostMapping("/password")
+    public Map<String, Object> changePassword(@Valid @RequestBody PwReq req, HttpServletRequest http) {
+        account.changePassword(
+                com.gongpu.security.AuthInterceptor.userId(http), req.oldPassword(), req.newPassword());
+        return Map.of("ok", true);
     }
 
     @PostMapping("/login")

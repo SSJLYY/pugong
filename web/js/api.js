@@ -131,6 +131,8 @@
       request('POST', '/api/auth/register', { username, password }),
     login: (username, password) =>
       request('POST', '/api/auth/login', { username, password }),
+    changePassword: (oldPassword, newPassword) =>
+      request('POST', '/api/auth/password', { oldPassword, newPassword }),
 
     // ---------- 元数据 ----------
     meta: () => request('GET', '/api/config/meta'),

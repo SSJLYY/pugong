@@ -205,6 +205,35 @@
     $('authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
     $('authUser').addEventListener('keydown', e => { if (e.key === 'Enter') $('authPass').focus(); });
 
+    $('btnChangePw').addEventListener('click', () => {
+      const mask = document.createElement('div');
+      mask.className = 'death-mask';
+      mask.innerHTML = `<div class="death-box pick-box">
+        <h2>🔑 修改密码</h2>
+        <input id="pwOld" type="password" class="auth-input" placeholder="原密码" autocomplete="current-password">
+        <input id="pwNew" type="password" class="auth-input" placeholder="新密码（至少 6 位）" autocomplete="new-password">
+        <div class="pick-choices">
+          <button class="rebirth-choice" id="pwGo">确认修改</button>
+          <button class="rebirth-choice" id="pwCancel">取消</button>
+        </div>
+      </div>`;
+      mask.querySelector('#pwCancel').addEventListener('click', () => mask.remove());
+      mask.addEventListener('click', e => { if (e.target === mask) mask.remove(); });
+      mask.querySelector('#pwGo').addEventListener('click', async () => {
+        const oldPw = mask.querySelector('#pwOld').value;
+        const newPw = mask.querySelector('#pwNew').value;
+        if (!oldPw || !newPw) { toast('原密码与新密码都要填', 'err'); return; }
+        try {
+          await API.changePassword(oldPw, newPw);
+          mask.remove();
+          toast('密码已修改，下次登录用新密码', 'ok');
+        } catch (e) {
+          toast(e.message, 'err');
+        }
+      });
+      document.body.appendChild(mask);
+    });
+
     $('btnLogout').addEventListener('click', () => {
       API.clearAuth();
       API.setSlot(0);

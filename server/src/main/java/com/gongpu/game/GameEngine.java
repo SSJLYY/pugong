@@ -393,7 +393,21 @@ public final class GameEngine {
                 kill(s, startMob);
             }
         }
+        // Boss 二阶段判定（第七批）：本帧打完仍存活的 Boss 跌破半血即狂怒（只触发一次）
+        checkBossPhase(s);
         return drops;
+    }
+
+    /** Boss 二阶段（第七批）：当前 Boss 血量跌破 50% → 置 phase2 并播报；攻速/攻击加成在 mobAttack 消费。 */
+    static void checkBossPhase(PlayerState s) {
+        PlayerState.MobState m = s.mob;
+        if (m == null || !m.boss || m.phase2 || m.maxHP == null) {
+            return;
+        }
+        if (Num.lt(Num.div(m.curHP, m.maxHP), Num.of(GameConst.BOSS_PHASE2_HP_LINE))) {
+            m.phase2 = true;
+            pushEvent(s, "🔥 Boss「" + (m.name == null ? "?" : m.name) + "」狂怒了！进入二阶段：攻速 +30%、攻击 +20%");
+        }
     }
 
     private static void healByLifesteal(PlayerState s, PanelCalculator.Panel p, BigDecimal dmg) {
@@ -605,6 +619,9 @@ public final class GameEngine {
     private static boolean advanceAfterKill(PlayerState s, PlayerState.MobState m) {
         if (m.boss) {
             s.stats.bossKillCount++;   // 终身 Boss 击杀计数（两条击杀路径共用此漏斗）
+            if (m.phase2) {
+                s.stats.bossPhaseKills++;   // 二阶段击破计数（第七批，破相者成就口径）
+            }
             // 首杀奖励：每档每 Boss 一次，金币 1000×(区域序+1)
             if (!s.bossKills.contains(m.id)) {
                 s.bossKills.add(m.id);
@@ -693,6 +710,10 @@ public final class GameEngine {
         }
         // 词条攻速乘区：狂暴残血反扑 / 疾影常驻加速（traitHasteMul 统一）
         hits *= traitHasteMul(m);
+        // Boss 二阶段（第七批）：狂怒攻速 +30%
+        if (m.boss && m.phase2) {
+            hits *= GameConst.BOSS_PHASE2_ASPD_MUL;
+        }
         // 词条·破甲：结算时玩家的双防按比例打折
         BigDecimal defMul = "sunder".equals(m.trait)
                 ? Num.of(1 - GameConst.TRAIT_SUNDER_IGNORE)
@@ -702,6 +723,11 @@ public final class GameEngine {
         BigDecimal mag = Num.gt(m.MATK, Num.ZERO)
                 ? Num.max(Num.of(0), Num.sub(m.MATK, Num.mul(Num.mul(p.MDEF(), defMul), Num.of(GameConst.DMG_DEF_FACTOR))))
                 : Num.ZERO;
+        // Boss 二阶段（第七批）：狂怒攻击 +20%（双攻同乘区，在保底 1 点之前）
+        if (m.boss && m.phase2) {
+            phys = Num.mul(phys, Num.of(GameConst.BOSS_PHASE2_ATK_MUL));
+            mag = Num.mul(mag, Num.of(GameConst.BOSS_PHASE2_ATK_MUL));
+        }
         BigDecimal perHit = Num.max(Num.of(1), Num.add(phys, mag));   // 设计 §2.3 承伤同理:至少 1 点
 
         // 格挡：受击减半 + 反弹 50%(设计 §7.3;对减伤前的伤害反弹)

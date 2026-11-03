@@ -227,6 +227,8 @@ public class PlayerState {
         public double silenceCd;
         /** 怪物词条 id（GameConst.MOB_TRAITS 的键）；null=普通怪。旧档无此字段即 null。 */
         public String trait;
+        /** Boss 二阶段（第七批）：血量跌破 50% 后置位，攻速/攻击提升，只触发一次。 */
+        public boolean phase2;
     }
 
     public static class Stats {
@@ -245,6 +247,8 @@ public class PlayerState {
         public BigDecimal bestHit = BigDecimal.ZERO;
         /** 终身 Boss 击杀次数（每次击杀计数，区别于 bossKills 首杀名单）。 */
         public long bossKillCount = 0;
+        /** 击破二阶段 Boss 次数（第七批，破相者成就口径）。 */
+        public long bossPhaseKills = 0;
         public long enchants = 0;
         public long tempers = 0;
         public long rerolls = 0;

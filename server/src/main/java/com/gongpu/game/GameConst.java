@@ -361,6 +361,10 @@ public final class GameConst {
     public static final double BLOODRAGE_ATK_MUL = 1.15;
     /** 主动「冲锋」（第七批）：下一击伤害乘区（一次性消费 buff，与蓄力重击同机制）。 */
     public static final double CHARGE_MUL = 3.0;
+    /** Boss 二阶段（第七批）：触发血线与攻速/攻击乘区。 */
+    public static final double BOSS_PHASE2_HP_LINE = 0.5;
+    public static final double BOSS_PHASE2_ASPD_MUL = 1.3;
+    public static final double BOSS_PHASE2_ATK_MUL = 1.2;
     /** 被动「材料嗅觉」的材料掉率加成（百分点，叠加在基础 50% 上）。 */
     public static final double MAT_SENSE_BONUS = 0.25;
     /** 击杀基础材料掉率。 */

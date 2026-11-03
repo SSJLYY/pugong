@@ -1372,6 +1372,10 @@ public class GameService {
         m.put("ASPD", s.mob.ASPD);
         m.put("RNG", s.mob.RNG);
         m.put("SPD", s.mob.SPD);
+        // Boss 二阶段（第七批）：前端血条狂怒标识
+        if (s.mob.boss && s.mob.phase2) {
+            m.put("phase2", true);
+        }
         // 怪物词条（v3.15）：下发完整展示信息，前端只渲染徽章不查表
         if (s.mob.trait != null) {
             GameConst.TraitDef td = GameConst.MOB_TRAITS.get(s.mob.trait);

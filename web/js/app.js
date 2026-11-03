@@ -726,7 +726,8 @@
     if (view.mob) {
       $('mobEmoji').textContent = view.mob.emoji;
       $('mobName').textContent = view.mob.name + (view.mob.boss ? ' 👑' : '')
-        + (view.mob.trait ? ' ' + view.mob.trait.emoji : '');
+        + (view.mob.trait ? ' ' + view.mob.trait.emoji : '')
+        + (view.mob.phase2 ? ' 🔥二阶段' : '');
       // 战斗飘字：怪物血量下降 → 弹伤害（暴击概率抽样 / 击杀提示）
       if (S.lastMobId === view.mob.id && S.lastMobHp !== null) {
         try {
@@ -764,7 +765,7 @@
         $('mobBar').style.width = pct.toFixed(1) + '%';
       }
       $('mobDesc').textContent = view.mob.boss
-        ? 'Boss 战 · 会施放沉默封印你的被动'
+        ? (view.mob.phase2 ? 'Boss 战 · 🔥 已狂怒：攻速 +30%、攻击 +20%，速战速决！' : 'Boss 战 · 会施放沉默封印你的被动 · 半血后进入二阶段')
         : (view.mob.trait
             ? '词条「' + view.mob.trait.emoji + ' ' + view.mob.trait.name + '」' + view.mob.trait.desc
             : '出拳就是修行');

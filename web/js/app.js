@@ -836,6 +836,7 @@
     }
     renderBag(view);
     renderSets(view);
+    renderDaily(view);
     renderEvents(view);
     renderPotions(view);
     renderPassives(view);
@@ -2336,6 +2337,44 @@
     } catch (e) {
       box.innerHTML = '<p class="empty-hint">墓园加载失败</p>';
     }
+  }
+
+  // ================= 每日任务（第七批） =================
+  function renderDaily(view) {
+    const box = $('dailyList');
+    if (!box) return;
+    const tasks = view.dailyTasks || [];
+    const sig = JSON.stringify(tasks);
+    if (sig === renderDaily._sig) return;
+    renderDaily._sig = sig;
+    if (!tasks.length) {
+      box.innerHTML = '<p class="empty-hint">今日暂无任务</p>';
+      return;
+    }
+    box.innerHTML = tasks.map(t => {
+      const pct = t.target > 0 ? Math.min(100, Math.floor(100 * t.progress / t.target)) : 0;
+      const btn = t.claimed
+        ? '<button class="daily-claim" disabled>✅ 已领取</button>'
+        : t.done
+          ? '<button class="daily-claim ready" data-daily-claim="' + esc(t.id) + '">🎁 领取 +' + fmt(t.rewardGold) + ' 金</button>'
+          : '<button class="daily-claim" disabled>未完成</button>';
+      return '<div class="daily-card' + (t.claimed ? ' claimed' : t.done ? ' done' : '') + '">' +
+        '<div class="daily-head"><span>' + t.emoji + ' ' + esc(t.name) + '</span><span class="daily-reward">+' + fmt(t.rewardGold) + ' 金</span></div>' +
+        '<div class="daily-desc">' + esc(t.desc) + '</div>' +
+        '<div class="daily-prog"><span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
+        fmt(t.progress) + '/' + fmt(t.target) + '</div>' + btn + '</div>';
+    }).join('');
+    box.querySelectorAll('[data-daily-claim]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          const r = await call(() => API.claimDaily(API.state.slot, btn.dataset.dailyClaim));
+          const res = (r && r.result) || {};
+          toast('📅 每日任务奖励：+' + fmt(res.reward || 0) + ' 金币', 'ok');
+          if (r) applyView(r);
+        } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
+      });
+    });
   }
 
   // ================= 冒险公会（委托） =================

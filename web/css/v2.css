@@ -1053,3 +1053,15 @@
   border-color:rgba(168,85,247,.55); color:#e9d5ff;
 }
 .zone-btn[data-zone="abyss"]:hover:not(:disabled){ border-color:#a855f7; box-shadow:0 0 10px rgba(168,85,247,.35); }
+
+/* 每日任务卡片（第七批） */
+.daily-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:900px){.daily-list{grid-template-columns:1fr}}
+.daily-card{border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:8px 10px;font-size:13px;display:flex;flex-direction:column;gap:5px}
+.daily-card.done{border-color:#ffb300;background:rgba(255,179,0,.07)}
+.daily-card.claimed{opacity:.55}
+.daily-head{font-weight:600;display:flex;justify-content:space-between;gap:6px}
+.daily-reward{color:#ffb300;white-space:nowrap}
+.daily-desc{color:#cbbfa5}
+.daily-claim{min-height:30px}
+.daily-claim.ready{background:#c9a227;color:#1a1503;font-weight:700;border-color:#c9a227;cursor:pointer}

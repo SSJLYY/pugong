@@ -43,7 +43,9 @@
     { id: 'boss_50', name: '屠龙宗师', emoji: '🐲', desc: '累计击败 Boss 50 次' },
     { id: 'potion_25', name: '神农尝百草', emoji: '🧉', desc: '使用过 25 种不同的药剂' },
     { id: 'boss_100', name: '屠龙神话', emoji: '🐉', desc: '累计击败 Boss 100 次' },
-    { id: 'craft_50', name: '锻造宗师', emoji: '🏯', desc: '累计合成 50 次' }
+    { id: 'craft_50', name: '锻造宗师', emoji: '🏯', desc: '累计合成 50 次' },
+    { id: 'set_4', name: '整装待发', emoji: '🧩', desc: '集齐任意一套装的 4 件' },
+    { id: 'set_dual', name: '双套加身', emoji: '🎭', desc: '同时激活两套套装（各 ≥2 件）' }
   ];
 
   var byId = {};

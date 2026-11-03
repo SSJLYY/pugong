@@ -54,7 +54,9 @@ public final class Achievements {
             new Def("boss_50", "屠龙宗师", "🐲", "累计击败 Boss 50 次"),
             new Def("potion_25", "神农尝百草", "🧉", "使用过 25 种不同的药剂"),
             new Def("boss_100", "屠龙神话", "🐉", "累计击败 Boss 100 次"),
-            new Def("craft_50", "锻造宗师", "🏯", "累计合成 50 次")
+            new Def("craft_50", "锻造宗师", "🏯", "累计合成 50 次"),
+            new Def("set_4", "整装待发", "🧩", "集齐任意一套装的 4 件"),
+            new Def("set_dual", "双套加身", "🎭", "同时激活两套套装（各 ≥2 件）")
     );
 
     private Achievements() {
@@ -66,7 +68,7 @@ public final class Achievements {
             case "first_punch", "first_kill", "first_death", "first_craft", "first_enchant",
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
-                    "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25" -> 2_000L;
+                    "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50" -> 5_000L;
             default -> 500L;
         };
@@ -114,6 +116,10 @@ public final class Achievements {
             case "craft_50" -> new long[]{s.stats.crafts, 50};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
+            case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
+                    .mapToInt(Integer::intValue).max().orElse(0), 4};
+            case "set_dual" -> new long[]{Sets.wornCounts(s).values().stream()
+                    .filter(n -> n >= 2).count(), 2};
             default -> null;
         };
     }
@@ -131,6 +137,7 @@ public final class Achievements {
         int equipCount = s.equipBag.size() + (int) s.equipped.values().stream().filter(it -> it != null).count();
         boolean wearEpic = s.equipped.values().stream()
                 .anyMatch(it -> it != null && it.quality >= 3);
+        java.util.Map<String, Integer> setCounts = Sets.wornCounts(s);
 
         for (Def d : ALL) {
             if (s.achievements.contains(d.id())) {
@@ -171,6 +178,8 @@ public final class Achievements {
                 case "boss_100" -> s.stats.bossKillCount >= 100;
                 case "craft_50" -> s.stats.crafts >= 50;
                 case "potion_25" -> s.usedPotions.size() >= 25;
+                case "set_4" -> setCounts.values().stream().anyMatch(n -> n >= 4);
+                case "set_dual" -> setCounts.values().stream().filter(n -> n >= 2).count() >= 2;
                 default -> false;
             };
             if (ok) {

@@ -466,7 +466,7 @@ public final class GameEngine {
         }
         // 材料/图纸掉落（DESIGN.md §9：材料随区域，图纸低概率/Boss 高概率）
         String mat = GameConst.ZONE_MAT.get(s.zone);
-        if (mat != null && Math.random() < 0.5) {
+        if (mat != null && Math.random() < materialChance(s)) {
             s.materials.merge(mat, 1, Integer::sum);
         }
         // 词条·晶化：击杀必额外掉 2 份本区材料（与基础 50% 掷骰独立，溢出期望击杀不带词条不享受）
@@ -797,6 +797,15 @@ public final class GameEngine {
     }
 
     /** 幸运药剂（luck_pot）掉落倍率：生效中 1.5，否则 1.0。装备/图纸/溢出期望三处掉落同口径。 */
+    /** 击杀材料掉率：基础 50%，被动「材料嗅觉」+25 个百分点（受沉默压制，与其它被动同口径）。 */
+    static double materialChance(PlayerState s) {
+        double chance = GameConst.MAT_BASE_CHANCE;
+        if (s.passives.contains("material_sense") && !PanelCalculator.isSilenced(s)) {
+            chance += GameConst.MAT_SENSE_BONUS;
+        }
+        return chance;
+    }
+
     static double dropLuckMul(PlayerState s) {
         double mul = buffLeft(s, "luck_pot") > 0 ? 1.5 : 1.0;
         // 被动·幸运星：掉落率 +10%（与鸿运药剂乘算；被动受沉默压制）

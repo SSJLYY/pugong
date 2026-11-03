@@ -992,6 +992,12 @@ DELETE FROM `cfg_buff` WHERE `code` IN ('slow');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('slow', '时滞', '🐌', 'bad', 'status', '{"aspdMul":0.8}', '出拳速度 -20%', 1, 51);
 
+-- 第六批第 88 轮：新被动「材料嗅觉」（击杀材料掉率 50%→75%）
+DELETE FROM `cfg_skill` WHERE `code` IN ('material_sense');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('material_sense', '材料嗅觉', '👃', 'passive', 300, 0, 0, 0, '{"effect":"mat_chance","bonus":0.25}', '击杀材料掉率 +25 个百分点（50%→75%）', 1, 22);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：
 --   cfg_equipment_template 45 / cfg_item 药剂 25 / cfg_affix 16

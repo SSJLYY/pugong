@@ -61,7 +61,7 @@ class DataParity2Test {
         }
         // 主动技能总数 = 9（元老 6 + 治愈/嗜血/铁壁）
         assertEquals(9, GameConst.ACTIVE_SKILLS.size());
-        assertEquals(12, GameConst.PASSIVE_SKILLS.size());
+        assertEquals(13, GameConst.PASSIVE_SKILLS.size());
     }
 
     @Test

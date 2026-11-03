@@ -320,11 +320,16 @@ public final class GameConst {
             Map.entry("boss_hunter", new PassiveDef("boss_hunter", "巨人杀手", "🗡️", "对 Boss 伤害 +20%")),
             Map.entry("diamond_body", new PassiveDef("diamond_body", "金刚体", "💎", "物防与魔防 ×1.15")),
             Map.entry("lucky_star", new PassiveDef("lucky_star", "幸运星", "⭐", "装备与图纸掉落率 +10%")),
-            Map.entry("eagle_bone", new PassiveDef("eagle_bone", "鹰骨", "🦴", "射程 +1")));
+            Map.entry("eagle_bone", new PassiveDef("eagle_bone", "鹰骨", "🦴", "射程 +1")),
+            Map.entry("material_sense", new PassiveDef("material_sense", "材料嗅觉", "👃", "击杀材料掉率 +25 个百分点（50%→75%），锻造党的鼻子")));
 
     public static final double COMBO_CHANCE = 0.15;
     /** 被动「巨人杀手」对 Boss 的伤害乘区。 */
     public static final double BOSS_HUNTER_MUL = 1.2;
+    /** 被动「材料嗅觉」的材料掉率加成（百分点，叠加在基础 50% 上）。 */
+    public static final double MAT_SENSE_BONUS = 0.25;
+    /** 击杀基础材料掉率。 */
+    public static final double MAT_BASE_CHANCE = 0.5;
     /** 石肤药剂的承伤乘区（-10%）。 */
     public static final double STONE_POT_MUL = 0.9;
     /** 荆棘药剂的反弹比例（对实际承受伤害）。 */

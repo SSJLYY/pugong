@@ -60,6 +60,8 @@ public class MetaController {
             // 探活失败即 down
         }
         m.put("mysql", db);
+        // 请求性能指标（第七批）：进程启动以来总请求/慢请求/阈值/最大耗时，静态计数不依赖 bean 注入
+        m.put("perf", TimingInterceptor.stats(500));
         addDiskWarn(m);
         // 内容版本指纹：部署后核对新内容是否生效（数字与库内 cfg 行数一致才算部署到位）；
         // 探测失败不加字段，绝不拖垮健康检查

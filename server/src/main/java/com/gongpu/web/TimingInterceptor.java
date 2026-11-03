@@ -20,8 +20,42 @@ public class TimingInterceptor implements HandlerInterceptor {
 
     private final long slowMs;
 
+    // 进程级请求指标（第七批）：/api/health 下发，运维不必翻日志就知道慢请求占比
+    private static final java.util.concurrent.atomic.AtomicLong REQ_TOTAL =
+            new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong REQ_SLOW =
+            new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong REQ_MAX_MS =
+            new java.util.concurrent.atomic.AtomicLong();
+
+    /** 记录一次请求耗时；返回是否为慢请求。静态便于单测与 health 读取。 */
+    static boolean record(long costMs, long slowMs) {
+        REQ_TOTAL.incrementAndGet();
+        REQ_MAX_MS.accumulateAndGet(costMs, Math::max);
+        boolean slow = costMs >= slowMs;
+        if (slow) {
+            REQ_SLOW.incrementAndGet();
+        }
+        return slow;
+    }
+
+    /** 指标快照（health 用）。 */
+    public static java.util.Map<String, Object> stats(long slowMs) {
+        java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+        m.put("requests", REQ_TOTAL.get());
+        m.put("slow", REQ_SLOW.get());
+        m.put("slowMs", slowMs);
+        m.put("maxMs", REQ_MAX_MS.get());
+        return m;
+    }
+
     public TimingInterceptor(@org.springframework.beans.factory.annotation.Value("${gongpu.slow-ms:500}") long slowMs) {
         this.slowMs = slowMs;
+    }
+
+    /** 实例侧快照（health 注入拦截器 bean 读取，阈值取实例配置）。 */
+    public java.util.Map<String, Object> stats() {
+        return stats(slowMs);
     }
 
     @Override
@@ -38,7 +72,7 @@ public class TimingInterceptor implements HandlerInterceptor {
             return;
         }
         long cost = System.currentTimeMillis() - (Long) t0;
-        if (cost >= slowMs) {
+        if (record(cost, slowMs)) {
             log.warn("慢端点: {} {} {}ms status={} uid={}",
                     req.getMethod(), req.getRequestURI(), cost, res.getStatus(),
                     req.getHeader("Authorization") == null ? "-" : "有");

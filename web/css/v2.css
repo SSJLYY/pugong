@@ -1081,3 +1081,23 @@
 
 /* 低特效模式（第七批）：停用全部动画与过渡（飘字由 JS 侧同步停用） */
 body.fx-off *, body.fx-off *::before, body.fx-off *::after{animation:none!important;transition:none!important}
+
+/* 宣纸主题（第七批）：变量层换色 + 少量硬编码深色元素适配 */
+body.theme-light{
+  --bg0:#f3ecd9; --bg1:#eee3c6; --bg2:#e7d9b4;
+  --panel:rgba(96,74,20,.07); --panel-2:rgba(96,74,20,.12);
+  --border:rgba(122,92,32,.38); --border-strong:rgba(122,92,32,.6);
+  --gold:#8a6d1f; --gold-bright:#97771c; --gold-dim:#77622a;
+  --txt:#2e2a1c; --txt-dim:#5d563f; --txt-faint:#8a8163;
+  --shadow:0 4px 18px rgba(96,74,20,.18);
+}
+body.theme-light input, body.theme-light select, body.theme-light textarea{
+  background:#fbf6e6; color:#2e2a1c; border-color:rgba(122,92,32,.45);
+}
+body.theme-light .panel-tip{color:#6d6242}
+body.theme-light .daily-desc{color:#5d563f}
+body.theme-light .codex-item{color:#4a4433}
+body.theme-light .pi-desc, body.theme-light .gi-meta{color:#5d563f}
+body.theme-light .trait-row span{color:#4a4433}
+body.theme-light .float-dmg{text-shadow:0 1px 3px rgba(255,252,240,.9)}
+body.theme-light .zone-btn.req{color:#7a6c46}

@@ -69,6 +69,16 @@
     if (b) b.textContent = fxOff() ? '🚫 特效' : '✨ 特效';
   }
 
+  // ---------------- 主题切换（第七批）：玄夜/宣纸，存 localStorage ----------------
+  function lightTheme() {
+    try { return localStorage.getItem('gongpu_theme') === 'light'; } catch (e) { return false; }
+  }
+  function applyThemePref() {
+    document.body.classList.toggle('theme-light', lightTheme());
+    const b = $('btnTheme');
+    if (b) b.textContent = lightTheme() ? '☀️ 宣纸' : '🌗 主题';
+  }
+
   // ---------------- 战斗飘字（预算节流防爆屏） ----------------
   let _floatLayer = null, _floatBudget = 0, _floatLast = 0;
   function floatDmg(text, cls, anchorId) {
@@ -1097,6 +1107,12 @@
       try { localStorage.setItem('gongpu_fx', fxOff() ? 'on' : 'off'); } catch (e) { /* 忽略 */ }
       applyFxPref();
       toast(fxOff() ? '🚫 特效已关（飘字与动画停用）' : '✨ 特效已开', 'ok');
+    });
+    applyThemePref();
+    $('btnTheme').addEventListener('click', () => {
+      try { localStorage.setItem('gongpu_theme', lightTheme() ? 'dark' : 'light'); } catch (e) { /* 忽略 */ }
+      applyThemePref();
+      toast(lightTheme() ? '☀️ 已切换宣纸主题' : '🌙 已切换玄夜主题', 'ok');
     });
 
     $('btnDaily').addEventListener('click', async () => {

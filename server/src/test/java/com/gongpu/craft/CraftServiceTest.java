@@ -65,10 +65,27 @@ class CraftServiceTest {
         bpRecipe.setNeedBlueprint(true);
         bpRecipe.setEnabled(true);
         bpRecipe.setSortNo(2);
+        CraftTemplate cook = new CraftTemplate();
+        cook.setCode("cook_test");
+        cook.setName("测试烹饪");
+        cook.setEmoji("🍳");
+        cook.setProductCode("item:food");
+        cook.setMatsJson("{\"pelt\":1}");
+        cook.setGoldCost(10);
+        cook.setNeedBlueprint(false);
+        cook.setEnabled(true);
+        cook.setSortNo(3);
         CraftTemplateRepository craftRepo = mock(CraftTemplateRepository.class);
-        when(craftRepo.findByEnabledTrueOrderBySortNoAscIdAsc()).thenReturn(List.of(basic, bpRecipe));
+        when(craftRepo.findByEnabledTrueOrderBySortNoAscIdAsc()).thenReturn(List.of(basic, bpRecipe, cook));
 
-        new GameData(equipRepo, mock(AffixTemplateRepository.class), mock(ItemTemplateRepository.class),
+        com.gongpu.cfg.ItemTemplate food = new com.gongpu.cfg.ItemTemplate();
+        food.setCode("food");
+        food.setName("食物");
+        food.setEmoji("🍖");
+        ItemTemplateRepository itemRepo = mock(ItemTemplateRepository.class);
+        when(itemRepo.findByEnabledTrueOrderBySortNoAscIdAsc()).thenReturn(List.of(food));
+
+        new GameData(equipRepo, mock(AffixTemplateRepository.class), itemRepo,
                 mock(SkillTemplateRepository.class), mock(BuffTemplateRepository.class),
                 mock(DropRateRuleRepository.class), craftRepo);
     }
@@ -129,10 +146,22 @@ class CraftServiceTest {
         Map<String, Object> board = crafts.board(s);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> rows = (List<Map<String, Object>>) board.get("crafts");
-        assertEquals(2, rows.size());
+        assertEquals(3, rows.size());
         assertEquals(Boolean.TRUE, rows.get(0).get("canCraft"), "基础配方可合成");
         assertEquals(Boolean.FALSE, rows.get(1).get("canCraft"), "图纸配方缺图纸不可合成");
         assertTrue(String.valueOf(rows.get(1).get("blockReason")).contains("图纸"));
+    }
+
+    @Test
+    void itemProductGoesToPotionBag() {
+        // 烹饪类配方（product_code = item:<code>）：产物进药剂栏、不占背包、无品质
+        PlayerState s = richState();
+        int bagBefore = s.equipBag.size();
+        Map<String, Object> r = crafts.craft(s, "cook_test");
+        assertEquals(Boolean.TRUE, r.get("ok"));
+        assertEquals("食物", r.get("itemName"));
+        assertEquals(bagBefore, s.equipBag.size(), "物品产物不占背包");
+        assertEquals(1, s.potions.getOrDefault("food", 0), "食物应进药剂栏");
     }
 
     @Test

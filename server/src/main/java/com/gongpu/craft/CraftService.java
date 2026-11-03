@@ -55,15 +55,21 @@ public class CraftService {
         crafts.sort(Comparator.comparingInt(t -> t.getSortNo() == null ? 0 : t.getSortNo()));
         List<Map<String, Object>> rows = new ArrayList<>();
         for (CraftTemplate t : crafts) {
-            GameData.Tpl tpl = productTpl(t.getProductCode());
+            boolean itemProduct = isItemProduct(t.getProductCode());
+            GameData.Tpl tpl = itemProduct ? null : productTpl(t.getProductCode());
+            com.gongpu.cfg.ItemTemplate itpl = itemProduct ? itemTpl(t.getProductCode()) : null;
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("code", t.getCode());
             row.put("name", t.getName());
             row.put("emoji", t.getEmoji());
             row.put("productCode", t.getProductCode());
-            row.put("productName", tpl == null ? t.getProductCode() : tpl.name());
-            row.put("productEmoji", tpl == null ? "❓" : tpl.emoji());
-            row.put("productSlot", tpl == null ? "" : tpl.slot());
+            row.put("productName", itemProduct
+                    ? (itpl == null ? t.getProductCode() : itpl.getName())
+                    : (tpl == null ? t.getProductCode() : tpl.name()));
+            row.put("productEmoji", itemProduct
+                    ? (itpl == null ? "❓" : (itpl.getEmoji() == null ? "🎁" : itpl.getEmoji()))
+                    : (tpl == null ? "❓" : tpl.emoji()));
+            row.put("productSlot", itemProduct ? "item" : (tpl == null ? "" : tpl.slot()));
             row.put("goldCost", t.getGoldCost() == null ? 0 : t.getGoldCost());
             row.put("needBlueprint", Boolean.TRUE.equals(t.getNeedBlueprint()));
             row.put("blueprintHave", s.materials.getOrDefault(blueprintKey(t.getCode()), 0));
@@ -87,7 +93,8 @@ public class CraftService {
             boolean bpOk = !Boolean.TRUE.equals(t.getNeedBlueprint())
                     || s.materials.getOrDefault(blueprintKey(t.getCode()), 0) >= 1;
             boolean goldOk = Num.gte(s.gold, Num.of(t.getGoldCost() == null ? 0 : t.getGoldCost()));
-            boolean bagOk = s.equipBag.size() < GameService.bagCap(s);
+            // 物品类产物（烹饪等）进药剂栏叠加，不占背包
+            boolean bagOk = itemProduct || s.equipBag.size() < GameService.bagCap(s);
             row.put("canCraft", bpOk && matsOk && goldOk && bagOk);
             row.put("blockReason", !bpOk ? "缺图纸（打怪掉落）"
                     : !matsOk ? "材料不足"
@@ -121,30 +128,61 @@ public class CraftService {
         if (Num.lt(s.gold, goldCost)) {
             throw ApiException.badRequest("金币不足");
         }
-        if (s.equipBag.size() >= GameService.bagCap(s)) {
-            throw ApiException.badRequest("背包已满，先卖掉或丢弃一些装备");
+        // 产物分两类：装备（默认）与物品（product_code 以 "item:" 前缀 → 药剂/食物，进药剂栏叠加）
+        boolean itemProduct = isItemProduct(t.getProductCode());
+        PlayerState.Item item = null;
+        int quality = -1;
+        if (itemProduct) {
+            if (itemTpl(t.getProductCode()) == null) {
+                throw ApiException.badRequest("产物配置缺失: " + t.getProductCode());
+            }
+        } else {
+            if (s.equipBag.size() >= GameService.bagCap(s)) {
+                throw ApiException.badRequest("背包已满，先卖掉或丢弃一些装备");
+            }
+            quality = needBp ? 2 : 1;
+            if (ThreadLocalRandom.current().nextDouble() < 0.25) {
+                quality = Math.min(3, quality + 1);
+            }
+            item = EquipFactory.generateCraft(s, t.getProductCode(), quality);
+            if (item == null) {
+                throw ApiException.badRequest("产物配置缺失: " + t.getProductCode());
+            }
         }
-        int quality = needBp ? 2 : 1;
-        if (ThreadLocalRandom.current().nextDouble() < 0.25) {
-            quality = Math.min(3, quality + 1);
-        }
-        PlayerState.Item item = EquipFactory.generateCraft(s, t.getProductCode(), quality);
-        if (item == null) {
-            throw ApiException.badRequest("产物配置缺失: " + t.getProductCode());
-        }
-        // 校验全过 → 扣料入包
+        // 校验全过 → 扣料发放
         if (needBp) {
             consumeMat(s, bpKey, 1);
         }
         mats.forEach((k, v) -> consumeMat(s, k, v));
         s.gold = Num.sub(s.gold, goldCost);
-        s.equipBag.add(item);
         s.stats.crafts++;
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("ok", true);
-        out.put("itemName", item.name);
-        out.put("quality", item.quality);
+        if (itemProduct) {
+            String itemCode = t.getProductCode().substring("item:".length());
+            s.potions.merge(itemCode, 1, Integer::sum);
+            out.put("itemName", itemTpl(t.getProductCode()).getName());
+        } else {
+            s.equipBag.add(item);
+            out.put("itemName", item.name);
+            out.put("quality", item.quality);
+        }
         return out;
+    }
+
+    /** 物品类产物约定：product_code = "item:<物品code>"（烹饪等配方，数据侧既有约定）。 */
+    static boolean isItemProduct(String productCode) {
+        return productCode != null && productCode.startsWith("item:");
+    }
+
+    private static com.gongpu.cfg.ItemTemplate itemTpl(String productCode) {
+        String code = productCode.substring("item:".length());
+        for (com.gongpu.cfg.ItemTemplate t : GameData.instance().snapshot().items()) {
+            if (code.equals(t.getCode())) {
+                return t;
+            }
+        }
+        return null;
     }
 
     private static void consumeMat(PlayerState s, String key, int n) {

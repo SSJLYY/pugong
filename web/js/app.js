@@ -2003,7 +2003,8 @@
       b.disabled = true;
       try {
         const r = await API.craftDo(API.state.slot, b.dataset.craft);
-        toast('⚒️ 锻造成功：' + (r.itemName || '装备') + '（品质 ' + (r.quality || 0) + '）已入背包', 'ok');
+        toast('⚒️ 锻造成功：' + (r.itemName || '装备') +
+          (r.quality != null ? '（品质 ' + r.quality + '）已入背包' : ' 已放入药剂栏'), 'ok');
         loadCrafts();
       } catch (e) {
         toast(e.message, 'err');

@@ -1369,6 +1369,18 @@ public class GameService {
             achRewards.put(d.id(), Achievements.rewardOf(d.id()));
         }
         m.put("achRewards", achRewards);
+        // 成就进度（未解锁的可量化成就 → [当前, 目标]，前端画进度条）
+        Map<String, Object> achProgress = new LinkedHashMap<>();
+        for (Achievements.Def d : Achievements.ALL) {
+            if (s.achievements.contains(d.id())) {
+                continue;
+            }
+            long[] pr = Achievements.progressOf(s, d.id());
+            if (pr != null) {
+                achProgress.put(d.id(), List.of(pr[0], pr[1]));
+            }
+        }
+        m.put("achProgress", achProgress);
         // 技能熟练度：casts=累计施放(封顶100),lv=熟练档位(每20次+1,最高5,每档 CD-3%)
         Map<String, Object> masteryView = new LinkedHashMap<>();
         for (Map.Entry<String, BigDecimal> e : s.mastery.entrySet()) {

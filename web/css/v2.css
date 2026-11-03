@@ -944,3 +944,7 @@
 .bf-chip{font-size:12px;padding:2px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#bbb;cursor:pointer}
 .bf-chip.on{background:#c9a227;color:#1a1503;border-color:#c9a227;font-weight:700}
 .bf-sep{width:10px}
+
+/* 成就进度条（第六批：未解锁的可量化成就） */
+.ach-prog{display:inline-block;width:90px;height:7px;border-radius:4px;background:rgba(255,255,255,.14);vertical-align:middle;overflow:hidden}
+.ach-prog-fill{display:block;height:100%;background:#c9a227;border-radius:4px}

@@ -52,6 +52,8 @@
   // 已领取奖励集合与奖励金额表(服务端 view 下发,金额以服务端 Achievements.rewardOf 为准)
   var claimed = {};
   var rewards = {};
+  // 服务端下发的未解锁成就进度（id -> [当前, 目标]）
+  var progress = {};
   // 已 toast 过/已建档的 id(内存态,防重复弹)
   var known = {};
   var baselined = false;
@@ -66,6 +68,7 @@
     claimed = {};
     (Array.isArray(view.achClaimed) ? view.achClaimed : []).forEach(function (id) { claimed[id] = true; });
     if (view.achRewards) rewards = view.achRewards;
+    if (view.achProgress) progress = view.achProgress;
 
     serverSet.forEach(function (id) {
       if (known[id]) return;
@@ -82,7 +85,12 @@
   function render(container) {
     // 签名守卫:解锁/已领取状态位不变就不重建(轮询帧每秒都进这里,重建 DOM 纯浪费)
     var sig = '';
-    ACH.forEach(function (a) { sig += (unlocked[a.id] ? '1' : '0') + (claimed[a.id] ? '1' : '0'); });
+    ACH.forEach(function (a) {
+      sig += (unlocked[a.id] ? '1' : '0') + (claimed[a.id] ? '1' : '0');
+      // 进度按 5% 分桶进签名：进度条会动，又不会每帧重建
+      var pr = progress[a.id];
+      if (pr) sig += ':' + Math.floor(Math.min(1, pr[0] / Math.max(1, pr[1])) * 20);
+    });
     if (sig === render._sig) return;
     render._sig = sig;
     var n = 0;
@@ -104,6 +112,12 @@
           (rewards[a.id] || 0) + ' 金</button>';
       } else if (on) {
         tail = ' · ✅ 已领奖';
+      }
+      if (!on && progress[a.id]) {
+        var pr = progress[a.id];
+        var pct = Math.min(100, Math.floor(pr[0] * 100 / Math.max(1, pr[1])));
+        tail += ' <span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
+          pr[0] + '/' + pr[1];
       }
       html.push('<div class="effect-item" style="opacity:' + (on ? 1 : .45) + '">' +
         '<span>' + (on ? a.emoji : '🔒') + '</span><b>' + a.name + '</b>' +

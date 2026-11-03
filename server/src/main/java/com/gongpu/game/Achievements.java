@@ -71,6 +71,44 @@ public final class Achievements {
     }
 
     /** 评估当前状态新解锁的成就 id（不含已解锁的）。在 SaveService.persist 前调用。 */
+    /**
+     * 成就进度（当前值/目标值）：可量化成就返回 [cur, target]，事件型成就返回 null（前端不画进度条）。
+     * 与 evaluate 的判定口径逐项一致（改判定必须同步这里）。
+     */
+    public static long[] progressOf(PlayerState s, String id) {
+        if (s == null || s.stats == null) {
+            return null;
+        }
+        return switch (id) {
+            case "punch_10k" -> new long[]{sat(s.stats.lifetimePunches), 10_000};
+            case "kill_100" -> new long[]{sat(s.stats.kills), 100};
+            case "kill_10k" -> new long[]{sat(s.stats.lifetimeKills), 10_000};
+            case "hp_5000" -> new long[]{sat(PanelCalculator.of(s).maxHP()), 5_000};
+            case "hp_1m" -> new long[]{sat(PanelCalculator.of(s).maxHP()), 1_000_000};
+            case "gold_10k" -> new long[]{sat(s.gold), 10_000};
+            case "gold_1m" -> new long[]{sat(s.gold), 1_000_000};
+            case "lived_1h" -> new long[]{com.gongpu.state.StateCodec.aliveSeconds(s), 3600};
+            case "equip_5" -> new long[]{s.equipBag.size()
+                    + s.equipped.values().stream().filter(it -> it != null).count(), 5};
+            case "gen_12" -> new long[]{s.gen, 12};
+            case "bless_3" -> new long[]{s.blessings == null ? 0 : s.blessings.size(), 3};
+            case "duelist" -> new long[]{sat(s.stats.kills), 10};
+            case "codex_10" -> new long[]{s.codex == null ? 0 : s.codex.size(), 10};
+            case "codex_all" -> new long[]{s.codex == null ? 0 : s.codex.size(), GameConst.codexTotal()};
+            case "first_craft" -> new long[]{s.stats.crafts, 1};
+            case "craft_25" -> new long[]{s.stats.crafts, 25};
+            case "first_enchant" -> new long[]{s.stats.enchants, 1};
+            case "potion_5" -> new long[]{s.usedPotions == null ? 0 : s.usedPotions.size(), 5};
+            case "potion_15" -> new long[]{s.usedPotions == null ? 0 : s.usedPotions.size(), 15};
+            case "potion_25" -> new long[]{s.usedPotions == null ? 0 : s.usedPotions.size(), 25};
+            case "boss_10" -> new long[]{s.stats.bossKillCount, 10};
+            case "boss_50" -> new long[]{s.stats.bossKillCount, 50};
+            case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
+            case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
+            default -> null;
+        };
+    }
+
     public static List<String> evaluate(PlayerState s) {
         if (s == null || s.achievements == null) {
             return List.of();

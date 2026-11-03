@@ -117,7 +117,10 @@ public final class Sets {
         return nameToCode.get(it.name);
     }
 
-    /** 已穿戴装备中每套的件数（key = 套装 id，含 0 件的套装）。 */
+    /**
+     * 已穿戴装备中每套的件数（key = 套装 id，含 0 件的套装）。
+     * 按「不同成员 code」计数：无相位栏可同穿多件同名装备，重复件不重复计件（防 4 顶同款帽子凑满套）。
+     */
     public static Map<String, Integer> wornCounts(PlayerState s) {
         Map<String, Integer> out = new LinkedHashMap<>();
         for (SetDef d : ALL) {
@@ -126,12 +129,15 @@ public final class Sets {
         if (s == null || s.equipped == null) {
             return out;
         }
+        Map<String, java.util.Set<String>> seen = new LinkedHashMap<>();
         for (PlayerState.Item it : s.equipped.values()) {
-            SetDef d = byMember(codeOf(it));
+            String code = codeOf(it);
+            SetDef d = byMember(code);
             if (d != null) {
-                out.merge(d.id(), 1, Integer::sum);
+                seen.computeIfAbsent(d.id(), k -> new java.util.HashSet<>()).add(code);
             }
         }
+        seen.forEach((id, codes) -> out.put(id, codes.size()));
         return out;
     }
 

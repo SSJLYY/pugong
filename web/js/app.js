@@ -1493,7 +1493,8 @@
 
     const bagTotal = Number(view.bagTotal != null ? view.bagTotal : (view.bag ? view.bag.length : 0));
     $('bagCount').textContent = bagTotal + '/' + view.bagMax
-      + (bagTotal > (view.bag ? view.bag.length : 0) ? '（仅显示前' + (view.bag ? view.bag.length : 0) + '件）' : '');
+      + (bagTotal > (view.bag ? view.bag.length : 0) ? '（仅显示前' + (view.bag ? view.bag.length : 0) + '件）' : '')
+      + (view.bagSellTotal && Number(view.bagSellTotal) > 0 ? ' · 可售 ≈' + fmt(view.bagSellTotal) + ' 金' : '');
     // 一键穿最强按钮：只挂一次
     if (!$('btnAutoEquip')) {
       const eb = document.createElement('button');

@@ -50,6 +50,23 @@ class BagScoreViewTest {
         assertEquals(GameService.equipScore(s.equipped.get("weapon")), eq.get("weapon"), 1e-9);
     }
 
+    /** 第七批第 65 轮：可售总价预览——未锁定件按 sellPrice 汇总，锁定件不计。 */
+    @Test
+    void sellTotalExcludesLocked() {
+        PlayerState s = NewState.create();
+        PlayerState.Item a = item("weapon", 0, "10");
+        PlayerState.Item b = item("weapon", 2, "50");
+        PlayerState.Item locked = item("weapon", 4, "999");
+        locked.locked = true;
+        s.equipBag.add(a);
+        s.equipBag.add(b);
+        s.equipBag.add(locked);
+        Map<String, Object> v = new GameService().inventoryView(s);
+        java.math.BigDecimal expected = EquipFactory.sellPrice(a).add(EquipFactory.sellPrice(b));
+        assertEquals(0, new java.math.BigDecimal(String.valueOf(v.get("bagSellTotal"))).compareTo(expected),
+                "可售总价应为未锁定件 sellPrice 之和");
+    }
+
     @Test
     void scoreFormulaSanity() {
         // 品质×1000 + 词条数×100 + 底子和，强化 +5%/级

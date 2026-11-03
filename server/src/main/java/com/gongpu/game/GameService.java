@@ -1439,6 +1439,14 @@ public class GameService {
             scores.add(equipScore(it));
         }
         m.put("bagScores", scores);
+        // 背包可售总价预览（第七批）：未锁定件按 sellPrice 同口径汇总（锁定件卖不掉，不计）
+        java.math.BigDecimal sellTotal = java.math.BigDecimal.ZERO;
+        for (PlayerState.Item it : bagView) {
+            if (!it.locked) {
+                sellTotal = sellTotal.add(EquipFactory.sellPrice(it));
+            }
+        }
+        m.put("bagSellTotal", Num.plain(sellTotal));
         Map<String, Double> eq = new LinkedHashMap<>();
         for (Map.Entry<String, PlayerState.Item> e : s.equipped.entrySet()) {
             if (e.getValue() != null) {

@@ -27,8 +27,17 @@ class AffixBatch7Test {
     }
 
     @Test
-    void totalCountAfterPojun() {
-        // 第 84 轮绝杀加入后总数 24；本断言在第 84 轮同步更新（先锁破军轮的 23 由 AffixBatch6Test 承担）
-        assertTrue(GameConst.AFFIXES.size() >= 23);
+    void jueshaIsCritEpicAboveDeadly() {
+        GameConst.Affix juesha = byName("绝杀");
+        GameConst.Affix deadly = byName("致命");
+        assertEquals("CRIT", juesha.key());
+        assertEquals("epic", juesha.rarity());
+        assertTrue(juesha.min() >= deadly.max(), "绝杀下限应不低于致命上限（上位关系）");
+        assertTrue(juesha.max() > deadly.max());
+    }
+
+    @Test
+    void totalCountIs24() {
+        assertEquals(24, GameConst.AFFIXES.size(), "第七批词条总数应达 24（22 + 破军 + 绝杀）");
     }
 }

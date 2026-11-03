@@ -1082,6 +1082,12 @@ INSERT INTO `cfg_affix`
   (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
   ('pojun', '破军', 'PATK', 'flat', 16, 40, 'epic', NULL, NULL, 1, 23);
 
+-- 第七批第 84 轮：高阶词条「绝杀」（暴击率上位版，致命 0.03~0.15 → 0.15~0.25）
+DELETE FROM `cfg_affix` WHERE `code` IN ('juesha');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('juesha', '绝杀', 'CRIT', 'flat', 0.15, 0.25, 'epic', NULL, NULL, 1, 24);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

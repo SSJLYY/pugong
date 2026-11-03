@@ -62,6 +62,6 @@ class AffixExpandTest {
     void newAffixesInTable() {
         assertTrue(GameConst.AFFIXES.stream().anyMatch(a -> "maxHP".equals(a.key())));
         assertTrue(GameConst.AFFIXES.stream().anyMatch(a -> "EVA".equals(a.key())));
-        assertEquals(23, GameConst.AFFIXES.size(), "词条表应为 23 条（22 + 破军）");
+        assertEquals(24, GameConst.AFFIXES.size(), "词条表应为 24 条（23 + 绝杀）");
     }
 }

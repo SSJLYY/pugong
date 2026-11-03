@@ -38,7 +38,8 @@
     { id: 'gold_1m', name: '富甲一方', emoji: '🏦', desc: '持有 100 万金币' },
     { id: 'boss_10', name: '屠龙者', emoji: '🐉', desc: '累计击败 Boss 10 次' },
     { id: 'best_hit_1m', name: '开山一击', emoji: '💥', desc: '单拳伤害达 100 万' },
-    { id: 'dismantle_100', name: '分解达人', emoji: '🔨', desc: '累计分解 100 件装备' }
+    { id: 'dismantle_100', name: '分解达人', emoji: '🔨', desc: '累计分解 100 件装备' },
+    { id: 'craft_25', name: '锻造大师', emoji: '🏭', desc: '累计合成 25 次' }
   ];
 
   var byId = {};

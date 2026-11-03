@@ -24,4 +24,15 @@ class AchievementBatch6Test {
         s.stats.dismantles = 100;
         assertTrue(Achievements.evaluate(s).contains("dismantle_100"), "100 件应解锁分解达人");
     }
+
+    @Test
+    void round32Craft25() {
+        PlayerState s = NewState.create();
+        s.stats.crafts = 24;
+        assertTrue(!Achievements.evaluate(s).contains("craft_25"), "24 次不应解锁");
+        s.stats.crafts = 25;
+        assertTrue(Achievements.evaluate(s).contains("craft_25"), "25 次应解锁锻造大师");
+        org.junit.jupiter.api.Assertions.assertEquals(2000L, Achievements.rewardOf("craft_25"),
+                "锻造大师应为 2000 金奖励档");
+    }
 }

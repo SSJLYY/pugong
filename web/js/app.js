@@ -1180,6 +1180,21 @@
       });
       $('bagCount').parentNode.appendChild(eb);
     }
+    // 背包整理按钮：只挂一次（按评分从高到低排序，好装备顶前）
+    if (!$('btnSortBag')) {
+      const sb = document.createElement('button');
+      sb.id = 'btnSortBag';
+      sb.textContent = '↕️ 整理背包';
+      sb.title = '按装备评分从高到低整理背包';
+      sb.addEventListener('click', async () => {
+        try {
+          const r = await call(() => API.sortBag(API.state.slot));
+          toast('背包已按评分整理', 'ok');
+          applyView(r);
+        } catch (e) { /* call 已 toast */ }
+      });
+      $('bagCount').parentNode.appendChild(sb);
+    }
     // 一键分级卖按钮组：只挂一次（白/绿/蓝/紫及以下，keep=1~4）
     if (!$('btnAutoSell1')) {
       const tiers = [

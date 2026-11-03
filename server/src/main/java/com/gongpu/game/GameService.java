@@ -547,6 +547,12 @@ public class GameService {
         return inventoryView(s);
     }
 
+    /** 背包整理：按评分从高到低稳定排序（同分保持原序），好装备顶到前面方便翻找。 */
+    public Map<String, Object> sortBag(PlayerState s) {
+        s.equipBag.sort((a, b) -> Double.compare(equipScore(b), equipScore(a)));
+        return inventoryView(s);
+    }
+
     /** 切换装备锁定：锁定件受保护，不被一键卖/丢弃/管护吞噬处置。 */
     public Map<String, Object> toggleLock(PlayerState s, int bagIdx) {
         if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {

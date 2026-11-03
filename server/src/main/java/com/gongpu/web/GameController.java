@@ -289,6 +289,11 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.discard(s, reqIdx(body.index(), "index")));
     }
 
+    @PostMapping("/{slot}/sortbag")
+    public Map<String, Object> sortBag(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.sortBag(s));
+    }
+
     @PostMapping("/{slot}/lock")
     public Map<String, Object> toggleLock(HttpServletRequest req, @PathVariable int slot,
                                           @RequestBody IdxReq body) {

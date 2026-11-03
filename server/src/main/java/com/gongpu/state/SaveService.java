@@ -42,9 +42,30 @@ public class SaveService {
         }
         GameSave gs = repo.findByUserIdAndSlotNo(userId, slot)
                 .orElseThrow(() -> ApiException.notFound("槽位 " + slot + " 没有存档"));
-        PlayerState s = StateCodec.decode(gs.getStateJson());
+        PlayerState s = decodeOrRecover(gs);
         cache.put(userId, slot, s);
         return s;
+    }
+
+    /**
+     * 存档解码自愈：主档 JSON 损坏（截断写/坏迁移）时回退到手动快照解码，
+     * 避免玩家被永久锁在 500 外；主档与快照都坏才报明确错误。
+     */
+    static PlayerState decodeOrRecover(GameSave gs) {
+        try {
+            return StateCodec.decode(gs.getStateJson());
+        } catch (RuntimeException mainBad) {
+            String snap = gs.getSnapshotJson();
+            if (snap != null && !snap.isBlank()) {
+                try {
+                    return StateCodec.decode(snap);
+                } catch (RuntimeException ignored) {
+                    // 快照也坏，走下面的统一报错
+                }
+            }
+            throw new ApiException(500, "SAVE_CORRUPT",
+                    "存档数据损坏，请联系管理员或删除该档重开");
+        }
     }
 
     public boolean exists(long userId, int slot) {
@@ -160,8 +181,16 @@ public class SaveService {
                 .orElseThrow(() -> ApiException.notFound("槽位 " + slot + " 没有存档"));
         PlayerState restored;
         String snap = gs.getSnapshotJson();
+        PlayerState fromSnap = null;
         if (snap != null && !snap.isBlank()) {
-            restored = StateCodec.decode(snap);
+            try {
+                fromSnap = StateCodec.decode(snap);
+            } catch (RuntimeException ignored) {
+                // 快照损坏：按无快照处理（主档重开一世），不让回档入口也锁死
+            }
+        }
+        if (fromSnap != null) {
+            restored = fromSnap;
         } else {
             // 无快照：按硬核规则重开一世（面板清零，传承保留）
             restored = StateCodec.decode(gs.getStateJson());

@@ -32,6 +32,19 @@ class AchProgressTest {
     }
 
     @Test
+    void batch9TopTierProgress() {
+        PlayerState s = NewState.create();
+        s.stats.bossKillCount = 73;
+        s.stats.crafts = 50;
+        assertArrayEquals(new long[]{73, 100}, Achievements.progressOf(s, "boss_100"));
+        assertArrayEquals(new long[]{50, 50}, Achievements.progressOf(s, "craft_50"));
+        org.junit.jupiter.api.Assertions.assertTrue(
+                Achievements.evaluate(s).contains("craft_50"), "合成 50 次应解锁锻造宗师");
+        org.junit.jupiter.api.Assertions.assertEquals(5000L, Achievements.rewardOf("boss_100"));
+        org.junit.jupiter.api.Assertions.assertEquals(5000L, Achievements.rewardOf("craft_50"));
+    }
+
+    @Test
     void eventAchievementsHaveNoProgress() {
         PlayerState s = NewState.create();
         assertNull(Achievements.progressOf(s, "first_kill"));

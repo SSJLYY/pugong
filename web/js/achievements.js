@@ -41,7 +41,9 @@
     { id: 'dismantle_100', name: '分解达人', emoji: '🔨', desc: '累计分解 100 件装备' },
     { id: 'craft_25', name: '锻造大师', emoji: '🏭', desc: '累计合成 25 次' },
     { id: 'boss_50', name: '屠龙宗师', emoji: '🐲', desc: '累计击败 Boss 50 次' },
-    { id: 'potion_25', name: '神农尝百草', emoji: '🧉', desc: '使用过 25 种不同的药剂' }
+    { id: 'potion_25', name: '神农尝百草', emoji: '🧉', desc: '使用过 25 种不同的药剂' },
+    { id: 'boss_100', name: '屠龙神话', emoji: '🐉', desc: '累计击败 Boss 100 次' },
+    { id: 'craft_50', name: '锻造宗师', emoji: '🏯', desc: '累计合成 50 次' }
   ];
 
   var byId = {};

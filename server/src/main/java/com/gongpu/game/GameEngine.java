@@ -503,6 +503,7 @@ public final class GameEngine {
      */
     private static boolean advanceAfterKill(PlayerState s, PlayerState.MobState m) {
         if (m.boss) {
+            s.stats.bossKillCount++;   // 终身 Boss 击杀计数（两条击杀路径共用此漏斗）
             // 首杀奖励：每档每 Boss 一次，金币 1000×(区域序+1)
             if (!s.bossKills.contains(m.id)) {
                 s.bossKills.add(m.id);

@@ -210,6 +210,8 @@ public class PlayerState {
         /** 终身普攻总伤害 / 最高单击（代表拳伤，含暴击期望口径；转生不清零，战绩与里程碑成就用）。 */
         public BigDecimal totalDamage = BigDecimal.ZERO;
         public BigDecimal bestHit = BigDecimal.ZERO;
+        /** 终身 Boss 击杀次数（每次击杀计数，区别于 bossKills 首杀名单）。 */
+        public long bossKillCount = 0;
         public long enchants = 0;
         public long born = 0;
         public long playSeconds = 0;

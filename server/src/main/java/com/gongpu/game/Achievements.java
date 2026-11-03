@@ -44,7 +44,11 @@ public final class Achievements {
             new Def("first_craft", "初试锻造", "⚒️", "完成第一次图纸合成"),
             new Def("first_enchant", "初试附魔", "✨", "完成第一次装备附魔"),
             new Def("potion_5", "品鉴五味", "🧪", "使用过 5 种不同的药剂"),
-            new Def("potion_15", "神农后人", "🌿", "使用过 15 种不同的药剂")
+            new Def("potion_15", "神农后人", "🌿", "使用过 15 种不同的药剂"),
+            new Def("kill_10k", "万怪斩", "🗡️", "终身击杀 1 万只怪物"),
+            new Def("gold_1m", "富甲一方", "🏦", "持有 100 万金币"),
+            new Def("boss_10", "屠龙者", "🐉", "累计击败 Boss 10 次"),
+            new Def("best_hit_1m", "开山一击", "💥", "单拳伤害达 100 万")
     );
 
     private Achievements() {
@@ -94,6 +98,10 @@ public final class Achievements {
                 case "first_enchant" -> s.stats.enchants >= 1;
                 case "potion_5" -> s.usedPotions.size() >= 5;
                 case "potion_15" -> s.usedPotions.size() >= 15;
+                case "kill_10k" -> sat(s.stats.lifetimeKills) >= 10_000;
+                case "gold_1m" -> gold >= 1_000_000;
+                case "boss_10" -> s.stats.bossKillCount >= 10;
+                case "best_hit_1m" -> sat(s.stats.bestHit) >= 1_000_000;
                 default -> false;
             };
             if (ok) {

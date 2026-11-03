@@ -871,6 +871,11 @@ DELETE FROM `cfg_affix` WHERE `code` IN ('lifespring');
 INSERT INTO `cfg_affix`
   (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
   ('lifespring', '生命之源', 'maxHP', 'flat', 300, 800, 'epic', NULL, NULL, 1, 20);
+-- 第 15 轮：高阶词条「魔力源泉」（蓝量上限上位版）
+DELETE FROM `cfg_affix` WHERE `code` IN ('manaspring');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('manaspring', '魔力源泉', 'MP', 'flat', 500, 1200, 'epic', NULL, NULL, 1, 21);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

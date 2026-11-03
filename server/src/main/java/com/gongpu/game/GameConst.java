@@ -382,7 +382,8 @@ public final class GameConst {
             new Affix("血契", "LIFESTEAL", "flat", 0.03, 0.06, "epic", null, null),
             new Affix("磐石", "PDEF", "flat", 20, 45, "epic", null, null),
             new Affix("猎风", "SPD", "flat", 30, 60, "epic", null, null),
-            new Affix("生命之源", "maxHP", "flat", 300, 800, "epic", null, null));
+            new Affix("生命之源", "maxHP", "flat", 300, 800, "epic", null, null),
+            new Affix("魔力源泉", "MP", "flat", 500, 1200, "epic", null, null));
 
     /** 掉落概率（按区域）。 */
     public static final Map<String, Double> DROP_RATE = Map.of(

@@ -60,6 +60,10 @@ class DataParityTest {
         String sql = allSql();
         assertTrue(sql.contains("'lightness'") && sql.contains("'vitality'"),
                 "新词条 lightness/vitality 应在 migration SQL 中");
+        // 第六批高阶词条：五个新 code 必须在 SQL 里（镜像守恒）
+        for (String code : new String[]{"bloodpact", "bedrock", "windhunter", "lifespring", "manaspring"}) {
+            assertTrue(sql.contains("'" + code + "'"), "第六批词条 " + code + " 应在 SQL 中");
+        }
         // 被动技能镜像：GameConst.PASSIVE_SKILLS 的每个 id 必须在 SQL cfg_skill 里（学不到 = 不存在）
         for (String id : GameConst.PASSIVE_SKILLS.keySet()) {
             assertTrue(sql.contains("'" + id + "'"), "被动技能 " + id + " 应在 SQL 技能表里");
@@ -68,7 +72,7 @@ class DataParityTest {
         for (String code : new String[]{"mine_deep", "swamp_venom", "snow_alpha"}) {
             assertTrue(sql.contains("'" + code + "'"), "新委托 " + code + " 应在 SQL 中");
         }
-        assertEquals(16, GameConst.AFFIXES.size());
+        assertEquals(21, GameConst.AFFIXES.size());
     }
 
     @Test

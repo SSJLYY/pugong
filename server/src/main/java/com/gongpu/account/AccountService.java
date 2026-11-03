@@ -53,13 +53,38 @@ public class AccountService {
         return tokenPayload(user);
     }
 
+    // ---------- 登录防爆破：同用户名连续失败 5 次锁定 5 分钟（内存计数，成功即清零） ----------
+    static final int LOGIN_MAX_FAILS = 5;
+    static final long LOGIN_LOCK_MS = 5 * 60_000L;
+    private final java.util.concurrent.ConcurrentHashMap<String, long[]> loginFails =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    boolean isLoginLocked(String username) {
+        long[] e = loginFails.get(username);
+        return e != null && e[1] > System.currentTimeMillis();
+    }
+
+    private void recordLoginFailure(String username) {
+        long now = System.currentTimeMillis();
+        loginFails.compute(username, (k, e) -> {
+            long count = (e == null || now - e[2] > LOGIN_LOCK_MS) ? 1 : e[0] + 1;
+            long lockUntil = count >= LOGIN_MAX_FAILS ? now + LOGIN_LOCK_MS : 0;
+            return new long[]{count, lockUntil, now};
+        });
+    }
+
     @Transactional
     public Map<String, Object> login(String username, String password) {
-        User user = users.findByUsername(username == null ? "" : username.trim())
-                .orElseThrow(() -> ApiException.unauthorized("用户名或密码错误"));
-        if (!encoder.matches(password == null ? "" : password, user.getPasswordHash())) {
+        String uname = username == null ? "" : username.trim();
+        if (isLoginLocked(uname)) {
+            throw ApiException.tooManyRequests("登录失败次数过多，请 5 分钟后再试");
+        }
+        User user = users.findByUsername(uname).orElse(null);
+        if (user == null || !encoder.matches(password == null ? "" : password, user.getPasswordHash())) {
+            recordLoginFailure(uname);
             throw ApiException.unauthorized("用户名或密码错误");
         }
+        loginFails.remove(uname);
         user.setLastLoginAt(Instant.now());
         users.save(user);
         return tokenPayload(user);

@@ -34,6 +34,10 @@ public class ApiException extends RuntimeException {
         return new ApiException(409, "CONFLICT", msg);
     }
 
+    public static ApiException tooManyRequests(String msg) {
+        return new ApiException(429, "TOO_MANY_REQUESTS", msg);
+    }
+
     public int getStatus() {
         return status;
     }

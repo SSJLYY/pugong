@@ -287,7 +287,7 @@ public final class GameEngine {
                     }
                     // 期望金币同步补发:此分支不走 onMobKilled,不补则中后期挂机收益被系统性吞掉
                     s.gold = Num.add(s.gold, Num.mul(Num.of(m.gold), Num.mul(goldMul(s), extraKills)));
-                    BigDecimal zoneRate = Num.of(com.gongpu.cfg.GameData.instance().dropRate(s.zone));
+                    BigDecimal zoneRate = Num.of(com.gongpu.cfg.GameData.instance().dropRate(s.zone) * dropLuckMul(s));
                     // 动态容量：负重腰带 +20，不能写死 BAG_MAX
                     int bagRoom = GameService.bagCap(s) - s.equipBag.size();
                     int extraDrops = Num.gt(zoneRate, Num.ZERO)
@@ -413,8 +413,8 @@ public final class GameEngine {
         if (scroll != null && Math.random() < 0.4) {
             s.materials.merge(scroll, 1, Integer::sum);
         }
-        // 图纸掉落（DESIGN §9：Boss 30% / 普通怪 4%）：按区域深度池随机一张，存材料键 bp_<配方>
-        if (Math.random() < (m.boss ? 0.30 : 0.04)) {
+        // 图纸掉落（DESIGN §9：Boss 30% / 普通怪 4%，幸运药剂同吃加成）：按区域深度池随机一张，存材料键 bp_<配方>
+        if (Math.random() < (m.boss ? 0.30 : 0.04) * dropLuckMul(s)) {
             String bp = com.gongpu.cfg.GameData.instance().randomCraftBlueprint(s.zone);
             if (bp != null) {
                 s.materials.merge(com.gongpu.craft.CraftService.blueprintKey(bp), 1, Integer::sum);
@@ -426,7 +426,7 @@ public final class GameEngine {
         s.gold = Num.add(s.gold, gold);
 
         int dropCount = 0;
-        double rate = com.gongpu.cfg.GameData.instance().dropRate(s.zone);
+        double rate = com.gongpu.cfg.GameData.instance().dropRate(s.zone) * dropLuckMul(s);
         if (m.boss) {
             rate = 1.0;
         }
@@ -603,6 +603,11 @@ public final class GameEngine {
         if (Num.lte(s.life.curHP, Num.ZERO)) {
             kill(s, s.mob);
         }
+    }
+
+    /** 幸运药剂（luck_pot）掉落倍率：生效中 1.5，否则 1.0。装备/图纸/溢出期望三处掉落同口径。 */
+    static double dropLuckMul(PlayerState s) {
+        return buffLeft(s, "luck_pot") > 0 ? 1.5 : 1.0;
     }
 
     private static double buffLeft(PlayerState s, String buff) {

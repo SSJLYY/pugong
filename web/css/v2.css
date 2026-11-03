@@ -894,3 +894,31 @@
 /* gameRoot 显隐改由 .on 类控制(内联 display 会压过单屏布局的 display:flex) */
 #gameRoot { display: none; }
 #gameRoot.on { display: flex; flex-direction: column; }
+
+/* ---- 管家悬浮面板 ---- */
+#butlerFab {
+  position: fixed; right: 14px; bottom: 86px; z-index: 900;
+  width: 46px; height: 46px; border-radius: 50%; font-size: 22px;
+  background: #2b2118; border: 1px solid #8a6d3b;
+  box-shadow: 0 4px 14px rgba(0,0,0,.45); cursor: pointer;
+}
+#butlerPanel {
+  position: fixed; right: 14px; bottom: 140px; z-index: 900;
+  width: 250px; padding: 12px; border-radius: 12px; display: none;
+  background: rgba(24,19,14,.97); border: 1px solid #8a6d3b;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5); font-size: 12px;
+}
+#butlerPanel.on { display: block; }
+#butlerPanel .bp-bar {
+  position: relative; height: 16px; margin: 6px 0; border-radius: 8px;
+  background: rgba(255,255,255,.08); overflow: hidden;
+}
+#butlerPanel .bp-fill { position: absolute; top: 0; bottom: 0; left: 0; transition: width .3s; }
+#butlerPanel .bp-fill.hp { background: linear-gradient(90deg, #b03a2e, #e05a4e); }
+#butlerPanel .bp-fill.mp { background: linear-gradient(90deg, #2e5aa8, #4e86e0); }
+#butlerPanel .bp-bar span {
+  position: relative; z-index: 1; padding-left: 6px;
+  font-size: 10px; line-height: 16px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.6);
+}
+#butlerPanel .bp-row { display: flex; align-items: center; gap: 6px; margin: 7px 0; }
+#butlerPanel .bp-btns button { flex: 1; min-height: 30px; }

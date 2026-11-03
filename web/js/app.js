@@ -407,9 +407,80 @@
     else if (tab === 'social') loadSocial().catch(() => { /* 静默 */ });
   }
 
+  // ================= 管家悬浮面板 =================
+  // 悬浮速览卡:生命/蓝条、当前怪、自动管护与自动售卖快捷开关、嗑药吃食。
+  // 每秒视图驱动,签名按 5% 分桶防 DOM 抖动;控件只挂一次,写操作走 call() 统一通道。
+  function renderButlerPanel(view) {
+    if (!$('butlerFab')) {
+      const fab = document.createElement('button');
+      fab.id = 'butlerFab';
+      fab.textContent = '🤖';
+      fab.title = '管家悬浮面板';
+      fab.addEventListener('click', () => $('butlerPanel').classList.toggle('on'));
+      document.body.appendChild(fab);
+      const el = document.createElement('div');
+      el.id = 'butlerPanel';
+      el.innerHTML =
+        '<div class="bp-row bp-mob" id="bpMob"></div>' +
+        '<div class="bp-bar"><div class="bp-fill hp" id="bpHp"></div><span id="bpHpTx"></span></div>' +
+        '<div class="bp-bar"><div class="bp-fill mp" id="bpMp"></div><span id="bpMpTx"></span></div>' +
+        '<label class="bp-row"><input type="checkbox" id="bpMaintain"> 自动管护（卖/吞噬/穿最强）</label>' +
+        '<label class="bp-row">自动售卖 <select id="bpSell">' +
+        '<option value="0">关</option><option value="1">白及以下</option><option value="2">绿及以下</option>' +
+        '<option value="3">蓝及以下</option><option value="4">紫及以下</option></select></label>' +
+        '<div class="bp-row bp-btns">' +
+        '<button id="bpDrinkHp">🧪 血药</button><button id="bpDrinkMp">🔵 蓝药</button><button id="bpEat">🍖 吃食</button></div>';
+      document.body.appendChild(el);
+      const saveAuto = async (patch) => {
+        const v = S.view;
+        if (!v) return;
+        const r = await call(() => API.autoConfig(API.state.slot,
+          v.autoHpLine, v.autoMpLine, v.autoCure, v.autoFleeLine, v.autoBurn, v.autoSkill, v.autoRebirth,
+          patch.autoSellKeep !== undefined ? patch.autoSellKeep : v.autoSellKeep,
+          patch.autoEquipBest !== undefined ? patch.autoEquipBest : v.autoEquipBest));
+        if (r) applyView(r);
+      };
+      $('bpMaintain').addEventListener('change', (e) => saveAuto({ autoEquipBest: e.target.checked }));
+      $('bpSell').addEventListener('change', (e) => saveAuto({ autoSellKeep: Number(e.target.value) }));
+      const drink = async (ids) => {
+        const v = S.view;
+        if (!v) return;
+        const id = ids.find(i => (v.potions || {})[i] > 0);
+        if (!id) { toast('没有可用的了', 'err'); return; }
+        const r = await call(() => API.usePotion(API.state.slot, id));
+        if (r) applyView(r);
+      };
+      $('bpDrinkHp').addEventListener('click', () => drink(['hp_l', 'hp_s']));
+      $('bpDrinkMp').addEventListener('click', () => drink(['mp']));
+      $('bpEat').addEventListener('click', () => drink(['food']));
+    }
+    const p = view.panel;
+    const hpPct = Math.max(0, Math.min(100, new Decimal(p.curHP).div(new Decimal(p.maxHP).max(1)).toNumber() * 100));
+    const mpPct = Math.max(0, Math.min(100, new Decimal(p.curMP).div(new Decimal(p.MP).max(1)).toNumber() * 100));
+    const pot = view.potions || {};
+    const sig = [Math.round(hpPct / 5), Math.round(mpPct / 5), view.zone, view.mob ? view.mob.name : '',
+      view.autoEquipBest ? 1 : 0, view.autoSellKeep || 0,
+      pot.hp_s || 0, pot.hp_l || 0, pot.mp || 0, pot.food || 0, view.dead ? 1 : 0].join('|');
+    if (renderButlerPanel._sig === sig) return;
+    renderButlerPanel._sig = sig;
+    $('bpHp').style.width = hpPct.toFixed(0) + '%';
+    $('bpHpTx').textContent = '❤ ' + fmt(p.curHP) + ' / ' + fmt(p.maxHP);
+    $('bpMp').style.width = mpPct.toFixed(0) + '%';
+    $('bpMpTx').textContent = '🔵 ' + fmt(p.curMP) + ' / ' + fmt(p.MP);
+    $('bpMob').textContent = view.dead ? '💀 已阵亡' : ('第 ' + view.gen + ' 世 · ' + (view.mob ? view.mob.name : '—'));
+    const mc = $('bpMaintain');
+    if (mc.checked !== !!view.autoEquipBest) mc.checked = !!view.autoEquipBest;
+    const bs = $('bpSell');
+    if (String(bs.value) !== String(view.autoSellKeep || 0)) bs.value = String(view.autoSellKeep || 0);
+    $('bpDrinkHp').textContent = '🧪 血药 ×' + ((pot.hp_s || 0) + (pot.hp_l || 0));
+    $('bpDrinkMp').textContent = '🔵 蓝药 ×' + (pot.mp || 0);
+    $('bpEat').textContent = '🍖 吃食 ×' + (pot.food || 0);
+  }
+
   function applyView(view) {
     if (!view || !view.panel) return;   // 写去重并入的调用在失败时拿到 undefined,直接忽略
     S.view = view;
+    renderButlerPanel(view);
     const p = view.panel;
 
     refreshActiveDataTabs();

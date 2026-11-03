@@ -1257,6 +1257,7 @@
       bag.innerHTML = '<p class="empty-hint">击杀怪物掉落装备</p>';
       return;
     }
+    // 卖出按钮上的售价与服务端 EquipFactory.sellPrice 同公式：20×(品质+1)×(1+强化×0.5)，改价必须两边同步
     view.bag.forEach((it, idx) => {
       const d = document.createElement('div');
       d.className = 'bag-item';
@@ -1274,7 +1275,7 @@
           <button data-act="enhance">强化</button>
           <button data-act="reroll">洗炼</button>
           ${((it.slot === 'weapon' || it.slot === 'bow') && !(it.affixes || []).some(a => a.sideKey === 'ENCHANT')) ? '<button data-act="enchant">附魔</button>' : ''}
-          <button data-act="sell">卖出</button>
+          <button data-act="sell">卖出 +${fmt(Math.round(20 * (it.quality + 1) * (1 + (it.enhance || 0) * 0.5)))} 金</button>
           <button data-act="discard" class="bi-discard">丢弃</button>
         </div>`;
       d.querySelectorAll('button').forEach(b => {

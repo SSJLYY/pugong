@@ -1892,11 +1892,15 @@
       box.appendChild(w);
     }
     // 药剂分组展示（25 种平铺难找）：回复 / 增益 / 功能，组内保持商店顺序
+    // 置顶（第七批）：localStorage 记住常用药剂，组内置顶优先（稳定排序不打乱商店序）
+    let pins = [];
+    try { pins = JSON.parse(localStorage.getItem('gongpu_pins') || '[]'); } catch (e) { pins = []; }
     const POT_GROUPS = [['heal', '💊 回复药剂'], ['buff', '⚡ 增益药剂'], ['func', '🧰 功能药剂']];
     const allPots = S.meta ? S.meta.potions : [];
     const groupedPots = [];
     POT_GROUPS.forEach(([g, label]) => {
       const items = allPots.filter(p => (p.group || 'func') === g);
+      items.sort((a, b) => (pins.includes(b.id) ? 1 : 0) - (pins.includes(a.id) ? 1 : 0));
       if (items.length) groupedPots.push({ header: label }, ...items);
     });
     if (!groupedPots.length) groupedPots.push(...allPots);
@@ -1909,15 +1913,24 @@
         return;
       }
       const have = (view.potions && view.potions[p.id]) || 0;
+      const pinned = pins.includes(p.id);
       const d = document.createElement('div');
-      d.className = 'potion-item';
+      d.className = 'potion-item' + (pinned ? ' pinned' : '');
       d.innerHTML = `
         <div class="pi-info"><b>${p.emoji} ${p.name}</b> <span class="pi-own">×${have}</span>
+          <button class="pin-btn" data-act="pin" title="${pinned ? '取消置顶' : '置顶到本组最前'}">${pinned ? '📌' : '📍'}</button>
           <div class="pi-desc">${p.desc}</div></div>
         <div class="pi-btns">
           <button data-act="use" ${have > 0 ? '' : 'disabled'}>服用</button>
           <button data-act="buy">买（${p.price}金）</button>
         </div>`;
+      d.querySelector('[data-act=pin]').addEventListener('click', () => {
+        let cur = [];
+        try { cur = JSON.parse(localStorage.getItem('gongpu_pins') || '[]'); } catch (e) { cur = []; }
+        cur = cur.includes(p.id) ? cur.filter(x => x !== p.id) : cur.concat(p.id);
+        try { localStorage.setItem('gongpu_pins', JSON.stringify(cur)); } catch (e) { /* 忽略 */ }
+        if (S.view) renderPotions(S.view);
+      });
       d.querySelector('[data-act=use]').addEventListener('click', async () => {
         const r = await call(() => API.usePotion(API.state.slot, p.id));
         applyView(r);

@@ -62,7 +62,9 @@ public final class Achievements {
             new Def("abyss_first", "渊瞳初开", "🕳️", "首次击杀深渊裂隙的怪物"),
             new Def("abyss_lord", "深渊主宰", "👑", "击杀渊底之主·无光君王"),
             new Def("daily_1", "每日事每日毕", "📅", "首次领取每日任务奖励"),
-            new Def("daily_30", "勤勉不辍", "🗓️", "累计领取 30 次每日任务奖励")
+            new Def("daily_30", "勤勉不辍", "🗓️", "累计领取 30 次每日任务奖励"),
+            new Def("phase_breaker", "破相者", "🔥", "击破 1 只二阶段 Boss"),
+            new Def("weak_100", "弱点猎手", "🎯", "累计触发 100 次弱点打击")
     );
 
     private Achievements() {
@@ -75,7 +77,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30" -> 2_000L;
+                    "daily_30", "phase_breaker" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord" -> 5_000L;
             default -> 500L;
         };
@@ -157,6 +159,8 @@ public final class Achievements {
             case "abyss_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_abyss") ? 1 : 0, 1};
             case "daily_1" -> new long[]{s.stats.dailyClaims, 1};
             case "daily_30" -> new long[]{s.stats.dailyClaims, 30};
+            case "phase_breaker" -> new long[]{s.stats.bossPhaseKills, 1};
+            case "weak_100" -> new long[]{s.stats.weakCrits, 100};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
             case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
@@ -229,6 +233,8 @@ public final class Achievements {
                 case "abyss_lord" -> s.bossKills != null && s.bossKills.contains("boss_abyss");
                 case "daily_1" -> s.stats.dailyClaims >= 1;
                 case "daily_30" -> s.stats.dailyClaims >= 30;
+                case "phase_breaker" -> s.stats.bossPhaseKills >= 1;
+                case "weak_100" -> s.stats.weakCrits >= 100;
                 default -> false;
             };
             if (ok) {

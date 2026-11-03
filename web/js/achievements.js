@@ -51,7 +51,9 @@
     { id: 'abyss_first', name: '渊瞳初开', emoji: '🕳️', desc: '首次击杀深渊裂隙的怪物' },
     { id: 'abyss_lord', name: '深渊主宰', emoji: '👑', desc: '击杀渊底之主·无光君王' },
     { id: 'daily_1', name: '每日事每日毕', emoji: '📅', desc: '首次领取每日任务奖励' },
-    { id: 'daily_30', name: '勤勉不辍', emoji: '🗓️', desc: '累计领取 30 次每日任务奖励' }
+    { id: 'daily_30', name: '勤勉不辍', emoji: '🗓️', desc: '累计领取 30 次每日任务奖励' },
+    { id: 'phase_breaker', name: '破相者', emoji: '🔥', desc: '击破 1 只二阶段 Boss' },
+    { id: 'weak_100', name: '弱点猎手', emoji: '🎯', desc: '累计触发 100 次弱点打击' }
   ];
 
   var byId = {};

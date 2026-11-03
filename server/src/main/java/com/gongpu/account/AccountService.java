@@ -33,9 +33,7 @@ public class AccountService {
         if (!USERNAME.matcher(u).matches()) {
             throw ApiException.badRequest("用户名需 2~16 位，仅限中英文、数字、下划线");
         }
-        if (password == null || password.length() < MIN_PASSWORD) {
-            throw ApiException.badRequest("密码至少 " + MIN_PASSWORD + " 位");
-        }
+        checkPasswordRules(password);
         if (users.existsByUsername(u)) {
             throw ApiException.conflict("该用户名已被占用");
         }
@@ -51,6 +49,20 @@ public class AccountService {
             throw ApiException.conflict("该用户名已被占用");
         }
         return tokenPayload(user);
+    }
+
+    /**
+     * 密码规则（注册/改密共用，第七批加固）：至少 MIN_PASSWORD 位；
+     * 且 UTF-8 字节数不得超过 72——BCrypt 只取前 72 字节，超长尾巴会被静默忽略，
+     * 两个仅在 72 字节后不同的密码会互相冒充，必须在入口拒绝。
+     */
+    static void checkPasswordRules(String password) {
+        if (password == null || password.length() < MIN_PASSWORD) {
+            throw ApiException.badRequest("密码至少 " + MIN_PASSWORD + " 位");
+        }
+        if (password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
+            throw ApiException.badRequest("密码过长（最多 72 字节，约 24 个汉字）");
+        }
     }
 
     // ---------- 登录防爆破：同用户名连续失败 5 次锁定 5 分钟（内存计数，成功即清零） ----------
@@ -104,8 +116,10 @@ public class AccountService {
         if (!encoder.matches(oldPassword == null ? "" : oldPassword, user.getPasswordHash())) {
             throw ApiException.unauthorized("原密码不正确");
         }
-        if (newPassword == null || newPassword.length() < 6) {
-            throw ApiException.badRequest("新密码至少 6 位");
+        try {
+            checkPasswordRules(newPassword);
+        } catch (ApiException e) {
+            throw ApiException.badRequest(e.getMessage().replace("密码", "新密码"));
         }
         if (encoder.matches(newPassword, user.getPasswordHash())) {
             throw ApiException.badRequest("新密码不能与原密码相同");

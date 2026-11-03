@@ -18,9 +18,11 @@ public class AuthInterceptor implements HandlerInterceptor {
     public static final String ATTR_USERNAME = "gongpu.username";
 
     private final JwtService jwt;
+    private final com.gongpu.account.AccountService accounts;
 
-    public AuthInterceptor(JwtService jwt) {
+    public AuthInterceptor(JwtService jwt, com.gongpu.account.AccountService accounts) {
         this.jwt = jwt;
+        this.accounts = accounts;
     }
 
     @Override
@@ -34,6 +36,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         String token = h.substring(7).trim();
         JwtService.Verified v = jwt.verify(token);
+        // 令牌版本比对：改密后版本自增，旧令牌在此判失效（版本查询带 30 秒缓存）
+        if (v.tokenVersion() != accounts.currentTokenVersion(v.userId())) {
+            throw ApiException.unauthorized("登录状态已失效，请重新登录");
+        }
         req.setAttribute(ATTR_USER_ID, v.userId());
         if (v.username() != null) {
             req.setAttribute(ATTR_USERNAME, v.username());

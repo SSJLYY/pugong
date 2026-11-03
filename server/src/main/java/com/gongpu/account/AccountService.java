@@ -86,7 +86,25 @@ public class AccountService {
             throw ApiException.badRequest("新密码不能与原密码相同");
         }
         user.setPasswordHash(encoder.encode(newPassword));
+        // 令牌版本自增：此前签发的全部令牌立即失效（防改密后旧设备/被盗令牌继续用）
+        user.setTokenVersion(user.getTokenVersion() + 1);
         users.save(user);
+        versionCache.remove(userId);
+    }
+
+    /** 令牌版本缓存（拦截器每请求比对用）：30 秒内存缓存，改密时主动失效，避免每请求查库。 */
+    private final java.util.concurrent.ConcurrentHashMap<Long, long[]> versionCache =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    public int currentTokenVersion(long userId) {
+        long now = System.currentTimeMillis();
+        long[] e = versionCache.get(userId);
+        if (e != null && now - e[1] < 30_000) {
+            return (int) e[0];
+        }
+        int v = users.findById(userId).map(User::getTokenVersion).orElse(0);
+        versionCache.put(userId, new long[]{v, now});
+        return v;
     }
 
     /**
@@ -115,7 +133,7 @@ public class AccountService {
 
     private Map<String, Object> tokenPayload(User user) {
         Map<String, Object> m = new LinkedHashMap<>();
-        m.put("token", jwt.issue(user.getId(), user.getUsername()));
+        m.put("token", jwt.issue(user.getId(), user.getUsername(), user.getTokenVersion()));
         m.put("expiresIn", jwt.ttlSeconds());
         m.put("userId", user.getId());
         m.put("username", user.getUsername());

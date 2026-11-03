@@ -301,6 +301,11 @@ SET @c := (SELECT COUNT(*) FROM information_schema.columns
            WHERE table_schema = 'gongpu' AND table_name = 'account_user' AND column_name = 'claim_streak');
 SET @sql := IF(@c = 0, 'ALTER TABLE `account_user` ADD COLUMN `claim_streak` INT NOT NULL DEFAULT 0 COMMENT ''连续签到天数'' AFTER `last_claim_day`', 'SELECT 1');
 PREPARE st FROM @sql; EXECUTE st; DEALLOCATE PREPARE st;
+-- 令牌版本列（第六批第 61 轮：改密自增，旧 JWT 立即失效）
+SET @c := (SELECT COUNT(*) FROM information_schema.columns
+           WHERE table_schema = 'gongpu' AND table_name = 'account_user' AND column_name = 'token_version');
+SET @sql := IF(@c = 0, 'ALTER TABLE `account_user` ADD COLUMN `token_version` INT NOT NULL DEFAULT 0 COMMENT ''令牌版本(改密自增,旧令牌失效)'' AFTER `claim_streak`', 'SELECT 1');
+PREPARE st FROM @sql; EXECUTE st; DEALLOCATE PREPARE st;
 
 -- ---- v3.16 运营统计冗余列 + v3.17 终身口径回填（仅本次真加列时回填） ----
 SET @c := (SELECT COUNT(*) FROM information_schema.columns

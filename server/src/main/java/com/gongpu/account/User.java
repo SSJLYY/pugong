@@ -48,6 +48,10 @@ public class User {
     @Column(name = "claim_streak", nullable = false)
     private Integer claimStreak = 0;
 
+    /** 令牌版本：改密时自增，JWT 携带签发时版本，拦截器比对不一致即失效。 */
+    @Column(name = "token_version", nullable = false)
+    private Integer tokenVersion = 0;
+
     public Long getId() {
         return id;
     }
@@ -126,5 +130,13 @@ public class User {
 
     public void setClaimStreak(Integer claimStreak) {
         this.claimStreak = claimStreak;
+    }
+
+    public Integer getTokenVersion() {
+        return tokenVersion == null ? 0 : tokenVersion;
+    }
+
+    public void setTokenVersion(Integer tokenVersion) {
+        this.tokenVersion = tokenVersion;
     }
 }

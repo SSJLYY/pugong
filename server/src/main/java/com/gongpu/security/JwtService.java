@@ -31,25 +31,33 @@ public class JwtService {
     }
 
     public String issue(long userId, String username) {
+        return issue(userId, username, 0);
+    }
+
+    /** 签发带令牌版本的令牌（claim "v"）：改密后版本自增，旧令牌被拦截器判失效。 */
+    public String issue(long userId, String username, int tokenVersion) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("u", username)
+                .claim("v", tokenVersion)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(ttlHours * 3600)))
                 .signWith(key)
                 .compact();
     }
 
-    /** 一次解析同时拿到 userId 与用户名（claim "u"，签发时写入）。 */
-    public record Verified(long userId, String username) {
+    /** 一次解析同时拿到 userId、用户名与令牌版本（claim "u"/"v"；老令牌无 v 时为 0）。 */
+    public record Verified(long userId, String username, int tokenVersion) {
     }
 
     public Verified verify(String token) {
         try {
             Claims c = Jwts.parser().verifyWith(key).build()
                     .parseSignedClaims(token).getPayload();
-            return new Verified(Long.parseLong(c.getSubject()), c.get("u", String.class));
+            Integer v = c.get("v", Integer.class);
+            return new Verified(Long.parseLong(c.getSubject()), c.get("u", String.class),
+                    v == null ? 0 : v);
         } catch (JwtException | IllegalArgumentException e) {
             throw ApiException.unauthorized("登录状态已失效，请重新登录");
         }
@@ -73,8 +81,9 @@ public class JwtService {
                     .parseSignedClaims(token).getPayload();
             long left = c.getExpiration().getTime() / 1000 - Instant.now().getEpochSecond();
             if (left < RENEW_THRESHOLD_SECONDS) {
+                Integer v = c.get("v", Integer.class);
                 return java.util.Optional.of(
-                        issue(Long.parseLong(c.getSubject()), c.get("u", String.class)));
+                        issue(Long.parseLong(c.getSubject()), c.get("u", String.class), v == null ? 0 : v));
             }
             return java.util.Optional.empty();
         } catch (JwtException | IllegalArgumentException e) {

@@ -786,9 +786,18 @@ public final class GameEngine {
                 useAutoPotion(s, "mp", p);
             }
         }
-        // 管家：中毒/灼烧自动嗑解毒剂
+        // 管家：中毒/灼烧自动嗑解毒剂（没药自动买一瓶——与 useAutoPotion 同语义，
+        // 此前本分支只查库存，与界面「没药自动买」的标注不符，断粮时解毒形同虚设）
         if (s.autoCure && (PanelCalculator.active(s, "poison") || PanelCalculator.active(s, "burn_dot"))) {
             Integer have = s.potions.get("cure");
+            if (have == null || have <= 0) {
+                try {
+                    GameService.buyPotion(s, "cure", 1);
+                } catch (RuntimeException ignored) {
+                    // 金币不足/药剂不存在：静默，下帧再试
+                }
+                have = s.potions.get("cure");
+            }
             if (have != null && have > 0) {
                 s.potions.put("cure", have - 1);
                 s.buffs.remove("poison");

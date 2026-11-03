@@ -56,7 +56,9 @@ public final class Achievements {
             new Def("boss_100", "屠龙神话", "🐉", "累计击败 Boss 100 次"),
             new Def("craft_50", "锻造宗师", "🏯", "累计合成 50 次"),
             new Def("set_4", "整装待发", "🧩", "集齐任意一套装的 4 件"),
-            new Def("set_dual", "双套加身", "🎭", "同时激活两套套装（各 ≥2 件）")
+            new Def("set_dual", "双套加身", "🎭", "同时激活两套套装（各 ≥2 件）"),
+            new Def("temper_5", "淬火成钢", "🔨", "任意一件装备淬炼满级"),
+            new Def("reroll_50", "洗炼大师", "🎲", "累计洗炼 50 次")
     );
 
     private Achievements() {
@@ -68,7 +70,7 @@ public final class Achievements {
             case "first_punch", "first_kill", "first_death", "first_craft", "first_enchant",
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
-                    "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4" -> 2_000L;
+                    "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50" -> 5_000L;
             default -> 500L;
         };
@@ -79,6 +81,22 @@ public final class Achievements {
      * 成就进度（当前值/目标值）：可量化成就返回 [cur, target]，事件型成就返回 null（前端不画进度条）。
      * 与 evaluate 的判定口径逐项一致（改判定必须同步这里）。
      */
+    /** 当前最高淬炼等级（已装备 + 背包，temper_5 成就口径）。 */
+    static int maxTemper(PlayerState s) {
+        int max = 0;
+        for (PlayerState.Item it : s.equipped.values()) {
+            if (it != null) {
+                max = Math.max(max, it.temper);
+            }
+        }
+        for (PlayerState.Item it : s.equipBag) {
+            if (it != null) {
+                max = Math.max(max, it.temper);
+            }
+        }
+        return max;
+    }
+
     public static long[] progressOf(PlayerState s, String id) {
         return progressOf(s, id, null);
     }
@@ -114,6 +132,8 @@ public final class Achievements {
             case "boss_50" -> new long[]{s.stats.bossKillCount, 50};
             case "boss_100" -> new long[]{s.stats.bossKillCount, 100};
             case "craft_50" -> new long[]{s.stats.crafts, 50};
+            case "temper_5" -> new long[]{maxTemper(s), GameConst.TEMPER_MAX_LV};
+            case "reroll_50" -> new long[]{s.stats.rerolls, 50};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
             case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
@@ -180,6 +200,8 @@ public final class Achievements {
                 case "potion_25" -> s.usedPotions.size() >= 25;
                 case "set_4" -> setCounts.values().stream().anyMatch(n -> n >= 4);
                 case "set_dual" -> setCounts.values().stream().filter(n -> n >= 2).count() >= 2;
+                case "temper_5" -> maxTemper(s) >= GameConst.TEMPER_MAX_LV;
+                case "reroll_50" -> s.stats.rerolls >= 50;
                 default -> false;
             };
             if (ok) {

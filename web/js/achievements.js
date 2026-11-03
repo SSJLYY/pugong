@@ -45,7 +45,9 @@
     { id: 'boss_100', name: '屠龙神话', emoji: '🐉', desc: '累计击败 Boss 100 次' },
     { id: 'craft_50', name: '锻造宗师', emoji: '🏯', desc: '累计合成 50 次' },
     { id: 'set_4', name: '整装待发', emoji: '🧩', desc: '集齐任意一套装的 4 件' },
-    { id: 'set_dual', name: '双套加身', emoji: '🎭', desc: '同时激活两套套装（各 ≥2 件）' }
+    { id: 'set_dual', name: '双套加身', emoji: '🎭', desc: '同时激活两套套装（各 ≥2 件）' },
+    { id: 'temper_5', name: '淬火成钢', emoji: '🔨', desc: '任意一件装备淬炼满级' },
+    { id: 'reroll_50', name: '洗炼大师', emoji: '🎲', desc: '累计洗炼 50 次' }
   ];
 
   var byId = {};

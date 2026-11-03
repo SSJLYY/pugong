@@ -44,4 +44,15 @@ class AchievementBatch6Test {
         s.stats.bossKillCount = 50;
         assertTrue(Achievements.evaluate(s).contains("boss_50"), "50 次应解锁屠龙宗师");
     }
+
+    @Test
+    void round34Potion25() {
+        PlayerState s = NewState.create();
+        for (int i = 0; i < 24; i++) {
+            s.usedPotions.add("pot_" + i);
+        }
+        assertTrue(!Achievements.evaluate(s).contains("potion_25"), "24 种不应解锁");
+        s.usedPotions.add("pot_24");
+        assertTrue(Achievements.evaluate(s).contains("potion_25"), "25 种应解锁神农尝百草");
+    }
 }

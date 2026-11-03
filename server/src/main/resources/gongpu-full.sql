@@ -837,6 +837,13 @@ INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`,
 DELETE FROM `cfg_buff` WHERE `code` IN ('giant_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('giant_pot', '巨人', '🦍', 'good', 'passive', '{"bossDmgMul":1.15}', '180s 内对 Boss 伤害 +15%', 1, 46);
+-- 第 7 轮：聚灵药剂（蓝量上限 +300）
+DELETE FROM `cfg_item` WHERE `code` IN ('spirit');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('spirit', '聚灵药剂', '🔮', 'potion', 450, '{"buff":"spirit_pot","buffVal":300,"buffDur":120}', '120s 内蓝量上限 +300', 1, 47);
+DELETE FROM `cfg_buff` WHERE `code` IN ('spirit_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('spirit_pot', '聚灵', '🔮', 'good', 'passive', '{"mpFlat":300}', '120s 内蓝量上限 +300', 1, 47);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

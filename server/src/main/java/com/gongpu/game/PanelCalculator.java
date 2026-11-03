@@ -82,6 +82,7 @@ public final class PanelCalculator {
         BigDecimal vitalPotMul = (active(s, "vital_pot") && !silenced) ? Num.of(1.3) : Num.of(1);
         BigDecimal guardPot = (active(s, "guard_pot") && !silenced) ? Num.of(15) : Num.ZERO;
         BigDecimal mightPot = (active(s, "might_pot") && !silenced) ? Num.of(20) : Num.ZERO;
+        BigDecimal spiritPot = (active(s, "spirit_pot") && !silenced) ? Num.of(300) : Num.ZERO;
 
         // 装备：底子 + 词条 + 强化
         Map<String, BigDecimal> flat = new HashMap<>();
@@ -135,7 +136,7 @@ public final class PanelCalculator {
         return new Panel(
                 maxHP,
                 curHP,
-                pctApply(L.MP, flat, pct, "MP"),
+                Num.add(pctApply(L.MP, flat, pct, "MP"), spiritPot),
                 Num.add(L.curMP, flat.getOrDefault("curMP", Num.ZERO)),
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.PATK, flat, pct, "PATK"), pmul.getOrDefault("PATK", Num.of(1))), burnMul), atkPotMul), mightPot),
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MATK, flat, pct, "MATK"), pmul.getOrDefault("MATK", Num.of(1))), burnMul), atkPotMul), mightPot),

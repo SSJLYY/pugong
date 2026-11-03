@@ -345,7 +345,8 @@ public final class GameConst {
             java.util.Map.entry("might", new PotionDef("might", "大力药剂", "🏋️", "120s 内物攻魔攻 +20", 0, 0, "might_pot", 20, 120, 500)),
             java.util.Map.entry("stone", new PotionDef("stone", "石肤药剂", "🗿", "120s 内受到的伤害 -10%", 0, 0, "stone_pot", 0.9, 120, 550)),
             java.util.Map.entry("thorn", new PotionDef("thorn", "荆棘药剂", "🌵", "120s 内反弹所受伤害的 20%", 0, 0, "thorn_pot", 0.2, 120, 650)),
-            java.util.Map.entry("giant", new PotionDef("giant", "巨人药剂", "🦍", "180s 内对 Boss 伤害 +15%", 0, 0, "giant_pot", 1.15, 180, 700)));
+            java.util.Map.entry("giant", new PotionDef("giant", "巨人药剂", "🦍", "180s 内对 Boss 伤害 +15%", 0, 0, "giant_pot", 1.15, 180, 700)),
+            java.util.Map.entry("spirit", new PotionDef("spirit", "聚灵药剂", "🔮", "120s 内蓝量上限 +300", 0, 0, "spirit_pot", 300, 120, 450)));
 
     /** 跨界使用蓝药的蓝量上限保护：技能 MP 消耗按当前 MP 判定。 */
     public static final double MP_REGEN_BASE = 2;

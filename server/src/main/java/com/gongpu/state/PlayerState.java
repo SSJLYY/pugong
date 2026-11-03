@@ -182,6 +182,8 @@ public class PlayerState {
         public long gold;
         public boolean boss;
         public double silenceCd;
+        /** 怪物词条 id（GameConst.MOB_TRAITS 的键）；null=普通怪。旧档无此字段即 null。 */
+        public String trait;
     }
 
     public static class Stats {

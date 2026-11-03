@@ -9,18 +9,21 @@
 前端纯静态（nginx），后端 Spring Boot 3.2.5 + Java 21（8081），
 MySQL 8 持久 + Redis 缓存/锁/榜单。数值全部服务端结算，前端只发意图。
 
-## 0.5 当前状态速览（2026-11-02 晚更新，公网部署 + 三处修复后）
+## 0.5 当前状态速览（2026-11-03 更新，v3.15 增强轮后）
+
+- **v3.15 增强轮（2026-11-03，已部署公网并实测）**：①新玩法「怪物词条」——野怪出生按区域深度掷 💢狂暴/🪓破甲/🔗缴械（平原 10% 起每深一层 +3%，池随深度解锁，Boss/木桩不出），`MobState.trait` 持久化、mobView 下发展示信息、前端名后缀+描述行渲染，公网实测刷出狂暴野兔且界面渲染确认。②销账两条技术遗留：BULLET_MP 排除强化乘区（遗留 #6）、榜单 submitBoard 改 Lua 原子提交+节流表清理（遗留 #5）。③性能：advance 内面板构建砍 3 处可证等价的重复（grow 复用主面板、autoPotion 三分支共用一份）。④前端标题/meta 补齐、版本升 v=53。单测 **165 全绿**（新增 V315EnhanceTest 5 项）；本机（Muse VM）测试依赖已补齐，`mvn -o test` 可直接离线跑通（seed-test.py 在 pugong-deploy）。详见 README「变更记录（2026-11-03 · v3.15 增强轮次）」。
+- **（以下为 2026-11-02 晚状态）**
 
 - **第二部署目标已上线**：`https://pugong.shaun88.cc.cd/gongpu/`（Muse VM，Cloudflare 隧道 → nginx :8088 → 本栈）。该 VM 的 JVM 出站 TCP 被平台拦截，MySQL/Redis 全走 Unix 套接字（MariaDB localSocket + 新增 `DeploySocketConfig`），构建走离线 Maven 仓；细节见 README「公网部署」节，下方 136 的路径/命令不适用于此目标。部署目录 `~/workspace/pugong-deploy/`，看门狗 supervise + cron 保活。
 - **三处修复（已实测，详见 README 变更记录）**：①CORS 白名单缺公网域名致浏览器注册/登录 403，启动参数已补；②前端 `renderBuffs._sig` 悬空引用致新手天赋觉醒仪式永不触发，改挂 `applyView._buffSig`（浏览器实测抽卡全流程通过），前端版本升 v=52；③灌库 CLI 字符集错误致 cfg_* 文本双重编码乱码，45 列已反转还原，CLI 导入必须 `--default-character-set=utf8mb4`。
 - **后端优化**：轮询帧落库节流 `SaveService.persistThrottled`（MySQL 写降至约 1/5，死亡强制立即写）；`run()` 内重复账号查询合并。
 
-- **验证基线**：单测 **160 全绿**（mvn -o test，含 PotionsV314Test 12 项）+ 冒烟 **66 全绿**（136 已跑）；每次改完必须双绿。
+- **验证基线**：单测 **165 全绿**（mvn -o test，含 PotionsV314Test 12 项 + V315EnhanceTest 5 项）+ 冒烟 **66 全绿**（136 已跑）；每次改完必须双绿。
 - **136 部署**：2026-11-02 v3.14 已按第 3 节完整部署（8180c24），双层冒烟 66/66 全绿；前端 ?v=49 已生效，136 商店 meta 实测 18 种药剂。
 - **v3.14 商店药剂扩容 8→18**（玩家需求）：新增锐眼(暴击+10%/90s)/残暴(暴伤+50%)/嗜血(吸血+10%)/狂暴(攻击×1.5)/磐石(双防×1.5)/疾风(攻速×1.5)/明察(命中+10%)/幻影(闪避+10%)/凝神(回蓝+10/s)/护盾(30%生命上限吸收盾/30s)。全部受沉默压制；**护盾是新机制**：PlayerState.shield 字段，mobAttack/dotTick 两路先扣盾后扣血，shield_pot 到期 tickBuff 清盾，fullView 下发 panel.shield，前端血条显示 🛡余量。配置链：GameConst.POTIONS 兜底 18 种 + migration-v3.14-potions.sql（cfg_item 10 行+cfg_buff 10 行幂等）；**灌库后必须 admin/config/reload 热刷新才对玩家生效**（本地实测踩坑：灌库不刷新 meta 仍旧 8 种）。
 - **v3.13 背包膨胀根治**（玩家三槽卡死修复）：根因三连——①v3.12 前吞噬把 BAG_CAP 累加进合并腰带（bagCap 虚增到 33720 格）②autoSellKeep=0 掉落全进背包（33720 件=14.3MB）③状态接口每秒全量下发 13.9MB JSON 前端卡死。修复：挂机管家新增「🧲 自动管护」开关（autoEquipBest，结算后自动卖白装→同名吞噬→穿最强）；fastAutoEquip 重写 O(n log n)（排序+名字哈希吞噬，空背包短路）；devourInto 对 BAG_CAP 取大不求和+bagCap 钳制封顶；fullView/inventoryView 背包截断 BAG_VIEW_LIMIT=200+bagTotal 下发。三槽实测：背包 33720→0、响应 13.9MB→57KB、轮询 0.21s。
 - **前端性能小修**（v3.13 同轮）：renderBag 签名补 bagTotal；editing 白名单补 autoEquipChk；__game 桥接补参；buffBar 签名守卫只更新倒计时文本；renderTitles 签名剔除每秒变化字段。
-- **技术遗留**（较大手术，已列入 README「技术遗留清单」）：锁模板 withLock 收口 / SocialService persist 收口 / StatDailyAggregator 全表扫描 / 轮询瘦身 / 榜单原子化 / advance 内 PanelCalculator.of 重复构建 ~5-8 次 / persist 每秒 3-4 次全量 JSON 编解码+MySQL 全量写 / StateCache 缓存 JSON 而非对象 / equipped 词条膨胀仍全量下发 / nextFreeExtra 首穿 O(n²) / 前端快照-点击 ≤1s 竞态。
+- **技术遗留**（较大手术，已列入 README「技术遗留清单」）：锁模板 withLock 收口 / SocialService persist 收口 / StatDailyAggregator 全表扫描 / 轮询瘦身 / persist 每秒 3-4 次全量 JSON 编解码+MySQL 全量写 / StateCache 缓存 JSON 而非对象 / equipped 词条膨胀仍全量下发 / nextFreeExtra 首穿 O(n²) / 前端快照-点击 ≤1s 竞态。（已销账：榜单原子化 v3.15 Lua、BULLET_MP 强化放大 v3.15、advance 内面板重复构建 v3.15 部分——grow/autoPotion 已收，余 dotTick/autoBuffTick/regenTick/通关判定 4 处在状态变更后构建，语义必需）
 - 本文件是唯一开工入口；读完本节+§8/§9 即可动手。
 
 ## 1. 服务器连接（免密已配置，不要用密码）
@@ -136,6 +139,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 枪械系统 | cfg_equipment_template base_stats | 三线：物理弹（纯 PATK 高攻速）/物理附魔弹（PATK+MATK 双轨不耗蓝）/纯魔法弹（纯 MATK + BULLET_MP 每发耗蓝，无蓝哑火，蓝回复后自动恢复射击）；加特林 ASPD 8、魔弹加特林 ASPD 10；一发子弹=一次普攻
 | 挂机策略 | POST /api/game/{slot}/autoconfig {hpLine,mpLine,autoBurn,autoSkill} | autoHpLine/autoMpLine 持久化（0~0.9 钳制）；autoPotion 在怪物攻击**前**执行（顺序 bug 修复：放攻击后低血先死嗑不到药），先大血药后小血药，离线也生效；**v3.4 新增 autoBurn/autoSkill**：GameEngine.autoBuffTick 按 legacy autobot 语义自动补 buff（涌动先行免蓝→急速→蓄力；血<60% 格挡；血<30% 怒吼；血>60% 补燃烧），走 castSkill 统一入口，村口/沉默跳过 |
 | 战斗飘字 | 纯前端 app.js floatDmg | 帧间怪物血量差弹伤害字（暴击按 CRIT 抽样金红样式），120ms 窗口 4 个预算节流；复用旧版 float-dmg CSS |
+| 怪物词条（v3.15） | GameConst.MOB_TRAITS/rollMobTrait + MobState.trait | 出生掷骰：村口不出、平原 10% 每深一层 +3%、池随深度解锁（平原仅狂暴/森林加破甲/矿洞起全开），Boss 不出；效果：狂暴=残血攻速×1.5（mobAttack hits）、破甲=玩家双防×0.7 结算（mobAttack）、缴械=玩家普攻×0.85（dealDamage）；mobView 下发 emoji/名/说明，前端名字后缀+mobDesc 直读；V315EnhanceTest 锁数值 |
 | 离线收益提示 | GameController.run 下发 offline | seconds>60 时下发摘要，前端每会话弹一次 |
 
 ## 8. 本地开发闭环（周末无内网时用）
@@ -152,12 +156,12 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 一键起服 | `bash server/run-local.sh`（读 server/local.env 注入密钥→打包→8081 起 local profile） |
 | 密钥文件 | `server/local.env`（**绝不入库**，模板是 local.env.example） |
 | 全链路冒烟 | `python -I server/deploy/smoke_test.py`（66 项，覆盖全部写端点+运维端 CRUD；SMOKE_ADMIN_PASSWORD 未设置时 57 项；136 上传参 BASE_URL 即可） |
-| 单元测试 | `mvn -o test`（126 项：Baglord 边界/经济/成长/常量表/序列化边界/战斗回归 CombatRegressTest/迁移 DataConsistencyTest/枪械 GunplayTest/快照/赋能封顶/无限装备栏语义） |
+| 单元测试 | `mvn -o test`（165 项：Baglord 边界/经济/成长/常量表/序列化边界/战斗回归 CombatRegressTest/迁移 DataConsistencyTest/枪械 GunplayTest/快照/赋能封顶/无限装备栏语义/v3.15 增强 V315EnhanceTest；Muse VM 本机依赖已补齐可直接跑） |
 | DB 备份 | `server/deploy/backup-db.sh`（136 上挂 cron 3:30，保留 7 份，gzip 完整性校验） |
 | 压测 | `python deploy/load_test.py 20 30`（基线 deploy/LOAD_TEST.md） |
 | 移动端 | css/v2.css 末尾媒体查询(768/420 两档):单栏重排/技能两列/横滑地图/弹窗限高;改布局后 375 视口必测 |
 | 前端结构 | 纯原生 JS 无构建：app.js(IIFE 单文件)/api.js/admin.js；**两栏布局**(战斗+地图\|大页签 4×2)；左上角头像方块悬浮弹 statCard 属性卡(成就/称号/图鉴在「👤 角色」页签)；通用点选弹窗 pickModal、装备词条触屏卡 item-pop、永续徽章卡 talent-pop 均在 app.js+style.css 尾部 |
-| 前端验证 | 静态页由 127.0.0.1:8090 常驻服务提供(挂 web/+/api 反代 8081,通常用户已拉起,先 curl 探测)；**改前端必须升 index.html 版本戳 ?v=N**(当前 v=41)；测试档 gui_bg_60945(槽1,6.5万血)可自由折腾；视口三件套 1366×768/1366×640/390×844 |
+| 前端验证 | 静态页由 127.0.0.1:8090 常驻服务提供(挂 web/+/api 反代 8081,通常用户已拉起,先 curl 探测)；**改前端必须升 index.html 版本戳 ?v=N**(当前 v=53)；测试档 gui_bg_60945(槽1,6.5万血)可自由折腾；视口三件套 1366×768/1366×640/390×844 |
 
 部署流程升级：deploy.sh 健康检查通过后**自动跑冒烟**（失败不回滚只报警）。
 
@@ -168,7 +172,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 3. **大数**：全 BigDecimal 字符串；`doubleValue()` 只许用于阈值比较；跨账号计数（香火/战绩/签到）一律原子 UPDATE（UserRepository/GraveRepository 已有范式）。
 4. **用户输入进 innerHTML**：先过 `esc()`。
 5. **实体改动三同步**：实体类 + schema.sql + deploy.sh 迁移函数。
-6. **每轮修改后必跑**：`mvn -o test`（126 项）+ `python -I server/deploy/smoke_test.py`（66 项），双绿才算完成。
+6. **每轮修改后必跑**：`mvn -o test`（165 项）+ `python -I server/deploy/smoke_test.py`（66 项），双绿才算完成。
 7. **kills/gold 等基线类字段**：死亡重开/转生清零时，引用它的派生数据（如委托基线）必须同步清理。
 8. **前端渲染加签名守卫**：applyView 每秒全量跑，任何新 renderXXX 必须挂 `_sig` 内容签名（范式见 renderPotions/renderBag），否则每秒销毁重建 DOM=掉帧+点击丢失。
 9. **浮层一律不透明底**：`--panel/--panel-2` 是近乎全透的白色叠层(靠暗底撑住)，浮层底下有内容会透——用 `--bg1/--bg2` 渐变(statCard/item-pop/talent-pop 三处先例)；新弹窗优先复用 pickModal/death-mask 体系。

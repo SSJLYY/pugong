@@ -85,7 +85,12 @@ public final class PanelCalculator {
             }
             BigDecimal enh = Num.of(1 + (double) it.enhance * GameConst.ENHANCE_STAT_BONUS);
             for (Map.Entry<String, BigDecimal> e : it.base.entrySet()) {
-                flat.merge(e.getKey(), Num.mul(e.getValue(), enh), Num::add);
+                // BULLET_MP 是每发耗蓝的「成本」而非战力:强化只放大战力,成本不吃强化乘区
+                // (否则魔弹枪越强化越哑火,与吞噬合并的同口径修复,见 GameService.devourInto)
+                BigDecimal v = "BULLET_MP".equals(e.getKey())
+                        ? e.getValue()
+                        : Num.mul(e.getValue(), enh);
+                flat.merge(e.getKey(), v, Num::add);
             }
             for (PlayerState.AffixInst a : it.affixes) {
                 if ("pct_hp".equals(a.type)) {

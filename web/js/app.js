@@ -524,7 +524,8 @@
 
     if (view.mob) {
       $('mobEmoji').textContent = view.mob.emoji;
-      $('mobName').textContent = view.mob.name + (view.mob.boss ? ' 👑' : '');
+      $('mobName').textContent = view.mob.name + (view.mob.boss ? ' 👑' : '')
+        + (view.mob.trait ? ' ' + view.mob.trait.emoji : '');
       // 战斗飘字：怪物血量下降 → 弹伤害（暴击概率抽样 / 击杀提示）
       if (S.lastMobId === view.mob.id && S.lastMobHp !== null) {
         try {
@@ -559,7 +560,11 @@
         const pct = Math.max(0, Math.min(100, new Decimal(view.mob.curHP).div(new Decimal(mhp).max(1)).toNumber() * 100));
         $('mobBar').style.width = pct.toFixed(1) + '%';
       }
-      $('mobDesc').textContent = view.mob.boss ? 'Boss 战 · 会施放沉默封印你的被动' : '出拳就是修行';
+      $('mobDesc').textContent = view.mob.boss
+        ? 'Boss 战 · 会施放沉默封印你的被动'
+        : (view.mob.trait
+            ? '词条「' + view.mob.trait.emoji + ' ' + view.mob.trait.name + '」' + view.mob.trait.desc
+            : '出拳就是修行');
     } else {
       $('mobEmoji').textContent = '💨';
       $('mobName').textContent = '寻找目标中…';

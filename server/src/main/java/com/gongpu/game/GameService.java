@@ -982,6 +982,18 @@ public class GameService {
         m.put("ASPD", s.mob.ASPD);
         m.put("RNG", s.mob.RNG);
         m.put("SPD", s.mob.SPD);
+        // 怪物词条（v3.15）：下发完整展示信息，前端只渲染徽章不查表
+        if (s.mob.trait != null) {
+            GameConst.TraitDef td = GameConst.MOB_TRAITS.get(s.mob.trait);
+            if (td != null) {
+                Map<String, Object> t = new LinkedHashMap<>();
+                t.put("id", td.id());
+                t.put("name", td.name());
+                t.put("emoji", td.emoji());
+                t.put("desc", td.desc());
+                m.put("trait", t);
+            }
+        }
         return m;
     }
 

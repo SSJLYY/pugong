@@ -67,6 +67,10 @@ public class LeaderboardService {
             return;
         }
         throttle.put(userId, now);
+        // 节流表只增不删会随历史玩家数单调膨胀:超阈值时顺手清掉已过窗口的条目
+        if (throttle.size() > 4096) {
+            throttle.entrySet().removeIf(e -> now - e.getValue() >= 60_000L);
+        }
         if (maxHP != null && maxHP.signum() > 0) {
             submitBoard(hpKey, userId, username, gen, Num.plain(maxHP), log10Safe(maxHP), false);
         }
@@ -78,27 +82,41 @@ public class LeaderboardService {
         }
     }
 
+    /**
+     * 单榜写入的原子脚本:「读旧分→比大小→换 member→写新分」必须在 Redis 内一次做完,
+     * 否则并发上报会互相覆盖(旧实现是四步往返,残留旧 member 即出自于此)。
+     * KEYS[1]=榜 ZSET,KEYS[2]=best HASH;ARGV=分数字符串,log 字段,member 字段,新 member。
+     * 返回 1=已写入,0=旧分更高跳过。
+     */
+    private static final org.springframework.data.redis.core.script.RedisScript<Long> SUBMIT_SCRIPT =
+            org.springframework.data.redis.core.script.RedisScript.of("""
+                    local old = redis.call('HGET', KEYS[2], ARGV[2])
+                    if old and tonumber(old) >= tonumber(ARGV[1]) then
+                      return 0
+                    end
+                    local oldm = redis.call('HGET', KEYS[2], ARGV[3])
+                    if oldm and oldm ~= ARGV[4] then
+                      redis.call('ZREM', KEYS[1], oldm)
+                    end
+                    redis.call('ZADD', KEYS[1], ARGV[1], ARGV[4])
+                    redis.call('HSET', KEYS[2], ARGV[2], ARGV[1], ARGV[3], ARGV[4])
+                    return 1
+                    """, Long.class);
+
     /** 单榜写入:member=uid|名|世代|值明文,分数为 log10(防 1e308 溢出)或世代整数。 */
     private void submitBoard(String boardKey, long userId, String username, int gen,
                              String valuePlain, double score, boolean genBoard) {
         try {
             String uidStr = String.valueOf(userId);
             String hashKey = boardKey + ":best";
-            String oldLog = (String) redis.opsForHash().get(hashKey, HASH_LOG + ":" + uidStr);
-            if (oldLog != null && Double.parseDouble(oldLog) >= score) {
-                return;
-            }
             // gen 榜 member 无第 4 段(值=世代);其余榜带值明文供 top() 精确展示
             String member = genBoard
                     ? userId + "|" + (username == null ? "?" : username)
                     : userId + "|" + (username == null ? "?" : username) + "|" + gen + "|" + valuePlain;
-            String oldMember = (String) redis.opsForHash().get(hashKey, HASH_MEMBER + ":" + uidStr);
-            if (oldMember != null && !oldMember.equals(member)) {
-                redis.opsForZSet().remove(boardKey, oldMember);
-            }
-            redis.opsForZSet().add(boardKey, member, score);
-            redis.opsForHash().put(hashKey, HASH_LOG + ":" + uidStr, String.valueOf(score));
-            redis.opsForHash().put(hashKey, HASH_MEMBER + ":" + uidStr, member);
+            redis.execute(SUBMIT_SCRIPT,
+                    java.util.List.of(boardKey, hashKey),
+                    String.valueOf(score), HASH_LOG + ":" + uidStr,
+                    HASH_MEMBER + ":" + uidStr, member);
         } catch (RuntimeException ignored) {
             // 榜单失败不影响游戏
         }

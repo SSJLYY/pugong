@@ -104,7 +104,7 @@ public final class GameEngine {
         }
 
         if (punches.signum() > 0) {
-            grow(s, punches);
+            grow(s, punches, p);
             s.stats.punches = Num.add(s.stats.punches, punches);
             s.stats.lifetimePunches = Num.add(s.stats.lifetimePunches, punches);
             s.stats.bestMaxHP = Math.max(s.stats.bestMaxHP, toLongSaturated(s.life.maxHP));
@@ -167,7 +167,12 @@ public final class GameEngine {
 
     /** 普攻赋能的永久成长。 */
     public static void grow(PlayerState s, BigDecimal punches) {
-        PanelCalculator.Panel p = PanelCalculator.of(s);
+        grow(s, punches, PanelCalculator.of(s));
+    }
+
+    /** 同 grow,但复用调用方已构建的面板(advance 主面板):grow 只读 ACC,
+     *  而 ACC 不受 grow 期间的生命/蓝量变动影响,复用与重算等价,省一次全量构建。 */
+    static void grow(PlayerState s, BigDecimal punches, PanelCalculator.Panel p) {
         BigDecimal hitRate = p.ACC();
         BigDecimal comboMul = comboMul(s);
         BigDecimal hits = Num.mul(Num.mul(punches, hitRate), comboMul);
@@ -223,6 +228,10 @@ public final class GameEngine {
                 ? Num.max(Num.of(1), Num.sub(Num.mul(p.MATK(), critMul), Num.mul(m.MDEF, Num.of(GameConst.DMG_DEF_FACTOR))))
                 : Num.ZERO;
         BigDecimal perHit = Num.add(pd, md);
+        // 词条·缴械：武器被压制，普攻伤害打折（与蓄力重击同为乘区，先后不影响结果）
+        if ("disarm".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_DISARM_MUL));
+        }
         if (PanelCalculator.active(s, "heavy")) {
             perHit = Num.mul(perHit, Num.of(5));
             s.buffs.remove("heavy");
@@ -473,10 +482,19 @@ public final class GameEngine {
         if (hits <= 0) {
             return;
         }
+        // 词条·狂暴：残血反扑，攻速提升
+        if ("frenzy".equals(m.trait) && m.maxHP != null
+                && Num.lt(m.curHP, Num.mul(m.maxHP, Num.of(GameConst.TRAIT_FRENZY_HP_LINE)))) {
+            hits *= GameConst.TRAIT_FRENZY_HASTE;
+        }
+        // 词条·破甲：结算时玩家的双防按比例打折
+        BigDecimal defMul = "sunder".equals(m.trait)
+                ? Num.of(1 - GameConst.TRAIT_SUNDER_IGNORE)
+                : Num.of(1);
         BigDecimal phys = Num.max(Num.of(0),
-                Num.sub(m.PATK, Num.mul(p.PDEF(), Num.of(GameConst.DMG_DEF_FACTOR))));
+                Num.sub(m.PATK, Num.mul(Num.mul(p.PDEF(), defMul), Num.of(GameConst.DMG_DEF_FACTOR))));
         BigDecimal mag = Num.gt(m.MATK, Num.ZERO)
-                ? Num.max(Num.of(0), Num.sub(m.MATK, Num.mul(p.MDEF(), Num.of(GameConst.DMG_DEF_FACTOR))))
+                ? Num.max(Num.of(0), Num.sub(m.MATK, Num.mul(Num.mul(p.MDEF(), defMul), Num.of(GameConst.DMG_DEF_FACTOR))))
                 : Num.ZERO;
         BigDecimal perHit = Num.max(Num.of(1), Num.add(phys, mag));   // 设计 §2.3 承伤同理:至少 1 点
 
@@ -631,8 +649,11 @@ public final class GameEngine {
 
     /** 挂机策略：血量/蓝量跌破配置线时自动嗑药（先小药后大药）。 */
     private static void autoPotion(PlayerState s) {
+        // 面板懒构建且全程复用一次:本方法只读 maxHP/MP,而嗑药/解毒只改当前血蓝与
+        // 毒/灼烧 buff(均不影响上限),三个分支重算的面板上限完全一致
+        PanelCalculator.Panel p = null;
         if (s.autoHpLine > 0 && !s.dead) {
-            PanelCalculator.Panel p = PanelCalculator.of(s);
+            p = PanelCalculator.of(s);
             if (Num.lt(s.life.curHP, Num.mul(p.maxHP(), Num.of(s.autoHpLine)))
                     && Num.gt(s.life.curHP, Num.ZERO)) {
                 // 先嗑大血药（血线已破，直接大补），再小血药
@@ -644,7 +665,9 @@ public final class GameEngine {
             }
         }
         if (s.autoMpLine > 0) {
-            PanelCalculator.Panel p = PanelCalculator.of(s);
+            if (p == null) {
+                p = PanelCalculator.of(s);
+            }
             if (Num.lt(s.life.curMP, Num.mul(p.MP(), Num.of(s.autoMpLine)))) {
                 useAutoPotion(s, "mp", p);
             }
@@ -660,7 +683,9 @@ public final class GameEngine {
         }
         // 管家：血量跌破逃跑线 → 自动逃跑回村（保命优先于挂机收益）
         if (s.autoFleeLine > 0 && !s.dead && !"village".equals(s.zone)) {
-            PanelCalculator.Panel p = PanelCalculator.of(s);
+            if (p == null) {
+                p = PanelCalculator.of(s);
+            }
             // 中毒/灼烧时逃跑线上浮 +15%(legacy autobot 语义,上限 50%)——持续掉血要提前跑
             double line = s.autoFleeLine;
             if (PanelCalculator.active(s, "poison") || PanelCalculator.active(s, "burn_dot")) {
@@ -781,6 +806,8 @@ public final class GameEngine {
         }
         GameConst.MobDef def = z.mobs().get((int) (Math.random() * z.mobs().size()));
         s.mob = toMob(def, false);
+        // 野怪出生掷词条（v3.15）：村口不出、越深越常见，Boss 走 spawnBoss 不带词条
+        s.mob.trait = GameConst.rollMobTrait(zoneId);
     }
 
     public static void spawnBoss(PlayerState s) {

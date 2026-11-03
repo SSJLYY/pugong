@@ -104,6 +104,51 @@ public final class GameConst {
 
     public static final Map<String, ZoneDef> ZONES = buildZones();
 
+    // ==================== 怪物词条（v3.15） ====================
+    // 野怪个体词条:出生时按区域深度掷骰,给同一张脸的怪一点脾气——残血狂暴、
+    // 破甲无视防御、缴械压普攻。Boss 不带词条(已有沉默机制),村口木桩永远温顺。
+
+    public record TraitDef(String id, String name, String emoji, String desc) {
+    }
+
+    public static final Map<String, TraitDef> MOB_TRAITS = Map.of(
+            "frenzy", new TraitDef("frenzy", "狂暴", "💢", "生命低于 30% 时攻速 +50%，小心它临死反扑"),
+            "sunder", new TraitDef("sunder", "破甲", "🪓", "攻击无视你 30% 的物防与魔防"),
+            "disarm", new TraitDef("disarm", "缴械", "🔗", "压制你的武器，你的普攻伤害 -15%"));
+
+    /** 狂暴触发血线 / 攻速倍率。 */
+    public static final double TRAIT_FRENZY_HP_LINE = 0.30;
+    public static final double TRAIT_FRENZY_HASTE = 1.5;
+    /** 破甲无视的防御比例（结算时防御乘 1-该值）。 */
+    public static final double TRAIT_SUNDER_IGNORE = 0.30;
+    /** 缴械的普攻伤害乘区。 */
+    public static final double TRAIT_DISARM_MUL = 0.85;
+
+    /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
+    private static final List<String> ZONE_ORDER =
+            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano");
+
+    /**
+     * 出生掷词条：村口不出；平原 10% 起、每深一层 +3%。
+     * 词条池随深度解锁：平原只有狂暴，森林起加破甲，矿洞起三种全开。
+     */
+    public static String rollMobTrait(String zoneId) {
+        int idx = ZONE_ORDER.indexOf(zoneId);
+        if (idx < 1) {
+            return null;
+        }
+        double chance = 0.10 + 0.03 * (idx - 1);
+        if (Math.random() >= chance) {
+            return null;
+        }
+        List<String> pool = idx == 1
+                ? List.of("frenzy")
+                : idx == 2
+                        ? List.of("frenzy", "sunder")
+                        : List.of("frenzy", "sunder", "disarm");
+        return pool.get((int) (Math.random() * pool.size()));
+    }
+
     private static Map<String, ZoneDef> buildZones() {
         Map<String, ZoneDef> m = new LinkedHashMap<>();
 

@@ -64,7 +64,9 @@ public final class Achievements {
             new Def("daily_1", "每日事每日毕", "📅", "首次领取每日任务奖励"),
             new Def("daily_30", "勤勉不辍", "🗓️", "累计领取 30 次每日任务奖励"),
             new Def("phase_breaker", "破相者", "🔥", "击破 1 只二阶段 Boss"),
-            new Def("weak_100", "弱点猎手", "🎯", "累计触发 100 次弱点打击")
+            new Def("weak_100", "弱点猎手", "🎯", "累计触发 100 次弱点打击"),
+            new Def("market_1", "黑市客", "🌑", "首次在每日黑市购买药剂"),
+            new Def("merchant", "商贾之道", "🧮", "卖材料累计收入 50,000 金币")
     );
 
     private Achievements() {
@@ -77,7 +79,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord" -> 5_000L;
             default -> 500L;
         };
@@ -161,6 +163,8 @@ public final class Achievements {
             case "daily_30" -> new long[]{s.stats.dailyClaims, 30};
             case "phase_breaker" -> new long[]{s.stats.bossPhaseKills, 1};
             case "weak_100" -> new long[]{s.stats.weakCrits, 100};
+            case "market_1" -> new long[]{s.stats.marketBuys, 1};
+            case "merchant" -> new long[]{s.stats.matSoldGold, 50_000};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
             case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
@@ -235,6 +239,8 @@ public final class Achievements {
                 case "daily_30" -> s.stats.dailyClaims >= 30;
                 case "phase_breaker" -> s.stats.bossPhaseKills >= 1;
                 case "weak_100" -> s.stats.weakCrits >= 100;
+                case "market_1" -> s.stats.marketBuys >= 1;
+                case "merchant" -> s.stats.matSoldGold >= 50_000;
                 default -> false;
             };
             if (ok) {

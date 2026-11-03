@@ -180,7 +180,7 @@ public final class GameConst {
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
-            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano");
+            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss");
 
     /**
      * 出生掷词条：村口不出；平原 10% 起、每深一层 +3%。
@@ -281,6 +281,22 @@ public final class GameConst {
                                 "第 0 世天花板，魔伤 400 射程 5", List.of("burn"))),
                 mob("boss_ifrit", "炎狱魔王", "👹", "2000000", "500", "600", "100", "100", 1.1, 4, 100, 15000,
                         "炎狱之主，沉默之焰焚尽增益", List.of("burn"))));
+
+        // 深渊裂隙（第七批）：火山之下的裂隙，跨世毕业区——双防与双攻都要成型才站得住
+        m.put("abyss", new ZoneDef("abyss", "深渊裂隙", "🕳️", false,
+                "建议生命 ≥ 200万 / 双防 ≥ 150 / 攻击 ≥ 4000（跨世毕业区）",
+                Map.of("maxHP", "2000000", "PDEF", "150", "MDEF", "150", "ATK", "4000"),
+                List.of(
+                        mob("abyss_wisp", "虚空游魂", "👻", "1500000", "100", "700", "60", "160", 0.9, 6, 95, 1200,
+                                "无形游魂，魔伤穿防，掉落深渊结晶", List.of()),
+                        mob("rift_hound", "裂隙猎犬", "🐺", "2500000", "900", "0", "150", "80", 1.4, 2, 140, 1500,
+                                "攻速极快移速如电，獠牙撕裂空间", List.of()),
+                        mob("void_knight", "虚空骑士", "♞", "4000000", "800", "500", "220", "220", 0.8, 3, 80, 2200,
+                                "双防如壁、双伤如潮，裂隙的守门人", List.of()),
+                        mob("chaos_spawn", "混沌魔胎", "🦑", "6000000", "600", "1100", "120", "260", 1.0, 7, 85, 3000,
+                                "魔伤滔天射程极远，混沌在裂隙深处胎动", List.of())),
+                mob("boss_abyss", "渊底之主·无光君王", "🕳️", "30000000", "1500", "1800", "300", "300", 1.2, 5, 100, 60000,
+                        "裂隙最深处的主人，沉默如渊，万光不入", List.of())));
 
         return java.util.Collections.unmodifiableMap(m);
     }
@@ -502,7 +518,8 @@ public final class GameConst {
     /** 区域材料（DESIGN.md §9：皮毛/狼牙/矿石/毒腺/魔尘/火晶）。 */
     public static final Map<String, String> ZONE_MAT = Map.of(
             "plain", "pelt", "forest", "wolf_fang", "mine", "ore",
-            "swamp", "toad_gland", "snow", "mana_dust", "volcano", "fire_crystal");
+            "swamp", "toad_gland", "snow", "mana_dust", "volcano", "fire_crystal",
+            "abyss", "abyss_crystal");
 
     /** 附魔卷轴（DESIGN.md §6.2/§8）：给武器/弓附加魔伤词条，火/冰/雷三系。 */
     public static final Map<String, Object[]> SCROLLS = Map.of(
@@ -522,7 +539,8 @@ public final class GameConst {
             "ore", new String[]{"矿石", "⛏️"},
             "toad_gland", new String[]{"毒腺", "🟢"},
             "mana_dust", new String[]{"魔尘", "✨"},
-            "fire_crystal", new String[]{"火晶", "🔥"});
+            "fire_crystal", new String[]{"火晶", "🔥"},
+            "abyss_crystal", new String[]{"深渊结晶", "🕳️"});
 
     /** 增益类 buff（永久存续天赋作用对象）。 */
     public static final Set<String> ETERNAL_BUFFS = Set.of(

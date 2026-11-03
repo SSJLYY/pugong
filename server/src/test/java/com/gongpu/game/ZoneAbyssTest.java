@@ -1,0 +1,76 @@
+package com.gongpu.game;
+
+import com.gongpu.cfg.GameData;
+import com.gongpu.common.ApiException;
+import com.gongpu.state.NewState;
+import com.gongpu.state.PlayerState;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/** 第七批第 21 轮：新区域「深渊裂隙」骨架——区域顺序/图鉴总数/材料映射/门槛/词条池深度。 */
+class ZoneAbyssTest {
+
+    @BeforeAll
+    static void initGameData() {
+        new GameData(null, null, null, null, null, null, null);
+    }
+
+    private final GameService game = new GameService();
+
+    @Test
+    void abyssIsDeepestZoneWithFullRoster() {
+        GameConst.ZoneDef z = GameConst.ZONES.get("abyss");
+        assertNotNull(z, "深渊裂隙应存在");
+        assertEquals("深渊裂隙", z.name());
+        assertEquals(4, z.mobs().size(), "深渊应有 4 种野怪");
+        assertNotNull(z.boss());
+        assertEquals("boss_abyss", z.boss().id());
+        List<String> order = new ArrayList<>(GameConst.ZONES.keySet());
+        assertEquals("abyss", order.get(order.size() - 1), "深渊应为最深区域（自动推进链末端）");
+        assertEquals("abyss", GameEngine.nextZoneId("volcano"), "火山之后应推进到深渊");
+        assertEquals(null, GameEngine.nextZoneId("abyss"), "深渊之后无下一区");
+    }
+
+    @Test
+    void codexTotalGrowsTo23() {
+        assertEquals(23, GameConst.codexTotal(), "图鉴总数 = 原 18 + 深渊 4 怪 1 Boss");
+    }
+
+    @Test
+    void abyssMaterialMapping() {
+        assertEquals("abyss_crystal", GameConst.ZONE_MAT.get("abyss"));
+        assertEquals("深渊结晶", GameConst.MAT_INFO.get("abyss_crystal")[0]);
+    }
+
+    @Test
+    void traitPoolAtAbyssDepthIsFull() {
+        assertEquals(12, GameConst.traitPool(7).size(), "最深区域词条池应全开（12 条）");
+    }
+
+    @Test
+    void gateRejectsWeakAndAdmitsStrong() {
+        PlayerState weak = NewState.create();
+        assertThrows(ApiException.class, () -> game.gotoZone(weak, "abyss"), "白板号应被深渊门槛拒绝");
+
+        PlayerState s = NewState.create();
+        s.life.maxHP = new BigDecimal("5000000");
+        s.life.curHP = new BigDecimal("5000000");
+        s.life.set("PATK", new BigDecimal("10000"));
+        s.life.set("PDEF", new BigDecimal("500"));
+        s.life.set("MDEF", new BigDecimal("500"));
+        game.gotoZone(s, "abyss");
+        assertEquals("abyss", s.zone);
+        assertNotNull(s.mob, "进入深渊应刷出野怪");
+        assertTrue(GameConst.ZONES.get("abyss").mobs().stream().anyMatch(d -> d.id().equals(s.mob.id)),
+                "刷出的应是深渊怪种：" + s.mob.id);
+    }
+}

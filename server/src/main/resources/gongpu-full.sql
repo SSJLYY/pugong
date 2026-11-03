@@ -980,6 +980,16 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('plain_veteran', '平原老兵', '🎖️', '功成身退的老兵想看看后辈的拳头：平原连战三十场', 'plain', '{"maxHP":2000}', 30, 200, 'might', 1, 1, 1, 13);
 
+-- 第七批第 25 轮：深渊委托 ×2（裂隙长线：初探 + 讨伐无光君王）
+DELETE FROM `cfg_quest` WHERE `code` IN ('abyss_probe');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('abyss_probe', '裂隙初探', '🕳️', '裂隙刚开，公会要第一手情报：在深渊裂隙清剿虚空生物', 'abyss', '{"maxHP":2000000,"ATK":4000}', 15, 20000, 'spirit', 2, 1, 1, 14);
+DELETE FROM `cfg_quest` WHERE `code` IN ('abyss_lord');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('abyss_lord', '无光君王', '👑', '渊底之主盘踞裂隙最深处，公会悬赏讨伐：深渊连战三十场', 'abyss', '{"maxHP":3000000,"ATK":6000}', 30, 50000, 'giant', 2, 1, 1, 15);
+
 -- 第六批第 84 轮：新药剂「聚宝药剂」（300s 击杀金币 +50%，补齐金币维度）
 DELETE FROM `cfg_item` WHERE `code` IN ('fortune');
 INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES

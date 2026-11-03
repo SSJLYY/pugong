@@ -65,9 +65,9 @@ class DataParity2Test {
     }
 
     @Test
-    void questCountIs14() throws Exception {
+    void questCountIs16() throws Exception {
         String sql = allSql();
-        assertEquals(14, countRows(insertBlocks(sql, "cfg_quest")), "委托总数应为 14");
+        assertEquals(16, countRows(insertBlocks(sql, "cfg_quest")), "委托总数应为 16（14 + 第七批深渊 2）");
     }
 
     @Test

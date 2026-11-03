@@ -76,6 +76,22 @@ class ZoneAbyssTest {
         }
     }
 
+    /** 第 25 轮：深渊委托 ×2 在 SQL 中（target_zone=abyss，奖励药剂为真实物品 code）。 */
+    @Test
+    void abyssQuestsInSql() throws Exception {
+        java.nio.file.Path testRoot = java.nio.file.Path.of(ZoneAbyssTest.class.getResource("/").toURI());
+        java.nio.file.Path root = testRoot.resolveSibling("classes");
+        StringBuilder sb = new StringBuilder();
+        try (java.util.stream.Stream<java.nio.file.Path> walk = java.nio.file.Files.walk(root)) {
+            for (java.nio.file.Path p : walk.filter(x -> x.getFileName().toString().endsWith(".sql")).toList()) {
+                sb.append(java.nio.file.Files.readString(p, java.nio.charset.StandardCharsets.UTF_8)).append('\n');
+            }
+        }
+        String sql = sb.toString();
+        assertTrue(sql.contains("'abyss_probe'") && sql.contains("'abyss_lord'"), "两条深渊委托应在 SQL 中");
+        assertTrue(sql.contains("'裂隙初探'") && sql.contains("'无光君王'"), "委托名应正确写入（防编码事故）");
+    }
+
     @Test
     void gateRejectsWeakAndAdmitsStrong() {
         PlayerState weak = NewState.create();

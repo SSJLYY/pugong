@@ -830,6 +830,13 @@ INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`,
 DELETE FROM `cfg_buff` WHERE `code` IN ('thorn_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('thorn_pot', '荆棘', '🌵', 'good', 'passive', '{"reflectMul":0.2}', '120s 内反弹所受伤害的 20%', 1, 45);
+-- 第 6 轮：巨人药剂（对 Boss 伤害 +15%）
+DELETE FROM `cfg_item` WHERE `code` IN ('giant');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('giant', '巨人药剂', '🦍', 'potion', 700, '{"buff":"giant_pot","buffVal":1.15,"buffDur":180}', '180s 内对 Boss 伤害 +15%', 1, 46);
+DELETE FROM `cfg_buff` WHERE `code` IN ('giant_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('giant_pot', '巨人', '🦍', 'good', 'passive', '{"bossDmgMul":1.15}', '180s 内对 Boss 伤害 +15%', 1, 46);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

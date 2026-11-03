@@ -237,6 +237,10 @@ public final class GameEngine {
         if (m.boss && s.passives.contains("boss_hunter")) {
             perHit = Num.mul(perHit, Num.of(GameConst.BOSS_HUNTER_MUL));
         }
+        // 药剂·巨人：对 Boss 专伤乘区（与被动乘算叠加，沉默压制）
+        if (m.boss && buffOn(s, p, "giant_pot")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.GIANT_POT_MUL));
+        }
         if (PanelCalculator.active(s, "heavy")) {
             perHit = Num.mul(perHit, Num.of(5));
             s.buffs.remove("heavy");

@@ -162,6 +162,8 @@
     flee: (slot) => request('POST', '/api/game/' + slot + '/flee'),
     autoEquip: (slot) => request('POST', '/api/game/' + slot + '/autoequip'),
     quests: (slot) => request('GET', '/api/game/' + slot + '/quests'),
+    craftBoard: (slot) => request('GET', '/api/game/' + slot + '/crafts'),
+    craftDo: (slot, code) => request('POST', '/api/game/' + slot + '/craft', { code }),
     questAccept: (slot, code) => request('POST', '/api/game/' + slot + '/quest/accept', { code }),
     questDeliver: (slot, code) => request('POST', '/api/game/' + slot + '/quest/deliver', { code }),
     questAbandon: (slot, code) => request('POST', '/api/game/' + slot + '/quest/abandon', { code }),

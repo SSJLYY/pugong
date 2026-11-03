@@ -922,3 +922,7 @@
 }
 #butlerPanel .bp-row { display: flex; align-items: center; gap: 6px; margin: 7px 0; }
 #butlerPanel .bp-btns button { flex: 1; min-height: 30px; }
+
+/* 图纸合成：材料筹码（持有量达标常色、不足标红） */
+.mat-chip { display: inline-block; padding: 1px 7px; border-radius: 9px; background: rgba(127,127,127,.16); font-size: 11px; margin: 2px 2px 0 0; }
+.mat-chip.lack { color: #e5484d; background: rgba(229,72,77,.12); }

@@ -9,8 +9,8 @@
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="css/style.css?v=58">
-<link rel="stylesheet" href="css/v2.css?v=58">
+<link rel="stylesheet" href="css/style.css?v=59">
+<link rel="stylesheet" href="css/v2.css?v=59">
 </head>
 <body>
 
@@ -150,6 +150,7 @@
       <button id="tabBtnEquip" class="game-tab active" data-tab="equip">🎒 装备</button>
       <button id="tabBtnSkills" class="game-tab" data-tab="skills">✋ 技能药剂</button>
       <button id="tabBtnQuest" class="game-tab" data-tab="quest">📜 委托</button>
+      <button id="tabBtnCraft" class="game-tab" data-tab="craft">⚒️ 锻造</button>
       <button id="tabBtnRole" class="game-tab" data-tab="role">👤 角色</button>
       <button id="tabBtnSave" class="game-tab" data-tab="save">💾 存档</button>
       <button id="tabBtnSocial" class="game-tab" data-tab="social">🏮 江湖</button>
@@ -191,6 +192,14 @@
         <h2>📜 冒险公会委托</h2>
         <p class="save-rule-hint">按属性门槛接取，击杀任意怪物计入进度，回来交付领赏（最多同时 3 个）</p>
         <div id="questList" class="graveyard-list"><p class="empty-hint">加载中…</p></div>
+      </div>
+    </div>
+
+    <div id="tabCraft" class="tab-pane" data-pane="craft" hidden>
+      <div class="save-box">
+        <h2>⚒️ 图纸合成</h2>
+        <p class="save-rule-hint">打怪掉图纸与材料，集齐即可锻造指定装备（词条随机）：基础配方出优秀品质、图纸配方出稀有品质，都有 25% 概率升一品</p>
+        <div id="craftList" class="graveyard-list"><p class="empty-hint">加载中…</p></div>
       </div>
     </div>
 
@@ -281,10 +290,10 @@
 <div id="toast" class="toast"></div>
 
 <script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=58"></script>
-<script src="js/api.js?v=58"></script>
-<script src="js/achievements.js?v=58"></script>
-<script src="js/tutorial.js?v=58"></script>
-<script src="js/app.js?v=58"></script>
+<script src="js/audio.js?v=59"></script>
+<script src="js/api.js?v=59"></script>
+<script src="js/achievements.js?v=59"></script>
+<script src="js/tutorial.js?v=59"></script>
+<script src="js/app.js?v=59"></script>
 </body>
 </html>

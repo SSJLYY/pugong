@@ -69,6 +69,7 @@ public class GameController {
     private final com.gongpu.account.AccountService accounts;
     private final com.gongpu.config.StateCache cache;
     private final com.gongpu.quest.QuestService quest;
+    private final com.gongpu.craft.CraftService crafts;
 
     public GameController(SaveService saves, GameService game,
                           com.gongpu.state.GraveService graves,
@@ -76,7 +77,8 @@ public class GameController {
                           com.gongpu.stats.SocialService social,
                           com.gongpu.account.AccountService accounts,
                           com.gongpu.config.StateCache cache,
-                          com.gongpu.quest.QuestService quest) {
+                          com.gongpu.quest.QuestService quest,
+                          com.gongpu.craft.CraftService crafts) {
         this.saves = saves;
         this.game = game;
         this.graves = graves;
@@ -85,6 +87,7 @@ public class GameController {
         this.accounts = accounts;
         this.cache = cache;
         this.quest = quest;
+        this.crafts = crafts;
     }
 
     /**
@@ -339,6 +342,20 @@ public class GameController {
     public Map<String, Object> questAbandon(HttpServletRequest req, @PathVariable int slot,
                                             @RequestBody QuestReq body) {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> quest.abandon(s, reqStr(body.code(), "code")));
+    }
+
+    /** 图纸合成：合成板（配方 + 持有量 + 可合成标记）。 */
+    @GetMapping("/{slot}/crafts")
+    public Map<String, Object> craftBoard(HttpServletRequest req, @PathVariable int slot) {
+        PlayerState s = saves.load(AuthInterceptor.userId(req), slot);
+        return crafts.board(s);
+    }
+
+    @PostMapping("/{slot}/craft")
+    public Map<String, Object> craftDo(HttpServletRequest req, @PathVariable int slot,
+                                       @RequestBody QuestReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
+                s -> crafts.craft(s, reqStr(body.code(), "code")));
     }
 
     /** 一键穿最强装备（按评分自动换装）。 */

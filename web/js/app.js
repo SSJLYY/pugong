@@ -425,6 +425,7 @@
     if (now - (S._tabRefreshAt || 0) < gap) return;
     S._tabRefreshAt = now;
     if (tab === 'quest') loadQuests().catch(() => { /* 静默 */ });
+    else if (tab === 'craft') loadCrafts().catch(() => { /* 静默 */ });
     else if (tab === 'social') loadSocial().catch(() => { /* 静默 */ });
   }
 
@@ -900,6 +901,7 @@
         if (tab.dataset.tab === 'save') loadGraveyard();
         if (tab.dataset.tab === 'social') loadSocial();
         if (tab.dataset.tab === 'quest') loadQuests();
+        if (tab.dataset.tab === 'craft') loadCrafts();
       });
     });
   }
@@ -1937,6 +1939,40 @@
   }
 
   // ================= 图纸合成 =================
+  async function loadCrafts() {
+    const box = $('craftList');
+    if (!box || !API.state.slot) return;
+    let data;
+    try { data = await API.craftBoard(API.state.slot); } catch (e) { return; }
+    const rows = (data.crafts || []).map(c => {
+      const mats = (c.mats || []).map(m =>
+        '<span class="mat-chip' + (m.have >= m.need ? '' : ' lack') + '">' + m.emoji + ' ' + esc(m.name) + ' ' + m.have + '/' + m.need + '</span>').join(' ');
+      const bp = c.needBlueprint
+        ? '<span class="mat-chip' + (c.blueprintHave >= 1 ? '' : ' lack') + '">📐 图纸 ' + c.blueprintHave + '/1</span>'
+        : '<span class="mat-chip">🆓 无需图纸</span>';
+      const btn = c.canCraft
+        ? '<button data-craft="' + esc(c.code) + '">锻造</button>'
+        : '<button disabled title="' + esc(c.blockReason || '') + '">锻造</button>';
+      return '<div class="potion-item"><div class="pi-info"><b>' + c.emoji + ' ' + esc(c.name) +
+        ' → ' + c.productEmoji + ' ' + esc(c.productName) + '</b>' +
+        '<div class="pi-desc">' + bp + ' ' + mats + ' · 💰 ' + fmt(c.goldCost) + ' 金' +
+        (c.canCraft ? '' : ' · ' + esc(c.blockReason || '')) + '</div></div>' +
+        '<div class="pi-btns">' + btn + '</div></div>';
+    }).join('');
+    box.innerHTML = rows || '<p class="empty-hint">暂无配方</p>';
+    box.querySelectorAll('[data-craft]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try {
+        const r = await API.craftDo(API.state.slot, b.dataset.craft);
+        toast('⚒️ 锻造成功：' + (r.itemName || '装备') + '（品质 ' + (r.quality || 0) + '）已入背包', 'ok');
+        loadCrafts();
+      } catch (e) {
+        toast(e.message, 'err');
+        b.disabled = false;
+      }
+    }));
+  }
+
   // ================= 江湖（社交） =================
   async function loadSocial() {
     loadDuel();

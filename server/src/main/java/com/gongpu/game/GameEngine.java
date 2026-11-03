@@ -404,6 +404,13 @@ public final class GameEngine {
         if (scroll != null && Math.random() < 0.4) {
             s.materials.merge(scroll, 1, Integer::sum);
         }
+        // 图纸掉落（DESIGN §9：Boss 30% / 普通怪 4%）：按区域深度池随机一张，存材料键 bp_<配方>
+        if (Math.random() < (m.boss ? 0.30 : 0.04)) {
+            String bp = com.gongpu.cfg.GameData.instance().randomCraftBlueprint(s.zone);
+            if (bp != null) {
+                s.materials.merge(com.gongpu.craft.CraftService.blueprintKey(bp), 1, Integer::sum);
+            }
+        }
 
         s.stats.newbieKills++;
         BigDecimal gold = Num.mul(Num.of(m.gold), goldMul(s));

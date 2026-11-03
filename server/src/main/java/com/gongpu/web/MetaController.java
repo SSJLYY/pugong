@@ -61,9 +61,31 @@ public class MetaController {
         }
     }
 
+    /**
+     * 元数据缓存：内容来自常量表 + GameData 配置快照，按快照对象身份缓存——
+     * 运维端 reload() 换快照后自动重建，未换则直接复用（此前每个请求全量重建整棵 Map 树）。
+     */
+    private volatile Object metaSnapKey;
+    private volatile Map<String, Object> metaCache;
+
     /** 前端启动时拉一次，用于渲染区域/怪物/技能/药剂表。 */
     @GetMapping("/config/meta")
     public Map<String, Object> meta() {
+        Object key = com.gongpu.cfg.GameData.instance().snapshot();
+        Map<String, Object> cached = metaCache;
+        if (cached != null && key == metaSnapKey) {
+            return cached;
+        }
+        synchronized (this) {
+            if (metaCache == null || key != metaSnapKey) {
+                metaCache = buildMeta();
+                metaSnapKey = key;
+            }
+            return metaCache;
+        }
+    }
+
+    private Map<String, Object> buildMeta() {
         Map<String, Object> m = new LinkedHashMap<>();
 
         List<Map<String, Object>> zones = new ArrayList<>();

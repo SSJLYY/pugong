@@ -133,6 +133,54 @@ class DailyQuestsTest {
         assertFalse(s.dailyBonusGiven, "全清奖励标记应随新日重置");
     }
 
+    // ---- 第 34 轮：模板池完整性 + 大数伤害基线 + 视图形状 ----
+
+    @Test
+    void templatePoolIntegrity() {
+        assertEquals(7, DailyQuests.TEMPLATES.size(), "模板池应为 7 个");
+        Set<String> ids = new HashSet<>();
+        for (DailyQuests.Template t : DailyQuests.TEMPLATES) {
+            assertTrue(ids.add(t.id()), "模板 id 不应重复");
+            assertEquals(3, t.targets().length, "每模板三档目标");
+            assertEquals(3, t.golds().length, "每模板三档奖励");
+            assertTrue(t.targets()[0] < t.targets()[1] && t.targets()[1] < t.targets()[2],
+                    "目标应递增：" + t.id());
+            for (long g : t.golds()) {
+                assertTrue(g > 0, "奖励应为正：" + t.id());
+            }
+        }
+    }
+
+    @Test
+    void damageBaselineHandlesHugeNumbers() {
+        PlayerState s = NewState.create();
+        String base = "123456789012345678901234567890";
+        s.stats.totalDamage = new java.math.BigDecimal(base);
+        PlayerState.DailyTask t = new PlayerState.DailyTask();
+        t.id = "damage";
+        t.baseline = base;
+        t.target = 1_000_000;
+        assertEquals(0, DailyQuests.progressOf(s, t));
+        s.stats.totalDamage = new java.math.BigDecimal(base).add(new java.math.BigDecimal("1000000"));
+        assertEquals(1_000_000, DailyQuests.progressOf(s, t), "大数基线作差应精确到个位");
+        assertTrue(DailyQuests.done(s, t));
+    }
+
+    @Test
+    void viewShapeIsComplete() {
+        PlayerState s = NewState.create();
+        java.util.List<java.util.Map<String, Object>> view = DailyQuests.viewOf(s);
+        assertEquals(3, view.size());
+        for (java.util.Map<String, Object> m : view) {
+            for (String key : new String[]{"id", "name", "emoji", "desc", "progress", "target",
+                    "rewardGold", "claimed", "done"}) {
+                assertTrue(m.containsKey(key), "视图应含字段 " + key);
+            }
+            assertTrue(String.valueOf(m.get("desc")).contains(String.valueOf(m.get("target"))),
+                    "描述应写明目标数量");
+        }
+    }
+
     @Test
     void usePotionIncrementsLifetimeCounter() {
         GameService game = new GameService();

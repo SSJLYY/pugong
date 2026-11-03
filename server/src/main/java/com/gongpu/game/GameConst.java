@@ -190,16 +190,21 @@ public final class GameConst {
         if (Math.random() >= chance) {
             return null;
         }
-        List<String> pool = idx == 1
+        List<String> pool = traitPool(idx);
+        return pool.get((int) (Math.random() * pool.size()));
+    }
+
+    /** 词条池（按区域深度解锁）：平原仅狂暴，深区逐步解锁至全 11 条。供单测锁定解锁线。 */
+    static List<String> traitPool(int zoneIdx) {
+        return zoneIdx == 1
                 ? List.of("frenzy")
-                : idx == 2
+                : zoneIdx == 2
                         ? List.of("frenzy", "sunder", "rich", "crystal")
-                        : idx == 3
+                        : zoneIdx == 3
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
-                                : idx == 4
+                                : zoneIdx == 4
                                         ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth")
                                         : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth");
-        return pool.get((int) (Math.random() * pool.size()));
     }
 
     private static Map<String, ZoneDef> buildZones() {

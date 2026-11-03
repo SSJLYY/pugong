@@ -425,7 +425,7 @@ public final class GameEngine {
         }
 
         s.stats.newbieKills++;
-        BigDecimal gold = Num.mul(Num.of(m.gold), goldMul(s));
+        BigDecimal gold = Num.mul(Num.of(m.gold), Num.mul(goldMul(s), traitGoldMul(m)));
         s.gold = Num.add(s.gold, gold);
 
         int dropCount = 0;
@@ -467,6 +467,13 @@ public final class GameEngine {
 
     private static BigDecimal goldMul(PlayerState s) {
         return "goldhand".equals(s.talent) ? Num.of(1.20) : Num.of(1);
+    }
+
+    /** 词条·富饶：击杀金币乘区（仅逐杀结算；批量溢出的期望击杀是普通怪，不吃词条）。 */
+    static BigDecimal traitGoldMul(PlayerState.MobState m) {
+        return m != null && "rich".equals(m.trait)
+                ? Num.of(GameConst.TRAIT_RICH_GOLD_MUL)
+                : Num.of(1);
     }
 
     /**

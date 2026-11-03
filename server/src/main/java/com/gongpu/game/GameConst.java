@@ -135,7 +135,8 @@ public final class GameConst {
             "sunder", new TraitDef("sunder", "破甲", "🪓", "攻击无视你 30% 的物防与魔防"),
             "disarm", new TraitDef("disarm", "缴械", "🔗", "压制你的武器，你的普攻伤害 -15%"),
             "leech", new TraitDef("leech", "嗜血", "🩸", "命中你时吸回所造成伤害 30% 的生命，拖得越久它越难杀"),
-            "thorns", new TraitDef("thorns", "荆棘", "🌵", "你打它时被反扎：所造成伤害的 10% 反弹给你，出手越重扎得越狠"));
+            "thorns", new TraitDef("thorns", "荆棘", "🌵", "你打它时被反扎：所造成伤害的 10% 反弹给你，出手越重扎得越狠"),
+            "rich", new TraitDef("rich", "富饶", "💰", "行走的钱袋子：击杀金币 ×3，它不伤人，只散财"));
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -148,6 +149,8 @@ public final class GameConst {
     public static final double TRAIT_LEECH_MUL = 0.30;
     /** 荆棘的反弹比例（对玩家本帧所造伤害量）。 */
     public static final double TRAIT_THORNS_MUL = 0.10;
+    /** 富饶的金币倍率（击杀结算乘区）。 */
+    public static final double TRAIT_RICH_GOLD_MUL = 3.0;
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
@@ -169,12 +172,12 @@ public final class GameConst {
         List<String> pool = idx == 1
                 ? List.of("frenzy")
                 : idx == 2
-                        ? List.of("frenzy", "sunder")
+                        ? List.of("frenzy", "sunder", "rich")
                         : idx == 3
-                                ? List.of("frenzy", "sunder", "disarm")
+                                ? List.of("frenzy", "sunder", "disarm", "rich")
                                 : idx == 4
-                                        ? List.of("frenzy", "sunder", "disarm", "leech")
-                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns");
+                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich")
+                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich");
         return pool.get((int) (Math.random() * pool.size()));
     }
 

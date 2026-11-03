@@ -1808,6 +1808,12 @@
     $('deathHP').textContent = fmt(view.panel.maxHP);
     $('deathPunches').textContent = fmt(view.stats.punches);
     $('deathLived').textContent = fmtDur(view.stats.aliveSeconds);
+    const dk = $('deathKills');
+    if (dk) dk.textContent = fmt(view.stats.kills || 0);
+    const db = $('deathBoss');
+    if (db) db.textContent = fmt(view.stats.bossKillCount || 0) + ' 次';
+    const dbh = $('deathBest');
+    if (dbh) dbh.textContent = fmt(view.stats.bestHit || 0);
     $('deathSave').textContent = '第 ' + view.gen + ' 世 · 死亡 ' + view.stats.deaths + ' 次';
 
     // 香火余额（决定第一个按钮可用性）

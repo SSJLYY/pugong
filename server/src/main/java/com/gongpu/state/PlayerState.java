@@ -160,6 +160,8 @@ public class PlayerState {
         public String desc;
         /** 装备锁定：锁定件不被一键卖/自动售卖/管护吞噬等批量流程处置（防分级售卖误删心头好）。 */
         public boolean locked;
+        /** 来源区域（掉落时打标）：分解产出按区域材料结算；旧档为 null（按平原兽皮兜底）。 */
+        public String zone;
     }
 
     public static class AffixInst {
@@ -201,6 +203,8 @@ public class PlayerState {
         public long deaths = 0;
         /** 累计合成次数 / 附魔次数（终身不清零，成就里程碑用）。 */
         public long crafts = 0;
+        /** 终身分解装备数。 */
+        public long dismantles = 0;
         public long enchants = 0;
         public long born = 0;
         public long playSeconds = 0;

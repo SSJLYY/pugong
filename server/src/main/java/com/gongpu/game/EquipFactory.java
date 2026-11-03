@@ -122,6 +122,7 @@ public final class EquipFactory {
         it.quality = qIdx;
         it.enhance = 0;
         it.desc = desc;
+        it.zone = zoneId;
         for (Map.Entry<String, BigDecimal> e : baseStats.entrySet()) {
             it.base.put(e.getKey(), e.getValue());
         }

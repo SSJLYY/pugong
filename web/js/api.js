@@ -161,6 +161,7 @@
     equipExtra: (slot, index) => request('POST', '/api/game/' + slot + '/equip-extra', { index }),
     unequip: (slot, equipSlot) => request('POST', '/api/game/' + slot + '/unequip', { slot: equipSlot }),
     sellItem: (slot, index) => request('POST', '/api/game/' + slot + '/sell', { index }),
+    dismantleItem: (slot, index) => request('POST', '/api/game/' + slot + '/dismantle', { index }),
     enhanceItem: (slot, index) => request('POST', '/api/game/' + slot + '/enhance', { index }),
     discardItem: (slot, index) => request('POST', '/api/game/' + slot + '/discard', { index }),
     toggleLock: (slot, index) => request('POST', '/api/game/' + slot + '/lock', { index }),

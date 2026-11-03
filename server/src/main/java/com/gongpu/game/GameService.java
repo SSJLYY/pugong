@@ -316,6 +316,36 @@ public class GameService {
         return m;
     }
 
+    /** 分解产出：材料按装备来源区域（ZONE_MAT 同口径），数量 = 品质+1，强化 ≥5 额外 +1。 */
+    static Object[] dismantleYield(PlayerState.Item it) {
+        String zone = it.zone == null ? "plain" : it.zone;
+        String mat = GameConst.ZONE_MAT.getOrDefault(zone, "pelt");
+        int count = it.quality + 1 + (it.enhance >= 5 ? 1 : 0);
+        return new Object[]{mat, count};
+    }
+
+    /** 分解：装备 → 区域材料（与卖金二选一的回收通道，喂合成经济）；锁定件拒绝。 */
+    public Map<String, Object> dismantle(PlayerState s, int bagIdx) {
+        if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
+            throw ApiException.badRequest("背包索引越界");
+        }
+        if (s.equipBag.get(bagIdx).locked) {
+            throw ApiException.badRequest("装备已锁定，先解锁再分解");
+        }
+        PlayerState.Item it = s.equipBag.remove(bagIdx);
+        Object[] y = dismantleYield(it);
+        String mat = (String) y[0];
+        int count = (Integer) y[1];
+        s.materials.merge(mat, count, Integer::sum);
+        s.stats.dismantles++;
+        Map<String, Object> m = inventoryView(s);
+        String[] info = GameConst.MAT_INFO.get(mat);
+        m.put("dismantled", Map.of("mat", mat,
+                "matName", info == null ? mat : info[0],
+                "count", count, "itemName", it.name == null ? "" : it.name));
+        return m;
+    }
+
     public Map<String, Object> enhance(PlayerState s, int bagIdx) {
         if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
             throw ApiException.badRequest("背包索引越界");

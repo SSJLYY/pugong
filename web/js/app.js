@@ -1282,6 +1282,7 @@
           <button data-act="reroll">洗炼</button>
           ${((it.slot === 'weapon' || it.slot === 'bow') && !(it.affixes || []).some(a => a.sideKey === 'ENCHANT')) ? '<button data-act="enchant">附魔</button>' : ''}
           <button data-act="sell">卖出 +${fmt(Math.round(20 * (it.quality + 1) * (1 + (it.enhance || 0) * 0.5)))} 金</button>
+          <button data-act="dismantle" title="分解为来源区域的材料（喂锻造合成）">分解</button>
           <button data-act="discard" class="bi-discard">丢弃</button>
         </div>`;
       d.querySelectorAll('button').forEach(b => {
@@ -1328,10 +1329,15 @@
             : act === 'enhance' ? () => API.enhanceItem(API.state.slot, idx)
               : act === 'reroll' ? () => API.rerollItem(API.state.slot, idx, lockIdx)
               : act === 'discard' ? () => API.discardItem(API.state.slot, idx)
+              : act === 'dismantle' ? () => API.dismantleItem(API.state.slot, idx)
               : () => API.sellItem(API.state.slot, idx);
           sfx(act === 'sell' ? 'sell' : 'click');
           const r = await call(fn, act === 'lock' ? (it.locked ? '已解锁' : '已锁定') : act === 'equip' || act === 'equipExtra' ? '已装备' : act === 'enhance' ? '强化成功'
-            : act === 'reroll' ? '词条已重刷' : '已卖出');
+            : act === 'reroll' ? '词条已重刷' : act === 'dismantle' ? '已分解' : '已卖出');
+          if (act === 'dismantle' && r && r.result && r.result.dismantled) {
+            const dz = r.result.dismantled;
+            toast('♻️ 分解 ' + (dz.itemName || '装备') + ' → ' + (dz.matName || dz.mat) + ' ×' + dz.count, 'ok');
+          }
           applyView(r);
         });
       });

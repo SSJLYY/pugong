@@ -26,7 +26,7 @@ class AchievementsTest {
         for (Achievements.Def d : Achievements.ALL) {
             assertTrue(ids.add(d.id()), "成就 id 重复: " + d.id());
         }
-        assertEquals(22, Achievements.ALL.size(), "成就总数应为 22(与前端表同步增删)");
+        assertEquals(24, Achievements.ALL.size(), "成就总数应为 24(与前端表同步增删)");
     }
 
     @Test

@@ -31,7 +31,9 @@
     { id: 'codex_10', name: '图鉴·十种', emoji: '📖', desc: '图鉴记录 10 种怪物' },
     { id: 'codex_all', name: '万物图鉴', emoji: '📚', desc: '集齐全部怪物图鉴（含各区域 Boss）' },
     { id: 'first_craft', name: '初试锻造', emoji: '⚒️', desc: '完成第一次图纸合成' },
-    { id: 'first_enchant', name: '初试附魔', emoji: '✨', desc: '完成第一次装备附魔' }
+    { id: 'first_enchant', name: '初试附魔', emoji: '✨', desc: '完成第一次装备附魔' },
+    { id: 'potion_5', name: '品鉴五味', emoji: '🧪', desc: '使用过 5 种不同的药剂' },
+    { id: 'potion_15', name: '神农后人', emoji: '🌿', desc: '使用过 15 种不同的药剂' }
   ];
 
   var byId = {};

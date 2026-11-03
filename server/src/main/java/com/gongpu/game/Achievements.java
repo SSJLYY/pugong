@@ -42,7 +42,9 @@ public final class Achievements {
             new Def("codex_10", "图鉴·十种", "📖", "图鉴记录 10 种怪物"),
             new Def("codex_all", "万物图鉴", "📚", "集齐全部怪物图鉴（含各区域 Boss）"),
             new Def("first_craft", "初试锻造", "⚒️", "完成第一次图纸合成"),
-            new Def("first_enchant", "初试附魔", "✨", "完成第一次装备附魔")
+            new Def("first_enchant", "初试附魔", "✨", "完成第一次装备附魔"),
+            new Def("potion_5", "品鉴五味", "🧪", "使用过 5 种不同的药剂"),
+            new Def("potion_15", "神农后人", "🌿", "使用过 15 种不同的药剂")
     );
 
     private Achievements() {
@@ -90,6 +92,8 @@ public final class Achievements {
                 case "codex_all" -> s.codex != null && s.codex.size() >= GameConst.codexTotal();
                 case "first_craft" -> s.stats.crafts >= 1;
                 case "first_enchant" -> s.stats.enchants >= 1;
+                case "potion_5" -> s.usedPotions.size() >= 5;
+                case "potion_15" -> s.usedPotions.size() >= 15;
                 default -> false;
             };
             if (ok) {

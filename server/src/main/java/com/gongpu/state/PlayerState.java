@@ -74,6 +74,8 @@ public class PlayerState {
 
     /** 怪物图鉴：已击杀过的怪物 id 集合（跨世代保留，纪念性质）。 */
     public java.util.Set<String> codex = new java.util.LinkedHashSet<>();
+    /** 用过的药剂种类（品药成就口径；只记种类不记次数）。 */
+    public java.util.Set<String> usedPotions = new java.util.LinkedHashSet<>();
 
     /** 已解锁成就 id 集合（服务端权威，每次落库前评估；跨世代保留）。 */
     public java.util.Set<String> achievements = new java.util.LinkedHashSet<>();

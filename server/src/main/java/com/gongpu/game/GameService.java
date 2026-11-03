@@ -145,6 +145,7 @@ public class GameService {
             throw ApiException.badRequest("没有" + def.name() + "了");
         }
         s.potions.put(potionId, have - 1);
+        s.usedPotions.add(potionId);   // 品药成就：记录用过的种类
 
         PanelCalculator.Panel p = PanelCalculator.of(s);
         if (def.healHP() > 0) {

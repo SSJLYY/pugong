@@ -1101,3 +1101,17 @@ body.theme-light .pi-desc, body.theme-light .gi-meta{color:#5d563f}
 body.theme-light .trait-row span{color:#4a4433}
 body.theme-light .float-dmg{text-shadow:0 1px 3px rgba(255,252,240,.9)}
 body.theme-light .zone-btn.req{color:#7a6c46}
+
+/* 移动端布局打磨（第七批） */
+@media (max-width: 768px){
+  .topbar{flex-wrap:wrap;row-gap:6px}
+  .brand-mini{font-size:13px}
+  .daily-btn{padding:4px 9px;font-size:12.5px}
+  .market-item .pi-btns{flex-wrap:wrap;justify-content:flex-end;row-gap:4px}
+  .potion-item .pi-btns button{min-height:36px}
+  .daily-claim{min-height:38px}
+  #butlerPanel{max-width:92vw}
+  .zone-btn{min-height:42px}
+  .mat-sell{min-height:28px;padding:2px 10px}
+  .rank-tab{margin-bottom:4px}
+}

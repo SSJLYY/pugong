@@ -2470,7 +2470,29 @@
       '<div class="pi-btns"><select id="matFrom">' + opts + '</select>' +
       '<select id="matTo">' + opts + '</select>' +
       '<button id="btnMatExchange">兑换</button></div></div>';
-    box.innerHTML = exchangeRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    // 材料出售（第七批）：价目与库存筹码，全卖一键
+    const MAT_SELL = [['pelt', '🟫 兽皮', 20], ['wolf_fang', '🦷 狼牙', 35], ['ore', '⛏️ 矿石', 60],
+      ['toad_gland', '🟢 毒腺', 90], ['mana_dust', '✨ 魔尘', 140], ['fire_crystal', '🔥 火晶', 220],
+      ['abyss_crystal', '🕳️ 深渊结晶', 400]];
+    const myMats = (S.view && S.view.materials) || {};
+    const sellChips = MAT_SELL.map(([c, n, price]) => {
+      const have = myMats[c] || 0;
+      return '<span class="mat-chip' + (have > 0 ? '' : ' lack') + '">' + n + ' ×' + have + ' · ' + price + ' 金/份' +
+        (have > 0 ? ' <button class="mat-sell" data-sell-mat="' + c + '">全卖 +' + fmt(price * have) + '</button>' : '') + '</span>';
+    }).join(' ');
+    const sellRow = '<div class="potion-item"><div class="pi-info"><b>💰 材料出售</b>' +
+      '<div class="pi-desc">' + sellChips + '</div></div></div>';
+    box.innerHTML = exchangeRow + sellRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    box.querySelectorAll('[data-sell-mat]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try {
+        const r = await call(() => API.sellMaterial(API.state.slot, b.dataset.sellMat, 0));
+        const res = (r && r.result) || {};
+        toast('💰 卖出 ' + (res.count || 0) + ' 份材料：+' + fmt(res.gold || 0) + ' 金币', 'ok');
+        if (r) applyView(r);
+        loadCrafts();
+      } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+    }));
     const exBtn = box.querySelector('#btnMatExchange');
     if (exBtn) exBtn.addEventListener('click', async () => {
       const from = box.querySelector('#matFrom').value;
@@ -2478,7 +2500,8 @@
       if (from === to) { toast('源材料与目标材料不能相同', 'err'); return; }
       try {
         const r = await API.matExchange(API.state.slot, from, to);
-        toast('🔄 兑换成功（余 ' + r.fromHave + ' → 目标现有 ' + r.toHave + '）', 'ok');
+        const ex = (r && r.result) || {};
+        toast('🔄 兑换成功（余 ' + ex.fromHave + ' → 目标现有 ' + ex.toHave + '）', 'ok');
         loadCrafts();
       } catch (e) { toast(e.message, 'err'); }
     });

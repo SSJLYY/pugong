@@ -816,6 +816,13 @@ INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`,
 DELETE FROM `cfg_buff` WHERE `code` IN ('might_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('might_pot', '大力', '🏋️', 'good', 'passive', '{"atkFlat":20}', '120s 内物攻魔攻 +20', 1, 43);
+-- 第 4 轮：石肤药剂（承伤 -10%）
+DELETE FROM `cfg_item` WHERE `code` IN ('stone');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('stone', '石肤药剂', '🗿', 'potion', 550, '{"buff":"stone_pot","buffVal":0.9,"buffDur":120}', '120s 内受到的伤害 -10%', 1, 44);
+DELETE FROM `cfg_buff` WHERE `code` IN ('stone_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('stone_pot', '石肤', '🗿', 'good', 'passive', '{"dmgTakenMul":0.9}', '120s 内受到的伤害 -10%', 1, 44);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

@@ -479,6 +479,11 @@ public final class GameEngine {
         return "goldhand".equals(s.talent) ? Num.of(1.20) : Num.of(1);
     }
 
+    /** 药剂 buff 是否生效（存在且未被沉默压制），引擎侧消费点统一口径。 */
+    static boolean buffOn(PlayerState s, PanelCalculator.Panel p, String key) {
+        return PanelCalculator.active(s, key) && (p == null || !p.silenced());
+    }
+
     /** 词条攻速乘区：疾影常驻 ×1.5；狂暴在残血（<30%）时 ×1.5。无词条为 1。 */
     static double traitHasteMul(PlayerState.MobState m) {
         if (m == null || m.trait == null) {
@@ -560,6 +565,10 @@ public final class GameEngine {
         boolean blocking = PanelCalculator.active(s, "block");
         if (blocking) {
             perHit = Num.mul(perHit, Num.of(0.5));
+        }
+        // 药剂·石肤：受到的伤害 -10%（与格挡乘算，沉默压制）
+        if (buffOn(s, p, "stone_pot")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.STONE_POT_MUL));
         }
         BigDecimal total = Num.mul(perHit, Num.of(hits));
         if (total.signum() <= 0) {

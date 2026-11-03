@@ -469,6 +469,21 @@ public final class GameEngine {
         return "goldhand".equals(s.talent) ? Num.of(1.20) : Num.of(1);
     }
 
+    /** 词条攻速乘区：疾影常驻 ×1.5；狂暴在残血（<30%）时 ×1.5。无词条为 1。 */
+    static double traitHasteMul(PlayerState.MobState m) {
+        if (m == null || m.trait == null) {
+            return 1.0;
+        }
+        if ("swift".equals(m.trait)) {
+            return GameConst.TRAIT_SWIFT_HASTE;
+        }
+        if ("frenzy".equals(m.trait) && m.maxHP != null
+                && Num.lt(m.curHP, Num.mul(m.maxHP, Num.of(GameConst.TRAIT_FRENZY_HP_LINE)))) {
+            return GameConst.TRAIT_FRENZY_HASTE;
+        }
+        return 1.0;
+    }
+
     /** 词条·富饶：击杀金币乘区（仅逐杀结算；批量溢出的期望击杀是普通怪，不吃词条）。 */
     static BigDecimal traitGoldMul(PlayerState.MobState m) {
         return m != null && "rich".equals(m.trait)
@@ -517,11 +532,8 @@ public final class GameEngine {
         if (hits <= 0) {
             return;
         }
-        // 词条·狂暴：残血反扑，攻速提升
-        if ("frenzy".equals(m.trait) && m.maxHP != null
-                && Num.lt(m.curHP, Num.mul(m.maxHP, Num.of(GameConst.TRAIT_FRENZY_HP_LINE)))) {
-            hits *= GameConst.TRAIT_FRENZY_HASTE;
-        }
+        // 词条攻速乘区：狂暴残血反扑 / 疾影常驻加速（traitHasteMul 统一）
+        hits *= traitHasteMul(m);
         // 词条·破甲：结算时玩家的双防按比例打折
         BigDecimal defMul = "sunder".equals(m.trait)
                 ? Num.of(1 - GameConst.TRAIT_SUNDER_IGNORE)

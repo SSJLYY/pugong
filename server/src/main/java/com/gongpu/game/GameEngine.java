@@ -139,6 +139,7 @@ public final class GameEngine {
             regenTick(s, effective);
             autoPotion(s);
             autoBuffTick(s);
+            autoEatTick(s);
         }
 
         // —— 通关判定 ——
@@ -611,6 +612,28 @@ public final class GameEngine {
      *   <li>autoBurn：燃烧 buff 掉了且血量>60% 才补（烧当前血 25%，>60% 起步不可能烧死）</li>
      * </ul>
      */
+    /** 自动进食：开启且饱食回血（regen_food）不在身、背包有食物时吃一份续上；村里不吃防浪费。 */
+    private static void autoEatTick(PlayerState s) {
+        if (!s.autoEat || "village".equals(s.zone)) {
+            return;
+        }
+        if (PanelCalculator.active(s, "regen_food")) {
+            return;
+        }
+        Integer have = s.potions.get("food");
+        if (have == null || have <= 0) {
+            return;
+        }
+        // 与 autoPotion 同款内联服用（usePotion 是实例方法，引擎层不回调用它）：
+        // 食物的效果就是挂上其 buff（饱食回血），无即时回复部分
+        GameConst.PotionDef def = com.gongpu.cfg.GameData.instance().potion("food");
+        if (def == null || def.buff() == null) {
+            return;
+        }
+        s.potions.put("food", have - 1);
+        s.buffs.put(def.buff(), def.buffDur());
+    }
+
     private static void autoBuffTick(PlayerState s) {
         if (s.dead || (!s.autoBurn && !s.autoSkill)) {
             return;

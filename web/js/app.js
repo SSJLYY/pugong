@@ -458,7 +458,8 @@
         const r = await call(() => API.autoConfig(API.state.slot,
           v.autoHpLine, v.autoMpLine, v.autoCure, v.autoFleeLine, v.autoBurn, v.autoSkill, v.autoRebirth,
           patch.autoSellKeep !== undefined ? patch.autoSellKeep : v.autoSellKeep,
-          patch.autoEquipBest !== undefined ? patch.autoEquipBest : v.autoEquipBest));
+          patch.autoEquipBest !== undefined ? patch.autoEquipBest : v.autoEquipBest,
+          v.autoEat));
         if (r) applyView(r);
       };
       $('bpMaintain').addEventListener('change', (e) => saveAuto({ autoEquipBest: e.target.checked }));
@@ -1293,7 +1294,7 @@
     // (漏判会把玩家刚勾选的项下一秒用服务端旧值复位),叠加"最近 input/change 时间戳"兜底
     const touching = Date.now() - (S._cfgTouchedAt || 0) < 3000;
     const ae = document.activeElement;
-    const editing = touching || !!(ae && ((ae.classList && ae.classList.contains('auto-line-input')) || ae.id === 'autoCureChk' || ae.id === 'autoBurnChk' || ae.id === 'autoSkillChk' || ae.id === 'autoRebirthChk' || ae.id === 'autoEquipChk'));
+    const editing = touching || !!(ae && ((ae.classList && ae.classList.contains('auto-line-input')) || ae.id === 'autoCureChk' || ae.id === 'autoBurnChk' || ae.id === 'autoSkillChk' || ae.id === 'autoRebirthChk' || ae.id === 'autoEquipChk' || ae.id === 'autoEatChk'));
     if (!cfg) {
       cfg = document.createElement('div');
       cfg.className = 'potion-item auto-cfg';
@@ -1311,6 +1312,7 @@
             <label><input id="autoBurnChk" type="checkbox" ${view.autoBurn ? 'checked' : ''}> 🔥 燃烧常驻（血量&gt;60% 才补，有风险）</label><br>
             <label><input id="autoRebirthChk" type="checkbox" ${view.autoRebirth ? 'checked' : ''}> 🌟 自动飞升（打到 1 载自动转生，新手保底每世重来）</label> ·
             <label><input id="autoEquipChk" type="checkbox" ${view.autoEquipBest ? 'checked' : ''}> 🧲 自动管护（掉落自动卖白装+吞噬同名+穿最强，背包不再堆积）</label> ·
+            <label><input id="autoEatChk" type="checkbox" ${view.autoEat ? 'checked' : ''}> 🍖 自动进食（饱食回血断了自动吃食物续上）</label> ·
             <span title="挂机打到的装备按档位直接折现金币，不进背包">⚖️ 自动卖装备</span> <select id="autoSellSel" class="auto-line-input" style="width:104px" title="挂机打到的装备按档位直接折现金币，不进背包">
               <option value="0" ${!view.autoSellKeep ? 'selected' : ''}>关闭</option>
               <option value="1" ${view.autoSellKeep === 1 ? 'selected' : ''}>白色及以下</option>
@@ -1333,8 +1335,9 @@
         const as2 = $('autoSkillChk').checked;
         const ar = $('autoRebirthChk').checked;
         const aeq = $('autoEquipChk').checked;
+        const aet = $('autoEatChk').checked;
         const ask = Number($('autoSellSel').value) || 0;
-        const r = await call(() => API.autoConfig(API.state.slot, hp, mp, cu, fl, ab, as2, ar, ask, aeq), '挂机策略已保存');
+        const r = await call(() => API.autoConfig(API.state.slot, hp, mp, cu, fl, ab, as2, ar, ask, aeq, aet), '挂机策略已保存');
         S._cfgTouchedAt = 0;   // 保存成功,解除抑制让服务端真值即时回填
         applyView(r);
       });
@@ -1355,6 +1358,8 @@
       if (arb) arb.checked = !!view.autoRebirth;
       const aeqEl = $('autoEquipChk');
       if (aeqEl) aeqEl.checked = !!view.autoEquipBest;
+      const aetEl = $('autoEatChk');
+      if (aetEl) aetEl.checked = !!view.autoEat;
       const asl = $('autoSellSel');
       if (asl && String(asl.value) !== String(view.autoSellKeep || 0)) asl.value = String(view.autoSellKeep || 0);
     }
@@ -2101,7 +2106,7 @@
     castSkill: (id) => API.castSkill(API.state.slot, id),
     usePotion: (id) => API.usePotion(API.state.slot, id),
     buyPotion: (id, n) => API.buyPotion(API.state.slot, id, n || 1),
-    autoConfig: (cfg) => API.autoConfig(API.state.slot, cfg.hpLine, cfg.mpLine, cfg.autoCure, cfg.fleeLine, cfg.autoBurn, cfg.autoSkill, cfg.autoRebirth, cfg.autoSellKeep, cfg.autoEquipBest),
+    autoConfig: (cfg) => API.autoConfig(API.state.slot, cfg.hpLine, cfg.mpLine, cfg.autoCure, cfg.fleeLine, cfg.autoBurn, cfg.autoSkill, cfg.autoRebirth, cfg.autoSellKeep, cfg.autoEquipBest, cfg.autoEat),
     autoSell: (keep) => API.autoSell(API.state.slot, keep),
     rebirth: (key) => API.rebirth(API.state.slot, key)
   };

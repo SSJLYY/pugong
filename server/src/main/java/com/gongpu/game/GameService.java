@@ -527,7 +527,7 @@ public class GameService {
                                             Boolean autoCure, Double fleeLine,
                                             Boolean autoBurn, Boolean autoSkill,
                                             Boolean autoRebirth, Integer autoSellKeep,
-                                            Boolean autoEquipBest) {
+                                            Boolean autoEquipBest, Boolean autoEat) {
         double hp = hpLine == null ? s.autoHpLine : Math.max(0, Math.min(0.9, hpLine));
         double mp = mpLine == null ? s.autoMpLine : Math.max(0, Math.min(0.9, mpLine));
         double fl = fleeLine == null ? s.autoFleeLine : Math.max(0, Math.min(0.5, fleeLine));
@@ -552,6 +552,9 @@ public class GameService {
         if (autoEquipBest != null) {
             s.autoEquipBest = autoEquipBest;
         }
+        if (autoEat != null) {
+            s.autoEat = autoEat;
+        }
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("autoHpLine", hp);
@@ -563,6 +566,7 @@ public class GameService {
         m.put("autoRebirth", s.autoRebirth);
         m.put("autoSellKeep", s.autoSellKeep);
         m.put("autoEquipBest", s.autoEquipBest);
+        m.put("autoEat", s.autoEat);
         return m;
     }
 
@@ -1104,6 +1108,7 @@ public class GameService {
         m.put("autoRebirth", s.autoRebirth);
         m.put("autoSellKeep", s.autoSellKeep);
         m.put("autoEquipBest", s.autoEquipBest);
+        m.put("autoEat", s.autoEat);
         m.put("recentKills", s.recentKills == null ? new ArrayList<>() : new ArrayList<>(s.recentKills));
         m.put("bossKills", new ArrayList<>(s.bossKills));
         m.put("codex", s.codex);

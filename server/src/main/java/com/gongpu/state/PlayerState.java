@@ -103,6 +103,8 @@ public class PlayerState {
     public int autoSellKeep = 0;
     /** 挂机自动管护(v3.13)：每次结算自动「卖白装→同名吞噬→穿最强换装」，无需手点。 */
     public boolean autoEquipBest = false;
+    /** 自动进食：饱食回血（regen_food）断档时自动吃一份食物续上（村里不吃，防浪费）。 */
+    public boolean autoEat = false;
     /** 尸检用：最近 10 条击杀序列（"存活秒数 怪名"，环形覆盖）。 */
     public java.util.List<String> recentKills = new java.util.ArrayList<>();
 

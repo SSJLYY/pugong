@@ -526,7 +526,11 @@ public final class GameConst {
             "shell", new TalentDef("shell", "铜皮铁骨", "🐢", "物防 +10%、魔防 +10%"),
             "wind", new TalentDef("wind", "疾风之躯", "💨", "移速 +15%"),
             "goldhand", new TalentDef("goldhand", "点金手", "🪙", "击杀金币 +20%"),
-            "master", new TalentDef("master", "武学奇才", "📕", "主动技能冷却 -15%"));
+            "master", new TalentDef("master", "武学奇才", "📕", "主动技能冷却 -15%"),
+            "lucky", new TalentDef("lucky", "幸运儿", "🍀", "装备与图纸掉落率 +15%"));
+
+    /** 天赋「幸运儿」（第七批）：掉落率乘区（与鸿运药剂/幸运星被动乘算）。 */
+    public static final double LUCKY_TALENT_MUL = 1.15;
 
     /** 顶级机缘(被动永续/无限装备栏/无限属性点)抽中概率各 30%;其余天赋平分剩余 10%。 */
     public static final double TOP_TALENT_RATE = 0.30;

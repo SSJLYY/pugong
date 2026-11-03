@@ -913,6 +913,10 @@ public final class GameEngine {
         if (s.passives.contains("lucky_star") && !PanelCalculator.isSilenced(s)) {
             mul *= GameConst.LUCKY_STAR_MUL;
         }
+        // 天赋·幸运儿（第七批）：掉落率 +15%（天赋为先天禀赋，不受沉默压制）
+        if ("lucky".equals(s.talent)) {
+            mul *= GameConst.LUCKY_TALENT_MUL;
+        }
         return mul;
     }
 

@@ -54,6 +54,18 @@ public final class Achievements {
     private Achievements() {
     }
 
+    /** 成就奖励金币（领取制）：按达成难度分四档，服务端权威，前端只展示 view 下发的值。 */
+    public static long rewardOf(String id) {
+        return switch (id) {
+            case "first_punch", "first_kill", "first_death", "first_craft", "first_enchant",
+                    "potion_5", "codex_10", "talent" -> 100L;
+            case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
+                    "kill_10k", "boss_10" -> 2_000L;
+            case "gold_1m", "best_hit_1m" -> 5_000L;
+            default -> 500L;
+        };
+    }
+
     /** 评估当前状态新解锁的成就 id（不含已解锁的）。在 SaveService.persist 前调用。 */
     public static List<String> evaluate(PlayerState s) {
         if (s == null || s.achievements == null) {

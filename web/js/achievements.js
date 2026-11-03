@@ -33,7 +33,11 @@
     { id: 'first_craft', name: '初试锻造', emoji: '⚒️', desc: '完成第一次图纸合成' },
     { id: 'first_enchant', name: '初试附魔', emoji: '✨', desc: '完成第一次装备附魔' },
     { id: 'potion_5', name: '品鉴五味', emoji: '🧪', desc: '使用过 5 种不同的药剂' },
-    { id: 'potion_15', name: '神农后人', emoji: '🌿', desc: '使用过 15 种不同的药剂' }
+    { id: 'potion_15', name: '神农后人', emoji: '🌿', desc: '使用过 15 种不同的药剂' },
+    { id: 'kill_10k', name: '万怪斩', emoji: '🗡️', desc: '终身击杀 1 万只怪物' },
+    { id: 'gold_1m', name: '富甲一方', emoji: '🏦', desc: '持有 100 万金币' },
+    { id: 'boss_10', name: '屠龙者', emoji: '🐉', desc: '累计击败 Boss 10 次' },
+    { id: 'best_hit_1m', name: '开山一击', emoji: '💥', desc: '单拳伤害达 100 万' }
   ];
 
   var byId = {};
@@ -41,6 +45,9 @@
 
   // 服务端下发的解锁集合(最近一次 view)
   var unlocked = {};
+  // 已领取奖励集合与奖励金额表(服务端 view 下发,金额以服务端 Achievements.rewardOf 为准)
+  var claimed = {};
+  var rewards = {};
   // 已 toast 过/已建档的 id(内存态,防重复弹)
   var known = {};
   var baselined = false;
@@ -52,6 +59,9 @@
     var serverSet = Array.isArray(view.achievements) ? view.achievements : [];
     unlocked = {};
     serverSet.forEach(function (id) { unlocked[id] = true; });
+    claimed = {};
+    (Array.isArray(view.achClaimed) ? view.achClaimed : []).forEach(function (id) { claimed[id] = true; });
+    if (view.achRewards) rewards = view.achRewards;
 
     serverSet.forEach(function (id) {
       if (known[id]) return;
@@ -66,9 +76,9 @@
 
   /** 渲染成就页（挂在角色页签，由 app.js 每轮询帧调用）。 */
   function render(container) {
-    // 签名守卫:解锁状态位不变就不重建(轮询帧每秒都进这里,重建 18 行 DOM 纯浪费)
+    // 签名守卫:解锁/已领取状态位不变就不重建(轮询帧每秒都进这里,重建 DOM 纯浪费)
     var sig = '';
-    ACH.forEach(function (a) { sig += unlocked[a.id] ? '1' : '0'; });
+    ACH.forEach(function (a) { sig += (unlocked[a.id] ? '1' : '0') + (claimed[a.id] ? '1' : '0'); });
     if (sig === render._sig) return;
     render._sig = sig;
     var n = 0;
@@ -77,9 +87,17 @@
       n + '/' + ACH.length + '）</div>'];
     ACH.forEach(function (a) {
       var on = !!unlocked[a.id];
+      var tail = '';
+      if (on && !claimed[a.id]) {
+        // 领取按钮由 app.js 的委托监听处理（data-ach-claim）
+        tail = ' · <button class="ach-claim" data-ach-claim="' + a.id + '">领取 +' +
+          (rewards[a.id] || 0) + ' 金</button>';
+      } else if (on) {
+        tail = ' · ✅ 已领奖';
+      }
       html.push('<div class="effect-item" style="opacity:' + (on ? 1 : .45) + '">' +
         '<span>' + (on ? a.emoji : '🔒') + '</span><b>' + a.name + '</b>' +
-        '<i>' + a.desc + (on ? ' · ✅' : '') + '</i></div>');
+        '<i>' + a.desc + tail + '</i></div>');
     });
     html.push('</div>');
     container.innerHTML = html.join('');

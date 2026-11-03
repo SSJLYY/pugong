@@ -748,6 +748,21 @@
       });
       var achBox = document.getElementById('achArea');
       if (achBox) window.__achievements.render(achBox);
+      if (!applyView._achClaimBound) {
+        applyView._achClaimBound = true;
+        // 成就领奖按钮（achievements.js 渲染，data-ach-claim 委托处理，一次绑定）
+        document.addEventListener('click', async (e) => {
+          const btn = e.target.closest ? e.target.closest('[data-ach-claim]') : null;
+          if (!btn) return;
+          btn.disabled = true;
+          try {
+            const r = await call(() => API.claimAchievement(API.state.slot, btn.dataset.achClaim));
+            const res = (r && r.result) || {};
+            toast('🏅 奖励已领取：+' + fmt(res.reward || 0) + ' 金币', 'ok');
+            if (r) applyView(r);
+          } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
+        });
+      }
     }
     renderBag(view);
     renderPotions(view);

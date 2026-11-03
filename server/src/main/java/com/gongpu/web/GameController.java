@@ -410,6 +410,17 @@ public class GameController {
         return game.talentView(s);
     }
 
+    public record AchReq(String id) {
+    }
+
+    /** 成就奖励领取（已解锁未领取，金币入账）。 */
+    @PostMapping("/{slot}/ach-claim")
+    public Map<String, Object> achClaim(HttpServletRequest req, @PathVariable int slot,
+                                        @RequestBody AchReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
+                s -> game.claimAchievement(s, reqStr(body.id(), "id")));
+    }
+
     /** 每日签到：每个账号每天一次，奖励金币+药剂（随世代加码）。 */
     @PostMapping("/{slot}/daily")
     public Map<String, Object> daily(HttpServletRequest req, @PathVariable int slot) {

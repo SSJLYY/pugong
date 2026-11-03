@@ -162,6 +162,7 @@
     unequip: (slot, equipSlot) => request('POST', '/api/game/' + slot + '/unequip', { slot: equipSlot }),
     sellItem: (slot, index) => request('POST', '/api/game/' + slot + '/sell', { index }),
     dismantleItem: (slot, index) => request('POST', '/api/game/' + slot + '/dismantle', { index }),
+    claimAchievement: (slot, id) => request('POST', '/api/game/' + slot + '/ach-claim', { id }),
     enhanceItem: (slot, index) => request('POST', '/api/game/' + slot + '/enhance', { index }),
     discardItem: (slot, index) => request('POST', '/api/game/' + slot + '/discard', { index }),
     toggleLock: (slot, index) => request('POST', '/api/game/' + slot + '/lock', { index }),

@@ -601,6 +601,27 @@ public class GameService {
     }
 
     /** 背包整理：按评分从高到低稳定排序（同分保持原序），好装备顶到前面方便翻找。 */
+    /** 成就奖励领取：已解锁未领取才发金币（一成就一次），金额 Achievements.rewardOf 权威。 */
+    public Map<String, Object> claimAchievement(PlayerState s, String id) {
+        boolean known = Achievements.ALL.stream().anyMatch(d -> d.id().equals(id));
+        if (!known) {
+            throw ApiException.badRequest("未知成就：" + id);
+        }
+        if (!s.achievements.contains(id)) {
+            throw ApiException.badRequest("成就尚未解锁");
+        }
+        if (!s.achClaimed.add(id)) {
+            throw ApiException.badRequest("奖励已领取过");
+        }
+        long reward = Achievements.rewardOf(id);
+        s.gold = Num.add(s.gold, Num.of(reward));
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("id", id);
+        m.put("reward", reward);
+        return m;
+    }
+
     public Map<String, Object> sortBag(PlayerState s) {
         s.equipBag.sort((a, b) -> Double.compare(equipScore(b), equipScore(a)));
         return inventoryView(s);
@@ -1219,6 +1240,12 @@ public class GameService {
         m.put("bossKills", new ArrayList<>(s.bossKills));
         m.put("codex", s.codex);
         m.put("achievements", new ArrayList<>(s.achievements));
+        m.put("achClaimed", new ArrayList<>(s.achClaimed));
+        Map<String, Object> achRewards = new LinkedHashMap<>();
+        for (Achievements.Def d : Achievements.ALL) {
+            achRewards.put(d.id(), Achievements.rewardOf(d.id()));
+        }
+        m.put("achRewards", achRewards);
         // 技能熟练度：casts=累计施放(封顶100),lv=熟练档位(每20次+1,最高5,每档 CD-3%)
         Map<String, Object> masteryView = new LinkedHashMap<>();
         for (Map.Entry<String, BigDecimal> e : s.mastery.entrySet()) {

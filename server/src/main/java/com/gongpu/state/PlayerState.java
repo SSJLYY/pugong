@@ -79,6 +79,8 @@ public class PlayerState {
 
     /** 已解锁成就 id 集合（服务端权威，每次落库前评估；跨世代保留）。 */
     public java.util.Set<String> achievements = new java.util.LinkedHashSet<>();
+    /** 已领取奖励的成就 id（成就本身在 achievements 里，奖励单独领取防重复领）。 */
+    public java.util.Set<String> achClaimed = new java.util.LinkedHashSet<>();
 
     /** 挂机策略：自动嗑药血线（0=关闭，如 0.4 表示血量低于 40% 自动嗑血药）。 */
     public double autoHpLine = 0;

@@ -1573,7 +1573,7 @@
       const setChip = setSm ? ` <span class="bi-set" title="套装成员：同套穿 2/4 件激活加成（见已装备区套装面板）">🧩${setSm.name}</span>` : '';
       d.innerHTML = `
         <div class="bi-head" style="color:${QUALITY_COLOR[it.quality]}">
-          ${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}${it.locked ? ' 🔒' : ''}
+          ${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}${it.temper ? ' 🔨' + it.temper : ''}${it.locked ? ' 🔒' : ''}
           <span class="bi-q">${QUALITY_NAME[it.quality]}</span>${scoreChip}${setChip}
         </div>
         <div class="bi-affix">${(it.affixes || []).map(affixText).join(' · ') || '（无词条）'}</div>
@@ -1582,6 +1582,7 @@
           <button data-act="equip">装备</button>
           ${(Number(view.extraSlots) > 0) ? '<button data-act="equipExtra" title="穿入无相位栏;同名装备自动吞噬合并,属性累加">加穿</button>' : ''}
           <button data-act="enhance">强化</button>
+          <button data-act="temper" title="淬炼：底子 +4%/级（满 5 级，与强化独立），耗来源区域材料 + 金币" ${it.temper >= 5 ? 'disabled' : ''}>${it.temper >= 5 ? '淬炼 MAX' : '淬炼'}</button>
           <button data-act="reroll">洗炼</button>
           ${((it.slot === 'weapon' || it.slot === 'bow') && !(it.affixes || []).some(a => a.sideKey === 'ENCHANT')) ? '<button data-act="enchant">附魔</button>' : ''}
           <button data-act="sell">卖出 +${fmt(Math.round(20 * (it.quality + 1) * (1 + (it.enhance || 0) * 0.5)))} 金</button>
@@ -1626,17 +1627,25 @@
             } catch (e) { toast(e.message, 'err'); }
             return;
           }
+          if (act === 'temper') {
+            // 淬炼确认：成本与服务端同公式（材料 2×下一级、金币 300×下一级×(品质+1)，材料按来源区域）
+            const ZM = { plain: ['pelt', '兽皮'], forest: ['wolf_fang', '狼牙'], mine: ['ore', '矿石'], swamp: ['toad_gland', '毒腺'], snow: ['mana_dust', '魔尘'], volcano: ['fire_crystal', '火晶'] };
+            const zm = ZM[it.zone || 'plain'] || ZM.plain;
+            const nxt = (it.temper || 0) + 1;
+            if (!confirm('淬炼「' + it.name + '」→ ' + nxt + ' 级：底子 +4%\n消耗 ' + zm[1] + '×' + (2 * nxt) + ' + 金币 ' + (300 * nxt * (it.quality + 1)) + '。确认？')) return;
+          }
           const fn = act === 'lock' ? () => API.toggleLock(API.state.slot, idx)
             : act === 'equip' ? () => API.equip(API.state.slot, idx)
             : act === 'equipExtra' ? () => API.equipExtra(API.state.slot, idx)
             : act === 'enhance' ? () => API.enhanceItem(API.state.slot, idx)
+              : act === 'temper' ? () => API.temperItem(API.state.slot, idx)
               : act === 'reroll' ? () => API.rerollItem(API.state.slot, idx, lockIdx)
               : act === 'discard' ? () => API.discardItem(API.state.slot, idx)
               : act === 'dismantle' ? () => API.dismantleItem(API.state.slot, idx)
               : () => API.sellItem(API.state.slot, idx);
           sfx(act === 'sell' ? 'sell' : 'click');
           const r = await call(fn, act === 'lock' ? (it.locked ? '已解锁' : '已锁定') : act === 'equip' || act === 'equipExtra' ? '已装备' : act === 'enhance' ? '强化成功'
-            : act === 'reroll' ? '词条已重刷' : act === 'dismantle' ? '已分解' : '已卖出');
+            : act === 'temper' ? '淬炼成功' : act === 'reroll' ? '词条已重刷' : act === 'dismantle' ? '已分解' : '已卖出');
           if (act === 'dismantle' && r && r.result && r.result.dismantled) {
             const dz = r.result.dismantled;
             toast('♻️ 分解 ' + (dz.itemName || '装备') + ' → ' + (dz.matName || dz.mat) + ' ×' + dz.count, 'ok');

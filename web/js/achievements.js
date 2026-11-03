@@ -96,9 +96,25 @@
   }
 
   /** 渲染成就页（挂在角色页签，由 app.js 每轮询帧调用）。 */
+  // 筛选（第七批）：all 全部 / claim 可领取 / doing 进行中 / done 已完成，localStorage 持久
+  var achFilter = 'all';
+  try { achFilter = localStorage.getItem('gongpu_achfilter') || 'all'; } catch (e) { /* 忽略 */ }
+
   function render(container) {
+    // 筛选切换的委托监听只挂一次
+    if (!container._achFilterBound) {
+      container._achFilterBound = true;
+      container.addEventListener('click', function (e) {
+        var chip = e.target.closest ? e.target.closest('[data-ach-filter]') : null;
+        if (!chip) return;
+        achFilter = chip.getAttribute('data-ach-filter');
+        try { localStorage.setItem('gongpu_achfilter', achFilter); } catch (err) { /* 忽略 */ }
+        render._sig = null;
+        render(container);
+      });
+    }
     // 签名守卫:解锁/已领取状态位不变就不重建(轮询帧每秒都进这里,重建 DOM 纯浪费)
-    var sig = '';
+    var sig = 'f=' + achFilter + '|';
     ACH.forEach(function (a) {
       sig += (unlocked[a.id] ? '1' : '0') + (claimed[a.id] ? '1' : '0');
       // 进度按 5% 分桶进签名：进度条会动，又不会每帧重建
@@ -117,7 +133,40 @@
       html.push('<div class="effect-item"><span>🎁</span><b>待领奖励 ' + claimable.length + ' 项</b>' +
         '<i><button class="ach-claim" data-ach-claim-all="1">一键全领 +' + sum + ' 金</button></i></div>');
     }
-    ACH.forEach(function (a) {
+    // 排序与筛选（第七批）：可领取置顶 → 进行中（进度高优先）→ 未解锁 → 已领奖垫底；筛选只影响列表子集
+    function achState(a) {
+      if (unlocked[a.id] && !claimed[a.id]) return 0;
+      if (!unlocked[a.id] && progress[a.id]) return 1;
+      if (!unlocked[a.id]) return 2;
+      return 3;
+    }
+    var doingN = ACH.filter(function (a) { return !unlocked[a.id] && progress[a.id]; }).length;
+    var doneN = ACH.filter(function (a) { return unlocked[a.id] && claimed[a.id]; }).length;
+    var chips = [['all', '全部 ' + ACH.length], ['claim', '🎁 可领取 ' + claimable.length],
+      ['doing', '🔄 进行中 ' + doingN], ['done', '✅ 已完成 ' + doneN]];
+    html.push('<div class="ach-filters">' + chips.map(function (c) {
+      return '<button class="ach-chip' + (achFilter === c[0] ? ' on' : '') + '" data-ach-filter="' + c[0] + '">' + c[1] + '</button>';
+    }).join('') + '</div>');
+    var ordered = ACH.slice().sort(function (x, y) {
+      var d = achState(x) - achState(y);
+      if (d !== 0) return d;
+      if (achState(x) === 1) {
+        var px = progress[x.id] ? progress[x.id][0] / Math.max(1, progress[x.id][1]) : 0;
+        var py = progress[y.id] ? progress[y.id][0] / Math.max(1, progress[y.id][1]) : 0;
+        return py - px;
+      }
+      return 0;
+    });
+    var shown = ordered.filter(function (a) {
+      if (achFilter === 'claim') return achState(a) === 0;
+      if (achFilter === 'doing') return achState(a) === 1 || achState(a) === 2;
+      if (achFilter === 'done') return achState(a) === 3;
+      return true;
+    });
+    if (!shown.length) {
+      html.push('<div class="effect-item"><span>·</span><b>暂无该类成就</b><i></i></div>');
+    }
+    shown.forEach(function (a) {
       var on = !!unlocked[a.id];
       var tail = '';
       if (on && !claimed[a.id]) {

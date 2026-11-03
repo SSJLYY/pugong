@@ -1124,3 +1124,8 @@ body.theme-light .zone-btn.req{color:#7a6c46}
 .zone-btn.ready::after{content:' ✓';color:#7dd87d;font-weight:700}
 .zone-btn.locked::after{content:' 🔒';font-size:11px}
 body.theme-light .zone-btn.ready::after{color:#3d7a34}
+
+/* 成就筛选（第七批） */
+.ach-filters{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
+.ach-chip{background:var(--panel);border:1px solid var(--border);color:var(--txt-dim);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;min-height:26px}
+.ach-chip.on{border-color:var(--gold);color:var(--gold-bright)}

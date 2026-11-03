@@ -1046,7 +1046,7 @@
         '<div class="trait-row"><b>🏅 成就</b><span>角色页成就带进度条与金币奖励，解锁后记得领取（可一键全领）。</span></div>',
         '<div class="trait-row"><b>✋ 扩展技能</b><span>战斗区第二行：治愈术（回 35% 血）/ 嗜血术 / 铁壁 / 净化（清中毒·灼烧·沉默·时滞，克剧毒与时滞词条）。</span></div>',
         '<div class="trait-row"><b>🧧 聚宝与嗅觉</b><span>聚宝药剂 300s 金币 +50%；被动「材料嗅觉」让材料掉率升到 75%，配晶化词条刷材料最快。</span></div>',
-        '<div class="trait-row"><b>⌨️ 快捷键</b><span>1 小血药 · 2 大血药 · 3 蓝药 · 4 治愈术 · 5 净化 · F 逃跑 · B 挑战 Boss。</span></div>',
+        '<div class="trait-row"><b>⌨️ 快捷键</b><span>1 小血药 · 2 大血药 · 3 蓝药 · 4 治愈术 · 5 净化 · F 逃跑 · B 挑战 Boss · Q/W/E/R/T/Y 六个常驻技能 · G 补给包 · H 特大血药。</span></div>',
         '<div class="trait-row"><b>📖 词条图鉴</b><span>地图区按钮查看野怪词条（狂暴/破甲/富饶/晶化…）的效果与应对。</span></div>'
       ].join(''));
     });
@@ -2870,6 +2870,15 @@
         case 'Digit5': call(() => API.castSkill(API.state.slot, 'cleanse')); break;
         case 'KeyF': { const b = $('btnFlee'); if (b) b.click(); break; }
         case 'KeyB': { const b = $('btnBoss'); if (b) b.click(); break; }
+        // 第七批扩展：Q/W/E/R/T/Y 依次点六个常驻技能按钮（按钮自身管 CD/禁用态）；G 补给包；H 特大血药
+        case 'KeyQ': { const b = $('btnBurn'); if (b) b.click(); break; }
+        case 'KeyW': { const b = $('btnRapid'); if (b) b.click(); break; }
+        case 'KeyE': { const b = $('btnHeavy'); if (b) b.click(); break; }
+        case 'KeyR': { const b = $('btnBlock'); if (b) b.click(); break; }
+        case 'KeyT': { const b = $('btnSurge'); if (b) b.click(); break; }
+        case 'KeyY': { const b = $('btnRoar'); if (b) b.click(); break; }
+        case 'KeyG': { const b = $('btnBuyKit'); if (b) b.click(); break; }
+        case 'KeyH': pot('hp_xl', 'hp_l'); break;
         default: return;
       }
       e.preventDefault();

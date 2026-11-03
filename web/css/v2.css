@@ -1067,3 +1067,9 @@
 .daily-claim.ready{background:#c9a227;color:#1a1503;font-weight:700;border-color:#c9a227;cursor:pointer}
 .daily-allclear{grid-column:1/-1;text-align:center;color:#ffb300;font-size:13px;margin:2px 0 0}
 .mat-sell{font-size:12px;padding:1px 7px;min-height:22px;background:#c9a227;color:#1a1503;border-color:#c9a227;font-weight:700;cursor:pointer;border-radius:4px}
+
+/* 每日黑市（第七批） */
+.market-box{margin-bottom:10px}
+.market-off{color:#ff7d6b;font-size:12px}
+.market-price{margin-right:8px;color:#ffb300;white-space:nowrap}
+.market-price s{color:#9a8f77}

@@ -846,6 +846,7 @@
     renderBag(view);
     renderSets(view);
     renderDaily(view);
+    renderMarket(view);
     renderEvents(view);
     renderPotions(view);
     renderPassives(view);
@@ -2384,6 +2385,40 @@
           if (res.allClearBonus > 0) {
             toast('🎉 每日任务全清！额外奖励 +' + fmt(res.allClearBonus) + ' 金币', 'ok');
           }
+          if (r) applyView(r);
+        } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
+      });
+    });
+  }
+
+  // ================= 每日黑市（第七批） =================
+  function renderMarket(view) {
+    const box = $('marketList');
+    if (!box) return;
+    const offers = view.blackMarket || [];
+    const sig = JSON.stringify(offers) + '|' + view.gold;
+    if (sig === renderMarket._sig) return;
+    renderMarket._sig = sig;
+    if (!offers.length) {
+      box.innerHTML = '<p class="empty-hint">今日黑市打烊</p>';
+      return;
+    }
+    box.innerHTML = offers.map(o => {
+      const soldOut = o.bought >= o.limit;
+      return '<div class="potion-item market-item"><div class="pi-info"><b>' + o.emoji + ' ' + esc(o.name) +
+        ' <span class="market-off">-' + o.discount + '%</span></b>' +
+        '<div class="pi-desc">' + esc(o.desc) + ' · 库存 ' + o.stock + ' · 今日已购 ' + o.bought + '/' + o.limit + '</div></div>' +
+        '<div class="pi-btns"><span class="market-price"><s>' + fmt(o.basePrice) + '</s> ' + fmt(o.price) + ' 金</span>' +
+        '<button data-market-buy="' + esc(o.id) + '"' + (soldOut ? ' disabled' : '') + '>' +
+        (soldOut ? '已达限购' : '购买') + '</button></div></div>';
+    }).join('');
+    box.querySelectorAll('[data-market-buy]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          const r = await call(() => API.marketBuy(API.state.slot, btn.dataset.marketBuy));
+          const res = (r && r.result) || {};
+          toast('🌑 黑市购入：-' + fmt(res.paid || 0) + ' 金币', 'ok');
           if (r) applyView(r);
         } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
       });

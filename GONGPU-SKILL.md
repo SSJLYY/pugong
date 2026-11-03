@@ -148,6 +148,17 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 可观测性 | TimingInterceptor | >gongpu.slow-ms(默认500)的 /api/** 打 WARN 慢日志；启动横幅带版本/profile；500 日志带 METHOD+URI |
 | 迁移审计 | 两轮全站对照(设计 §0-16+legacy 六模块) | v3.9 全量迁移完成,剩余项见 README「迁移状态」;autoRebirth/autoSellKeep/autoRebirth 开关在挂机管家 |
 | 新手保底 | GameEngine.grantNewbieDrops | 每世前5杀必掉保底武器、≥10杀必掉回春戒(每秒回1%生命上限,type=pct_hp);**空戒指位自动穿上**(两戒占位才进背包;背包满且无空位等待不吞);字段 newbieKills/newbieWeaponsGiven/ringGranted;面板回血行=固定回血+regenHpPerSec(fullView 下发) |
+| 每日连签（第六批） | POST /{slot}/daily | account_user.claim_streak 守卫列；原子领取的同一 UPDATE 用 CASE 维护连签（昨日签过 +1 否则 1）；奖励加成 +50/天封顶 350、每 7 天周奖大血药 ×2；并发败者 revertDailyReward 同步扣回加成；AccountService.nextStreak/streakBonusGold 静态口径，DailyStreakTest 锁 |
+| 战斗日志（第六批） | PlayerState.events + fullView.events | Boss 击杀/图纸/史诗三类大事环形 20 条（GameEngine.pushEvent 单点），前端战斗区倒序 6 条；旧档 decode 补空表 |
+| 自动推进/Boss 连战（第六批） | autoconfig autoAdvance/autoBoss | Boss 击杀漏斗 advanceAfterKill：连战（留区 spawnBoss）优先于推进（下一区门槛与 gotoZone 同口径 zoneReqMet，不达标回村）；setAutoLines 已 15 参，前端三处调用（管家 saveAuto/配置区/策略应用）必须同步加参 |
+| 一键分解/材料兑换（第六批） | POST /{slot}/dismantle-all {keep}、/{slot}/mat-exchange {from,to} | 分解与一键卖同档位语义、锁定跳过、产出按 Item.zone 汇总；兑换仅六种区域材料 3:1（MAT_EXCHANGE_COST），CraftService.exchange 单点校验 |
+| 按量补给/成就全领（第六批） | POST /{slot}/buyfill {id,target}、/{slot}/ach-claim-all | buyfill 循环单瓶 buyPotion 保持动态定价口径、金币不足静默停；claim-all 遍历 Achievements.ALL 只领已解锁未领，返回总额 |
+| 令牌版本（第六批） | JWT claim v + account_user.token_version | 改密自增版本，AuthInterceptor 逐请求比对 AccountService.currentTokenVersion（30s 内存缓存 + 改密主动失效）；滑动续期继承版本，JwtRenewVersionTest 锁；老无 v 令牌按 0 兼容 |
+| 登录防爆破（第六批） | AccountService.login | 同用户名连错 5 次锁 5 分钟回 429（与 AuthRateLimiter 的 IP 维度互补）；成功清零；LoginThrottleTest 锁 |
+| 存档自愈（第六批） | SaveService.decodeOrRecover | 主档 JSON 损坏回退快照解码，双坏报 500 SAVE_CORRUPT；rollback 快照坏按无快照重开；SaveRecoverTest 锁 |
+| 击杀预估（第六批） | fullView mob.estPunches/estSeconds | GameEngine.expectedPerHit 与 dealDamage 前段同口径（暴击期望/防御/词条/巨人乘区，不含蓄力），改伤害公式必须同步 |
+| 怪物词条·时滞（第六批） | MOB_TRAITS slow（沼泽起） | 🐌 命中概率上 slow 4s：面板 ASPD ×0.8（PanelCalculator slowMul，减益不查沉默）；净化技能/解毒可清；SlowTraitTest 锁 |
+| 内容计数（第六批终版） | /api/health content 指纹 | 药剂 34/词条 22/装备 52/怪物词条 12/技能 23/委托 14/配方 16/成就 34；计数锁分布于 PotionsV314/Affix*/DataParity*/EconomySanity/Achievements* 测试与 deploy.sh 验收行，改内容必须全链同步 |
 | 排行榜 | GET /api/leaderboard?board=maxhp\|gold\|gen | 三榜统一上报(LeaderboardService.submit,60s 节流)；分数 log10 防 1e308 溢出；member=uid\|名\|世代\|值明文,单榜旧条目兼容 |
 | 无限属性点 | POST /{slot}/statpoint {stat,count} | statlord 专属：每杀一怪 +1 自由点（溢出期望击杀同口径发放）；加点值=STAT_POINT_STEP[stat]×count 并入面板 flat 区（攻/防+1、攻速+0.05、暴击+0.5%…14 属性可加，金币不可加）；转生清零重赚；前端点属性卡属性行弹窗加点 || 区域攻击门槛 | gotoZone 校验 req.ATK | **v3.12 新增**:矿洞 60/沼泽 150/雪山 400/火山 1200（ATK=物攻/魔攻取高,物理/附魔/魔攻三条路都算）;此前只卡生命上限,堆血冲进高防区每拳伤害触底 1 点=白打(玩家反馈"后期不杀怪"根因);前端 ZONE_REQ_TEXT 需与后端 req 同步 |
 | 压测 | deploy/load_test.py | N 用户并发注册→建档→1s 轮询,P50/95/99+RPS,退出码可接 CI;基线见 deploy/LOAD_TEST.md(40 并发 P95=66ms) |

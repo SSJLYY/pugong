@@ -975,3 +975,74 @@
 .set-bonus.on{opacity:1;color:#81c784}
 .es-set{font-size:11px;color:#ffb300}
 .bi-set{font-size:11px;color:#ffb300}
+
+/* ============================================================
+   v3.2 布局重构（玩家反馈：模块拥挤、有的看不清楚）
+   桌面：标题行并入顶栏省高度；主区改网格分工——战斗 / 页签工作区 / 地图窄列，
+   .play-column 以 display:contents 让战斗与地图直接成为 shell 网格项（DOM/JS 不动）；
+   中屏（769~1399）为左叠双列：战斗上、地图下、页签右跨两行。
+   页签改单行横滚条（不再两排大按钮挤压内容）；角色页成就/称号/图鉴各自限高内滚；
+   次级文字与未解锁图鉴提亮，事件日志限高，模块边界更分明。
+   ============================================================ */
+.brand-mini { display: none; }
+
+/* 页签：单行横滚，矮而清晰 */
+.game-tabs {
+  display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px;
+  padding: 6px 8px; scrollbar-width: none;
+}
+.game-tabs::-webkit-scrollbar { display: none; }
+.game-tab { flex: 0 0 auto; padding: 8px 13px; font-size: 13px; }
+
+/* 次级信息提亮（原 11px 暗褐在深底上读不清） */
+.panel-tip { color: #b3a684; font-size: 12px; }
+.hotkey-hint { color: #b3a684; }
+.zone-btn .req { color: rgba(255, 255, 255, .8); }
+.codex-item { color: #ddd2b8; }
+.codex-item.unseen { opacity: .62; }
+
+/* 角色页三块列表各自限高内滚，不再一柱长滚到底 */
+#achArea { max-height: 34vh; overflow-y: auto; padding-right: 4px; }
+#titleArea { max-height: 24vh; overflow-y: auto; padding-right: 4px; }
+.codex-area { max-height: 42vh; }
+
+/* 战斗日志限高：大事记只占一小条，不挤压技能区 */
+.event-log { max-height: 118px; overflow: hidden; }
+
+@media (min-width: 769px) {
+  /* 标题行并入顶栏：省下整行高度给主区 */
+  .game-header { display: none; }
+  .brand-mini {
+    display: block; font-weight: 700; letter-spacing: 2px; font-size: 15px;
+    color: #e8d9a8; white-space: nowrap;
+  }
+  .play-column { display: contents; }
+  .combat, .map-panel { min-width: 0; min-height: 0; }
+  .combat { grid-area: combat; overflow-y: auto; }
+  .map-panel { grid-area: map; }
+  .utility-panel { grid-area: utility; }
+  .game-shell {
+    grid-template-columns: minmax(330px, .95fr) minmax(0, 1.35fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "combat utility" "map utility";
+  }
+}
+
+/* 宽屏三列：战斗定宽、页签吃剩余、地图收成右侧窄列纵向清单 */
+@media (min-width: 1400px) {
+  .game-shell {
+    max-width: 1560px;
+    grid-template-columns: 400px minmax(0, 1fr) 292px;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "combat utility map";
+  }
+  .topbar, .bulletin-bar { max-width: 1560px; }
+  .map-panel {
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-content: start; gap: 7px;
+  }
+  .map-panel h2 { grid-column: 1 / -1; margin: 0 0 3px; }
+  .map-panel .zones { grid-column: 1 / -1; grid-template-columns: 1fr; }
+  .map-panel .zone-btn { min-height: 38px; }
+  #btnBoss, #btnAuto { grid-column: 1 / -1; }
+}

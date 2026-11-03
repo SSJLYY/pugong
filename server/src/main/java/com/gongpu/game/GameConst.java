@@ -130,17 +130,18 @@ public final class GameConst {
     public record TraitDef(String id, String name, String emoji, String desc) {
     }
 
-    public static final Map<String, TraitDef> MOB_TRAITS = Map.of(
-            "frenzy", new TraitDef("frenzy", "狂暴", "💢", "生命低于 30% 时攻速 +50%，小心它临死反扑"),
-            "sunder", new TraitDef("sunder", "破甲", "🪓", "攻击无视你 30% 的物防与魔防"),
-            "disarm", new TraitDef("disarm", "缴械", "🔗", "压制你的武器，你的普攻伤害 -15%"),
-            "leech", new TraitDef("leech", "嗜血", "🩸", "命中你时吸回所造成伤害 30% 的生命，拖得越久它越难杀"),
-            "thorns", new TraitDef("thorns", "荆棘", "🌵", "你打它时被反扎：所造成伤害的 10% 反弹给你，出手越重扎得越狠"),
-            "rich", new TraitDef("rich", "富饶", "💰", "行走的钱袋子：击杀金币 ×3，它不伤人，只散财"),
-            "swift", new TraitDef("swift", "疾影", "⚡", "出手如风：攻速 +50%，别被它连绵的攻势磨死"),
-            "bulwark", new TraitDef("bulwark", "堡垒", "🛡️", "皮糙肉厚如堡垒：你对它造成的伤害 -20%，得靠耐心磨"),
-            "venom", new TraitDef("venom", "剧毒", "☠️", "獠牙带毒：命中可能让你中毒持续掉血，出门记得带解毒剂"),
-            "crystal", new TraitDef("crystal", "晶化", "💎", "通体晶化：击杀必额外掉 2 份本区材料，锻造党的福星"));
+    public static final Map<String, TraitDef> MOB_TRAITS = Map.ofEntries(
+            Map.entry("frenzy", new TraitDef("frenzy", "狂暴", "💢", "生命低于 30% 时攻速 +50%，小心它临死反扑")),
+            Map.entry("sunder", new TraitDef("sunder", "破甲", "🪓", "攻击无视你 30% 的物防与魔防")),
+            Map.entry("disarm", new TraitDef("disarm", "缴械", "🔗", "压制你的武器，你的普攻伤害 -15%")),
+            Map.entry("leech", new TraitDef("leech", "嗜血", "🩸", "命中你时吸回所造成伤害 30% 的生命，拖得越久它越难杀")),
+            Map.entry("thorns", new TraitDef("thorns", "荆棘", "🌵", "你打它时被反扎：所造成伤害的 10% 反弹给你，出手越重扎得越狠")),
+            Map.entry("rich", new TraitDef("rich", "富饶", "💰", "行走的钱袋子：击杀金币 ×3，它不伤人，只散财")),
+            Map.entry("swift", new TraitDef("swift", "疾影", "⚡", "出手如风：攻速 +50%，别被它连绵的攻势磨死")),
+            Map.entry("bulwark", new TraitDef("bulwark", "堡垒", "🛡️", "皮糙肉厚如堡垒：你对它造成的伤害 -20%，得靠耐心磨")),
+            Map.entry("venom", new TraitDef("venom", "剧毒", "☠️", "獠牙带毒：命中可能让你中毒持续掉血，出门记得带解毒剂")),
+            Map.entry("crystal", new TraitDef("crystal", "晶化", "💎", "通体晶化：击杀必额外掉 2 份本区材料，锻造党的福星")),
+            Map.entry("stealth", new TraitDef("stealth", "潜行", "🌫️", "身形飘忽：你的攻击屡屡落空，对它的伤害 -10%，堆命中克它")));
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -163,6 +164,8 @@ public final class GameConst {
     public static final double TRAIT_VENOM_DUR = 6.0;
     /** 晶化击杀额外材料份数。 */
     public static final int TRAIT_CRYSTAL_MATS = 2;
+    /** 潜行的伤害乘区（攻击落空等价：玩家对它造成的伤害 ×0.9）。 */
+    public static final double TRAIT_STEALTH_MUL = 0.9;
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
@@ -188,8 +191,8 @@ public final class GameConst {
                         : idx == 3
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : idx == 4
-                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal")
-                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal");
+                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth")
+                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth");
         return pool.get((int) (Math.random() * pool.size()));
     }
 

@@ -237,6 +237,10 @@ public final class GameEngine {
         if ("bulwark".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_BULWARK_MUL));
         }
+        // 词条·潜行：身形飘忽攻击屡屡落空，你对它造成的伤害打折（同乘区；成长按实际挥拳另算不受影响）
+        if ("stealth".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_STEALTH_MUL));
+        }
         // 被动·巨人杀手：对 Boss 专伤乘区
         if (m.boss && s.passives.contains("boss_hunter")) {
             perHit = Num.mul(perHit, Num.of(GameConst.BOSS_HUNTER_MUL));

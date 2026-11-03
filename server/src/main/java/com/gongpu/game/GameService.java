@@ -649,6 +649,7 @@ public class GameService {
         inst.sideKey = "ENCHANT";
         inst.sideVal = null;
         it.affixes.add(inst);
+        s.stats.enchants++;
         Map<String, Object> m = inventoryView(s);
         m.put("enchanted", scroll[0]);
         m.put("matkBonus", ((Number) scroll[2]).doubleValue());

@@ -90,6 +90,7 @@ class CraftServiceTest {
         assertEquals("铁剑", r.get("itemName"));
         assertEquals(bagBefore + 1, s.equipBag.size());
         assertEquals(3, s.materials.get("pelt"), "兽皮 5-2=3");
+        assertEquals(1, s.stats.crafts, "合成成功应计 +1（成就里程碑）");
         assertEquals(0, s.gold.compareTo(new BigDecimal("9900")), "金币扣 100");
         int q = (Integer) r.get("quality");
         assertTrue(q >= 1 && q <= 2, "基础配方品质 1（25% 升 2）");

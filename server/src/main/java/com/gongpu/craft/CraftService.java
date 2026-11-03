@@ -139,6 +139,7 @@ public class CraftService {
         mats.forEach((k, v) -> consumeMat(s, k, v));
         s.gold = Num.sub(s.gold, goldCost);
         s.equipBag.add(item);
+        s.stats.crafts++;
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("ok", true);
         out.put("itemName", item.name);

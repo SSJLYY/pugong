@@ -197,6 +197,9 @@ public class PlayerState {
         /** 终身击杀（跨世不清零；运营统计口径。当世 kills 每世重置、不可用作累计）。 */
         public BigDecimal lifetimeKills = BigDecimal.ZERO;
         public long deaths = 0;
+        /** 累计合成次数 / 附魔次数（终身不清零，成就里程碑用）。 */
+        public long crafts = 0;
+        public long enchants = 0;
         public long born = 0;
         public long playSeconds = 0;
         public long bestMaxHP = 0;

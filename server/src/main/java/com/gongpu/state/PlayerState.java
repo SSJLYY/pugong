@@ -103,6 +103,8 @@ public class PlayerState {
     public boolean autoRebirth = false;
     /** 挂机自动售卖：0=关；1~4=品质低于该档的掉落自动折现金币不进背包（4=紫及以下全折现，背包不进装备）（legacy autoSell+sellKeepQ）。 */
     public int autoSellKeep = 0;
+    /** 自动分解档位（0=关）：掉落品质低于此档直接分解为材料不进背包；与自动售卖并存时分解优先。 */
+    public int autoSmeltKeep = 0;
     /** 挂机自动管护(v3.13)：每次结算自动「卖白装→同名吞噬→穿最强换装」，无需手点。 */
     public boolean autoEquipBest = false;
     /** 自动进食：饱食回血（regen_food）断档时自动吃一份食物续上（村里不吃，防浪费）。 */

@@ -324,6 +324,28 @@ public class GameService {
         return new Object[]{mat, count};
     }
 
+    /** 分解入账（材料合并 + 终身计数），手动分解与掉落自动分解共用。返回 [材料 code, 数量]。 */
+    static Object[] grantDismantle(PlayerState s, PlayerState.Item it) {
+        Object[] y = dismantleYield(it);
+        s.materials.merge((String) y[0], (Integer) y[1], Integer::sum);
+        s.stats.dismantles++;
+        return y;
+    }
+
+    /**
+     * 掉落拦截决策：自动分解（smelt）优先于自动售卖（sell），都不命中才入包（bag）。
+     * 档位语义与 autoSellKeep 一致：品质 < 档位才拦截（4 = 全部）。
+     */
+    static String dropIntercept(PlayerState s, PlayerState.Item it) {
+        if (s.autoSmeltKeep > 0 && it.quality < s.autoSmeltKeep) {
+            return "smelt";
+        }
+        if (s.autoSellKeep > 0 && it.quality < s.autoSellKeep) {
+            return "sell";
+        }
+        return "bag";
+    }
+
     /** 分解：装备 → 区域材料（与卖金二选一的回收通道，喂合成经济）；锁定件拒绝。 */
     public Map<String, Object> dismantle(PlayerState s, int bagIdx) {
         if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
@@ -333,11 +355,9 @@ public class GameService {
             throw ApiException.badRequest("装备已锁定，先解锁再分解");
         }
         PlayerState.Item it = s.equipBag.remove(bagIdx);
-        Object[] y = dismantleYield(it);
+        Object[] y = grantDismantle(s, it);
         String mat = (String) y[0];
         int count = (Integer) y[1];
-        s.materials.merge(mat, count, Integer::sum);
-        s.stats.dismantles++;
         Map<String, Object> m = inventoryView(s);
         String[] info = GameConst.MAT_INFO.get(mat);
         m.put("dismantled", Map.of("mat", mat,
@@ -605,7 +625,7 @@ public class GameService {
                                             Boolean autoCure, Double fleeLine,
                                             Boolean autoBurn, Boolean autoSkill,
                                             Boolean autoRebirth, Integer autoSellKeep,
-                                            Boolean autoEquipBest, Boolean autoEat) {
+                                            Boolean autoEquipBest, Boolean autoEat, Integer autoSmeltKeep) {
         double hp = hpLine == null ? s.autoHpLine : Math.max(0, Math.min(0.9, hpLine));
         double mp = mpLine == null ? s.autoMpLine : Math.max(0, Math.min(0.9, mpLine));
         double fl = fleeLine == null ? s.autoFleeLine : Math.max(0, Math.min(0.5, fleeLine));
@@ -633,6 +653,9 @@ public class GameService {
         if (autoEat != null) {
             s.autoEat = autoEat;
         }
+        if (autoSmeltKeep != null) {
+            s.autoSmeltKeep = Math.max(0, Math.min(4, autoSmeltKeep));
+        }
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("autoHpLine", hp);
@@ -643,6 +666,7 @@ public class GameService {
         m.put("autoSkill", s.autoSkill);
         m.put("autoRebirth", s.autoRebirth);
         m.put("autoSellKeep", s.autoSellKeep);
+        m.put("autoSmeltKeep", s.autoSmeltKeep);
         m.put("autoEquipBest", s.autoEquipBest);
         m.put("autoEat", s.autoEat);
         return m;
@@ -1186,6 +1210,7 @@ public class GameService {
         m.put("autoSkill", s.autoSkill);
         m.put("autoRebirth", s.autoRebirth);
         m.put("autoSellKeep", s.autoSellKeep);
+        m.put("autoSmeltKeep", s.autoSmeltKeep);
         m.put("autoEquipBest", s.autoEquipBest);
         m.put("autoEat", s.autoEat);
         m.put("recentKills", s.recentKills == null ? new ArrayList<>() : new ArrayList<>(s.recentKills));

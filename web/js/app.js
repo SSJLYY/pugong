@@ -485,6 +485,9 @@
         '<label class="bp-row">自动售卖 <select id="bpSell">' +
         '<option value="0">关</option><option value="1">白及以下</option><option value="2">绿及以下</option>' +
         '<option value="3">蓝及以下</option><option value="4">紫及以下</option></select></label>' +
+        '<label class="bp-row">自动分解 <select id="bpSmelt">' +
+        '<option value="0">关</option><option value="1">白及以下</option><option value="2">绿及以下</option>' +
+        '<option value="3">蓝及以下</option><option value="4">紫及以下</option></select></label>' +
         '<div class="bp-row bp-btns">' +
         '<button id="bpDrinkHp">🧪 血药</button><button id="bpDrinkMp">🔵 蓝药</button><button id="bpEat">🍖 吃食</button></div>';
       document.body.appendChild(el);
@@ -495,11 +498,13 @@
           v.autoHpLine, v.autoMpLine, v.autoCure, v.autoFleeLine, v.autoBurn, v.autoSkill, v.autoRebirth,
           patch.autoSellKeep !== undefined ? patch.autoSellKeep : v.autoSellKeep,
           patch.autoEquipBest !== undefined ? patch.autoEquipBest : v.autoEquipBest,
-          v.autoEat));
+          v.autoEat,
+          patch.autoSmeltKeep !== undefined ? patch.autoSmeltKeep : v.autoSmeltKeep));
         if (r) applyView(r);
       };
       $('bpMaintain').addEventListener('change', (e) => saveAuto({ autoEquipBest: e.target.checked }));
       $('bpSell').addEventListener('change', (e) => saveAuto({ autoSellKeep: Number(e.target.value) }));
+      $('bpSmelt').addEventListener('change', (e) => saveAuto({ autoSmeltKeep: Number(e.target.value) }));
       const drink = async (ids) => {
         const v = S.view;
         if (!v) return;
@@ -517,7 +522,7 @@
     const mpPct = Math.max(0, Math.min(100, new Decimal(p.curMP).div(new Decimal(p.MP).max(1)).toNumber() * 100));
     const pot = view.potions || {};
     const sig = [Math.round(hpPct / 5), Math.round(mpPct / 5), view.zone, view.mob ? view.mob.name : '',
-      view.autoEquipBest ? 1 : 0, view.autoSellKeep || 0,
+      view.autoEquipBest ? 1 : 0, view.autoSellKeep || 0, view.autoSmeltKeep || 0,
       pot.hp_s || 0, pot.hp_l || 0, pot.mp || 0, pot.food || 0, view.dead ? 1 : 0].join('|');
     if (renderButlerPanel._sig === sig) return;
     renderButlerPanel._sig = sig;
@@ -530,6 +535,8 @@
     if (mc.checked !== !!view.autoEquipBest) mc.checked = !!view.autoEquipBest;
     const bs = $('bpSell');
     if (String(bs.value) !== String(view.autoSellKeep || 0)) bs.value = String(view.autoSellKeep || 0);
+    const bsm = $('bpSmelt');
+    if (bsm && String(bsm.value) !== String(view.autoSmeltKeep || 0)) bsm.value = String(view.autoSmeltKeep || 0);
     $('bpDrinkHp').textContent = '🧪 血药 ×' + ((pot.hp_s || 0) + (pot.hp_l || 0));
     $('bpDrinkMp').textContent = '🔵 蓝药 ×' + (pot.mp || 0);
     $('bpEat').textContent = '🍖 吃食 ×' + (pot.food || 0);
@@ -1380,6 +1387,13 @@
               <option value="2" ${view.autoSellKeep === 2 ? 'selected' : ''}>绿色及以下</option>
               <option value="3" ${view.autoSellKeep === 3 ? 'selected' : ''}>蓝色及以下</option>
               <option value="4" ${view.autoSellKeep === 4 ? 'selected' : ''}>紫色及以下（全折现）</option>
+            </select> ·
+            <span title="挂机打到的装备按档位直接分解为材料，不进背包（与自动卖装备并存时分解优先）">♻️ 自动分解</span> <select id="autoSmeltSel" class="auto-line-input" style="width:104px" title="挂机打到的装备按档位直接分解为材料，不进背包（与自动卖装备并存时分解优先）">
+              <option value="0" ${!view.autoSmeltKeep ? 'selected' : ''}>关闭</option>
+              <option value="1" ${view.autoSmeltKeep === 1 ? 'selected' : ''}>白色及以下</option>
+              <option value="2" ${view.autoSmeltKeep === 2 ? 'selected' : ''}>绿色及以下</option>
+              <option value="3" ${view.autoSmeltKeep === 3 ? 'selected' : ''}>蓝色及以下</option>
+              <option value="4" ${view.autoSmeltKeep === 4 ? 'selected' : ''}>紫色及以下（全分解）</option>
             </select></div>
         </div>
         <div class="pi-btns"><button id="btnAutoCfg">保存</button></div>`;
@@ -1398,7 +1412,8 @@
         const aeq = $('autoEquipChk').checked;
         const aet = $('autoEatChk').checked;
         const ask = Number($('autoSellSel').value) || 0;
-        const r = await call(() => API.autoConfig(API.state.slot, hp, mp, cu, fl, ab, as2, ar, ask, aeq, aet), '挂机策略已保存');
+        const asm = Number($('autoSmeltSel').value) || 0;
+        const r = await call(() => API.autoConfig(API.state.slot, hp, mp, cu, fl, ab, as2, ar, ask, aeq, aet, asm), '挂机策略已保存');
         S._cfgTouchedAt = 0;   // 保存成功,解除抑制让服务端真值即时回填
         applyView(r);
       });
@@ -1423,6 +1438,8 @@
       if (aetEl) aetEl.checked = !!view.autoEat;
       const asl = $('autoSellSel');
       if (asl && String(asl.value) !== String(view.autoSellKeep || 0)) asl.value = String(view.autoSellKeep || 0);
+      const asmEl = $('autoSmeltSel');
+      if (asmEl && String(asmEl.value) !== String(view.autoSmeltKeep || 0)) asmEl.value = String(view.autoSmeltKeep || 0);
     }
     // —— 药剂列表：库存签名未变化就不重建(按钮监听器不丢,DOM 不闪) ——
     const sig = JSON.stringify(view.potions || {});

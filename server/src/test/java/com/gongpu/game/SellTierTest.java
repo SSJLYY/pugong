@@ -72,9 +72,9 @@ class SellTierTest {
     @Test
     void autoSellKeepClampsToFour() {
         PlayerState s = NewState.create();
-        game.setAutoLines(s, null, null, null, null, null, null, null, 4, null, null);
+        game.setAutoLines(s, null, null, null, null, null, null, null, 4, null, null, null);
         assertEquals(4, s.autoSellKeep);
-        game.setAutoLines(s, null, null, null, null, null, null, null, 99, null, null);
+        game.setAutoLines(s, null, null, null, null, null, null, null, 99, null, null, null);
         assertEquals(4, s.autoSellKeep, "超限值应钳到最高档 4");
     }
 

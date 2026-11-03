@@ -298,9 +298,12 @@ public final class GameEngine {
                         if (it == null) {
                             continue;
                         }
-                        // 与 onMobKilled 同语义:挂机售卖开启时,低于保留档的掉落直接折现,不进背包
+                        // 与 onMobKilled 同语义:掉落拦截（自动分解优先于自动售卖）走 GameService.dropIntercept
                         // (此前只改了逐杀分支,高攻速常态走本期望分支,自动售卖形同虚设)
-                        if (s.autoSellKeep > 0 && it.quality < s.autoSellKeep) {
+                        String act = GameService.dropIntercept(s, it);
+                        if ("smelt".equals(act)) {
+                            GameService.grantDismantle(s, it);
+                        } else if ("sell".equals(act)) {
                             s.gold = Num.add(s.gold, EquipFactory.sellPrice(it));
                         } else {
                             s.equipBag.add(it);
@@ -433,8 +436,14 @@ public final class GameEngine {
         if (Math.random() < rate && s.equipBag.size() < GameService.bagCap(s)) {
             PlayerState.Item it = EquipFactory.generate(s, s.zone, m.boss);
             if (it != null) {
-                // 挂机自动售卖(legacy autoSell+sellKeepQ):品质低于保留档 → 直接折现金币
-                if (s.autoSellKeep > 0 && it.quality < s.autoSellKeep) {
+                // 掉落拦截：自动分解优先（转材料），其次自动售卖（折现金币），都不命中才进背包
+                String act = GameService.dropIntercept(s, it);
+                if ("smelt".equals(act)) {
+                    GameService.grantDismantle(s, it);
+                    s.lastDropCount = 1;   // 分解计一次掉落,不进批量掉落漏计
+                    return;   // 不进背包
+                }
+                if ("sell".equals(act)) {
                     s.gold = Num.add(s.gold, EquipFactory.sellPrice(it));
                     s.lastDropCount = 1;   // 折现计一次掉落,不进批量掉落漏计
                     return;   // 不进背包

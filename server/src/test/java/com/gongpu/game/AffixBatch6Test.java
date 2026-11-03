@@ -33,4 +33,13 @@ class AffixBatch6Test {
         assertEquals("epic", a.rarity());
         assertTrue(a.min() >= 20 && a.max() <= 45, "磐石区间应为 20~45：" + a.min() + "~" + a.max());
     }
+
+    @Test
+    void round13Windhunter() {
+        GameConst.Affix a = byName("猎风");
+        assertNotNull(a, "猎风应进词条池");
+        assertEquals("SPD", a.key());
+        assertEquals("epic", a.rarity());
+        assertTrue(a.min() >= 30 && a.max() <= 60, "猎风区间应为 30~60：" + a.min() + "~" + a.max());
+    }
 }

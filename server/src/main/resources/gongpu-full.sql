@@ -861,6 +861,11 @@ DELETE FROM `cfg_affix` WHERE `code` IN ('bedrock');
 INSERT INTO `cfg_affix`
   (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
   ('bedrock', '磐石', 'PDEF', 'flat', 20, 45, 'epic', NULL, NULL, 1, 18);
+-- 第 13 轮：高阶词条「猎风」（移速上位版）
+DELETE FROM `cfg_affix` WHERE `code` IN ('windhunter');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('windhunter', '猎风', 'SPD', 'flat', 30, 60, 'epic', NULL, NULL, 1, 19);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

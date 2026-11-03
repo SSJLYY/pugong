@@ -752,6 +752,17 @@
         applyView._achClaimBound = true;
         // 成就领奖按钮（achievements.js 渲染，data-ach-claim 委托处理，一次绑定）
         document.addEventListener('click', async (e) => {
+          const allBtn = e.target.closest ? e.target.closest('[data-ach-claim-all]') : null;
+          if (allBtn) {
+            allBtn.disabled = true;
+            try {
+              const r = await call(() => API.claimAllAchievements(API.state.slot));
+              const res = (r && r.result) || {};
+              toast('🎁 一键全领：' + (res.claimedCount || 0) + ' 项，+' + fmt(res.totalReward || 0) + ' 金币', 'ok');
+              if (r) applyView(r);
+            } catch (err) { toast(err.message, 'err'); allBtn.disabled = false; }
+            return;
+          }
           const btn = e.target.closest ? e.target.closest('[data-ach-claim]') : null;
           if (!btn) return;
           btn.disabled = true;

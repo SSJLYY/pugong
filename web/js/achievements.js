@@ -89,6 +89,12 @@
     for (var k in unlocked) { if (unlocked[k]) n++; }
     var html = ['<div class="effect-group"><div class="effect-group-title">🏅 成就（' +
       n + '/' + ACH.length + '）</div>'];
+    var claimable = ACH.filter(function (a) { return unlocked[a.id] && !claimed[a.id]; });
+    if (claimable.length) {
+      var sum = claimable.reduce(function (t, a) { return t + (rewards[a.id] || 0); }, 0);
+      html.push('<div class="effect-item"><span>🎁</span><b>待领奖励 ' + claimable.length + ' 项</b>' +
+        '<i><button class="ach-claim" data-ach-claim-all="1">一键全领 +' + sum + ' 金</button></i></div>');
+    }
     ACH.forEach(function (a) {
       var on = !!unlocked[a.id];
       var tail = '';

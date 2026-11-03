@@ -164,6 +164,7 @@
     dismantleItem: (slot, index) => request('POST', '/api/game/' + slot + '/dismantle', { index }),
     dismantleAll: (slot, keep) => request('POST', '/api/game/' + slot + '/dismantle-all', { keep: keep }),
     claimAchievement: (slot, id) => request('POST', '/api/game/' + slot + '/ach-claim', { id }),
+    claimAllAchievements: (slot) => request('POST', '/api/game/' + slot + '/ach-claim-all', {}),
     enhanceItem: (slot, index) => request('POST', '/api/game/' + slot + '/enhance', { index }),
     discardItem: (slot, index) => request('POST', '/api/game/' + slot + '/discard', { index }),
     toggleLock: (slot, index) => request('POST', '/api/game/' + slot + '/lock', { index }),

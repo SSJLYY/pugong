@@ -695,6 +695,26 @@ public class GameService {
         return m;
     }
 
+    /** 成就奖励一键全领：遍历全部成就，已解锁未领取的逐个入账（无可领时回报 0，不报错）。 */
+    public Map<String, Object> claimAllAchievements(PlayerState s) {
+        long total = 0;
+        java.util.List<String> claimed = new java.util.ArrayList<>();
+        for (Achievements.Def d : Achievements.ALL) {
+            if (s.achievements.contains(d.id()) && s.achClaimed.add(d.id())) {
+                long reward = Achievements.rewardOf(d.id());
+                total += reward;
+                claimed.add(d.id());
+            }
+        }
+        s.gold = Num.add(s.gold, Num.of(total));
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("claimedCount", claimed.size());
+        m.put("claimedIds", claimed);
+        m.put("totalReward", total);
+        return m;
+    }
+
     public Map<String, Object> sortBag(PlayerState s) {
         s.equipBag.sort((a, b) -> Double.compare(equipScore(b), equipScore(a)));
         return inventoryView(s);

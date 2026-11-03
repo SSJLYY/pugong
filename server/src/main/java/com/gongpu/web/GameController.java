@@ -450,6 +450,13 @@ public class GameController {
                 s -> game.claimAchievement(s, reqStr(body.id(), "id")));
     }
 
+    /** 成就奖励一键全领。 */
+    @PostMapping("/{slot}/ach-claim-all")
+    public Map<String, Object> achClaimAll(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
+                s -> game.claimAllAchievements(s));
+    }
+
     /** 每日签到：每个账号每天一次，奖励金币+药剂（随世代加码）。 */
     @PostMapping("/{slot}/daily")
     public Map<String, Object> daily(HttpServletRequest req, @PathVariable int slot) {

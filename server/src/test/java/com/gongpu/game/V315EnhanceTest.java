@@ -111,6 +111,7 @@ class V315EnhanceTest {
         plain.mob = testMob(null, "1000000");
         plain.life.set("PATK", new BigDecimal("1000"));
         plain.fixed.CRIT = Num.ZERO;   // 出生自带 5% 暴击会污染精确伤害断言
+        plain.fixed.CRITD = Num.of(1);   // 弱点打击中性化（第七批机制，旧断言口径不变）
         GameEngine.dealDamage(plain, PanelCalculator.of(plain), Num.of(10), 1.0);
         assertEquals(0, plain.mob.curHP.compareTo(new BigDecimal("990000")));
 
@@ -118,6 +119,7 @@ class V315EnhanceTest {
         disarmed.mob = testMob("disarm", "1000000");
         disarmed.life.set("PATK", new BigDecimal("1000"));
         disarmed.fixed.CRIT = Num.ZERO;
+        disarmed.fixed.CRITD = Num.of(1);   // 弱点打击中性化（同上）
         GameEngine.dealDamage(disarmed, PanelCalculator.of(disarmed), Num.of(10), 1.0);
         assertEquals(0, disarmed.mob.curHP.compareTo(new BigDecimal("991500")),
                 "缴械应把普攻总伤压到 85%");

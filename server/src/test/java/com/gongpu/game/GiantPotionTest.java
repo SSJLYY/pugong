@@ -38,6 +38,7 @@ class GiantPotionTest {
         s.zone = "plain";
         s.life.set("PATK", new BigDecimal("100"));
         s.fixed.CRIT = BigDecimal.ZERO;
+        s.fixed.CRITD = BigDecimal.ONE;   // 弱点打击中性化（第七批机制：暴伤=1 时弱点拳无加成，旧断言口径不变）
         s.life.maxHP = new BigDecimal("10000");
         s.life.curHP = new BigDecimal("10000");
         if (passive) {

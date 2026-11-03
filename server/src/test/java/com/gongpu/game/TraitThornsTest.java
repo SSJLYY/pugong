@@ -41,6 +41,7 @@ class TraitThornsTest {
         s.mob = m;
         s.life.set("PATK", new BigDecimal("100"));
         s.fixed.CRIT = BigDecimal.ZERO;   // 归零固有暴击期望，保证每拳恰好 100 伤、反扎恰好 10%
+        s.fixed.CRITD = BigDecimal.ONE;   // 弱点打击中性化（第七批机制：暴伤=1 时弱点拳无加成，旧断言口径不变）
         s.life.maxHP = new BigDecimal("10000");
         s.life.curHP = curHP;
         return s;

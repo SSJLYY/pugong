@@ -40,6 +40,7 @@ class StealthTraitTest {
         s.zone = "swamp";
         s.life.set("PATK", new BigDecimal("100"));
         s.fixed.CRIT = BigDecimal.ZERO;
+        s.fixed.CRITD = BigDecimal.ONE;   // 弱点打击中性化（第七批机制：暴伤=1 时弱点拳无加成，旧断言口径不变）
         s.life.maxHP = new BigDecimal("10000");
         s.life.curHP = new BigDecimal("10000");
         GameEngine.dealDamage(s, PanelCalculator.of(s), new BigDecimal("10"), 1.0);
@@ -58,6 +59,6 @@ class StealthTraitTest {
         }
         assertFalse(mine.contains("stealth"), "矿洞池不应有潜行");
         assertTrue(swamp.contains("stealth"), "沼泽池应能掷出潜行");
-        assertEquals(12, GameConst.MOB_TRAITS.size(), "怪物词条总数应达 12（7 + 第六批 5）");
+        assertEquals(14, GameConst.MOB_TRAITS.size(), "怪物词条总数应达 14（12 + 第七批诅咒/寒霜）");
     }
 }

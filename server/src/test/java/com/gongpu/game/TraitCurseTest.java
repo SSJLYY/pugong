@@ -86,6 +86,7 @@ class TraitCurseTest {
         for (PlayerState s : new PlayerState[]{plain, cursed}) {
             s.life.set("PATK", new BigDecimal("100"));
             s.fixed.CRIT = BigDecimal.ZERO;
+            s.fixed.CRITD = BigDecimal.ONE;   // 弱点打击中性化（同上）
             s.life.curHP = new BigDecimal("5000");
             s.life.maxHP = new BigDecimal("100000");
             s.life.curMP = Num.of(100);

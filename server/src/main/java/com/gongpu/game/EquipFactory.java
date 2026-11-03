@@ -286,23 +286,29 @@ public final class EquipFactory {
         rerollAffixes(it, lockIdx, false);
     }
 
+    /** 洗炼（保底版，单锁）：见多锁核心实现。 */
+    public static void rerollAffixes(PlayerState.Item it, int lockIdx, boolean forceEpic) {
+        rerollAffixes(it, lockIdx >= 0 ? java.util.Set.of(lockIdx) : java.util.Set.of(), forceEpic);
+    }
+
     /**
-     * 洗炼（保底版）：forceEpic 时若重刷后仍无史诗词条，把最后一条未锁定词条替换为随机史诗词条
+     * 洗炼核心（第七批双锁）：locks 中的词条原样保留（按原序置于前列，同名不回池），其余按品质条数重刷。
+     * forceEpic 时若重刷后仍无史诗词条，把最后一条未锁定词条替换为随机史诗词条
      * （同名不重复；全部词条都被锁定则无处可换、保底不触发）。数值在该词条区间内随机。
      */
-    public static void rerollAffixes(PlayerState.Item it, int lockIdx, boolean forceEpic) {
-        // 锁定词条（原样保留）
-        PlayerState.AffixInst locked = null;
-        if (lockIdx >= 0 && lockIdx < it.affixes.size()) {
-            locked = it.affixes.get(lockIdx);
+    public static void rerollAffixes(PlayerState.Item it, java.util.Set<Integer> locks, boolean forceEpic) {
+        List<PlayerState.AffixInst> locked = new ArrayList<>();
+        for (int i = 0; i < it.affixes.size(); i++) {
+            if (locks.contains(i)) {
+                locked.add(it.affixes.get(i));
+            }
         }
         it.affixes.clear();
         List<GameConst.Affix> pool = new ArrayList<>(com.gongpu.cfg.GameData.instance().affixPool());
-        if (locked != null) {
+        for (PlayerState.AffixInst lk : locked) {
             // 锁定词条不放回池（同名不重复）
-            final String lockName = locked.name;
-            pool.removeIf(a -> a.name().equals(lockName));
-            it.affixes.add(locked);
+            pool.removeIf(a -> a.name().equals(lk.name));
+            it.affixes.add(lk);
         }
         int count = GameConst.QUALITY_AFFIX_COUNT[Math.max(0, Math.min(3, it.quality))];
         for (int i = it.affixes.size(); i < count && !pool.isEmpty(); i++) {
@@ -319,7 +325,7 @@ public final class EquipFactory {
             it.affixes.add(inst);
         }
         if (forceEpic && it.affixes.stream().noneMatch(a -> "epic".equals(a.rarity))) {
-            int firstFree = locked != null ? 1 : 0;
+            int firstFree = locked.size();
             if (it.affixes.size() > firstFree) {
                 List<GameConst.Affix> epics = new ArrayList<>();
                 for (GameConst.Affix a : com.gongpu.cfg.GameData.instance().affixPool()) {

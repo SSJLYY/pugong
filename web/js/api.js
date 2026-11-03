@@ -170,7 +170,7 @@
     discardItem: (slot, index) => request('POST', '/api/game/' + slot + '/discard', { index }),
     toggleLock: (slot, index) => request('POST', '/api/game/' + slot + '/lock', { index }),
     sortBag: (slot) => request('POST', '/api/game/' + slot + '/sortbag'),
-    rerollItem: (slot, index, lockIndex) => request('POST', '/api/game/' + slot + '/reroll', { index, lockIndex: lockIndex == null ? -1 : lockIndex }),
+    rerollItem: (slot, index, lockIndex, lockIndex2) => request('POST', '/api/game/' + slot + '/reroll', { index, lockIndex: lockIndex == null ? -1 : lockIndex, lockIndex2: lockIndex2 == null ? -1 : lockIndex2 }),
     temperItem: (slot, index) => request('POST', '/api/game/' + slot + '/temper', { index }),
     autoSell: (slot, keep) => request('POST', '/api/game/' + slot + '/autosell', { keep: keep }),
     flee: (slot) => request('POST', '/api/game/' + slot + '/flee'),

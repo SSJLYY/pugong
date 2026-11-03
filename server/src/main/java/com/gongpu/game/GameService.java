@@ -470,16 +470,42 @@ public class GameService {
         return m;
     }
 
-    /** 洗炼：花金币重刷词条（底子/强化/品质保留；lockIdx≥0 时锁定该条词条，费用 ×3）。 */
+    /** 洗炼（单锁兼容入口）。 */
     public Map<String, Object> reroll(PlayerState s, int bagIdx, int lockIdx) {
+        return reroll(s, bagIdx, lockIdx, -1);
+    }
+
+    /**
+     * 洗炼：花金币重刷词条（底子/强化/品质保留）。
+     * 锁定一条费用 ×3；双锁（第七批，须 ≥3 条词条且两条不同）费用 ×5。
+     */
+    public Map<String, Object> reroll(PlayerState s, int bagIdx, int lockIdx, int lockIdx2) {
         if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
             throw ApiException.badRequest("背包索引越界");
         }
         PlayerState.Item it = s.equipBag.get(bagIdx);
-        boolean hasLock = lockIdx >= 0 && lockIdx < it.affixes.size();
+        java.util.Set<Integer> locks = new java.util.TreeSet<>();
+        for (int v : new int[]{lockIdx, lockIdx2}) {
+            if (v >= 0) {
+                if (v >= it.affixes.size()) {
+                    throw ApiException.badRequest("锁定的词条不存在");
+                }
+                locks.add(v);
+            }
+        }
+        if (lockIdx2 >= 0) {
+            if (locks.size() < 2) {
+                throw ApiException.badRequest("双锁需要两条不同的词条");
+            }
+            if (it.affixes.size() < 3) {
+                throw ApiException.badRequest("双锁需要至少 3 条词条（总要留一条重刷）");
+            }
+        }
         BigDecimal cost = EquipFactory.rerollCost(it);
-        if (hasLock) {
+        if (locks.size() == 1) {
             cost = Num.mul(cost, Num.of(3));
+        } else if (locks.size() >= 2) {
+            cost = Num.mul(cost, Num.of(5));
         }
         if (Num.lt(s.gold, cost)) {
             throw ApiException.badRequest("金币不足，洗炼需要 " + Num.cn(cost));
@@ -487,13 +513,14 @@ public class GameService {
         s.gold = Num.sub(s.gold, cost);
         // 洗炼保底（第七批）：连续 REROLL_PITY_MAX 次未出史诗，本次强制出一条；出史诗（含保底）清零计数
         boolean pityArmed = s.rerollPity >= GameConst.REROLL_PITY_MAX - 1;
-        EquipFactory.rerollAffixes(it, hasLock ? lockIdx : -1, pityArmed);
+        EquipFactory.rerollAffixes(it, locks, pityArmed);
         boolean gotEpic = it.affixes.stream().anyMatch(a -> "epic".equals(a.rarity));
         s.rerollPity = gotEpic ? 0 : s.rerollPity + 1;
         s.stats.rerolls++;
         Map<String, Object> m = inventoryView(s);
         m.put("rerolled", true);
-        m.put("locked", hasLock);
+        m.put("locked", !locks.isEmpty());
+        m.put("lockedCount", locks.size());
         m.put("cost", Num.plain(cost));
         m.put("affixes", it.affixes);
         m.put("pity", s.rerollPity);

@@ -31,7 +31,7 @@ public class GameController {
     public record IdxReq(Integer index) {
     }
 
-    public record RerollReq(Integer index, Integer lockIndex) {
+    public record RerollReq(Integer index, Integer lockIndex, Integer lockIndex2) {
     }
 
     public record AutoCfgReq(Double hpLine, Double mpLine, Boolean autoCure, Double fleeLine,
@@ -308,9 +308,10 @@ public class GameController {
     @PostMapping("/{slot}/reroll")
     public Map<String, Object> reroll(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody RerollReq body) {
-        // lockIndex 可选(旧客户端/快捷洗炼不锁),缺省 -1 = 不锁定
+        // lockIndex/lockIndex2 可选(旧客户端/快捷洗炼不锁),缺省 -1 = 不锁定;lockIndex2 为双锁第二条
         Integer lock = body.lockIndex() == null ? -1 : body.lockIndex();
-        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.reroll(s, reqIdx(body.index(), "index"), lock));
+        Integer lock2 = body.lockIndex2() == null ? -1 : body.lockIndex2();
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> game.reroll(s, reqIdx(body.index(), "index"), lock, lock2));
     }
 
     @PostMapping("/{slot}/autosell")

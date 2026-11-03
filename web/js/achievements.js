@@ -47,7 +47,9 @@
     { id: 'set_4', name: '整装待发', emoji: '🧩', desc: '集齐任意一套装的 4 件' },
     { id: 'set_dual', name: '双套加身', emoji: '🎭', desc: '同时激活两套套装（各 ≥2 件）' },
     { id: 'temper_5', name: '淬火成钢', emoji: '🔨', desc: '任意一件装备淬炼满级' },
-    { id: 'reroll_50', name: '洗炼大师', emoji: '🎲', desc: '累计洗炼 50 次' }
+    { id: 'reroll_50', name: '洗炼大师', emoji: '🎲', desc: '累计洗炼 50 次' },
+    { id: 'abyss_first', name: '渊瞳初开', emoji: '🕳️', desc: '首次击杀深渊裂隙的怪物' },
+    { id: 'abyss_lord', name: '深渊主宰', emoji: '👑', desc: '击杀渊底之主·无光君王' }
   ];
 
   var byId = {};

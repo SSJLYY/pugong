@@ -58,7 +58,9 @@ public final class Achievements {
             new Def("set_4", "整装待发", "🧩", "集齐任意一套装的 4 件"),
             new Def("set_dual", "双套加身", "🎭", "同时激活两套套装（各 ≥2 件）"),
             new Def("temper_5", "淬火成钢", "🔨", "任意一件装备淬炼满级"),
-            new Def("reroll_50", "洗炼大师", "🎲", "累计洗炼 50 次")
+            new Def("reroll_50", "洗炼大师", "🎲", "累计洗炼 50 次"),
+            new Def("abyss_first", "渊瞳初开", "🕳️", "首次击杀深渊裂隙的怪物"),
+            new Def("abyss_lord", "深渊主宰", "👑", "击杀渊底之主·无光君王")
     );
 
     private Achievements() {
@@ -71,7 +73,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5" -> 2_000L;
-            case "gold_1m", "best_hit_1m", "boss_100", "craft_50" -> 5_000L;
+            case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord" -> 5_000L;
             default -> 500L;
         };
     }
@@ -81,6 +83,20 @@ public final class Achievements {
      * 成就进度（当前值/目标值）：可量化成就返回 [cur, target]，事件型成就返回 null（前端不画进度条）。
      * 与 evaluate 的判定口径逐项一致（改判定必须同步这里）。
      */
+    /** 图鉴中已收集的深渊怪种数（abyss_first 成就口径）。 */
+    static int abyssCodexHits(PlayerState s) {
+        if (s.codex == null) {
+            return 0;
+        }
+        int n = 0;
+        for (String id : new String[]{"abyss_wisp", "rift_hound", "void_knight", "chaos_spawn"}) {
+            if (s.codex.contains(id)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     /** 当前最高淬炼等级（已装备 + 背包，temper_5 成就口径）。 */
     static int maxTemper(PlayerState s) {
         int max = 0;
@@ -134,6 +150,8 @@ public final class Achievements {
             case "craft_50" -> new long[]{s.stats.crafts, 50};
             case "temper_5" -> new long[]{maxTemper(s), GameConst.TEMPER_MAX_LV};
             case "reroll_50" -> new long[]{s.stats.rerolls, 50};
+            case "abyss_first" -> new long[]{abyssCodexHits(s), 1};
+            case "abyss_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_abyss") ? 1 : 0, 1};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
             case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
@@ -202,6 +220,8 @@ public final class Achievements {
                 case "set_dual" -> setCounts.values().stream().filter(n -> n >= 2).count() >= 2;
                 case "temper_5" -> maxTemper(s) >= GameConst.TEMPER_MAX_LV;
                 case "reroll_50" -> s.stats.rerolls >= 50;
+                case "abyss_first" -> abyssCodexHits(s) >= 1;
+                case "abyss_lord" -> s.bossKills != null && s.bossKills.contains("boss_abyss");
                 default -> false;
             };
             if (ok) {

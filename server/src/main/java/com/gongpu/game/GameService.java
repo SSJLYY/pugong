@@ -891,6 +891,7 @@ public class GameService {
         m.put("autoEat", s.autoEat);
         m.put("autoAdvance", s.autoAdvance);
         m.put("autoBoss", s.autoBoss);
+        m.put("rerollPity", s.rerollPity);
         return m;
     }
 

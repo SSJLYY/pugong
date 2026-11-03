@@ -1604,7 +1604,9 @@
                 sub: '锁定此词条 · 其余重刷 · 费用×3',
                 value: i - 0
               })).concat([{ label: '全部重刷', sub: '不锁定 · 费用正常', value: -1 }]);
-              const pick = await pickModal('🔁 洗炼 · ' + esc(it.name), '底子与强化保留，只重刷未锁定词条。', choices);
+              const pity = Number(view.rerollPity || 0);
+              const pityTxt = pity >= 9 ? ' 🍀 保底已满：本次必出史诗词条！' : ' 保底进度 ' + pity + '/10（连续未出史诗的洗炼次数，满 10 次必出）。';
+              const pick = await pickModal('🔁 洗炼 · ' + esc(it.name), '底子与强化保留，只重刷未锁定词条。' + pityTxt, choices);
               if (pick === null) return;   // 取消
               lockIdx = pick;
             } else if (!confirm('洗炼会重刷全部词条（底子与强化保留）。确认？')) {
@@ -1649,6 +1651,9 @@
           if (act === 'dismantle' && r && r.result && r.result.dismantled) {
             const dz = r.result.dismantled;
             toast('♻️ 分解 ' + (dz.itemName || '装备') + ' → ' + (dz.matName || dz.mat) + ' ×' + dz.count, 'ok');
+          }
+          if (act === 'reroll' && r && r.result && r.result.pityTriggered) {
+            toast('🍀 保底触发！这次洗炼强行刷出了史诗词条', 'ok');
           }
           applyView(r);
         });

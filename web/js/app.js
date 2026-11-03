@@ -834,6 +834,7 @@
       }
     }
     renderBag(view);
+    renderSets(view);
     renderEvents(view);
     renderPotions(view);
     renderPassives(view);
@@ -1302,6 +1303,30 @@
       : '';
   }
 
+  // 套装成员判定（第七批）：按模板 code 在 view.sets 里查所属套装（旧档无 code 的装备不显示徽章，件数由服务端计）
+  function setOfItem(view, it) {
+    if (!it || !it.code || !view.sets) return null;
+    return view.sets.find(sm => (sm.members || []).includes(it.code)) || null;
+  }
+
+  // 套装面板：只展示已穿 ≥1 件的套装（件数 + 两档加成，激活档高亮）；签名守卫同其他渲染器
+  function renderSets(view) {
+    const wrap = $('setsBox');
+    if (!wrap) return;
+    const rows = (view.sets || []).filter(sm => sm.worn > 0);
+    const sig = JSON.stringify(rows);
+    if (sig === renderSets._sig) return;
+    renderSets._sig = sig;
+    wrap.hidden = rows.length === 0;
+    if (!rows.length) return;
+    $('setsList').innerHTML = rows.map(sm => `
+      <div class="set-row${sm.active4 ? ' set-full' : sm.active2 ? ' set-on' : ''}">
+        <div class="set-head">${sm.emoji} ${sm.name} <span class="set-count">${sm.worn}/${sm.total}</span></div>
+        <div class="set-bonus${sm.active2 ? ' on' : ''}">2 件：${sm.bonus2}</div>
+        <div class="set-bonus${sm.active4 ? ' on' : ''}">4 件：${sm.bonus4}</div>
+      </div>`).join('');
+  }
+
   function renderBag(view) {
     // 内容签名守卫:挂机时背包/穿戴不变就跳过重建——每秒销毁重建 40+ 节点×7 按钮
     // 会导致移动端掉帧、按钮监听器每秒换新引发偶发点击丢失(签名范式同 renderPotions)
@@ -1316,8 +1341,9 @@
       d.className = 'equip-slot' + (it ? '' : ' empty');
       if (it) {
         d.style.borderColor = QUALITY_COLOR[it.quality];
+        const sm = setOfItem(view, it);
         d.innerHTML = `<div class="es-name" style="color:${QUALITY_COLOR[it.quality]}">${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}</div>
-                       <div class="es-slot">${SLOT_NAME[slot]}</div>`;
+                       <div class="es-slot">${SLOT_NAME[slot]}</div>${sm ? `<div class="es-set">🧩 ${sm.name} ${sm.worn}/${sm.total}</div>` : ''}`;
         d.title = (it.affixes || []).map(affixText).join('\n');
         d.addEventListener('click', async () => {
           // 触屏:hover title 失效,点击先弹词条小卡,卸下走卡内按钮
@@ -1533,10 +1559,12 @@
       const eqSc = (view.equippedScores || {})[it.slot];
       const scoreChip = sc == null ? '' : ` <span class="bi-score" title="装备评分（与自动换装/整理同口径）">⚖${Math.round(sc)}${eqSc == null ? '' : sc > eqSc
         ? ` <b style="color:#4caf50">⬆${Math.round(sc - eqSc)}</b>` : ` <b style="color:#999">⬇${Math.round(eqSc - sc)}</b>`}</span>`;
+      const setSm = setOfItem(view, it);
+      const setChip = setSm ? ` <span class="bi-set" title="套装成员：同套穿 2/4 件激活加成（见已装备区套装面板）">🧩${setSm.name}</span>` : '';
       d.innerHTML = `
         <div class="bi-head" style="color:${QUALITY_COLOR[it.quality]}">
           ${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}${it.locked ? ' 🔒' : ''}
-          <span class="bi-q">${QUALITY_NAME[it.quality]}</span>${scoreChip}
+          <span class="bi-q">${QUALITY_NAME[it.quality]}</span>${scoreChip}${setChip}
         </div>
         <div class="bi-affix">${(it.affixes || []).map(affixText).join(' · ') || '（无词条）'}</div>
         <div class="bi-actions">

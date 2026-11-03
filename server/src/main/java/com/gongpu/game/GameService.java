@@ -1303,6 +1303,7 @@ public class GameService {
             m.put("id", d.id());
             m.put("name", d.name());
             m.put("emoji", d.emoji());
+            m.put("members", d.members());
             int worn = counts.getOrDefault(d.id(), 0);
             m.put("worn", worn);
             m.put("total", d.members().size());

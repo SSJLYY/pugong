@@ -962,3 +962,16 @@
 
 /* 补给预警（第六批：血药/蓝药见底红字提示） */
 .potion-warn{color:#ff8a80;background:rgba(229,72,77,.12);border:1px solid rgba(229,72,77,.4);border-radius:8px;padding:6px 10px;font-size:13px;margin:6px 0}
+
+/* 套装（第七批）：已装备区套装面板 + 槽位/背包套装徽章 */
+.sets-box{margin-top:10px}
+.sets-list{display:flex;flex-direction:column;gap:6px}
+.set-row{border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 10px;font-size:13px}
+.set-row.set-on{border-color:rgba(76,175,80,.55)}
+.set-row.set-full{border-color:#ffb300;background:rgba(255,179,0,.08)}
+.set-head{font-weight:600}
+.set-count{color:#ffb300;margin-left:6px}
+.set-bonus{opacity:.55}
+.set-bonus.on{opacity:1;color:#81c784}
+.es-set{font-size:11px;color:#ffb300}
+.bi-set{font-size:11px;color:#ffb300}

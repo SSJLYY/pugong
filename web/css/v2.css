@@ -1065,3 +1065,4 @@
 .daily-desc{color:#cbbfa5}
 .daily-claim{min-height:30px}
 .daily-claim.ready{background:#c9a227;color:#1a1503;font-weight:700;border-color:#c9a227;cursor:pointer}
+.daily-allclear{grid-column:1/-1;text-align:center;color:#ffb300;font-size:13px;margin:2px 0 0}

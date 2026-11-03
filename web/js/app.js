@@ -2371,7 +2371,8 @@
         '<div class="daily-desc">' + esc(t.desc) + '</div>' +
         '<div class="daily-prog"><span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
         fmt(t.progress) + '/' + fmt(t.target) + '</div>' + btn + '</div>';
-    }).join('');
+    }).join('') + (tasks.every(t => t.claimed)
+      ? '<p class="daily-allclear">🎉 今日任务已全清，全清奖励也到手了——明天见！</p>' : '');
     box.querySelectorAll('[data-daily-claim]').forEach(btn => {
       btn.addEventListener('click', async () => {
         btn.disabled = true;

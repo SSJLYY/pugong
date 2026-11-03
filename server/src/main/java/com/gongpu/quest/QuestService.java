@@ -175,16 +175,24 @@ public class QuestService {
         return z != null ? z.name() : zone;
     }
 
-    private static Map<String, Object> parseJson(String json) {
+    private static final com.fasterxml.jackson.databind.ObjectMapper JSON =
+            new com.fasterxml.jackson.databind.ObjectMapper();
+    /** reqJson 解析缓存：委托板每次打开对每个模板都解析一遍，配置不变时结果不变（按原文键缓存）。 */
+    private static final java.util.concurrent.ConcurrentHashMap<String, Map<String, Object>> REQ_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    static Map<String, Object> parseJson(String json) {
         if (json == null || json.isBlank()) {
             return Map.of();
         }
-        try {
-            return new com.fasterxml.jackson.databind.ObjectMapper()
-                    .readValue(json, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {
-                    });
-        } catch (Exception e) {
-            return Map.of();
-        }
+        return REQ_CACHE.computeIfAbsent(json, j -> {
+            try {
+                Map<String, Object> m = JSON.readValue(j,
+                        new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+                return m == null ? Map.of() : m;
+            } catch (Exception e) {
+                return Map.of();
+            }
+        });
     }
 }

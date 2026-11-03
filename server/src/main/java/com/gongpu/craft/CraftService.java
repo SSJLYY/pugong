@@ -107,6 +107,32 @@ public class CraftService {
         return out;
     }
 
+    /**
+     * 材料兑换：3 份区域材料换 1 份任意其他区域材料（跨区锻造的调剂通道）。
+     * 只限六种区域材料之间（图纸/卷轴不在此列），同种互换拒绝。
+     */
+    public Map<String, Object> exchange(PlayerState s, String from, String to) {
+        if (from == null || to == null || from.equals(to)
+                || !com.gongpu.game.GameConst.ZONE_MAT.containsValue(from)
+                || !com.gongpu.game.GameConst.ZONE_MAT.containsValue(to)) {
+            throw ApiException.badRequest("只能在六种区域材料之间兑换（同种不可换）");
+        }
+        int cost = com.gongpu.game.GameConst.MAT_EXCHANGE_COST;
+        int have = s.materials.getOrDefault(from, 0);
+        if (have < cost) {
+            throw ApiException.badRequest("材料不足（兑换需要 " + cost + " 份）");
+        }
+        s.materials.put(from, have - cost);
+        s.materials.merge(to, 1, Integer::sum);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("from", from);
+        m.put("to", to);
+        m.put("fromHave", s.materials.getOrDefault(from, 0));
+        m.put("toHave", s.materials.getOrDefault(to, 0));
+        return m;
+    }
+
     /** 执行合成：全校验通过才扣料，产物入背包。 */
     public Map<String, Object> craft(PlayerState s, String code) {
         CraftTemplate t = GameData.instance().craft(code);

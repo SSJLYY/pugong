@@ -371,6 +371,17 @@ public class GameController {
                 s -> crafts.craft(s, reqStr(body.code(), "code")));
     }
 
+    public record MatExchangeReq(String from, String to) {
+    }
+
+    /** 材料兑换：3 份区域材料换 1 份其他区域材料。 */
+    @PostMapping("/{slot}/mat-exchange")
+    public Map<String, Object> matExchange(HttpServletRequest req, @PathVariable int slot,
+                                           @RequestBody MatExchangeReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
+                s -> crafts.exchange(s, reqStr(body.from(), "from"), reqStr(body.to(), "to")));
+    }
+
     /** 一键穿最强装备（按评分自动换装）。 */
     @PostMapping("/{slot}/autoequip")
     public Map<String, Object> autoEquip(HttpServletRequest req, @PathVariable int slot) {

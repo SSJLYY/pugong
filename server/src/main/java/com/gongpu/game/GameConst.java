@@ -170,6 +170,8 @@ public final class GameConst {
     public static final double LUCKY_STAR_MUL = 1.1;
     /** 主动「治愈术」的即时回复比例（按生命上限）。 */
     public static final double HEAL_SKILL_RATIO = 0.35;
+    /** 材料兑换汇率：N 份源材料换 1 份目标材料。 */
+    public static final int MAT_EXCHANGE_COST = 3;
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =

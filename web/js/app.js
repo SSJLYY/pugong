@@ -2109,7 +2109,26 @@
         (c.canCraft ? '' : ' · ' + esc(c.blockReason || '')) + '</div></div>' +
         '<div class="pi-btns">' + btn + '</div></div>';
     }).join('');
-    box.innerHTML = rows || '<p class="empty-hint">暂无配方</p>';
+    const MATS6 = [['pelt', '🟫 兽皮'], ['wolf_fang', '🦷 狼牙'], ['ore', '⛏️ 矿石'],
+      ['toad_gland', '🟢 毒腺'], ['mana_dust', '✨ 魔尘'], ['fire_crystal', '🔥 火晶']];
+    const opts = MATS6.map(([c, n]) => '<option value="' + c + '">' + n + '</option>').join('');
+    const exchangeRow = '<div class="potion-item"><div class="pi-info"><b>🔄 材料兑换</b>' +
+      '<div class="pi-desc">3 份任意区域材料 → 1 份目标材料（跨区锻造调剂）</div></div>' +
+      '<div class="pi-btns"><select id="matFrom">' + opts + '</select>' +
+      '<select id="matTo">' + opts + '</select>' +
+      '<button id="btnMatExchange">兑换</button></div></div>';
+    box.innerHTML = exchangeRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    const exBtn = box.querySelector('#btnMatExchange');
+    if (exBtn) exBtn.addEventListener('click', async () => {
+      const from = box.querySelector('#matFrom').value;
+      const to = box.querySelector('#matTo').value;
+      if (from === to) { toast('源材料与目标材料不能相同', 'err'); return; }
+      try {
+        const r = await API.matExchange(API.state.slot, from, to);
+        toast('🔄 兑换成功（余 ' + r.fromHave + ' → 目标现有 ' + r.toHave + '）', 'ok');
+        loadCrafts();
+      } catch (e) { toast(e.message, 'err'); }
+    });
     box.querySelectorAll('[data-craft]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true;
       try {

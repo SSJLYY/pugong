@@ -38,6 +38,8 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (v.username() != null) {
             req.setAttribute(ATTR_USERNAME, v.username());
         }
+        // 滑动续期：令牌快到期时在响应头带回新令牌，前端无感替换（见 api.js）
+        jwt.renewIfExpiringSoon(token).ifPresent(nt -> resp.setHeader("X-New-Token", nt));
         return true;
     }
 

@@ -89,6 +89,12 @@
         signal: ctl.signal
       });
       state.online = true;
+      // 滑动续期：服务端在令牌快到期时通过响应头回新令牌，无感替换本地存储
+      const nt = res.headers.get('X-New-Token');
+      if (nt && nt !== state.token) {
+        state.token = nt;
+        lsSet(TOKEN_KEY, nt);
+      }
     } catch (e) {
       state.online = false;
       // AbortController 超时与断线同义:轮询循环 catch 后自动续转,不会永久卡死

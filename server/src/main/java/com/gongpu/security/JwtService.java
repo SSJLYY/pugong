@@ -59,6 +59,29 @@ public class JwtService {
         return verify(token).userId();
     }
 
+    /** 滑动续期阈值：剩余有效期不足 24 小时即换新。 */
+    public static final long RENEW_THRESHOLD_SECONDS = 24 * 3600;
+
+    /**
+     * 滑动续期：令牌剩余有效期不足阈值时签发一枚新令牌，否则返回空。
+     * 挂机玩家会话以周计，中途被 7 天 TTL 踢下线很伤体验；轮询请求天然构成活跃心跳，
+     * 活跃即续期、真正闲置满 TTL 才过期。解析失败（已失效）返回空，鉴权该拒仍拒。
+     */
+    public java.util.Optional<String> renewIfExpiringSoon(String token) {
+        try {
+            Claims c = Jwts.parser().verifyWith(key).build()
+                    .parseSignedClaims(token).getPayload();
+            long left = c.getExpiration().getTime() / 1000 - Instant.now().getEpochSecond();
+            if (left < RENEW_THRESHOLD_SECONDS) {
+                return java.util.Optional.of(
+                        issue(Long.parseLong(c.getSubject()), c.get("u", String.class)));
+            }
+            return java.util.Optional.empty();
+        } catch (JwtException | IllegalArgumentException e) {
+            return java.util.Optional.empty();
+        }
+    }
+
     public long ttlSeconds() {
         return ttlHours * 3600;
     }

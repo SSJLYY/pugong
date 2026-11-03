@@ -39,7 +39,8 @@
     { id: 'boss_10', name: '屠龙者', emoji: '🐉', desc: '累计击败 Boss 10 次' },
     { id: 'best_hit_1m', name: '开山一击', emoji: '💥', desc: '单拳伤害达 100 万' },
     { id: 'dismantle_100', name: '分解达人', emoji: '🔨', desc: '累计分解 100 件装备' },
-    { id: 'craft_25', name: '锻造大师', emoji: '🏭', desc: '累计合成 25 次' }
+    { id: 'craft_25', name: '锻造大师', emoji: '🏭', desc: '累计合成 25 次' },
+    { id: 'boss_50', name: '屠龙宗师', emoji: '🐲', desc: '累计击败 Boss 50 次' }
   ];
 
   var byId = {};

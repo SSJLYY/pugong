@@ -35,4 +35,13 @@ class AchievementBatch6Test {
         org.junit.jupiter.api.Assertions.assertEquals(2000L, Achievements.rewardOf("craft_25"),
                 "锻造大师应为 2000 金奖励档");
     }
+
+    @Test
+    void round33Boss50() {
+        PlayerState s = NewState.create();
+        s.stats.bossKillCount = 49;
+        assertTrue(!Achievements.evaluate(s).contains("boss_50"), "49 次不应解锁");
+        s.stats.bossKillCount = 50;
+        assertTrue(Achievements.evaluate(s).contains("boss_50"), "50 次应解锁屠龙宗师");
+    }
 }

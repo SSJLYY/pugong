@@ -50,7 +50,8 @@ public final class Achievements {
             new Def("boss_10", "屠龙者", "🐉", "累计击败 Boss 10 次"),
             new Def("best_hit_1m", "开山一击", "💥", "单拳伤害达 100 万"),
             new Def("dismantle_100", "分解达人", "🔨", "累计分解 100 件装备"),
-            new Def("craft_25", "锻造大师", "🏭", "累计合成 25 次")
+            new Def("craft_25", "锻造大师", "🏭", "累计合成 25 次"),
+            new Def("boss_50", "屠龙宗师", "🐲", "累计击败 Boss 50 次")
     );
 
     private Achievements() {
@@ -62,7 +63,7 @@ public final class Achievements {
             case "first_punch", "first_kill", "first_death", "first_craft", "first_enchant",
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
-                    "kill_10k", "boss_10", "craft_25" -> 2_000L;
+                    "kill_10k", "boss_10", "craft_25", "boss_50" -> 2_000L;
             case "gold_1m", "best_hit_1m" -> 5_000L;
             default -> 500L;
         };
@@ -118,6 +119,7 @@ public final class Achievements {
                 case "best_hit_1m" -> sat(s.stats.bestHit) >= 1_000_000;
                 case "dismantle_100" -> s.stats.dismantles >= 100;
                 case "craft_25" -> s.stats.crafts >= 25;
+                case "boss_50" -> s.stats.bossKillCount >= 50;
                 default -> false;
             };
             if (ok) {

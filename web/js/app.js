@@ -2371,6 +2371,9 @@
           const r = await call(() => API.claimDaily(API.state.slot, btn.dataset.dailyClaim));
           const res = (r && r.result) || {};
           toast('📅 每日任务奖励：+' + fmt(res.reward || 0) + ' 金币', 'ok');
+          if (res.allClearBonus > 0) {
+            toast('🎉 每日任务全清！额外奖励 +' + fmt(res.allClearBonus) + ' 金币', 'ok');
+          }
           if (r) applyView(r);
         } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
       });

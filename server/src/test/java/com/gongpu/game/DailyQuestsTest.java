@@ -106,7 +106,18 @@ class DailyQuestsTest {
         t.target = 30;
         t.rewardGold = 1800;
         s.dailyDay = DailyQuests.today();
-        s.dailyTasks = new java.util.ArrayList<>(List.of(t));
+        // 另挂两个未完成任务：否则单任务列表领完即触发「全清奖励」，金币断言会混入 +5000
+        PlayerState.DailyTask filler1 = new PlayerState.DailyTask();
+        filler1.id = "boss";
+        filler1.baseline = "0";
+        filler1.target = 999;
+        filler1.rewardGold = 1;
+        PlayerState.DailyTask filler2 = new PlayerState.DailyTask();
+        filler2.id = "craft";
+        filler2.baseline = "0";
+        filler2.target = 999;
+        filler2.rewardGold = 1;
+        s.dailyTasks = new java.util.ArrayList<>(List.of(t, filler1, filler2));
         assertThrows(com.gongpu.common.ApiException.class, () -> game.claimDaily(s, "hunt"),
                 "未完成应拒绝领取");
         s.stats.lifetimeKills = Num.of(30);
@@ -199,6 +210,34 @@ class DailyQuestsTest {
         assertEquals(1, s.dailyTasks.size(), "转生不应清空任务列表");
         assertEquals(15, DailyQuests.progressOf(s, s.dailyTasks.get(0)),
                 "终身计数不随转生重置，每日进度应原样保留");
+    }
+
+    /** 第 36 轮：全清奖励——第三个任务领取时额外 +5000，每日只发一次。 */
+    @Test
+    void allClearBonusPaysOnce() {
+        GameService game = new GameService();
+        PlayerState s = NewState.create();
+        s.dailyDay = DailyQuests.today();
+        java.util.List<PlayerState.DailyTask> tasks = new java.util.ArrayList<>();
+        for (String id : new String[]{"hunt", "boss", "craft"}) {
+            PlayerState.DailyTask t = new PlayerState.DailyTask();
+            t.id = id;
+            t.baseline = "0";
+            t.target = 1;
+            t.rewardGold = 100;
+            tasks.add(t);
+        }
+        s.dailyTasks = tasks;
+        s.stats.lifetimeKills = Num.of(5);
+        s.stats.bossKillCount = 5;
+        s.stats.crafts = 5;
+        assertEquals(0L, game.claimDaily(s, "hunt").get("allClearBonus"), "未全清不应发全清奖励");
+        assertEquals(0L, game.claimDaily(s, "boss").get("allClearBonus"));
+        java.util.Map<String, Object> third = game.claimDaily(s, "craft");
+        assertEquals(DailyQuests.ALL_CLEAR_BONUS, third.get("allClearBonus"), "全清应发额外奖励");
+        assertTrue(s.dailyBonusGiven);
+        assertEquals(0, s.gold.compareTo(Num.of(300 + DailyQuests.ALL_CLEAR_BONUS)),
+                "总入账 = 三任务奖励 + 全清奖励");
     }
 
     @Test

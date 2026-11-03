@@ -44,6 +44,9 @@ public final class DailyQuests {
             new Template("damage", "摧山令", "💥", "造成伤害", "点",
                     new long[]{1_000_000, 10_000_000, 100_000_000}, new long[]{2000, 4000, 8000}));
 
+    /** 每日全清奖励：3 个任务全领后额外发放（每日一次）。 */
+    public static final long ALL_CLEAR_BONUS = 5000;
+
     public static Template templateOf(String id) {
         for (Template t : TEMPLATES) {
             if (t.id().equals(id)) {

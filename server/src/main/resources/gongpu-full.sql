@@ -896,6 +896,11 @@ DELETE FROM `cfg_equipment_template` WHERE `code` IN ('marsh_leggings');
 INSERT INTO `cfg_equipment_template`
   (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
   ('marsh_leggings', '沼泽绑腿', '🦵', 'legs', 2, 'swamp', '{"PDEF":"9","MDEF":"8","REGEN":"1"}', 10, 40, '防水防毒', 1, 49);
+-- 第 20 轮：雪原补胸甲「雪狼皮甲」（雪原此前无胸甲位）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('snow_wolf_armor');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('snow_wolf_armor', '雪狼皮甲', '🐺', 'chest', 3, 'snow', '{"PDEF":"16","MDEF":"10","maxHP":"120"}', 10, 60, '雪狼皮保暖坚韧', 1, 50);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

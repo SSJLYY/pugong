@@ -57,4 +57,9 @@ class EquipBatch6Test {
     void round19MarshLeggings() throws Exception {
         assertEquip("marsh_leggings", "legs", "swamp");
     }
+
+    @Test
+    void round20SnowWolfArmor() throws Exception {
+        assertEquip("snow_wolf_armor", "chest", "snow");
+    }
 }

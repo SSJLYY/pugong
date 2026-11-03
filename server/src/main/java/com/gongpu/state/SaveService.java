@@ -96,8 +96,9 @@ public class SaveService {
         gs.setAliveSeconds(StateCodec.aliveSeconds(s));
         // 运营统计冗余列：与 JSON 内 stats 同步维护，聚合端一条 SUM 取全服累计
         if (s.stats != null) {
-            gs.setPunchesTotal(s.stats.punches == null ? java.math.BigDecimal.ZERO : s.stats.punches);
-            gs.setKillsTotal(s.stats.kills == null ? java.math.BigDecimal.ZERO : s.stats.kills);
+            // 冗余列存终身口径：当世 punches/kills 每世重置，聚合 SUM 必须单调（见 StatDailyAggregator）
+            gs.setPunchesTotal(s.stats.lifetimePunches == null ? java.math.BigDecimal.ZERO : s.stats.lifetimePunches);
+            gs.setKillsTotal(s.stats.lifetimeKills == null ? java.math.BigDecimal.ZERO : s.stats.lifetimeKills);
             gs.setDeathsTotal(s.stats.deaths);
             gs.setRebirthsTotal(s.stats.rebirths);
         }
@@ -176,8 +177,8 @@ public class SaveService {
         gs.setZone(restored.zone);
         gs.setMaxHp(Num.plain(restored.life.maxHP));
         if (restored.stats != null) {
-            gs.setPunchesTotal(restored.stats.punches == null ? java.math.BigDecimal.ZERO : restored.stats.punches);
-            gs.setKillsTotal(restored.stats.kills == null ? java.math.BigDecimal.ZERO : restored.stats.kills);
+            gs.setPunchesTotal(restored.stats.lifetimePunches == null ? java.math.BigDecimal.ZERO : restored.stats.lifetimePunches);
+            gs.setKillsTotal(restored.stats.lifetimeKills == null ? java.math.BigDecimal.ZERO : restored.stats.lifetimeKills);
             gs.setDeathsTotal(restored.stats.deaths);
             gs.setRebirthsTotal(restored.stats.rebirths);
         }

@@ -95,6 +95,15 @@ public final class StateCodec {
         if (s.achievements == null) {
             s.achievements = new java.util.LinkedHashSet<>();
         }
+        if (s.stats != null) {
+            if (s.stats.lifetimeKills == null) {
+                s.stats.lifetimeKills = java.math.BigDecimal.ZERO;
+            }
+            // 旧档种子：终身击杀字段引入前 kills 是唯一口径，以当前当世击杀为起点（此后终身单调累加）
+            if (s.stats.kills != null && s.stats.lifetimeKills.compareTo(s.stats.kills) < 0) {
+                s.stats.lifetimeKills = s.stats.kills;
+            }
+        }
         if (s.activeQuests == null) {
             s.activeQuests = new java.util.LinkedHashMap<>();
         }

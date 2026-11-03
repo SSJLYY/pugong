@@ -194,6 +194,8 @@ public class PlayerState {
         public BigDecimal punches = BigDecimal.ZERO;
         public BigDecimal lifetimePunches = BigDecimal.ZERO;
         public BigDecimal kills = BigDecimal.ZERO;
+        /** 终身击杀（跨世不清零；运营统计口径。当世 kills 每世重置、不可用作累计）。 */
+        public BigDecimal lifetimeKills = BigDecimal.ZERO;
         public long deaths = 0;
         public long born = 0;
         public long playSeconds = 0;

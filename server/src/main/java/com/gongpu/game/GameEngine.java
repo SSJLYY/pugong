@@ -280,6 +280,7 @@ public final class GameEngine {
                 BigDecimal extraKills = Num.floor(Num.div(dmgLeft, Num.max(hpNeeded, Num.of(1))));
                 if (Num.gt(extraKills, Num.ZERO)) {
                     s.stats.kills = Num.add(s.stats.kills, extraKills);
+                    s.stats.lifetimeKills = Num.add(s.stats.lifetimeKills, extraKills);
                     // 溢出期望击杀同样是真杀:自由属性点按比例发放(与 kills 口径一致)
                     if ("statlord".equals(s.talent)) {
                         s.freePoints = Num.add(s.freePoints, extraKills);
@@ -371,6 +372,7 @@ public final class GameEngine {
 
     private static void onMobKilled(PlayerState s, PlayerState.MobState m) {
         s.stats.kills = Num.add(s.stats.kills, Num.of(1));
+        s.stats.lifetimeKills = Num.add(s.stats.lifetimeKills, Num.of(1));
         // 无限属性点天赋:每杀一怪 +1 自由属性点
         if ("statlord".equals(s.talent)) {
             s.freePoints = Num.add(s.freePoints, Num.of(1));

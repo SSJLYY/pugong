@@ -46,7 +46,7 @@ public class GameSave {
     @Column(name = "alive_seconds", nullable = false)
     private Long aliveSeconds = 0L;
 
-    /** 冗余累计出拳/击杀（运营统计 SUM 聚合用，persist 时与 stats 同步维护，免全表解析 JSON）。 */
+    /** 冗余终身出拳/击杀（运营统计 SUM 聚合用，persist 时与 stats 终身字段同步维护；存终身口径因当世值每世重置、聚合需单调）。 */
     @Column(name = "punches_total", precision = 65, scale = 0)
     private java.math.BigDecimal punchesTotal = java.math.BigDecimal.ZERO;
 

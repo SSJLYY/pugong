@@ -485,12 +485,20 @@ public class GameService {
             throw ApiException.badRequest("金币不足，洗炼需要 " + Num.cn(cost));
         }
         s.gold = Num.sub(s.gold, cost);
-        EquipFactory.rerollAffixes(it, hasLock ? lockIdx : -1);
+        // 洗炼保底（第七批）：连续 REROLL_PITY_MAX 次未出史诗，本次强制出一条；出史诗（含保底）清零计数
+        boolean pityArmed = s.rerollPity >= GameConst.REROLL_PITY_MAX - 1;
+        EquipFactory.rerollAffixes(it, hasLock ? lockIdx : -1, pityArmed);
+        boolean gotEpic = it.affixes.stream().anyMatch(a -> "epic".equals(a.rarity));
+        s.rerollPity = gotEpic ? 0 : s.rerollPity + 1;
+        s.stats.rerolls++;
         Map<String, Object> m = inventoryView(s);
         m.put("rerolled", true);
         m.put("locked", hasLock);
         m.put("cost", Num.plain(cost));
         m.put("affixes", it.affixes);
+        m.put("pity", s.rerollPity);
+        m.put("pityMax", GameConst.REROLL_PITY_MAX);
+        m.put("pityTriggered", pityArmed && gotEpic);
         return m;
     }
 

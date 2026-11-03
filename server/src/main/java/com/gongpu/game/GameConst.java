@@ -325,6 +325,9 @@ public final class GameConst {
             Map.entry("material_sense", new PassiveDef("material_sense", "材料嗅觉", "👃", "击杀材料掉率 +25 个百分点（50%→75%），锻造党的鼻子")));
 
     public static final double COMBO_CHANCE = 0.15;
+
+    /** 洗炼保底（第七批）：连续 REROLL_PITY_MAX 次洗炼未出史诗词条时，第 REROLL_PITY_MAX 次必出一条。 */
+    public static final int REROLL_PITY_MAX = 10;
     /** 被动「巨人杀手」对 Boss 的伤害乘区。 */
     public static final double BOSS_HUNTER_MUL = 1.2;
     /** 被动「材料嗅觉」的材料掉率加成（百分点，叠加在基础 50% 上）。 */

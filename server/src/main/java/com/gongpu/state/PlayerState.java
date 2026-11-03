@@ -117,6 +117,9 @@ public class PlayerState {
     public boolean autoBoss = false;
     /** 自动管护上次执行的背包签名（击杀/背包/已穿构成），未变跳过扫描。 */
     public long lastMaintainSig = -1;
+
+    /** 洗炼保底计数（第七批）：连续未刷出史诗词条的洗炼次数，到 REROLL_PITY_MAX-1 时下一次必出史诗。 */
+    public int rerollPity = 0;
     /** 尸检用：最近 10 条击杀序列（"存活秒数 怪名"，环形覆盖）。 */
     public java.util.List<String> recentKills = new java.util.ArrayList<>();
     /** 战斗日志：最近事件（Boss 击杀/图纸/史诗掉落），环形保留 20 条。 */
@@ -228,6 +231,7 @@ public class PlayerState {
         public long bossKillCount = 0;
         public long enchants = 0;
         public long tempers = 0;
+        public long rerolls = 0;
         public long born = 0;
         public long playSeconds = 0;
         public long bestMaxHP = 0;

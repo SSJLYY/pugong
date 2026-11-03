@@ -283,6 +283,14 @@ public final class EquipFactory {
 
     /** 洗炼：重刷词条（保留底子与强化等级；lockIdx 指定一条锁定的词条不动）。 */
     public static void rerollAffixes(PlayerState.Item it, int lockIdx) {
+        rerollAffixes(it, lockIdx, false);
+    }
+
+    /**
+     * 洗炼（保底版）：forceEpic 时若重刷后仍无史诗词条，把最后一条未锁定词条替换为随机史诗词条
+     * （同名不重复；全部词条都被锁定则无处可换、保底不触发）。数值在该词条区间内随机。
+     */
+    public static void rerollAffixes(PlayerState.Item it, int lockIdx, boolean forceEpic) {
         // 锁定词条（原样保留）
         PlayerState.AffixInst locked = null;
         if (lockIdx >= 0 && lockIdx < it.affixes.size()) {
@@ -309,6 +317,31 @@ public final class EquipFactory {
             inst.sideKey = a.sideKey();
             inst.sideVal = a.sideVal() == null ? null : Num.of(a.sideVal());
             it.affixes.add(inst);
+        }
+        if (forceEpic && it.affixes.stream().noneMatch(a -> "epic".equals(a.rarity))) {
+            int firstFree = locked != null ? 1 : 0;
+            if (it.affixes.size() > firstFree) {
+                List<GameConst.Affix> epics = new ArrayList<>();
+                for (GameConst.Affix a : com.gongpu.cfg.GameData.instance().affixPool()) {
+                    if ("epic".equals(a.rarity())
+                            && it.affixes.stream().noneMatch(x -> x.name.equals(a.name()))) {
+                        epics.add(a);
+                    }
+                }
+                if (!epics.isEmpty()) {
+                    GameConst.Affix a = epics.get(ThreadLocalRandom.current().nextInt(epics.size()));
+                    double v = a.min() + ThreadLocalRandom.current().nextDouble() * (a.max() - a.min());
+                    PlayerState.AffixInst inst = new PlayerState.AffixInst();
+                    inst.name = a.name();
+                    inst.key = a.key();
+                    inst.type = a.type();
+                    inst.val = Num.of(round(v));
+                    inst.rarity = a.rarity();
+                    inst.sideKey = a.sideKey();
+                    inst.sideVal = a.sideVal() == null ? null : Num.of(a.sideVal());
+                    it.affixes.set(it.affixes.size() - 1, inst);
+                }
+            }
         }
     }
 

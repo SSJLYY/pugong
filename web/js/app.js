@@ -968,6 +968,29 @@
       await call(() => API.manualSave(API.state.slot), '已存档到云端');
     });
 
+    $('btnCopySummary').addEventListener('click', async () => {
+      const v = S.view;
+      if (!v || !v.panel) { toast('暂无战绩数据', 'err'); return; }
+      const z = S.meta && S.meta.zones.find(x => x.id === v.zone);
+      const lines = [
+        '🥋 《普攻永久增加生命上限》战绩',
+        '第 ' + v.gen + ' 世 · 所在区域：' + (z ? z.name : v.zone),
+        '❤️ 生命上限 ' + fmt(v.panel.maxHP) + ' · 💰 金币 ' + fmt(v.gold || 0),
+        '👊 终身出拳 ' + fmt((v.stats || {}).lifetimePunches || 0) + ' · 💀 本世击杀 ' + fmt((v.stats || {}).kills || 0) +
+          ' · 👑 Boss 击杀 ' + fmt((v.stats || {}).bossKillCount || 0),
+        '💥 最高单击 ' + fmt((v.stats || {}).bestHit || 0) + ' · 🏅 成就 ' +
+          (v.achievements || []).length + '/' + Object.keys(v.achRewards || {}).length,
+        '📖 图鉴 ' + (Array.isArray(v.codex) ? v.codex.length : 0) + ' 种 · ⚒️ 合成 ' + fmt((v.stats || {}).crafts || 0) + ' 次'
+      ];
+      const text = lines.join('\n');
+      try {
+        await navigator.clipboard.writeText(text);
+        toast('📋 战绩摘要已复制，去炫耀一下吧', 'ok');
+      } catch (e) {
+        infoModal('📋 战绩摘要', '<pre style="white-space:pre-wrap">' + esc(text) + '</pre>');
+      }
+    });
+
     $('btnDaily').addEventListener('click', async () => {
       try {
         sfx('levelup');

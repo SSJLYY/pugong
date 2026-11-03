@@ -1100,6 +1100,16 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('hex_slow', '迟缓咒', '🐌', 'active', 350, 20, 25, 8, '{"id":"hex_slow","aspdMul":0.7}', '当前怪物攻速 -30%，持续 8 秒', 1, 27);
 
+-- 第七批第 89 轮：新委托 ×2（火山/雪原各补一张高阶单）
+DELETE FROM `cfg_quest` WHERE `code` IN ('volcano_core');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('volcano_core', '熔火之心', '🌋', '熔火平原的怒焰需要平息：于火山猎杀四十只魔物', 'volcano', '{"maxHP":500000,"ATK":2500}', 40, 30000, 'guard', 2, 1, 1, 17);
+DELETE FROM `cfg_quest` WHERE `code` IN ('snow_throne');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('snow_throne', '雪原王座', '👑', '雪狼王盘踞王座已久：于雪原猎杀五十只魔物，向公会证明你的实力', 'snow', '{"maxHP":200000,"ATK":1500}', 50, 22000, 'fortune', 1, 1, 1, 18);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第六批 100 轮收官口径）：
 --   cfg_equipment_template 52 / cfg_item 药剂 34 / cfg_affix 22

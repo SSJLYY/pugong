@@ -11,6 +11,7 @@ MySQL 8 持久 + Redis 缓存/锁/榜单。数值全部服务端结算，前端�
 
 ## 0.5 当前状态速览（2026-11-03 更新，v3.15 增强轮后）
 
+- **第二批十轮增强（2026-11-03，每轮独立提交；按玩家新流程只在本地内网自测，未部署公网）**：统计 SUM 化（遗留 #3 完全销账，game_save 四冗余列 + migration-v3.16 回填）/ Meta 快照缓存 / 装备锁定 / 背包整理 / 护盾跨世残留修复 / Health 探活短缓存 / 新词条🩸嗜血（沼泽起解锁）/ 异常处理补齐 400/404/405 / 榜单读缓存 / 图鉴成就（成就 20 项）。前端升 v=58，单测 **199 全绿**；内网实测：迁移回填与 JSON 聚合逐项相等、锁定全卖只剩锁定件、类型不符路径 400。详见 README「变更记录（2026-11-03 · 第二批十轮增强）」。
 - **v3.15 增强轮（2026-11-03，已部署公网并实测）**：①新玩法「怪物词条」——野怪出生按区域深度掷 💢狂暴/🪓破甲/🔗缴械（平原 10% 起每深一层 +3%，池随深度解锁，Boss/木桩不出），`MobState.trait` 持久化、mobView 下发展示信息、前端名后缀+描述行渲染，公网实测刷出狂暴野兔且界面渲染确认。②销账两条技术遗留：BULLET_MP 排除强化乘区（遗留 #6）、榜单 submitBoard 改 Lua 原子提交+节流表清理（遗留 #5）。③性能：advance 内面板构建砍 3 处可证等价的重复（grow 复用主面板、autoPotion 三分支共用一份）。④前端标题/meta 补齐、版本升 v=53。⑤同日续作「分级售卖」（玩家需求）：手动一键卖扩为白/绿/蓝/紫四档按钮、挂机自动售卖扩到紫档（全折现不进包），前端升 v=54。⑥同日再续「十轮增强」（每轮独立提交，已部署公网实测）：nextFreeExtra 线性化 / 用户名走 JWT claim / 日聚合轻量采集 / SocialService 写路径收口 / 锁模板 withLock 收口 / 前端轮询失败退避 / 圆满金碑 / 管家悬浮面板 / 存档导出 / 自动进食，前端升 v=55。单测 **172 全绿**（V315EnhanceTest 5 项 + SellTierTest 4 项 + PerfectGraveTest 1 项 + AutoEatTest 2 项）；本机（Muse VM）测试依赖已补齐，`mvn -o test` 可直接离线跑通（seed-test.py 在 pugong-deploy）。详见 README「变更记录（2026-11-03）」各节。
 - **（以下为 2026-11-02 晚状态）**
 
@@ -18,7 +19,7 @@ MySQL 8 持久 + Redis 缓存/锁/榜单。数值全部服务端结算，前端�
 - **三处修复（已实测，详见 README 变更记录）**：①CORS 白名单缺公网域名致浏览器注册/登录 403，启动参数已补；②前端 `renderBuffs._sig` 悬空引用致新手天赋觉醒仪式永不触发，改挂 `applyView._buffSig`（浏览器实测抽卡全流程通过），前端版本升 v=52；③灌库 CLI 字符集错误致 cfg_* 文本双重编码乱码，45 列已反转还原，CLI 导入必须 `--default-character-set=utf8mb4`。
 - **后端优化**：轮询帧落库节流 `SaveService.persistThrottled`（MySQL 写降至约 1/5，死亡强制立即写）；`run()` 内重复账号查询合并。
 
-- **验证基线**：单测 **172 全绿**（mvn -o test，含 PotionsV314Test 12 项 + V315EnhanceTest 5 项 + SellTierTest 4 项 + PerfectGraveTest 1 项 + AutoEatTest 2 项）+ 冒烟 **66 全绿**（136 已跑）；每次改完必须双绿。
+- **验证基线**：单测 **199 全绿**（mvn -o test，含第二批十轮新增 StatDailySumTest 3 / ItemLockTest 5 / TraitLeechTest 4 / ResetAuditTest 2 / CodexAchievementTest 3 等 27 项）+ 冒烟 **66 全绿**（136 已跑）；每次改完必须双绿。注：2026-11-03 起玩家改为本地改代码流程，公网部署维护已停，冒烟以本机内网栈为准。
 - **136 部署**：2026-11-02 v3.14 已按第 3 节完整部署（8180c24），双层冒烟 66/66 全绿；前端 ?v=49 已生效，136 商店 meta 实测 18 种药剂。
 - **v3.14 商店药剂扩容 8→18**（玩家需求）：新增锐眼(暴击+10%/90s)/残暴(暴伤+50%)/嗜血(吸血+10%)/狂暴(攻击×1.5)/磐石(双防×1.5)/疾风(攻速×1.5)/明察(命中+10%)/幻影(闪避+10%)/凝神(回蓝+10/s)/护盾(30%生命上限吸收盾/30s)。全部受沉默压制；**护盾是新机制**：PlayerState.shield 字段，mobAttack/dotTick 两路先扣盾后扣血，shield_pot 到期 tickBuff 清盾，fullView 下发 panel.shield，前端血条显示 🛡余量。配置链：GameConst.POTIONS 兜底 18 种 + migration-v3.14-potions.sql（cfg_item 10 行+cfg_buff 10 行幂等）；**灌库后必须 admin/config/reload 热刷新才对玩家生效**（本地实测踩坑：灌库不刷新 meta 仍旧 8 种）。
 - **v3.13 背包膨胀根治**（玩家三槽卡死修复）：根因三连——①v3.12 前吞噬把 BAG_CAP 累加进合并腰带（bagCap 虚增到 33720 格）②autoSellKeep=0 掉落全进背包（33720 件=14.3MB）③状态接口每秒全量下发 13.9MB JSON 前端卡死。修复：挂机管家新增「🧲 自动管护」开关（autoEquipBest，结算后自动卖白装→同名吞噬→穿最强）；fastAutoEquip 重写 O(n log n)（排序+名字哈希吞噬，空背包短路）；devourInto 对 BAG_CAP 取大不求和+bagCap 钳制封顶；fullView/inventoryView 背包截断 BAG_VIEW_LIMIT=200+bagTotal 下发。三槽实测：背包 33720→0、响应 13.9MB→57KB、轮询 0.21s。
@@ -117,7 +118,11 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 药剂（18 种） | cfg_item + GameConst.POTIONS 兜底 | 修行药剂 growth_pot 成长×2（GameEngine.grow 乘区）、铁壁药剂 iron_pot 双防×1.5（PanelCalculator 乘区）；v3.14 新增 10 种：锐眼/残暴/嗜血/狂暴/磐石/疾风/明察/幻影/凝神/护盾（乘区/加区全在 PanelCalculator，受沉默压制）；护盾为新机制（PlayerState.shield，mobAttack/dotTick 先扣盾，buff 到期清盾，panel.shield 下发）；**灌库后必须 admin/config/reload 热刷新** |
 | 每日签到 | POST /api/game/{slot}/daily | 每账号每天一次（account_user.last_claim_day）；金币 200+gen×100、血药×3 蓝药×2、gen≥1 送修行、gen≥3 送铁壁 |
 | 洗炼+词条锁定 | POST /api/game/{slot}/reroll {index,lockIndex} | EquipFactory.rerollAffixes(it,lockIdx)；锁定词条保留且不放回池；锁定费用 ×3（rerollCost×3） |
-| 分级一键卖 | POST /api/game/{slot}/autosell {keep} | keep 1~4 合法（4=紫及以下即全卖，越界 400）；卖出 quality<keep 的全部背包装备；前端背包区四档按钮组（卖白装/绿及以下/蓝及以下/紫及以下） |
+| 分级一键卖 | POST /api/game/{slot}/autosell {keep} | keep 1~4 合法（4=紫及以下即全卖，越界 400）；卖出 quality<keep 的全部背包装备（锁定件跳过）；前端背包区四档按钮组（卖白装/绿及以下/蓝及以下/紫及以下） |
+| 装备锁定 | POST /api/game/{slot}/lock {index} | Item.locked：单卖/丢弃拒绝、一键卖与管护卖白装跳过、无相位管护不吞噬不穿入；前端背包 🔒 按钮+名称标记；ItemLockTest 锁 |
+| 背包整理 | POST /api/game/{slot}/sortbag | 按 equipScore 降序稳定排序；前端「↕️ 整理背包」按钮 |
+| 怪物词条·嗜血 | GameConst.MOB_TRAITS leech | 🩸 命中按玩家实际掉血（护盾吸收后）30% 回怪血、封顶上限；沼泽起入池（矿洞仍三词条）；TraitLeechTest 锁 |
+| 运营统计 | StatDailyAggregator | game_save 冗余列（punches/kills/deaths/rebirths）一条 SUM 聚合，persist/rollback 同步维护；新库 schema.sql 自带、存量库跑 migration-v3.16 回填 |
 | 一键穿最强 | POST /api/game/{slot}/autoequip | equipScore=品质×1000+词条×100+底子和，强化+5%/级；同部位更优即换，戒指自动填 ring2 |
 | 装备词条显示 | 前端 app.js affixText 唯一出口 | 全部直接数值无 %：率型键(CRIT/CRITD/ACC/EVA/LIFESTEAL)按百分点显示(内部仍存小数概率)；pct_hp 生命泉涌刻意保留 %；旧档 pct 词条由 StateCodec.decode 线性映射转 flat(LEGACY_PCT_MAP 必须覆盖全部词条 key，漏键=词条静默失效，DataConsistencyTest 锁死) |
 | 挂机自动售卖 | 挂机管家 autoSellKeep 0~4 | 档位=白色及以下/绿色及以下/蓝色及以下/紫色及以下(全折现)，掉落直接折现**不进背包**（选蓝档只有紫装入包）；逐杀(onMobKilled)与溢出期望(dealDamage 护栏外)两分支同语义(玩家反馈修复,CombatRegressTest+SellTierTest 锁死)；手动分级卖走 autosell 端点；新手保底装备直入包不受拦截（福利豁免） |
@@ -128,10 +133,10 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 挂机自动管护 | 挂机管家 autoEquipBest(v3.13) | 每秒结算后自动「卖白装→同名吞噬→穿最强」(GameService.autoMaintain→fastAutoEquip)；**背包膨胀根治开关**——三槽 33720 件卡死根因；O(n log n) 空背包短路，异常 WARN 不静默；非 baglord 只走卖白装+原生栏换装(不碰无相位栏) |
 | 背包容量 | GameConst.BAG_MAX=100 | 动态上限 bagCap=BAG_MAX+装备 BAG_CAP 词条(负重腰带+20)；改容量只动常量 |
 | 永续天赋展示 | 顶栏徽章=信息入口 | 永续 ♾️ 下 8 个 ETERNAL_BUFFS 增益不再进 buff 条，悬浮/点击顶栏「♾️ 被动永续」徽章弹 talentPop 清单卡；前后端永续键表必须一致(GameConst.ETERNAL_BUFFS ↔ app.js ETERNAL_KEYS)；其他天赋沿用 title |
-| 转生/重开重置 | SaveService.resetForNewLife 唯一实现 | rebirth 复用它(勿再手抄副本)；清 药价阶梯 potionBought/尸检 recentKills/赋能委托等全部派生数据；「每日」时区统一 GameConst.DAILY_ZONE(Asia/Shanghai) |
+| 转生/重开重置 | SaveService.resetForNewLife 唯一实现 | rebirth 复用它(勿再手抄副本)；清 药价阶梯 potionBought/尸检 recentKills/护盾 shield（buff 附属量）等全部当世派生数据，传承（赋能/图鉴/成就/已完成委托/无相位栏）保留；ResetAuditTest 锁清单；「每日」时区统一 GameConst.DAILY_ZONE(Asia/Shanghai) |
 | 世界公告 | GET /api/social/bulletin（公开） | 史诗(quality≥3)掉落播报；Redis LIST gongpu:bulletin 20 条/1h 过期；玩家名 bulletinName（transient，三个结算入口填充） |
 | Boss 首杀 | GameEngine Boss 击杀分支 | PlayerState.bossKills 持久化防重复；金币 1000×(区域序+1)；AdvanceResult.bossFirstKill 下发 |
-| 称号+图鉴+成就 | 前端本地推导/渲染 + fullView 下发 | computeTitles 9 称号；codex 集合记录击杀（转生不清空）；**成就 18 项服务端权威落库**（Achievements.java persist 前评估，state_json.achievements 持久化，前端只渲染+diff toast，前后端 id 表有单测锁死） |
+| 称号+图鉴+成就 | 前端本地推导/渲染 + fullView 下发 | computeTitles 9 称号；codex 集合记录击杀（转生不清空）；**成就 20 项服务端权威落库**（Achievements.java persist 前评估，含 codex_10/codex_all 图鉴成就、总数口径 GameConst.codexTotal，state_json.achievements 持久化，前端只渲染+diff toast，前后端 id 表有单测锁死） |
 | 觉醒天赋 | POST /api/game/{slot}/talent | **8 种天赋**：三大顶级机缘（♾️被动永续/🧳无限装备栏/💠无限属性点）各 30%，其余平分 10%（可自选，顶级只能靠命）；抽中顶级=万中无一金雨仪式；**无限装备栏 v3.12 起觉醒即无限**（不再每天 +1；openExtraSlots=已用 extra_N 数+1，加穿后自动再开一格；穿最强把背包剩余全部穿入无相位栏；**同名装备自动吞噬合并**（equipExtra/穿最强入口：base 求和、同名同键词条 val 叠加、不同词条追加、强化/品质取高；autoEquip 入口先 devourLegacyDuplicates 清历史膨胀——性能卡顿源即已穿件数线性膨胀；原生 ring1/ring2 双戒不动）；旧字段 extraSlots/lastSlotDay 仅兼容旧档，grantDailySlot 已删除） |
 | 安全限速 | AuthRateLimiter | 登录失败同 IP 10 次/10 分钟锁；注册同 IP 5 次/小时；回环豁免；Redis 挂了放行 |
 | 可观测性 | TimingInterceptor | >gongpu.slow-ms(默认500)的 /api/** 打 WARN 慢日志；启动横幅带版本/profile；500 日志带 METHOD+URI |

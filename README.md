@@ -268,8 +268,23 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
   圆满金碑(12世集齐置顶)、管家悬浮面板 UI(接口 __game 已就绪)。怪物 缴械/破甲/狂暴 三系标签已于 v3.15 落地为「怪物词条」系统
 
 - ~~离线结算未做离线死亡判定~~ **已验证迁移完成**：离线与在线共用战斗流程，打不过的怪离线真实击杀（§10.2/已定决策#10），回游戏进死亡画面+完整尸检→回档或重开；OfflineDeathTest 锁死语义
-- ~~成就为纯前端展示层~~ **已落库（v3.3）**：18 项成就服务端权威评估（Achievements.java），随 state_json 持久化，换设备/清缓存不丢
+- ~~成就为纯前端展示层~~ **已落库（v3.3）**：成就服务端权威评估（Achievements.java，2026-11-03 起 20 项），随 state_json 持久化，换设备/清缓存不丢
 - ~~旧版自动管家的 autoBurn/autoSkill buff 常驻链未迁移~~ **已迁移（v3.4）**：挂机管家新增「技能常驻」「燃烧常驻」开关，服务端 GameEngine.autoBuffTick 按 legacy 语义执行（涌动先行免蓝→急速→蓄力常驻、血<60% 补格挡、血<30% 怒吼、血>60% 补燃烧），离线同样生效
+
+## 变更记录（2026-11-03 · 第二批十轮增强）
+
+再做十轮增强/优化/完善（每轮独立提交），单测 172 → **199 全绿**，前端版本升 **v=58**。按玩家新定流程：本轮只在本地内网启动自测（本机栈起服 + API 冒烟 + 浏览器界面核对），不部署公网。
+
+1. **性能（遗留 #3 完全销账）**：运营统计改走冗余列 SUM——`game_save` 新增 punches/kills/deaths/rebirths 四列，`SaveService.persist/rollback` 与 JSON 内 stats 同步维护，`StatDailyAggregator.collect` 改一条 SUM 查询，不再分页拉全表 LONGTEXT 解析 JSON；`schema.sql` 同步、存量库走 `migration-v3.16-stats-cols.sql` 从 JSON 回填（本地库实测回填值与 JSON 聚合逐项相等、persist 后列值与 JSON 实时一致）。
+2. **性能**：`/config/meta` 按 GameData 快照身份缓存——快照未换直接复用整棵 Map，运维 reload 换快照自动重建（此前每请求全量重建）。
+3. **玩法**：装备锁定——背包件可 🔒 锁定：单卖/丢弃直接拒绝、一键分级卖与挂机管护卖白装跳过、无相位栏管护不吞噬不穿入；新增 `POST /{slot}/lock`，前端背包加锁定按钮与名称标记（防分级售卖误删心头好；内网实测 keep=4 全卖 100 件只剩锁定 1 件）。
+4. **功能**：背包一键整理——`POST /{slot}/sortbag` 按装备评分（与穿最强同口径）降序稳定排序，前端加「↕️ 整理背包」按钮。
+5. **修复**：重置审计补漏——护盾是 shield_pot buff 附属量（buff 消失盾即清零），`resetForNewLife` 此前只清 buffs 漏清 shield，死亡重开/转生后新一世白带无 buff 的盾；已补清零，审计测试锁死当世清零/传承保留清单（委托跨转生经审计本已一致，不动）。
+6. **性能**：`/health` 探活 2 秒短缓存——未鉴权高频轮询不再每请求真打 Redis ping + DB 连接（故障感知延迟 ≤2 秒）。
+7. **玩法**：怪物词条扩容——新增 🩸嗜血：命中玩家时按实际掉血 30% 吸回自身生命（封顶其上限，结算在护盾吸收后、格挡反弹前）；词条池沼泽起四种全开，矿洞仍三种。
+8. **健壮性**：全局异常处理补齐客户端错误码——路径参数类型不符 400、路径不存在 404、方法不允许 405，不再全落兜底 500 打 error 日志（内网实测 `/game/abc/state` 返回 400 参数类型不合法）。
+9. **性能**：榜单读取 5 秒短缓存——公开接口 `LeaderboardService.top` 按（榜，limit）缓存；上报侧本身 60 秒节流，数据新鲜度地板远高于 5 秒，不损失语义。
+10. **玩法**：图鉴成就——成就 18 → 20 项：📖图鉴·十种（记录 10 种怪）、📚万物图鉴（集满可收集总数；`GameConst.codexTotal` 按引擎写入同口径：可击杀怪种 + 各区域 Boss，无限血木桩不计），前后端成就表同步、一致性测试锁死。
 
 ## 变更记录（2026-11-03 · 十轮增强）
 
@@ -318,7 +333,7 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 
 1. ~~**锁模板收口**：lock→try→finally unlock 在 Game/Save/Social 三个 controller 各抄一遍，抽 `StateCache.withLock(uid, slot, Supplier)`~~（2026-11-03 十轮增强第 5 轮已修：withLock+lockRetry 收口 StateCache，三控制器统一短等重试语义；锁 TTL 与离线大帧耦合复审未动，仍观察）
 2. ~~**SocialService 写路径收口**：祭奠/香火复活直读 DB 改 JSON 再 save，绕过 persist~~（2026-11-03 十轮增强第 4 轮已修：改走 saves.load+persist，成就/冗余列/缓存口径与主流程一致）
-3. **StatDailyAggregator**（部分销账）：每小时 `saves.findAll()` 全表 LONGTEXT 反序列化——2026-11-03 十轮增强第 3 轮已改分页拉取 + 只读 JSON 树 stats 子树累加，对象图反序列化与全表 List 常驻已消除；剩 punches/kills 冗余数值列 + SUM SQL 未做（需 schema 变更，留待玩家量真正上千时）
+3. ~~**StatDailyAggregator**：每小时全表 LONGTEXT 反序列化聚合~~（2026-11-03 第二批十轮第 1 轮完全销账：game_save 加 punches/kills/deaths/rebirths 四冗余列、persist 同步维护、collect 改一条 SUM 查询；schema.sql + migration-v3.16 回填存量）
 4. **轮询瘦身**：GET /state 每次全量 JSON 编解码（仍在） + ~~每请求查用户名~~（2026-11-03 十轮增强第 2 轮已修：用户名进 JWT claim，run() 免查库）
 5. ~~**榜单 submitBoard** 读-比-写三步非原子(并发残留旧 member);throttle Map 只增不删~~（2026-11-03 v3.15 已修：改 Redis Lua 脚本原子提交，节流表超 4096 条自动清理过期项，见变更记录）
 6. ~~**BULLET_MP 会被强化放大**(测试 Agent 发现):魔弹枪强化后每发更耗蓝~~（2026-11-03 v3.15 已修：PanelCalculator 强化乘区排除 BULLET_MP，与吞噬合并不累加同口径，V315EnhanceTest 锁死）

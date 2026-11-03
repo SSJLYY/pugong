@@ -450,13 +450,23 @@ public class GameService {
                 }
             }
             bag.sort((a, b) -> Double.compare(equipScore(b), equipScore(a)));
+            // 空位下标只扫一遍并单调递增:逐件调 nextFreeExtra 从 0 重扫是 O(n²),
+            // 无限栏穿满几百件时每帧管护都白烧 CPU(下标语义不变:仍优先回填最靠前的空洞)
+            int extraIdx = 0;
+            while (s.equipped.containsKey("extra_" + extraIdx)) {
+                extraIdx++;
+            }
             for (PlayerState.Item it : bag) {
                 PlayerState.Item sameWorn = worn.get(it.name);
                 if (sameWorn != null) {
                     devourInto(sameWorn, it);
                 } else {
-                    s.equipped.put(nextFreeExtra(s), it);
+                    s.equipped.put("extra_" + extraIdx, it);
                     worn.put(it.name, it);
+                    extraIdx++;
+                    while (s.equipped.containsKey("extra_" + extraIdx)) {
+                        extraIdx++;
+                    }
                 }
                 changed++;
             }

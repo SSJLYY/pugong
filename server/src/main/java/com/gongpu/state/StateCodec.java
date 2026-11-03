@@ -192,7 +192,8 @@ public final class StateCodec {
             java.util.Map.entry("LIFESTEAL", new double[]{0.005, 0.05, 0.005, 0.05}),
             java.util.Map.entry("ASPD", new double[]{0.02, 0.20, 0.02, 0.20}),
             java.util.Map.entry("RNG", new double[]{0.10, 0.50, 1, 2}),
-            java.util.Map.entry("MP", new double[]{100, 500, 100, 500}));   // v3.13 新增,恒等区间防御
+            java.util.Map.entry("MP", new double[]{100, 500, 100, 500}),   // v3.13 新增,恒等区间防御
+            java.util.Map.entry("maxHP", new double[]{50, 300, 50, 300}));   // 第四批新增,恒等区间防御
 
     /** 包内可见:单测校验迁移表覆盖全部词条键(漏键=旧档词条静默失效)。 */
     static boolean legacyPctMapHasKey(String key) {

@@ -49,7 +49,9 @@
     { id: 'temper_5', name: '淬火成钢', emoji: '🔨', desc: '任意一件装备淬炼满级' },
     { id: 'reroll_50', name: '洗炼大师', emoji: '🎲', desc: '累计洗炼 50 次' },
     { id: 'abyss_first', name: '渊瞳初开', emoji: '🕳️', desc: '首次击杀深渊裂隙的怪物' },
-    { id: 'abyss_lord', name: '深渊主宰', emoji: '👑', desc: '击杀渊底之主·无光君王' }
+    { id: 'abyss_lord', name: '深渊主宰', emoji: '👑', desc: '击杀渊底之主·无光君王' },
+    { id: 'daily_1', name: '每日事每日毕', emoji: '📅', desc: '首次领取每日任务奖励' },
+    { id: 'daily_30', name: '勤勉不辍', emoji: '🗓️', desc: '累计领取 30 次每日任务奖励' }
   ];
 
   var byId = {};

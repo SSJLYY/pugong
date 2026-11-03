@@ -60,7 +60,9 @@ public final class Achievements {
             new Def("temper_5", "淬火成钢", "🔨", "任意一件装备淬炼满级"),
             new Def("reroll_50", "洗炼大师", "🎲", "累计洗炼 50 次"),
             new Def("abyss_first", "渊瞳初开", "🕳️", "首次击杀深渊裂隙的怪物"),
-            new Def("abyss_lord", "深渊主宰", "👑", "击杀渊底之主·无光君王")
+            new Def("abyss_lord", "深渊主宰", "👑", "击杀渊底之主·无光君王"),
+            new Def("daily_1", "每日事每日毕", "📅", "首次领取每日任务奖励"),
+            new Def("daily_30", "勤勉不辍", "🗓️", "累计领取 30 次每日任务奖励")
     );
 
     private Achievements() {
@@ -72,7 +74,8 @@ public final class Achievements {
             case "first_punch", "first_kill", "first_death", "first_craft", "first_enchant",
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
-                    "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5" -> 2_000L;
+                    "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
+                    "daily_30" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord" -> 5_000L;
             default -> 500L;
         };
@@ -152,6 +155,8 @@ public final class Achievements {
             case "reroll_50" -> new long[]{s.stats.rerolls, 50};
             case "abyss_first" -> new long[]{abyssCodexHits(s), 1};
             case "abyss_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_abyss") ? 1 : 0, 1};
+            case "daily_1" -> new long[]{s.stats.dailyClaims, 1};
+            case "daily_30" -> new long[]{s.stats.dailyClaims, 30};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
             case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
@@ -222,6 +227,8 @@ public final class Achievements {
                 case "reroll_50" -> s.stats.rerolls >= 50;
                 case "abyss_first" -> abyssCodexHits(s) >= 1;
                 case "abyss_lord" -> s.bossKills != null && s.bossKills.contains("boss_abyss");
+                case "daily_1" -> s.stats.dailyClaims >= 1;
+                case "daily_30" -> s.stats.dailyClaims >= 30;
                 default -> false;
             };
             if (ok) {

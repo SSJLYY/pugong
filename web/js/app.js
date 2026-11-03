@@ -1080,22 +1080,30 @@
       });
       $('bagCount').parentNode.appendChild(eb);
     }
-    // 一键卖白装按钮：只挂一次，更新可用状态
-    if (!$('btnAutoSell')) {
-      const btn = document.createElement('button');
-      btn.id = 'btnAutoSell';
-      btn.textContent = '🧹 卖白装';
-      btn.title = '一键卖出背包内全部「普通」品质装备';
-      btn.addEventListener('click', async () => {
-        if (!confirm('卖出背包内全部普通品质装备？')) return;
-        try {
-          const r = await call(() => API.autoSell(API.state.slot, 1));
-          const res = r.result || {};
-          toast('卖出 ' + (res.soldCount || 0) + ' 件，+' + fmt(res.soldFor || 0) + ' 金币', 'ok');
-          applyView(r);
-        } catch (e) { /* call 已 toast */ }
-      });
-      $('bagCount').parentNode.appendChild(btn);
+    // 一键分级卖按钮组：只挂一次（白/绿/蓝/紫及以下，keep=1~4）
+    if (!$('btnAutoSell1')) {
+      const tiers = [
+        { keep: 1, label: '🧹 卖白装', text: '普通（白）' },
+        { keep: 2, label: '卖绿装及以下', text: '精良（绿）及以下' },
+        { keep: 3, label: '卖蓝装及以下', text: '稀有（蓝）及以下' },
+        { keep: 4, label: '卖紫装及以下', text: '史诗（紫）及以下，即全部装备' },
+      ];
+      for (const t of tiers) {
+        const btn = document.createElement('button');
+        btn.id = 'btnAutoSell' + t.keep;
+        btn.textContent = t.label;
+        btn.title = '一键卖出背包内' + t.text + '品质装备';
+        btn.addEventListener('click', async () => {
+          if (!confirm('卖出背包内' + t.text + '品质的全部装备？')) return;
+          try {
+            const r = await call(() => API.autoSell(API.state.slot, t.keep));
+            const res = r.result || {};
+            toast('卖出 ' + (res.soldCount || 0) + ' 件，+' + fmt(res.soldFor || 0) + ' 金币', 'ok');
+            applyView(r);
+          } catch (e) { /* call 已 toast */ }
+        });
+        $('bagCount').parentNode.appendChild(btn);
+      }
     }
     const bag = $('bagList');
     bag.innerHTML = '';
@@ -1209,6 +1217,7 @@
               <option value="1" ${view.autoSellKeep === 1 ? 'selected' : ''}>白色及以下</option>
               <option value="2" ${view.autoSellKeep === 2 ? 'selected' : ''}>绿色及以下</option>
               <option value="3" ${view.autoSellKeep === 3 ? 'selected' : ''}>蓝色及以下</option>
+              <option value="4" ${view.autoSellKeep === 4 ? 'selected' : ''}>紫色及以下（全折现）</option>
             </select></div>
         </div>
         <div class="pi-btns"><button id="btnAutoCfg">保存</button></div>`;
@@ -1355,7 +1364,7 @@
     // 挂机策略快照(设计 §3.3 死亡复盘):让玩家知道当时管家是怎么配的
     rows.push(`· 挂机策略：嗑药线 ${Math.round((view.autoHpLine || 0) * 100)}% · 逃跑线 ${Math.round((view.autoFleeLine || 0) * 100)}%`
       + ` · 技能常驻 ${view.autoSkill ? '开' : '关'} · 燃烧常驻 ${view.autoBurn ? '开' : '关'}`
-      + ` · 自动售卖 ${view.autoSellKeep ? ('留' + ['白装', '精良+', '稀有+', '史诗+'][view.autoSellKeep]) : '关'}`);
+      + ` · 自动售卖 ${view.autoSellKeep ? (view.autoSellKeep >= 4 ? '全部折现' : '留' + ['白装', '精良+', '稀有+', '史诗+'][view.autoSellKeep]) : '关'}`);
     // 击杀序列(最后 10 条)
     if (view.recentKills && view.recentKills.length) {
       rows.push(`· 最后的战斗：${view.recentKills.join('、')}`);

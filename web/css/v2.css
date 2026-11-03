@@ -833,7 +833,7 @@
 
 /* ---- 2) 小按钮触控目标 ---- */
 /* 背包标题行内按钮（无类名，只有 id）：此前无任何高度约束 ≈22px */
-#btnAutoEquip, #btnAutoSell {
+#btnAutoEquip, #btnAutoSell1, #btnAutoSell2, #btnAutoSell3, #btnAutoSell4 {
   min-height: 32px;
   padding: 5px 10px;
   font-size: 12px;

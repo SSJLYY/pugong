@@ -353,9 +353,9 @@ public class GameService {
         return m;
     }
 
-    /** 一键卖出：把背包里品质低于 keepQuality 的全部卖掉。 */
+    /** 一键卖出：把背包里品质低于 keepQuality 的全部卖掉（1=白及以下…4=紫及以下即全卖）。 */
     public Map<String, Object> autoSell(PlayerState s, int keepQuality) {
-        if (keepQuality < 0 || keepQuality > 3) {
+        if (keepQuality < 0 || keepQuality > 4) {
             throw ApiException.badRequest("保留品质不合法");
         }
         BigDecimal total = Num.ZERO;
@@ -537,7 +537,7 @@ public class GameService {
             s.autoRebirth = autoRebirth;
         }
         if (autoSellKeep != null) {
-            s.autoSellKeep = Math.max(0, Math.min(3, autoSellKeep));
+            s.autoSellKeep = Math.max(0, Math.min(4, autoSellKeep));
         }
         if (autoEquipBest != null) {
             s.autoEquipBest = autoEquipBest;

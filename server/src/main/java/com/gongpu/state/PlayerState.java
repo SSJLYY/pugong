@@ -99,7 +99,7 @@ public class PlayerState {
     public boolean ringGranted = false;
     /** 自动飞升（legacy autobot autoRebirth）：通关线达成即自动转生。 */
     public boolean autoRebirth = false;
-    /** 挂机自动售卖：0=关；1~3=品质低于该档的掉落自动折现金币（legacy autoSell+sellKeepQ）。 */
+    /** 挂机自动售卖：0=关；1~4=品质低于该档的掉落自动折现金币不进背包（4=紫及以下全折现，背包不进装备）（legacy autoSell+sellKeepQ）。 */
     public int autoSellKeep = 0;
     /** 挂机自动管护(v3.13)：每次结算自动「卖白装→同名吞噬→穿最强换装」，无需手点。 */
     public boolean autoEquipBest = false;

@@ -28,8 +28,28 @@ public class MetaController {
         this.dataSource = dataSource;
     }
 
+    /** 探活结果短缓存：/health 未鉴权且常被监控高频轮询，2 秒内复用同一次探测，免每请求打 Redis+DB。 */
+    private volatile Map<String, Object> healthCache;
+    private volatile long healthCacheAt;
+
     @GetMapping("/health")
     public Map<String, Object> health() {
+        Map<String, Object> cached = healthCache;
+        if (cached != null && System.currentTimeMillis() - healthCacheAt < 2000) {
+            return cached;
+        }
+        synchronized (this) {
+            if (healthCache != null && System.currentTimeMillis() - healthCacheAt < 2000) {
+                return healthCache;
+            }
+            Map<String, Object> fresh = probeHealth();
+            healthCache = fresh;
+            healthCacheAt = System.currentTimeMillis();
+            return fresh;
+        }
+    }
+
+    private Map<String, Object> probeHealth() {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("redis", cache.ping() ? "up" : "down");

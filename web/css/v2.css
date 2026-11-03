@@ -955,3 +955,7 @@
 .trait-row b{white-space:nowrap;color:#d8c98a}
 .trait-row span{color:#ccc}
 .info-close{width:100%}
+
+/* 未达标区域锁定样式（第六批：面板门槛比对） */
+.zone-btn.locked{opacity:.45;filter:grayscale(.6)}
+.zone-btn.locked::after{content:' 🔒'}

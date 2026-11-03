@@ -736,9 +736,18 @@
       $('mobDesc').textContent = '';
     }
 
-    // 区域按钮状态
+    // 区域按钮状态：当前区高亮 + 未达标区锁定样式（门槛与服务端 gotoZone 同口径，面板逐项比对）
     document.querySelectorAll('.zone-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.zone === view.zone);
+      const z = S.meta && S.meta.zones.find(x => x.id === b.dataset.zone);
+      if (!z || !z.req) { b.classList.remove('locked'); return; }
+      let met = true;
+      for (const [k, v] of Object.entries(z.req)) {
+        const have = k === 'ATK' ? Math.max(Number(p.PATK), Number(p.MATK)) : Number(p[k]);
+        if (!(have >= Number(v))) { met = false; break; }
+      }
+      b.classList.toggle('locked', !met);
+      b.title = met ? '' : ('尚未达标：' + (ZONE_REQ_TEXT[z.id] || '') + '（点击查看具体差距）');
     });
 
     // 挂机未存档警示条（DESIGN.md §10.1：战斗区且距上次存档超 5 分钟）

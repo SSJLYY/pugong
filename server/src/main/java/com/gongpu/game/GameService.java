@@ -801,6 +801,16 @@ public class GameService {
     }
 
     /** 背包整理：按评分从高到低稳定排序（同分保持原序），好装备顶到前面方便翻找。 */
+    /** 每日任务领取（第七批）：完成才可领，金币由 DailyQuests.claim 入账；返回小回执（run 合并进 result）。 */
+    public Map<String, Object> claimDaily(PlayerState s, String taskId) {
+        long reward = DailyQuests.claim(s, taskId);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("id", taskId);
+        m.put("reward", reward);
+        return m;
+    }
+
     /** 成就奖励领取：已解锁未领取才发金币（一成就一次），金额 Achievements.rewardOf 权威。 */
     public Map<String, Object> claimAchievement(PlayerState s, String id) {
         boolean known = Achievements.ALL.stream().anyMatch(d -> d.id().equals(id));
@@ -920,6 +930,7 @@ public class GameService {
         m.put("autoAdvance", s.autoAdvance);
         m.put("autoBoss", s.autoBoss);
         m.put("rerollPity", s.rerollPity);
+        m.put("dailyTasks", DailyQuests.viewOf(s));
         return m;
     }
 

@@ -14,6 +14,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** 第七批第 31 轮：每日任务模型——签发 3 个不重复、基线快照、同日不重签、计数口径与编解码。 */
@@ -91,6 +92,45 @@ class DailyQuestsTest {
         assertEquals(s.dailyTasks.get(0).id, back.dailyTasks.get(0).id);
         assertEquals(s.dailyTasks.get(0).baseline, back.dailyTasks.get(0).baseline);
         assertTrue(back.dailyTasks.get(0).claimed, "领取标记应随存档保留");
+    }
+
+    // ---- 第 32 轮：领取规则与跨日重签 ----
+
+    @Test
+    void claimRequiresDoneAndPaysOnce() {
+        GameService game = new GameService();
+        PlayerState s = NewState.create();
+        PlayerState.DailyTask t = new PlayerState.DailyTask();
+        t.id = "hunt";
+        t.baseline = "0";
+        t.target = 30;
+        t.rewardGold = 1800;
+        s.dailyDay = DailyQuests.today();
+        s.dailyTasks = new java.util.ArrayList<>(List.of(t));
+        assertThrows(com.gongpu.common.ApiException.class, () -> game.claimDaily(s, "hunt"),
+                "未完成应拒绝领取");
+        s.stats.lifetimeKills = Num.of(30);
+        java.util.Map<String, Object> r = game.claimDaily(s, "hunt");
+        assertEquals(1800L, r.get("reward"));
+        assertEquals(0, s.gold.compareTo(Num.of(1800)), "奖励金币应入账");
+        assertEquals(1, s.stats.dailyClaims);
+        assertThrows(com.gongpu.common.ApiException.class, () -> game.claimDaily(s, "hunt"),
+                "重复领取应拒绝");
+        assertThrows(com.gongpu.common.ApiException.class, () -> game.claimDaily(s, "nope"),
+                "未知任务应拒绝");
+    }
+
+    @Test
+    void crossDayReissuesFreshTasks() {
+        PlayerState s = NewState.create();
+        DailyQuests.ensure(s);
+        s.dailyTasks.get(0).claimed = true;
+        s.dailyDay = "2000-01-01";   // 模拟跨日
+        DailyQuests.ensure(s);
+        assertEquals(DailyQuests.today(), s.dailyDay, "跨日应重签");
+        assertEquals(3, s.dailyTasks.size());
+        assertTrue(s.dailyTasks.stream().noneMatch(t -> t.claimed), "新日任务应全部未领取");
+        assertFalse(s.dailyBonusGiven, "全清奖励标记应随新日重置");
     }
 
     @Test

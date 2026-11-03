@@ -453,6 +453,14 @@ public class GameController {
     public record AchReq(String id) {
     }
 
+    /** 每日任务奖励领取（第七批）。 */
+    @PostMapping("/{slot}/daily-claim")
+    public Map<String, Object> dailyClaim(HttpServletRequest req, @PathVariable int slot,
+                                          @RequestBody AchReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
+                s -> game.claimDaily(s, reqStr(body.id(), "id")));
+    }
+
     /** 成就奖励领取（已解锁未领取，金币入账）。 */
     @PostMapping("/{slot}/ach-claim")
     public Map<String, Object> achClaim(HttpServletRequest req, @PathVariable int slot,

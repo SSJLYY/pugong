@@ -313,7 +313,11 @@ public final class GameConst {
             java.util.Map.entry("acc", new PotionDef("acc", "明察药剂", "🎯", "120s 内命中 +10%", 0, 0, "acc_pot", 0.10, 120, 300)),
             java.util.Map.entry("eva", new PotionDef("eva", "幻影药剂", "🌫️", "120s 内闪避 +10%", 0, 0, "eva_pot", 0.10, 120, 350)),
             java.util.Map.entry("mregen", new PotionDef("mregen", "凝神药剂", "🧿", "120s 内回蓝 +10/秒", 0, 0, "mregen_pot", 10, 120, 250)),
-            java.util.Map.entry("shield", new PotionDef("shield", "护盾药剂", "🛡", "30s 内获得 30% 生命上限的护盾", 0, 0, "shield_pot", 0.30, 30, 900)));
+            java.util.Map.entry("shield", new PotionDef("shield", "护盾药剂", "🛡", "30s 内获得 30% 生命上限的护盾", 0, 0, "shield_pot", 0.30, 30, 900)),
+            // ---- 第四批扩充：回复系（特大回复 + 双回） ----
+            java.util.Map.entry("hp_xl", new PotionDef("hp_xl", "特大血药", "❤️", "瞬回 100% 生命上限", 1.0, 0, null, 0, 0, 600)),
+            java.util.Map.entry("mp_l", new PotionDef("mp_l", "大蓝药", "💙", "瞬回 100% 蓝量", 0, 1.0, null, 0, 0, 150)),
+            java.util.Map.entry("elixir", new PotionDef("elixir", "万灵药剂", "🌈", "瞬回 80% 生命与 80% 蓝量", 0.80, 0.80, null, 0, 0, 800)));
 
     /** 跨界使用蓝药的蓝量上限保护：技能 MP 消耗按当前 MP 判定。 */
     public static final double MP_REGEN_BASE = 2;

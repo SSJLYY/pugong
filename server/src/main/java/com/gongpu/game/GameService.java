@@ -1570,6 +1570,12 @@ public class GameService {
         m.put("potions", s.potions);
         m.put("equipped", s.equipped);
         m.put("sets", setsView(s));
+        // 每日任务/黑市/洗炼保底（第七批实测修复）：此前误挂在 autoconfig 回执上，
+        // fullView 轮询帧拿不到——前端每日卡片与黑市永远刷不出来，现归位到主视图
+        DailyQuests.ensure(s);
+        m.put("dailyTasks", DailyQuests.viewOf(s));
+        m.put("blackMarket", BlackMarket.viewOf(s));
+        m.put("rerollPity", s.rerollPity);
         // v3.13 背包截断防复发:此前全量下发 3.3 万件=13.9MB JSON,前端每秒解析+渲染
         // 直接卡死。视图只带前 200 件(强化/洗炼/卖出按索引操作,截断段不可及,
         // 服务端管护会先把背包清到安全规模),bagTotal 让前端如实显示总数。

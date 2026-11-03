@@ -595,6 +595,16 @@ public final class GameEngine {
                 return;
             }
         }
+        // 药剂·荆棘：实际承受伤害的 20% 反弹给怪（与格挡反弹可叠加，沉默压制；反弹致死同走击杀流程）
+        if (buffOn(s, p, "thorn_pot") && total.signum() > 0) {
+            BigDecimal thornReflect = Num.mul(total, Num.of(GameConst.THORN_POT_MUL));
+            m.curHP = Num.sub(m.curHP, thornReflect);
+            if (Num.lte(m.curHP, Num.ZERO)) {
+                onMobKilled(s, m);
+                advanceAfterKill(s, m);
+                return;
+            }
+        }
 
         // Boss 沉默
         if (m.boss && m.silenceCd > 0) {

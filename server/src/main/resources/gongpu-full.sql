@@ -823,6 +823,13 @@ INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`,
 DELETE FROM `cfg_buff` WHERE `code` IN ('stone_pot');
 INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('stone_pot', '石肤', '🗿', 'good', 'passive', '{"dmgTakenMul":0.9}', '120s 内受到的伤害 -10%', 1, 44);
+-- 第 5 轮：荆棘药剂（反弹所受伤害 20%）
+DELETE FROM `cfg_item` WHERE `code` IN ('thorn');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('thorn', '荆棘药剂', '🌵', 'potion', 650, '{"buff":"thorn_pot","buffVal":0.2,"buffDur":120}', '120s 内反弹所受伤害的 20%', 1, 45);
+DELETE FROM `cfg_buff` WHERE `code` IN ('thorn_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('thorn_pot', '荆棘', '🌵', 'good', 'passive', '{"reflectMul":0.2}', '120s 内反弹所受伤害的 20%', 1, 45);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

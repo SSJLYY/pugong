@@ -511,6 +511,12 @@ public final class GameEngine {
         // 护盾(v3.14 护盾药剂):先于生命扣除,吸收完后余量才进血
         total = absorbShield(s, total);
         s.life.curHP = Num.sub(s.life.curHP, total);
+        // 词条·嗜血：怪按玩家实际掉血量比例吸回自身生命（封顶其上限；
+        // 置于格挡反弹之前——反弹致死时怪已死，不存在吸血复活的顺序问题）
+        if ("leech".equals(m.trait) && m.maxHP != null && total.signum() > 0) {
+            BigDecimal heal = Num.mul(total, Num.of(GameConst.TRAIT_LEECH_MUL));
+            m.curHP = Num.min(m.maxHP, Num.add(m.curHP, heal));
+        }
         if (blocking && Num.gt(p.PATK(), Num.ZERO)) {
             // 反弹:格挡期间把承受伤害的 50% 弹回怪物(设计 §7.3 反弹 50%)
             BigDecimal reflect = Num.mul(total, Num.of(0.5));

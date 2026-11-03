@@ -132,7 +132,28 @@ public class LeaderboardService {
     }
 
     /** 榜单查询:board=maxhp(默认)/gold/gen。行结构随榜单不同(maxHP/maxHPText 或 gold/goldText 或 gen)。 */
+    /**
+     * 榜单读取短缓存（5 秒/榜）：上报侧本身有 60 秒节流，数据新鲜度地板远高于 5 秒，
+     * 缓存不损失语义；公开未鉴权接口借此挡住高频抓取对 Redis 的直打。
+     */
+    private record CachedTop(List<Map<String, Object>> rows, long at) {
+    }
+
+    private final java.util.concurrent.ConcurrentHashMap<String, CachedTop> topCache =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
     public List<Map<String, Object>> top(String board, int limit) {
+        String cacheKey = (board == null ? BOARD_HP : board) + ":" + limit;
+        CachedTop hit = topCache.get(cacheKey);
+        if (hit != null && System.currentTimeMillis() - hit.at() < 5000) {
+            return hit.rows();
+        }
+        List<Map<String, Object>> rows = fetchTop(board, limit);
+        topCache.put(cacheKey, new CachedTop(rows, System.currentTimeMillis()));
+        return rows;
+    }
+
+    private List<Map<String, Object>> fetchTop(String board, int limit) {
         List<Map<String, Object>> rows = new ArrayList<>();
         try {
             Set<ZSetOperations.TypedTuple<String>> set =

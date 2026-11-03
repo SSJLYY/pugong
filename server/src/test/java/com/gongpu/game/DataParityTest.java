@@ -60,6 +60,10 @@ class DataParityTest {
         String sql = allSql();
         assertTrue(sql.contains("'lightness'") && sql.contains("'vitality'"),
                 "新词条 lightness/vitality 应在 migration SQL 中");
+        // 被动技能镜像：GameConst.PASSIVE_SKILLS 的每个 id 必须在 SQL cfg_skill 里（学不到 = 不存在）
+        for (String id : GameConst.PASSIVE_SKILLS.keySet()) {
+            assertTrue(sql.contains("'" + id + "'"), "被动技能 " + id + " 应在 SQL 技能表里");
+        }
         assertEquals(16, GameConst.AFFIXES.size());
     }
 

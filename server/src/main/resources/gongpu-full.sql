@@ -405,7 +405,7 @@ INSERT INTO `cfg_item`
   ('spd',  '速度药剂', '💨', 'potion', 100, '{"buff":"spd_pot","buffVal":0.2,"buffDur":30}',      '30s 内攻速 +20%',   1, 6);
 
 -- ============================================================
--- 4. 技能主表 cfg_skill（14 行 = 6 主动 + 8 被动）
+-- 4. 技能主表 cfg_skill（15 行 = 6 主动 + 9 被动）
 -- 来源：GameConst.ACTIVE_SKILLS / GameConst.PASSIVE_SKILLS
 -- 主动：mp/cd/dur 照抄；被动：price=300，effect_json 存 GameConst 对应参数
 -- ============================================================
@@ -425,7 +425,8 @@ INSERT INTO `cfg_skill`
   ('swift',    '疾风步',   '💨', 'passive', 300, 0,  0,   0,   '{"effect":"mul","key":"SPD","mul":1.2}',                  '+20% 移速',                       1, 11),
   ('hawkeye',  '鹰眼',     '🦅', 'passive', 300, 0,  0,   0,   '{"effect":"add","key":"ACC","val":0.05}',                 '+5% 命中',                       1, 12),
   ('brute',    '蛮力',     '💢', 'passive', 300, 0,  0,   0,   '{"effect":"mul","key":"PATK","mul":1.15,"sideKey":"ACC","sideVal":-0.03}', '物攻 ×1.15，-3% 命中', 1, 13),
-  ('element',  '元素亲和', '⚡', 'passive', 300, 0,  0,   0,   '{"effect":"mul","key":"AFFIX_MATK","mul":1.25}',          '附魔魔伤 +25%',                  1, 14);
+  ('element',  '元素亲和', '⚡', 'passive', 300, 0,  0,   0,   '{"effect":"mul","key":"AFFIX_MATK","mul":1.25}',          '附魔魔伤 +25%',                  1, 14),
+  ('boss_hunter', '巨人杀手', '🗡️', 'passive', 300, 0,  0,   0,   '{"effect":"boss_hunter","mul":1.2}',                     '对 Boss 伤害 +20%',              1, 15);
 
 -- ============================================================
 -- 5. 状态主表 cfg_buff（9 行 = 6 增益 passive + 3 负面 status）

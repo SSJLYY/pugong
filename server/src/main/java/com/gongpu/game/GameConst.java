@@ -285,9 +285,12 @@ public final class GameConst {
             "swift", new PassiveDef("swift", "疾风步", "💨", "+20% 移速"),
             "hawkeye", new PassiveDef("hawkeye", "鹰眼", "🦅", "+5% 命中"),
             "brute", new PassiveDef("brute", "蛮力", "💢", "物攻 ×1.15，-3% 命中"),
-            "element", new PassiveDef("element", "元素亲和", "⚡", "附魔魔伤 +25%"));
+            "element", new PassiveDef("element", "元素亲和", "⚡", "附魔魔伤 +25%"),
+            "boss_hunter", new PassiveDef("boss_hunter", "巨人杀手", "🗡️", "对 Boss 伤害 +20%"));
 
     public static final double COMBO_CHANCE = 0.15;
+    /** 被动「巨人杀手」对 Boss 的伤害乘区。 */
+    public static final double BOSS_HUNTER_MUL = 1.2;
     public static final int VITALITY_INTERVAL = 100;
     public static final int VITALITY_BONUS = 50;
 

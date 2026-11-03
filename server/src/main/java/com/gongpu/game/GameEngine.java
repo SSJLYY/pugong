@@ -233,6 +233,10 @@ public final class GameEngine {
         if ("disarm".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_DISARM_MUL));
         }
+        // 被动·巨人杀手：对 Boss 专伤乘区
+        if (m.boss && s.passives.contains("boss_hunter")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.BOSS_HUNTER_MUL));
+        }
         if (PanelCalculator.active(s, "heavy")) {
             perHit = Num.mul(perHit, Num.of(5));
             s.buffs.remove("heavy");

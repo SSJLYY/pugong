@@ -11,19 +11,19 @@ MySQL 8 持久 + Redis 缓存/锁/榜单。数值全部服务端结算，前端�
 
 ## 0.5 当前状态速览（2026-11-03 更新，v3.15 增强轮后）
 
-- **v3.15 增强轮（2026-11-03，已部署公网并实测）**：①新玩法「怪物词条」——野怪出生按区域深度掷 💢狂暴/🪓破甲/🔗缴械（平原 10% 起每深一层 +3%，池随深度解锁，Boss/木桩不出），`MobState.trait` 持久化、mobView 下发展示信息、前端名后缀+描述行渲染，公网实测刷出狂暴野兔且界面渲染确认。②销账两条技术遗留：BULLET_MP 排除强化乘区（遗留 #6）、榜单 submitBoard 改 Lua 原子提交+节流表清理（遗留 #5）。③性能：advance 内面板构建砍 3 处可证等价的重复（grow 复用主面板、autoPotion 三分支共用一份）。④前端标题/meta 补齐、版本升 v=53。⑤同日续作「分级售卖」（玩家需求）：手动一键卖扩为白/绿/蓝/紫四档按钮、挂机自动售卖扩到紫档（全折现不进包），前端升 v=54。单测 **169 全绿**（V315EnhanceTest 5 项 + SellTierTest 4 项）；本机（Muse VM）测试依赖已补齐，`mvn -o test` 可直接离线跑通（seed-test.py 在 pugong-deploy）。详见 README「变更记录（2026-11-03）」两节。
+- **v3.15 增强轮（2026-11-03，已部署公网并实测）**：①新玩法「怪物词条」——野怪出生按区域深度掷 💢狂暴/🪓破甲/🔗缴械（平原 10% 起每深一层 +3%，池随深度解锁，Boss/木桩不出），`MobState.trait` 持久化、mobView 下发展示信息、前端名后缀+描述行渲染，公网实测刷出狂暴野兔且界面渲染确认。②销账两条技术遗留：BULLET_MP 排除强化乘区（遗留 #6）、榜单 submitBoard 改 Lua 原子提交+节流表清理（遗留 #5）。③性能：advance 内面板构建砍 3 处可证等价的重复（grow 复用主面板、autoPotion 三分支共用一份）。④前端标题/meta 补齐、版本升 v=53。⑤同日续作「分级售卖」（玩家需求）：手动一键卖扩为白/绿/蓝/紫四档按钮、挂机自动售卖扩到紫档（全折现不进包），前端升 v=54。⑥同日再续「十轮增强」（每轮独立提交，已部署公网实测）：nextFreeExtra 线性化 / 用户名走 JWT claim / 日聚合轻量采集 / SocialService 写路径收口 / 锁模板 withLock 收口 / 前端轮询失败退避 / 圆满金碑 / 管家悬浮面板 / 存档导出 / 自动进食，前端升 v=55。单测 **172 全绿**（V315EnhanceTest 5 项 + SellTierTest 4 项 + PerfectGraveTest 1 项 + AutoEatTest 2 项）；本机（Muse VM）测试依赖已补齐，`mvn -o test` 可直接离线跑通（seed-test.py 在 pugong-deploy）。详见 README「变更记录（2026-11-03）」各节。
 - **（以下为 2026-11-02 晚状态）**
 
 - **第二部署目标已上线**：`https://pugong.shaun88.cc.cd/gongpu/`（Muse VM，Cloudflare 隧道 → nginx :8088 → 本栈）。该 VM 的 JVM 出站 TCP 被平台拦截，MySQL/Redis 全走 Unix 套接字（MariaDB localSocket + 新增 `DeploySocketConfig`），构建走离线 Maven 仓；细节见 README「公网部署」节，下方 136 的路径/命令不适用于此目标。部署目录 `~/workspace/pugong-deploy/`，看门狗 supervise + cron 保活。
 - **三处修复（已实测，详见 README 变更记录）**：①CORS 白名单缺公网域名致浏览器注册/登录 403，启动参数已补；②前端 `renderBuffs._sig` 悬空引用致新手天赋觉醒仪式永不触发，改挂 `applyView._buffSig`（浏览器实测抽卡全流程通过），前端版本升 v=52；③灌库 CLI 字符集错误致 cfg_* 文本双重编码乱码，45 列已反转还原，CLI 导入必须 `--default-character-set=utf8mb4`。
 - **后端优化**：轮询帧落库节流 `SaveService.persistThrottled`（MySQL 写降至约 1/5，死亡强制立即写）；`run()` 内重复账号查询合并。
 
-- **验证基线**：单测 **169 全绿**（mvn -o test，含 PotionsV314Test 12 项 + V315EnhanceTest 5 项 + SellTierTest 4 项）+ 冒烟 **66 全绿**（136 已跑）；每次改完必须双绿。
+- **验证基线**：单测 **172 全绿**（mvn -o test，含 PotionsV314Test 12 项 + V315EnhanceTest 5 项 + SellTierTest 4 项 + PerfectGraveTest 1 项 + AutoEatTest 2 项）+ 冒烟 **66 全绿**（136 已跑）；每次改完必须双绿。
 - **136 部署**：2026-11-02 v3.14 已按第 3 节完整部署（8180c24），双层冒烟 66/66 全绿；前端 ?v=49 已生效，136 商店 meta 实测 18 种药剂。
 - **v3.14 商店药剂扩容 8→18**（玩家需求）：新增锐眼(暴击+10%/90s)/残暴(暴伤+50%)/嗜血(吸血+10%)/狂暴(攻击×1.5)/磐石(双防×1.5)/疾风(攻速×1.5)/明察(命中+10%)/幻影(闪避+10%)/凝神(回蓝+10/s)/护盾(30%生命上限吸收盾/30s)。全部受沉默压制；**护盾是新机制**：PlayerState.shield 字段，mobAttack/dotTick 两路先扣盾后扣血，shield_pot 到期 tickBuff 清盾，fullView 下发 panel.shield，前端血条显示 🛡余量。配置链：GameConst.POTIONS 兜底 18 种 + migration-v3.14-potions.sql（cfg_item 10 行+cfg_buff 10 行幂等）；**灌库后必须 admin/config/reload 热刷新才对玩家生效**（本地实测踩坑：灌库不刷新 meta 仍旧 8 种）。
 - **v3.13 背包膨胀根治**（玩家三槽卡死修复）：根因三连——①v3.12 前吞噬把 BAG_CAP 累加进合并腰带（bagCap 虚增到 33720 格）②autoSellKeep=0 掉落全进背包（33720 件=14.3MB）③状态接口每秒全量下发 13.9MB JSON 前端卡死。修复：挂机管家新增「🧲 自动管护」开关（autoEquipBest，结算后自动卖白装→同名吞噬→穿最强）；fastAutoEquip 重写 O(n log n)（排序+名字哈希吞噬，空背包短路）；devourInto 对 BAG_CAP 取大不求和+bagCap 钳制封顶；fullView/inventoryView 背包截断 BAG_VIEW_LIMIT=200+bagTotal 下发。三槽实测：背包 33720→0、响应 13.9MB→57KB、轮询 0.21s。
 - **前端性能小修**（v3.13 同轮）：renderBag 签名补 bagTotal；editing 白名单补 autoEquipChk；__game 桥接补参；buffBar 签名守卫只更新倒计时文本；renderTitles 签名剔除每秒变化字段。
-- **技术遗留**（较大手术，已列入 README「技术遗留清单」）：锁模板 withLock 收口 / SocialService persist 收口 / StatDailyAggregator 全表扫描 / 轮询瘦身 / persist 每秒 3-4 次全量 JSON 编解码+MySQL 全量写 / StateCache 缓存 JSON 而非对象 / equipped 词条膨胀仍全量下发 / nextFreeExtra 首穿 O(n²) / 前端快照-点击 ≤1s 竞态。（已销账：榜单原子化 v3.15 Lua、BULLET_MP 强化放大 v3.15、advance 内面板重复构建 v3.15 部分——grow/autoPotion 已收，余 dotTick/autoBuffTick/regenTick/通关判定 4 处在状态变更后构建，语义必需）
+- **技术遗留**（较大手术，已列入 README「技术遗留清单」）：persist 每秒全量 JSON 编解码+MySQL 全量写（已节流 5s，对象化未做） / StateCache 缓存 JSON 而非对象 / equipped 词条膨胀仍全量下发 / 前端快照-点击 ≤1s 竞态 / StatDailyAggregator 冗余数值列+SUM（对象图反序列化已于十轮增强消除）。（已销账：榜单原子化 v3.15 Lua、BULLET_MP 强化放大 v3.15、advance 内面板重复构建 v3.15 部分、锁模板 withLock 收口、SocialService persist 收口、nextFreeExtra O(n²)、用户名查库——后四项为 2026-11-03 十轮增强）
 - 本文件是唯一开工入口；读完本节+§8/§9 即可动手。
 
 ## 1. 服务器连接（免密已配置，不要用密码）
@@ -121,6 +121,10 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 一键穿最强 | POST /api/game/{slot}/autoequip | equipScore=品质×1000+词条×100+底子和，强化+5%/级；同部位更优即换，戒指自动填 ring2 |
 | 装备词条显示 | 前端 app.js affixText 唯一出口 | 全部直接数值无 %：率型键(CRIT/CRITD/ACC/EVA/LIFESTEAL)按百分点显示(内部仍存小数概率)；pct_hp 生命泉涌刻意保留 %；旧档 pct 词条由 StateCodec.decode 线性映射转 flat(LEGACY_PCT_MAP 必须覆盖全部词条 key，漏键=词条静默失效，DataConsistencyTest 锁死) |
 | 挂机自动售卖 | 挂机管家 autoSellKeep 0~4 | 档位=白色及以下/绿色及以下/蓝色及以下/紫色及以下(全折现)，掉落直接折现**不进背包**（选蓝档只有紫装入包）；逐杀(onMobKilled)与溢出期望(dealDamage 护栏外)两分支同语义(玩家反馈修复,CombatRegressTest+SellTierTest 锁死)；手动分级卖走 autosell 端点；新手保底装备直入包不受拦截（福利豁免） |
+| 自动进食 | 挂机管家 autoEat 开关 | 战斗区内饱食回血（regen_food）断档自动吃 1 份食物（food）续上；buff 在身不吃、村里不吃；GameEngine.autoEatTick 在 autoBuffTick 后，AutoEatTest 锁 |
+| 圆满金碑 | 世界墓园 | 玩家飞升金碑覆盖 ≥12 个不同世代 → 其金碑在墓园置顶 +「🌕 圆满金碑」金辉样式（SocialService.perfectUsers 聚合金碑近 500 条判定，PerfectGraveTest 锁）；纯纪念无数值加成 |
+| 存档导出 | GET /api/saves/{slot}/export | 返回存档 JSON 附件供玩家自备备份；**只出不进**，导入绕过服务端校验明确不开放 |
+| 管家悬浮面板 | 前端右下角 🤖 | 血/蓝条+当前怪速览、自动管护开关、自动售卖档位、嗑药/吃食按钮；走 autoconfig 与 usePotion 既有通道，渲染签名 5% 分桶 |
 | 挂机自动管护 | 挂机管家 autoEquipBest(v3.13) | 每秒结算后自动「卖白装→同名吞噬→穿最强」(GameService.autoMaintain→fastAutoEquip)；**背包膨胀根治开关**——三槽 33720 件卡死根因；O(n log n) 空背包短路，异常 WARN 不静默；非 baglord 只走卖白装+原生栏换装(不碰无相位栏) |
 | 背包容量 | GameConst.BAG_MAX=100 | 动态上限 bagCap=BAG_MAX+装备 BAG_CAP 词条(负重腰带+20)；改容量只动常量 |
 | 永续天赋展示 | 顶栏徽章=信息入口 | 永续 ♾️ 下 8 个 ETERNAL_BUFFS 增益不再进 buff 条，悬浮/点击顶栏「♾️ 被动永续」徽章弹 talentPop 清单卡；前后端永续键表必须一致(GameConst.ETERNAL_BUFFS ↔ app.js ETERNAL_KEYS)；其他天赋沿用 title |
@@ -168,7 +172,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 ## 9. 改动守则（本项目血泪浓缩）
 
 1. **新增写端点**：必须套 `run()`（GameController）或 `locked()`（Save/Social）模板——先锁再结算再落库；请求体字段先过 `reqStr/reqIdx` 兜底（GameConst 查找表是 Map.of，get(null) 直接 NPE 500）。
-2. **直改 DB 的代码**（如 SocialService）：写完 `evict` 缓存。
+2. **写存档一律走 `SaveService.load + persist`**（2026-11-03 起 SocialService 亦然）：禁止再手写「直查 DB→decode→encode→save」绕过成就评估/冗余列/缓存刷新；万一真要直改 DB，写完必须 `evict` 缓存。
 3. **大数**：全 BigDecimal 字符串；`doubleValue()` 只许用于阈值比较；跨账号计数（香火/战绩/签到）一律原子 UPDATE（UserRepository/GraveRepository 已有范式）。
 4. **用户输入进 innerHTML**：先过 `esc()`。
 5. **实体改动三同步**：实体类 + schema.sql + deploy.sh 迁移函数。

@@ -271,6 +271,23 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 - ~~成就为纯前端展示层~~ **已落库（v3.3）**：18 项成就服务端权威评估（Achievements.java），随 state_json 持久化，换设备/清缓存不丢
 - ~~旧版自动管家的 autoBurn/autoSkill buff 常驻链未迁移~~ **已迁移（v3.4）**：挂机管家新增「技能常驻」「燃烧常驻」开关，服务端 GameEngine.autoBuffTick 按 legacy 语义执行（涌动先行免蓝→急速→蓄力常驻、血<60% 补格挡、血<30% 怒吼、血>60% 补燃烧），离线同样生效
 
+## 变更记录（2026-11-03 · 十轮增强）
+
+应玩家要求对全栈做十轮增强/优化/完善（每轮独立提交），单测 169 → **172 全绿**，前端版本升 **v=55**，已部署公网实测：
+
+1. **性能**：无限装备栏批量穿入的空位扫描 O(n²) → 单调递增线性（`nextFreeExtra` 逐件重扫改一遍扫完）。
+2. **性能**：用户名进 JWT claim——拦截器一次解析出 userId+用户名，`run()` 免去每秒轮询的账号查库（遗留 #4 username 部分销账）。
+3. **性能**：`StatDailyAggregator` 不再全表反序列化存档对象图——分页 200/页 + 只读 JSON 树 stats 子树精确累加（遗留 #3 部分销账）。
+4. **架构**：`SocialService` 祭奠/复活写路径收口 `SaveService.load+persist`（原手写绕过成就评估与冗余列、且直读 DB 会撞节流落库的旧金币；遗留 #2 销账）。
+5. **架构**：锁模板收口 `StateCache.withLock/lockRetry`，三控制器统一短等重试语义，告别各抄一份与瞬时 409（遗留 #1 销账）。
+6. **前端**：轮询失败退避——断网/服务端重启时连败间隔指数放大（封顶 30s），成功清零，切回前台立即补帧。
+7. **玩法**：圆满金碑——飞升金碑集齐 12 个不同世代的玩家，其金碑在世界墓园置顶、标注「🌕 圆满金碑」配金色辉光（纯纪念无数值加成；`PerfectGraveTest` 锁判定）。
+8. **前端**：管家悬浮面板——右下角 🤖 悬浮卡：血/蓝条速览、当前怪、自动管护开关、自动售卖档位、嗑药/吃食快捷按钮，不必切 tab 照看挂机。
+9. **功能**：存档导出——选档页每档「导出」按钮下载存档 JSON 自备备份；只出不进（导入绕过服务端校验，明确不开放）。
+10. **玩法**：挂机自动进食——管家新开关：饱食回血断档自动吃食物续上（buff 在身不浪费、村里不吃；`AutoEatTest` 锁语义），悬浮面板与管家 tab 双入口。
+
+公网实测：自动进食开后买 2 份食物、一帧结算自动吃掉 1 份且饱食回血生效；导出接口返回附件头与完整存档 JSON；墓园/轮询/榜单全链路走新 JWT claim 路径正常。
+
 ## 变更记录（2026-11-03 · 分级售卖）
 
 - **手动一键卖分级**（玩家需求）：背包区由单个「卖白装」按钮改为四档按钮组——卖白装/卖绿装及以下/卖蓝装及以下/卖紫装及以下（`autosell {keep}` 1~4，后端合法范围 3→4，keep=4 即卖 quality<4 的全部装备含史诗）。
@@ -299,9 +316,9 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 
 审计已识别、本轮有意不动的较大手术（各自值得独立轮次+专项回归）：
 
-1. **锁模板收口**：lock→try→finally unlock 在 Game/Save/Social 三个 controller 各抄一遍，抽 `StateCache.withLock(uid, slot, Supplier)`；顺带复审锁 TTL 10s 与离线大帧耗时的耦合
-2. **SocialService 写路径收口**：祭奠/香火复活直读 DB 改 JSON 再 save,绕过 persist(不评估成就/不推时间)——改走 `saves.load + persist`
-3. **StatDailyAggregator**：每小时 `saves.findAll()` 全表 LONGTEXT 反序列化,玩家量上千后拖垮 DB/GC——punches/kills 冗余成数值列走 SUM SQL
-4. **轮询瘦身**：GET /state 每次全量 JSON 编解码 + ~~每请求 2 次 DB 查用户名~~（2026-11-02 已合并为 1 次，见变更记录；username 进 JWT claim 仍可再进一步）
+1. ~~**锁模板收口**：lock→try→finally unlock 在 Game/Save/Social 三个 controller 各抄一遍，抽 `StateCache.withLock(uid, slot, Supplier)`~~（2026-11-03 十轮增强第 5 轮已修：withLock+lockRetry 收口 StateCache，三控制器统一短等重试语义；锁 TTL 与离线大帧耦合复审未动，仍观察）
+2. ~~**SocialService 写路径收口**：祭奠/香火复活直读 DB 改 JSON 再 save，绕过 persist~~（2026-11-03 十轮增强第 4 轮已修：改走 saves.load+persist，成就/冗余列/缓存口径与主流程一致）
+3. **StatDailyAggregator**（部分销账）：每小时 `saves.findAll()` 全表 LONGTEXT 反序列化——2026-11-03 十轮增强第 3 轮已改分页拉取 + 只读 JSON 树 stats 子树累加，对象图反序列化与全表 List 常驻已消除；剩 punches/kills 冗余数值列 + SUM SQL 未做（需 schema 变更，留待玩家量真正上千时）
+4. **轮询瘦身**：GET /state 每次全量 JSON 编解码（仍在） + ~~每请求查用户名~~（2026-11-03 十轮增强第 2 轮已修：用户名进 JWT claim，run() 免查库）
 5. ~~**榜单 submitBoard** 读-比-写三步非原子(并发残留旧 member);throttle Map 只增不删~~（2026-11-03 v3.15 已修：改 Redis Lua 脚本原子提交，节流表超 4096 条自动清理过期项，见变更记录）
 6. ~~**BULLET_MP 会被强化放大**(测试 Agent 发现):魔弹枪强化后每发更耗蓝~~（2026-11-03 v3.15 已修：PanelCalculator 强化乘区排除 BULLET_MP，与吞噬合并不累加同口径，V315EnhanceTest 锁死）

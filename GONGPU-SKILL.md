@@ -11,6 +11,7 @@ MySQL 8 持久 + Redis 缓存/锁/榜单。数值全部服务端结算，前端�
 
 ## 0.5 当前状态速览（2026-11-03 更新，v3.15 增强轮后）
 
+- **SQL 整合 + 136 同步（2026-11-03）**：①拉入 136 环境提交（shaun88）：deploy.sh 迁移清单补全 v3.16~v3.24、DeploySocketConfig 改 @ConditionalOnProperty(gongpu.redis.socket)——**本机 start-gongpu.sh 已补 --gongpu.redis.socket 参数**（旧版是硬编码路径，下次本机重建不补会断 Redis）。②resources 下 22 个 SQL 文件整合为单一 **gongpu-full.sql**（§1 表结构/§2 守卫式加列与一次性回填/§3 基线种子/§4 内容迁移按序），全程幂等：临时库实测全新导入与现行库 cfg 内容逐行一致（除自增 id）、二次导入无错；deploy.sh 已改为单一入口并删除 migrate() 内联与 CONTENT_MIGRATIONS 清单。GunplayTest 改读整合文件。单测 242 全绿。
 - **第四批十轮增强（2026-11-03，主题：药剂与装备种类增强；本地内网自测）**：药剂 18 → **25 种**（回复系特大血/大蓝/万灵双回、新维度生生/远眺/疾行、收益维度鸿运掉落 ×1.5、解毒剂兼清沉默）/ 装备模板 36 → **45 件**（沼泽 1→5、火山 3→6、雪原 6→8）/ 词条 14 → **16**（轻盈 EVA、活力 maxHP）/ 商店药剂分组（meta group 字段）/ DataParityTest 数据一致性锁 / 品药成就（成就 24 项，usedPotions 记种类）。前端升 v=67，单测 **242 全绿**；内网实测：7 个新迁移导库后 meta 药剂 25 种分组正确、新药喝下 buff 全生效、potion_5 即时点亮。详见 README「变更记录（2026-11-03 · 第四批十轮增强）」。迁移序号推进到 v3.24。
 - **第三批十轮增强（2026-11-03，每轮独立提交 + 1 个实测修复；本地内网自测）**：统计改终身口径（Stats.lifetimeKills + migration-v3.17，当世值每世重置不可作累计）/ **图纸合成系统接通**（图纸掉落 Boss 30%/普通 4%、CraftService、⚒️锻造 tab；另有 item: 物品产物约定走药剂栏）/ 新词条🌵荆棘（雪原起解锁）/ 修改密码 / JWT 滑动续期（X-New-Token）/ 背包售价显示 / 图鉴总数口径对齐 / 死亡轮询降频 / QuestService 解析缓存+首测 / 成就扩充（22 项，crafts/enchants 终身计数）。前端升 v=65，单测 **223 全绿**；内网实测：迁移回填相等、合成装备与烹饪双产物落地且 first_craft 点亮、改密往返、自签短令牌续期链完整。详见 README「变更记录（2026-11-03 · 第三批十轮增强）」。
 - **第二批十轮增强（2026-11-03，每轮独立提交；按玩家新流程只在本地内网自测，未部署公网）**：统计 SUM 化（遗留 #3 完全销账，game_save 四冗余列 + migration-v3.16 回填）/ Meta 快照缓存 / 装备锁定 / 背包整理 / 护盾跨世残留修复 / Health 探活短缓存 / 新词条🩸嗜血（沼泽起解锁）/ 异常处理补齐 400/404/405 / 榜单读缓存 / 图鉴成就（成就 20 项）。前端升 v=58，单测 **199 全绿**；内网实测：迁移回填与 JSON 聚合逐项相等、锁定全卖只剩锁定件、类型不符路径 400。详见 README「变更记录（2026-11-03 · 第二批十轮增强）」。
@@ -89,7 +90,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 
 | 症状 | 大概率原因 | 查法/修法 |
 |---|---|---|
-| 服务反复重启 | ddl-auto=validate 与表不匹配 | `journalctl -u gongpu-server -n 50`；改实体要同步 schema.sql + deploy.sh 迁移列表 |
+| 服务反复重启 | ddl-auto=validate 与表不匹配 | `journalctl -u gongpu-server -n 50`；改实体要同步 gongpu-full.sql（§1 表结构 + §2 守卫加列） |
 | 起不来 + jar 报错 | dist jar 没更新 | deploy.sh 已修：`--skip-build` 也强制 cp target jar |
 | `set: pipefail: invalid option` | sh 脚本有 CRLF | `sed -i 's/\r$//'` |
 | 请求 10 秒内全报"操作太快" | unlock 的 Lua token 释放失败 | 检查 StateCache.unlock 是否把 token 当单个 varargs（不能包 List） |
@@ -109,7 +110,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 
 - 入口 `http://192.168.215.136:8088/gongpu/admin.html`；密码 = `/etc/gongpu/app.env` 的 ADMIN_PASSWORD（服务器上 `grep ADMIN_PASSWORD /etc/gongpu/app.env` 查看）
 - 后端 `/api/admin/**`（AdminGuard 独立 JWT，subject=admin，2h 有效）；改配置自动热刷新 GameData
-- 配置数据在 6 张 cfg_* 表；种子文件 server/src/main/resources/seed-v3.sql（幂等可重跑）
+- 配置数据在 8 张 cfg_* 表；全量脚本 server/src/main/resources/gongpu-full.sql（基线种子在其 §3，幂等可重跑；原 seed-v3.sql 等 22 个 SQL 文件已整合删除）
 - 改数值三选一：运维端页面改（推荐）/ 直接 UPDATE cfg_* 表后 POST /api/admin/config/reload / 重启服务
 - 所有运维操作落 admin_audit_log 审计表
 
@@ -124,7 +125,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 装备锁定 | POST /api/game/{slot}/lock {index} | Item.locked：单卖/丢弃拒绝、一键卖与管护卖白装跳过、无相位管护不吞噬不穿入；前端背包 🔒 按钮+名称标记；ItemLockTest 锁 |
 | 背包整理 | POST /api/game/{slot}/sortbag | 按 equipScore 降序稳定排序；前端「↕️ 整理背包」按钮 |
 | 怪物词条·嗜血 | GameConst.MOB_TRAITS leech | 🩸 命中按玩家实际掉血（护盾吸收后）30% 回怪血、封顶上限；沼泽起入池（矿洞仍三词条）；TraitLeechTest 锁 |
-| 运营统计 | StatDailyAggregator | game_save 冗余列（punches/kills/deaths/rebirths）一条 SUM 聚合，persist/rollback 同步维护；新库 schema.sql 自带、存量库跑 migration-v3.16 回填 |
+| 运营统计 | StatDailyAggregator | game_save 冗余列（punches/kills/deaths/rebirths）一条 SUM 聚合，persist/rollback 同步维护；gongpu-full.sql §1 自带冗余列、§2 守卫加列+一次性回填（存终身口径） |
 | 一键穿最强 | POST /api/game/{slot}/autoequip | equipScore=品质×1000+词条×100+底子和，强化+5%/级；同部位更优即换，戒指自动填 ring2 |
 | 装备词条显示 | 前端 app.js affixText 唯一出口 | 全部直接数值无 %：率型键(CRIT/CRITD/ACC/EVA/LIFESTEAL)按百分点显示(内部仍存小数概率)；pct_hp 生命泉涌刻意保留 %；旧档 pct 词条由 StateCodec.decode 线性映射转 flat(LEGACY_PCT_MAP 必须覆盖全部词条 key，漏键=词条静默失效，DataConsistencyTest 锁死) |
 | 挂机自动售卖 | 挂机管家 autoSellKeep 0~4 | 档位=白色及以下/绿色及以下/蓝色及以下/紫色及以下(全折现)，掉落直接折现**不进背包**（选蓝档只有紫装入包）；逐杀(onMobKilled)与溢出期望(dealDamage 护栏外)两分支同语义(玩家反馈修复,CombatRegressTest+SellTierTest 锁死)；手动分级卖走 autosell 端点；新手保底装备直入包不受拦截（福利豁免） |
@@ -183,7 +184,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 2. **写存档一律走 `SaveService.load + persist`**（2026-11-03 起 SocialService 亦然）：禁止再手写「直查 DB→decode→encode→save」绕过成就评估/冗余列/缓存刷新；万一真要直改 DB，写完必须 `evict` 缓存。
 3. **大数**：全 BigDecimal 字符串；`doubleValue()` 只许用于阈值比较；跨账号计数（香火/战绩/签到）一律原子 UPDATE（UserRepository/GraveRepository 已有范式）。
 4. **用户输入进 innerHTML**：先过 `esc()`。
-5. **实体改动三同步**：实体类 + schema.sql + deploy.sh 迁移函数。
+5. **实体改动三同步**：实体类 + gongpu-full.sql（§1 表结构 + §2 守卫加列）；deploy.sh 已改单一全量脚本入口，无清单要维护。
 6. **每轮修改后必跑**：`mvn -o test`（165 项）+ `python -I server/deploy/smoke_test.py`（66 项），双绿才算完成。
 7. **kills/gold 等基线类字段**：死亡重开/转生清零时，引用它的派生数据（如委托基线）必须同步清理。
 8. **前端渲染加签名守卫**：applyView 每秒全量跑，任何新 renderXXX 必须挂 `_sig` 内容签名（范式见 renderPotions/renderBag），否则每秒销毁重建 DOM=掉帧+点击丢失。

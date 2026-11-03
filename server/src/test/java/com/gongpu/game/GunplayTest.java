@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *   <li>BULLET_MP 从武器 base_stats 进面板({@link PanelCalculator.Panel#BULLETMP()});</li>
  *   <li>纯魔法弹(BULLET_MP&gt;0)每发子弹耗蓝,无蓝整体哑火(本帧普攻全不结算),蓝回复后自动恢复;</li>
  *   <li>物理弹(BULLET_MP=0)不吃 MP,0 蓝照常射击;</li>
- *   <li>加特林 ASPD 8 / 魔弹加特林 ASPD 10(模板落在 migration-v3.2-guns.sql,测试直读该种子)。</li>
+ *   <li>加特林 ASPD 8 / 魔弹加特林 ASPD 10(模板落在 gongpu-full.sql §4 枪械节,测试直读该文件)。</li>
  * </ul>
  * <p>战斗一律经 {@link GameEngine#advance} 驱动(与生产同路径),村口木桩(无限血)便于只观察发数。</p>
  */
@@ -144,7 +144,8 @@ class GunplayTest {
 
     /**
      * 模板锁:加特林 ASPD 8(物理弹线)/魔弹加特林 ASPD 10(纯魔法弹线)。
-     * 模板只存在于 migration-v3.2-guns.sql(cfg 表种子),测试直读该种子逐行解析 base_stats。
+     * 模板在 gongpu-full.sql 的 §4 枪械节（原 migration-v3.2-guns.sql，整合后唯一来源），
+     * 测试直读该文件逐行解析 base_stats。
      */
     @Test
     void gatlingTemplateAspdAndBulletMpLocked() throws Exception {
@@ -164,11 +165,11 @@ class GunplayTest {
                 "物理附魔弹线必须双修(PATK+MATK 底子)");
     }
 
-    /** 从 migration-v3.2-guns.sql 里取指定 code 枪械模板的 base_stats JSON 并解析。 */
+    /** 从 gongpu-full.sql 里取指定 code 枪械模板的 base_stats JSON 并解析。 */
     private Map<String, BigDecimal> templateBaseStats(String code) throws Exception {
         String sql;
-        try (InputStream in = GunplayTest.class.getResourceAsStream("/migration-v3.2-guns.sql")) {
-            assertNotNull(in, "种子 migration-v3.2-guns.sql 必须在 classpath 上(枪械模板唯一来源)");
+        try (InputStream in = GunplayTest.class.getResourceAsStream("/gongpu-full.sql")) {
+            assertNotNull(in, "gongpu-full.sql 必须在 classpath 上(枪械模板唯一来源)");
             sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
         for (String line : sql.split("\r?\n")) {

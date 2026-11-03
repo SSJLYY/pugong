@@ -64,61 +64,18 @@ if ! grep -q '^JWT_SECRET=' /etc/gongpu/app.env; then
 fi
 chmod 600 /etc/gongpu/app.env
 
-# ---------- 3. DB 迁移（幂等：缺列才加）----------
-# schema.sql 全部为 CREATE TABLE IF NOT EXISTS，可安全重复执行（新装/升级统一入口）
-mysql --default-character-set=utf8mb4 gongpu < "$SRC_DIR/src/main/resources/schema.sql" 2>/dev/null || \
-  mysql --default-character-set=utf8mb4 < "$SRC_DIR/src/main/resources/schema.sql" 2>/dev/null || true
-# seed-v3.sql 幂等（先 DELETE 再 INSERT）：新装 DB 的 cfg_* 基线数据（装备/词条/药剂/技能/状态/爆率）
-if [[ -f "$SRC_DIR/src/main/resources/seed-v3.sql" ]]; then
-  mysql --default-character-set=utf8mb4 gongpu < "$SRC_DIR/src/main/resources/seed-v3.sql" 2>/dev/null \
-    && log "cfg 基线种子(seed-v3)完成" || err "seed-v3.sql 执行失败(检查 mysql 可用性)"
+# ---------- 3. DB 初始化/迁移（单一全量脚本，全程幂等）----------
+# gongpu-full.sql = 原 schema.sql + seed-v3.sql + 全部 migration-*.sql 的整合版（唯一入口）：
+# §1 表结构（CREATE TABLE IF NOT EXISTS）→ §2 历史加列（information_schema 守卫，缺列才加，
+# 含原 deploy.sh migrate() 内联的 7 列）→ §3 基线种子 → §4 内容迁移（按版本序）。
+# 新装一次到位、存量升级、重复执行三种场景同一文件；原 22 个 SQL 文件已删除，勿再引用。
+if [[ -f "$SRC_DIR/src/main/resources/gongpu-full.sql" ]]; then
+  mysql --default-character-set=utf8mb4 gongpu < "$SRC_DIR/src/main/resources/gongpu-full.sql" 2>/dev/null \
+    && log "DB 全量脚本(gongpu-full.sql)执行完成" || err "gongpu-full.sql 执行失败(检查 mysql 可用性)"
+else
+  err "缺 gongpu-full.sql——检查 server/src 是否完整 scp 上传"
 fi
-migrate() {
-  local tbl=$1 col=$2 ddl=$3
-  mysql --default-character-set=utf8mb4 -e "SELECT 1 FROM information_schema.columns WHERE table_schema='gongpu' AND table_name='$tbl' AND column_name='$col'" 2>/dev/null | grep -q 1 || {
-    log "迁移：$tbl + $col"
-    mysql --default-character-set=utf8mb4 gongpu -e "ALTER TABLE $tbl ADD COLUMN $col $ddl"
-  }
-}
-migrate game_save snapshot_json "LONGTEXT NULL COMMENT '存档点快照（死亡回档读它）' AFTER state_json"
-migrate game_save saved_at "DATETIME(6) NULL COMMENT '存档点时间' AFTER snapshot_json"
-migrate account_user incense "INT NOT NULL DEFAULT 0 COMMENT '香火（复活货币）' AFTER last_login_at"
-migrate account_user pvp_wins "INT NOT NULL DEFAULT 0 AFTER incense"
-migrate account_user pvp_losses "INT NOT NULL DEFAULT 0 AFTER pvp_wins"
-migrate game_grave tributes "INT NOT NULL DEFAULT 0 COMMENT '被祭奠次数' AFTER epitaph"
-migrate account_user last_claim_day "DATE NULL COMMENT '每日签到最近领取日' AFTER pvp_losses"
-# v3.x 内容迁移(全部幂等,可重复执行,按序):
-# v2.1/v2.2 的加列已由上面 migrate() 内联覆盖——那两个文件是裸 ALTER,重复跑会报错,勿挂。
-# 缺这批文件时新装/重建 DB 会缺 枪械模板/修行铁壁药剂/腰带/委托/合成/词条flat(v3.9),玩法整体消失。
-CONTENT_MIGRATIONS=(
-  migration-v3.1-content.sql
-  migration-v3.2-guns.sql
-  migration-v3.3-belt.sql
-  migration-v3.3-cooking.sql
-  migration-v3.3-crafts.sql
-  migration-v3.3-quests.sql
-  migration-v3.9-affix-flat.sql
-  migration-v3.13-affix-mp.sql
-  migration-v3.14-potions.sql
-  migration-v3.16-stats-cols.sql
-  migration-v3.17-lifetime-stats.sql
-  migration-v3.18-potions2.sql
-  migration-v3.19-potions3.sql
-  migration-v3.20-potions4.sql
-  migration-v3.21-cure.sql
-  migration-v3.22-affixes.sql
-  migration-v3.23-equipment2.sql
-  migration-v3.24-equipment3.sql
-)
-for mf in "${CONTENT_MIGRATIONS[@]}"; do
-  if [[ -f "$SRC_DIR/src/main/resources/$mf" ]]; then
-    mysql --default-character-set=utf8mb4 gongpu < "$SRC_DIR/src/main/resources/$mf" 2>/dev/null \
-      && log "迁移 $mf 完成" || err "迁移 $mf 执行失败(检查 mysql 可用性)"
-  else
-    err "缺迁移文件 $mf——检查 server/src 是否完整 scp 上传"
-  fi
-done
-log "DB 迁移核对完成（验收口径:cfg_equipment 36/cfg_item 8/cfg_quest 9/cfg_craft 14/cfg_affix 13/cfg_skill 14）"
+log "DB 迁移核对完成（验收口径:cfg_equipment_template 45/cfg_item 25/cfg_quest 9/cfg_craft 14/cfg_affix 16/cfg_skill 14）"
 
 # ---------- 4. systemd ----------
 cat > /etc/systemd/system/${SERVICE}.service <<UNIT

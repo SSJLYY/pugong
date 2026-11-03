@@ -75,10 +75,9 @@ game/
 │       │   └── web/          # Controllers + GlobalExceptionHandler
 │       └── resources/
 │           ├── application.yml
-│           ├── schema.sql                    # 新装一次性建表（已含全部列）
-│           ├── seed-v3.sql                   # cfg_* 基线（幂等,先 DELETE 再 INSERT）
-│           └── migration-*.sql               # v2.x 加列已被 schema 合并(deploy.sh 内联 migrate);
-│                                             # v3.1~v3.9 内容迁移全部幂等,deploy.sh 按序自动执行
+│           └── gongpu-full.sql               # 数据库全量脚本（唯一入口,全程幂等）:
+│                                             # §1 表结构 + §2 历史加列守卫 + §3 基线种子 + §4 内容迁移
+│                                             # （原 schema.sql/seed-v3.sql/20 个 migration 已整合删除）
 ├── deploy/games.conf         # nginx 站点配置
 └── gongpu-legacy/            # v1 纯前端旧版（对照用，不再部署）
 ```
@@ -139,8 +138,8 @@ scp -r web/* root@192.168.215.136:/data/games/gongpu/
 
 - 业务账号 `gongpu_app@127.0.0.1`（密码在 /etc/gongpu/app.env 的 DB_PASSWORD）
 - 表：`account_user`（账号+香火+切磋战绩）、`game_save`（3 槽/人，state_json=滚动状态，snapshot_json=存档点快照）、`game_grave`（墓碑）、`stat_daily`
-- `spring.jpa.ddl-auto=validate`：实体与表不匹配会**启动失败**——改实体必须同步改 schema.sql 并走 deploy.sh 的幂等迁移
-- 新装库：`mysql < server/src/main/resources/schema.sql`（root 执行，含建库）
+- `spring.jpa.ddl-auto=validate`：实体与表不匹配会**启动失败**——改实体必须同步改 gongpu-full.sql（§1 表结构；新列另在 §2 加守卫式加列）
+- 新装库：`mysql --default-character-set=utf8mb4 < server/src/main/resources/gongpu-full.sql`（root 执行，含建库；存量升级/重复执行同一文件）
 - **灌库字符集（必读）**：mysql CLI 导入任何含中文的 SQL 必须带 `--default-character-set=utf8mb4`（或在 my.cnf 的 [client] 段预设）。客户端按 latin1 读 UTF-8 文件会把文本双重编码存入（页面显示 å°è¡€ 式乱码），2026-11-02 公网库已中招并逐列反转修复，详见开发注意 #10。
 
 ---
@@ -203,7 +202,7 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 5. **JDBC 字符集**：`characterEncoding=UTF-8`（不是 utf8mb4），配 `connectionCollation=utf8mb4_unicode_ci`。
 6. **前端路径**：页面在 `/gongpu/` 子路径下，fetch 必须用 `API_BASE` 相对拼接；nginx 反代用 `^~` 前缀匹配，防止 API 路径被静态正则截走。
 7. **XSS**：用户名/墓志铭/槽名进 innerHTML 前必须过 `esc()`。
-8. **ddl-auto=validate**：改实体 = 改 schema.sql + deploy.sh 迁移列表，三处同步。
+8. **ddl-auto=validate**：改实体 = 改 gongpu-full.sql（§1 表结构 + §2 守卫加列），deploy.sh 已是单一入口无需改清单。
 9. **前端渲染抛错会静默中断进游戏分支**：`applyView` 里任何一处抛错，`enterGame` 的后续分支（天赋觉醒仪式/死亡/转生弹窗）就永远到不了，界面却照常渲染，极难察觉。v3.14 的 buff 签名守卫引用了已被内联删除的 `renderBuffs._sig`，每次渲染存档视图必抛 ReferenceError，新手觉醒仪式因此从未触发；2026-11-02 改挂 `applyView._buffSig` 修复。给函数挂 `_sig` 属性前先确认函数还在。
 10. **灌库字符集**：见「数据库」节——mysql CLI 必须 `--default-character-set=utf8mb4`；双重编码的修复式：`CONVERT(BINARY(CONVERT(col USING latin1)) USING utf8mb4)`（`desc` 等保留字列名要加反引号）。JDBC 侧不受影响。
 11. **前端静态版本**：静态资源走 immutable 长缓存，改 `web/` 后必须同步提升 `index.html` 的 `?v=` 参数（当前 v=52），否则玩家继续用旧 JS；136 的 no-cache 部署同理确认。
@@ -270,6 +269,12 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 - ~~离线结算未做离线死亡判定~~ **已验证迁移完成**：离线与在线共用战斗流程，打不过的怪离线真实击杀（§10.2/已定决策#10），回游戏进死亡画面+完整尸检→回档或重开；OfflineDeathTest 锁死语义
 - ~~成就为纯前端展示层~~ **已落库（v3.3）**：成就服务端权威评估（Achievements.java，2026-11-03 起 24 项），随 state_json 持久化，换设备/清缓存不丢
 - ~~旧版自动管家的 autoBurn/autoSkill buff 常驻链未迁移~~ **已迁移（v3.4）**：挂机管家新增「技能常驻」「燃烧常驻」开关，服务端 GameEngine.autoBuffTick 按 legacy 语义执行（涌动先行免蓝→急速→蓄力常驻、血<60% 补格挡、血<30% 怒吼、血>60% 补燃烧），离线同样生效
+
+## 变更记录（2026-11-03 · SQL 整合）
+
+- 拉入 136 环境提交（deploy.sh 迁移清单补全 v3.16~v3.24；DeploySocketConfig 改条件启用 `gongpu.redis.socket`，常规环境回归 TCP、Muse VM 靠启动参数走套接字）。
+- resources 下 22 个 SQL 文件（schema.sql + seed-v3.sql + 20 个 migration）整合为单一 **`gongpu-full.sql`**：§1 表结构 → §2 历史加列（information_schema 守卫式，缺列才加；v3.16/v3.17 一次性回填仅在本次真加列时执行，避免重复回填冲掉终身口径）→ §3 基线种子 → §4 内容迁移（按版本序）。全程幂等：临时库实测全新导入与现行库 cfg 内容逐行一致、二次导入无错。
+- deploy.sh 改为单一全量脚本入口（删除 migrate() 内联补列与 CONTENT_MIGRATIONS 清单，验收口径更新）；GunplayTest 改读整合文件。
 
 ## 变更记录（2026-11-03 · 第四批十轮增强）
 

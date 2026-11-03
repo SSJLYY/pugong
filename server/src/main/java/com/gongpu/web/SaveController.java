@@ -74,6 +74,25 @@ public class SaveController {
                 .body(com.gongpu.state.StateCodec.encode(s));
     }
 
+    public record RenameReq(String name) {
+    }
+
+    /** 存档改名：1~16 字，与建档命名同界（persist 的 slotName 通道落库）。 */
+    @PostMapping("/{slot}/rename")
+    public Map<String, Object> rename(HttpServletRequest req, @PathVariable int slot,
+                                      @RequestBody RenameReq body) {
+        long uid = AuthInterceptor.userId(req);
+        String name = body == null || body.name() == null ? "" : body.name().trim();
+        if (name.isEmpty() || name.length() > 16) {
+            throw com.gongpu.common.ApiException.badRequest("存档名需为 1~16 个字符");
+        }
+        locked(uid, slot, () -> {
+            PlayerState s = saves.load(uid, slot);
+            saves.persist(uid, slot, s, name);
+        });
+        return Map.of("ok", true, "slotName", name);
+    }
+
     @PostMapping("/{slot}")
     public Map<String, Object> create(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody(required = false) CreateReq body) {

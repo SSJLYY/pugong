@@ -147,6 +147,7 @@
     // ---------- 存档 ----------
     listSaves: () => request('GET', '/api/saves'),
     createSave: (slot, slotName) => request('POST', '/api/saves/' + slot, { slotName }),
+    renameSave: (slot, name) => request('POST', '/api/saves/' + slot + '/rename', { name }),
     loadSave: (slot) => request('GET', '/api/saves/' + slot),
     manualSave: (slot) => request('POST', '/api/saves/' + slot + '/save'),
     deleteSave: (slot) => request('DELETE', '/api/saves/' + slot),

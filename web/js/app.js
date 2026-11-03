@@ -291,9 +291,18 @@
           <div class="sc-meta">生命上限 ${fmt(slot.maxHp)} · 存活 ${fmtDur(slot.aliveSeconds)}</div>
           <div class="sc-actions">
             <button class="sc-btn play">继续</button>
+            <button class="sc-btn ren">改名</button>
             <button class="sc-btn exp">导出</button>
             <button class="sc-btn del">删除</button>
           </div>`;
+        div.querySelector('.ren').addEventListener('click', async () => {
+          const name = prompt('给这一世改个名字（1~16 字）', slot.slotName || '');
+          if (name == null) return;
+          const trimmed = name.trim();
+          if (!trimmed) { toast('名字不能为空', 'err'); return; }
+          await call(() => API.renameSave(slot.slot, trimmed), '已改名');
+          await showSlots();
+        });
         div.querySelector('.play').addEventListener('click', async () => {
           try {
             await enterGame(slot.slot);

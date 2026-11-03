@@ -2375,10 +2375,42 @@
     autoSell: (keep) => API.autoSell(API.state.slot, keep),
     rebirth: (key) => API.rebirth(API.state.slot, key)
   };
+  // 快捷键（第六批）：1 小血药 / 2 大血药 / 3 蓝药 / 4 治愈术 / F 逃跑 / B 挑战 Boss。
+  // 输入框聚焦、选档界面或弹窗打开时不触发，避免与打字/确认冲突。
+  function bindHotkeys() {
+    if (bindHotkeys._done) return;
+    bindHotkeys._done = true;
+    document.addEventListener('keydown', async (e) => {
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+      if (!API.state.slot || !S.view || S.view.dead) return;
+      const slotMask = $('slotMask');
+      if (slotMask && slotMask.style.display === 'flex') return;
+      const pot = (id, alt) => {
+        const v = S.view;
+        const have = (v.potions && v.potions[id]) || 0;
+        const use = have > 0 ? id : alt;
+        if (use) call(() => API.usePotion(API.state.slot, use));
+      };
+      switch (e.code) {
+        case 'Digit1': pot('hp_s', 'hp_l'); break;
+        case 'Digit2': pot('hp_l', 'hp_s'); break;
+        case 'Digit3': pot('mp', 'mp_l'); break;
+        case 'Digit4': call(() => API.castSkill(API.state.slot, 'heal')); break;
+        case 'KeyF': { const b = $('btnFlee'); if (b) b.click(); break; }
+        case 'KeyB': { const b = $('btnBoss'); if (b) b.click(); break; }
+        default: return;
+      }
+      e.preventDefault();
+    });
+  }
+
   function boot() {
     initAuth();
     initStatCard();
     initTalentPop();
+    bindHotkeys();
     // 先挂 401 监听再触发请求:否则启动时 token 已过期,事件发出时无人接收,静默跳回登录页无提示
     window.addEventListener('gongpu:unauthorized', () => {
       stopLoop();

@@ -936,3 +936,5 @@
 .event-log .event-line{padding:1px 0;border-top:1px dashed rgba(255,255,255,.07)}
 .event-log .event-line:first-child{border-top:none}
 .mat-src{font-style:normal;opacity:.65;font-size:11px}
+.hotkey-hint{font-size:11px;color:#9a917e;margin-top:4px}
+.hotkey-hint b{color:#d8c98a}

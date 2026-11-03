@@ -959,3 +959,6 @@
 /* 未达标区域锁定样式（第六批：面板门槛比对） */
 .zone-btn.locked{opacity:.45;filter:grayscale(.6)}
 .zone-btn.locked::after{content:' 🔒'}
+
+/* 补给预警（第六批：血药/蓝药见底红字提示） */
+.potion-warn{color:#ff8a80;background:rgba(229,72,77,.12);border:1px solid rgba(229,72,77,.4);border-radius:8px;padding:6px 10px;font-size:13px;margin:6px 0}

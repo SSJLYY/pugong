@@ -1658,7 +1658,20 @@
     const sig = JSON.stringify(view.potions || {});
     if (sig === renderPotions._sig) return;
     renderPotions._sig = sig;
-    box.querySelectorAll('.potion-item:not(.auto-cfg), .potion-group').forEach(el => el.remove());
+    box.querySelectorAll('.potion-item:not(.auto-cfg), .potion-group, .potion-warn').forEach(el => el.remove());
+    // 补给预警：血药见底时在列表顶部红字提示（挂机断药是最常见的暴毙原因）
+    const hpTot = ((view.potions || {}).hp_s || 0) + ((view.potions || {}).hp_l || 0);
+    const mpTot = ((view.potions || {}).mp || 0) + ((view.potions || {}).mp_l || 0);
+    const warns = [];
+    if (hpTot === 0) warns.push('🩸 血药已耗尽！点上方「一键补给」或逐个购买');
+    else if (hpTot < 3) warns.push('⚠️ 血药仅剩 ' + hpTot + ' 瓶，建议补给');
+    if (mpTot === 0) warns.push('🔵 蓝药已耗尽，主动技能将无法释放');
+    if (warns.length) {
+      const w = document.createElement('div');
+      w.className = 'potion-warn';
+      w.innerHTML = warns.join('<br>');
+      box.appendChild(w);
+    }
     // 药剂分组展示（25 种平铺难找）：回复 / 增益 / 功能，组内保持商店顺序
     const POT_GROUPS = [['heal', '💊 回复药剂'], ['buff', '⚡ 增益药剂'], ['func', '🧰 功能药剂']];
     const allPots = S.meta ? S.meta.potions : [];

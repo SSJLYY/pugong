@@ -1352,8 +1352,66 @@
       bag.innerHTML = '<p class="empty-hint">击杀怪物掉落装备</p>';
       return;
     }
+    // 背包筛选条：只建一次（部位 + 品质两组筹码），点击改 bagFilter 后强制重绘
+    if (!$('bagFilterBar')) {
+      const bar = document.createElement('div');
+      bar.id = 'bagFilterBar';
+      bar.className = 'bag-filter-bar';
+      const slotChips = [['all', '全部部位'], ['weapon', '武器'], ['bow', '弓'], ['offhand', '副手'],
+        ['head', '头'], ['chest', '胸'], ['legs', '腿'], ['boots', '鞋'], ['ring', '戒指'], ['necklace', '项链']];
+      const qChips = [['all', '全部品质'], [0, '白'], [1, '绿'], [2, '蓝'], [3, '紫'], [4, '橙']];
+      bar.innerHTML =
+        slotChips.map(([v, n]) => '<button class="bf-chip" data-bf-slot="' + v + '">' + n + '</button>').join('') +
+        '<span class="bf-sep"></span>' +
+        qChips.map(([v, n]) => '<button class="bf-chip" data-bf-q="' + v + '">' + n + '</button>').join('') +
+        '<span class="bf-sep"></span>' +
+        '<select id="bagSortSel" title="背包排序（仅显示顺序，不改动服务端背包）">' +
+        '<option value="orig">↕️ 默认顺序</option><option value="score">⚖ 评分优先</option>' +
+        '<option value="quality">🎨 品质优先</option><option value="price">💰 售价优先</option></select>';
+      bar.addEventListener('change', (e) => {
+        if (e.target.id !== 'bagSortSel') return;
+        bagFilter.sort = e.target.value;
+        renderBag._sig = null;
+        if (S.view) renderBag(S.view);
+      });
+      bar.addEventListener('click', (e) => {
+        const b = e.target.closest('.bf-chip');
+        if (!b) return;
+        if (b.dataset.bfSlot !== undefined) bagFilter.slot = b.dataset.bfSlot;
+        if (b.dataset.bfQ !== undefined) bagFilter.quality = b.dataset.bfQ === 'all' ? 'all' : Number(b.dataset.bfQ);
+        renderBag._sig = null;
+        if (S.view) renderBag(S.view);
+      });
+      bag.parentNode.insertBefore(bar, bag);
+    }
+    // 筹码选中态跟随 bagFilter
+    document.querySelectorAll('#bagFilterBar .bf-chip').forEach(c => {
+      const on = (c.dataset.bfSlot !== undefined && c.dataset.bfSlot === bagFilter.slot)
+        || (c.dataset.bfQ !== undefined && String(bagFilter.quality) === c.dataset.bfQ);
+      c.classList.toggle('on', !!on);
+    });
+    const entries = view.bag.map((it, idx) => ({ it, idx })).filter(en =>
+      (bagFilter.slot === 'all' || en.it.slot === bagFilter.slot
+        || (bagFilter.slot === 'ring' && (en.it.slot === 'ring1' || en.it.slot === 'ring2')))
+      && (bagFilter.quality === 'all' || en.it.quality === bagFilter.quality));
+    // 显示排序（不改动服务端背包顺序，操作仍走原始下标）：评分/品质/售价降序
+    const sortSel = $('bagSortSel');
+    if (sortSel && sortSel.value !== bagFilter.sort) sortSel.value = bagFilter.sort;
+    if (bagFilter.sort === 'score') {
+      const sc = view.bagScores || [];
+      entries.sort((a, b) => (sc[b.idx] || 0) - (sc[a.idx] || 0));
+    } else if (bagFilter.sort === 'quality') {
+      entries.sort((a, b) => b.it.quality - a.it.quality || (b.it.enhance || 0) - (a.it.enhance || 0));
+    } else if (bagFilter.sort === 'price') {
+      const price = (it) => 20 * (it.quality + 1) * (1 + (it.enhance || 0) * 0.5);
+      entries.sort((a, b) => price(b.it) - price(a.it));
+    }
+    if (!entries.length) {
+      bag.innerHTML = '<p class="empty-hint">没有符合筛选的装备（点「全部」恢复）</p>';
+      return;
+    }
     // 卖出按钮上的售价与服务端 EquipFactory.sellPrice 同公式：20×(品质+1)×(1+强化×0.5)，改价必须两边同步
-    view.bag.forEach((it, idx) => {
+    entries.forEach(({ it, idx }) => {
       const d = document.createElement('div');
       d.className = 'bag-item';
       d.style.borderLeftColor = QUALITY_COLOR[it.quality];

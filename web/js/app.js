@@ -955,6 +955,19 @@
 
     $('btnRebirth').addEventListener('click', () => showRebirth(S.view));
 
+    $('btnHelp').addEventListener('click', () => {
+      infoModal('❓ 玩法说明', [
+        '<div class="trait-row"><b>🥋 核心循环</b><span>出拳永久 +生命上限 → 打怪攒金币/装备 → 过门槛推进区域 → 挑战 Boss → 飞升转世解锁天赋，越转越强。</span></div>',
+        '<div class="trait-row"><b>🤖 挂机管家</b><span>药剂页可设喝药线、自动技能/燃烧/飞升、自动卖/分解档位；管家悬浮球还能一键管护与看材料库存。</span></div>',
+        '<div class="trait-row"><b>🗺️ 自动推进</b><span>开启后打完 Boss 若下一区门槛达标就直接推进；「👑 Boss 连战」则留在本区连刷 Boss 攒图纸。</span></div>',
+        '<div class="trait-row"><b>⚒️ 锻造分解</b><span>装备可分解为来源区域材料，图纸打 Boss/野怪掉落；材料还能 3:1 跨区兑换，锻造页材料筹码标注了来源区域。</span></div>',
+        '<div class="trait-row"><b>🎁 每日连签</b><span>每天签到得金币礼包，连签每天多 +50 金（封顶 +350），每连签 7 天另奖大血药 ×2。</span></div>',
+        '<div class="trait-row"><b>🏅 成就</b><span>角色页成就带进度条与金币奖励，解锁后记得领取（可一键全领）。</span></div>',
+        '<div class="trait-row"><b>⌨️ 快捷键</b><span>1 小血药 · 2 大血药 · 3 蓝药 · 4 治愈术 · F 逃跑 · B 挑战 Boss。</span></div>',
+        '<div class="trait-row"><b>📖 词条图鉴</b><span>地图区按钮查看野怪词条（狂暴/破甲/富饶/晶化…）的效果与应对。</span></div>'
+      ].join(''));
+    });
+
     $('btnTraits').addEventListener('click', () => {
       const traits = (S.meta && S.meta.traits) || [];
       if (!traits.length) { toast('词条数据未加载', 'err'); return; }

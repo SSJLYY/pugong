@@ -145,7 +145,7 @@ public class GameController {
         // 榜单（生命/金币/世代三榜统一上报,带内部节流,静默失败）
         try {
             board.submit(uid, name,
-                    s.life.maxHP, s.gen, s.gold);
+                    s.life.maxHP, s.gen, s.gold, s.stats.totalDamage);
         } catch (RuntimeException ignored) {
             // 榜单不影响游戏
         }
@@ -582,7 +582,7 @@ public class GameController {
             }
             String username = accounts.require(uid).getUsername();
             // 转生后回首世，但榜单记的是历史最好成绩
-            board.submit(uid, username, s.life.maxHP, s.gen, s.gold);
+            board.submit(uid, username, s.life.maxHP, s.gen, s.gold, s.stats.totalDamage);
             Map<String, Object> extra = game.rebirth(s, body.key());
             saves.persist(uid, slot, s, null);
             Map<String, Object> out = game.fullView(s);

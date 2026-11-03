@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** 排行榜（公开接口，无需登录）：board=maxhp(默认)/gold/gen 三榜。 */
+/** 排行榜（公开接口，无需登录）：board=maxhp(默认)/gold/gen/damage 四榜。 */
 @RestController
 @RequestMapping("/api/leaderboard")
 public class LeaderboardController {

@@ -2296,10 +2296,10 @@
   }
 
   // ================= 榜单 / 墓园 =================
-  // 三榜切换:生命上限/财富/世代(gongpu:lb:* ZSET,服务端 60s 节流上报)
+  // 四榜切换:生命上限/财富/世代/总伤害(gongpu:lb:* ZSET,服务端 60s 节流上报)
   let rankBoard = 'maxhp';
   const RANK_TABS = [
-    ['maxhp', '❤️ 生命榜'], ['gold', '💰 财富榜'], ['gen', '🌟 世代榜']
+    ['maxhp', '❤️ 生命榜'], ['gold', '💰 财富榜'], ['gen', '🌟 世代榜'], ['damage', '💥 伤害榜']
   ];
   async function loadRank() {
     const box = $('rankList');
@@ -2313,6 +2313,7 @@
         box.innerHTML = tabs + r.rows.map(x => {
           const meta = rankBoard === 'gold' ? '身家 ' + esc(x.goldText)
             : rankBoard === 'gen' ? '已达 ' + Number(x.gen) + ' 世'
+            : rankBoard === 'damage' ? '第 ' + esc(x.gen) + ' 世 · 总伤害 ' + esc(x.damageText)
             : '第 ' + esc(x.gen) + ' 世 · 生命上限 ' + esc(x.maxHPText);
           return `<div class="grave-item">
             <b>#${x.rank} ${esc(x.username)}</b>

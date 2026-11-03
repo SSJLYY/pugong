@@ -37,6 +37,28 @@ class LeaderboardCacheTest {
         verify(zset, times(1)).reverseRangeWithScores(anyString(), eq(0L), eq(49L));
     }
 
+    /** 第七批第 55 轮：伤害榜读取——走 damage 键，行含 damage/damageText 与世代段。 */
+    @Test
+    @SuppressWarnings("unchecked")
+    void damageBoardParsesRows() {
+        StringRedisTemplate redis = mock(StringRedisTemplate.class);
+        ZSetOperations<String, String> zset = mock(ZSetOperations.class);
+        when(redis.opsForZSet()).thenReturn(zset);
+        ZSetOperations.TypedTuple<String> row = mock(ZSetOperations.TypedTuple.class);
+        when(row.getValue()).thenReturn("9|伤害王|2|987654321");
+        when(row.getScore()).thenReturn(8.99);
+        when(zset.reverseRangeWithScores(eq("gongpu:board:damage"), eq(0L), eq(49L)))
+                .thenReturn(Set.of(row));
+
+        LeaderboardService svc = new LeaderboardService(redis, "gongpu:board:maxhp");
+        List<Map<String, Object>> rows = svc.top(LeaderboardService.BOARD_DAMAGE, 50);
+
+        assertEquals(1, rows.size());
+        assertEquals("伤害王", rows.get(0).get("username"));
+        assertEquals("987654321", rows.get(0).get("damage"));
+        assertEquals("2", rows.get(0).get("gen"));
+    }
+
     @Test
     @SuppressWarnings("unchecked")
     void differentBoardsCacheSeparately() {

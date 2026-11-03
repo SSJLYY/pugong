@@ -27,15 +27,17 @@ public class LeaderboardService {
     private static final String HASH_MEMBER = "member";
     private static final String HASH_LOG = "log";
 
-    /** 榜单类型：生命上限 / 金币 / 世代。 */
+    /** 榜单类型：生命上限 / 金币 / 世代 / 总伤害（第七批）。 */
     public static final String BOARD_HP = "maxhp";
     public static final String BOARD_GOLD = "gold";
     public static final String BOARD_GEN = "gen";
+    public static final String BOARD_DAMAGE = "damage";
 
     private final StringRedisTemplate redis;
     private final String hpKey;
     private final String goldKey;
     private final String genKey;
+    private final String damageKey;
 
     public LeaderboardService(StringRedisTemplate redis,
                               @Value("${gongpu.game.leaderboard-key}") String key) {
@@ -43,21 +45,29 @@ public class LeaderboardService {
         this.hpKey = key;
         this.goldKey = key.replace("maxhp", "gold");
         this.genKey = key.replace("maxhp", "gen");
+        this.damageKey = key.replace("maxhp", "damage");
     }
 
     private String keyOf(String board) {
         return switch (board) {
             case BOARD_GOLD -> goldKey;
             case BOARD_GEN -> genKey;
+            case BOARD_DAMAGE -> damageKey;
             default -> hpKey;
         };
     }
 
+    /** 旧签名兼容：不上报伤害榜。 */
+    public void submit(long userId, String username, BigDecimal maxHP, int gen, BigDecimal gold) {
+        submit(userId, username, maxHP, gen, gold, null);
+    }
+
     /**
-     * 统一上报三个榜单(生命上限/金币/世代),同用户各榜取历史最好成绩。
+     * 统一上报四个榜单(生命上限/金币/世代/总伤害),同用户各榜取历史最好成绩。
      * 共享 60 秒节流,避免 tick 风暴。任何失败静默——榜单不影响游戏。
      */
-    public void submit(long userId, String username, BigDecimal maxHP, int gen, BigDecimal gold) {
+    public void submit(long userId, String username, BigDecimal maxHP, int gen, BigDecimal gold,
+                       BigDecimal totalDamage) {
         if (userId <= 0) {
             return;
         }
@@ -79,6 +89,9 @@ public class LeaderboardService {
         }
         if (gen > 0) {
             submitBoard(genKey, userId, username, gen, String.valueOf(gen), gen, true);
+        }
+        if (totalDamage != null && totalDamage.signum() > 0) {
+            submitBoard(damageKey, userId, username, gen, Num.plain(totalDamage), log10Safe(totalDamage), false);
         }
     }
 
@@ -178,6 +191,12 @@ public class LeaderboardService {
                     double score = t.getScore() == null ? 0 : t.getScore();
                     switch (board == null ? BOARD_HP : board) {
                         case BOARD_GEN -> row.put("gen", (int) score);
+                        case BOARD_DAMAGE -> {
+                            row.put("gen", parts.length > 2 ? parts[2] : "0");
+                            BigDecimal dmg = valueOfMember(parts, score);
+                            row.put("damage", Num.plain(dmg));
+                            row.put("damageText", Num.cn(dmg));
+                        }
                         case BOARD_GOLD -> {
                             BigDecimal gold = valueOfMember(parts, score);
                             row.put("gold", Num.plain(gold));

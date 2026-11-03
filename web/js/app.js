@@ -1457,20 +1457,16 @@
         <div class="pi-btns"><button id="btnRestock">补给</button></div>`;
       box.appendChild(rb);
       rb.querySelector('#btnRestock').addEventListener('click', async () => {
+        // 服务端 buyfill 逐瓶补到 10：动态涨价口径与手动逐瓶买一致，客户端不再按标价估算
         let bought = 0;
+        let last = null;
         for (const id of ['hp_s', 'hp_l', 'mp', 'cure']) {
-          const have = (S.view && S.view.potions && S.view.potions[id]) || 0;
-          const need = 10 - have;
-          if (need <= 0) continue;
-          const def = (S.meta && S.meta.potions || []).find(p => p.id === id);
-          const gold = S.view ? Number(S.view.gold) : 0;
-          const afford = def && def.price > 0 ? Math.min(need, Math.floor(gold / def.price)) : 0;
-          if (afford <= 0) break;
-          const r = await call(() => API.buyPotion(API.state.slot, id, afford));
+          const r = await call(() => API.buyFill(API.state.slot, id, 10));
           if (!r) break;
-          applyView(r);
-          bought += afford;
+          last = r;
+          bought += (r.result && r.result.bought) || 0;
         }
+        if (last) applyView(last);
         toast(bought > 0 ? `补给完成：买入 ${bought} 瓶` : '无需补给或金币不足');
       });
       $('btnAutoCfg').addEventListener('click', async () => {

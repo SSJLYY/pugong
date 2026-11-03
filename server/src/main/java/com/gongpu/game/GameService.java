@@ -212,6 +212,35 @@ public class GameService {
         return m;
     }
 
+    /**
+     * 补给到目标库存：逐瓶买入直到达到 target 或金币不足（动态涨价与手动逐瓶买完全同口径，
+     * 买不起剩余部分静默停手并回报实际买入数；药剂不存在/目标非法直接报错）。
+     */
+    public static Map<String, Object> buyFill(PlayerState s, String potionId, int target) {
+        GameConst.PotionDef def = com.gongpu.cfg.GameData.instance().potion(potionId);
+        if (def == null) {
+            throw ApiException.badRequest("药剂不存在");
+        }
+        if (target < 1 || target > 99) {
+            throw ApiException.badRequest("目标库存不合法");
+        }
+        int bought = 0;
+        while (s.potions.getOrDefault(potionId, 0) < target) {
+            try {
+                buyPotion(s, potionId, 1);
+                bought++;
+            } catch (RuntimeException e) {
+                break;   // 金币不足：停在当前库存
+            }
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("bought", bought);
+        m.put("left", s.potions.getOrDefault(potionId, 0));
+        m.put("gold", Num.plain(s.gold));
+        return m;
+    }
+
     // ==================== 装备 ====================
 
     /** 动态背包容量：基础 100 + 装备 BAG_CAP 词条（负重腰带 +20）。 */

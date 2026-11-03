@@ -176,6 +176,7 @@
     craftBoard: (slot) => request('GET', '/api/game/' + slot + '/crafts'),
     craftDo: (slot, code) => request('POST', '/api/game/' + slot + '/craft', { code }),
     matExchange: (slot, from, to) => request('POST', '/api/game/' + slot + '/mat-exchange', { from, to }),
+    buyFill: (slot, id, target) => request('POST', '/api/game/' + slot + '/buyfill', { id, target }),
     questAccept: (slot, code) => request('POST', '/api/game/' + slot + '/quest/accept', { code }),
     questDeliver: (slot, code) => request('POST', '/api/game/' + slot + '/quest/deliver', { code }),
     questAbandon: (slot, code) => request('POST', '/api/game/' + slot + '/quest/abandon', { code }),

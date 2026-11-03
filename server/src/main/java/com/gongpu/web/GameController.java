@@ -240,6 +240,17 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> GameService.buyPotion(s, reqStr(body.id(), "id"), count));
     }
 
+    public record BuyFillReq(String id, Integer target) {
+    }
+
+    /** 补给：把某药剂买到目标库存（金币不足部分买入）。 */
+    @PostMapping("/{slot}/buyfill")
+    public Map<String, Object> buyFill(HttpServletRequest req, @PathVariable int slot,
+                                       @RequestBody BuyFillReq body) {
+        int target = body.target() == null ? 10 : body.target();
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), s -> GameService.buyFill(s, reqStr(body.id(), "id"), target));
+    }
+
     @PostMapping("/{slot}/equip")
     public Map<String, Object> equip(HttpServletRequest req, @PathVariable int slot,
                                      @RequestBody IdxReq body) {

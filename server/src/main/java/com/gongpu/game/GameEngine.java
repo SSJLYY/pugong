@@ -233,6 +233,10 @@ public final class GameEngine {
         if ("disarm".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_DISARM_MUL));
         }
+        // 词条·堡垒：皮糙肉厚，你对它造成的伤害打折（同乘区）
+        if ("bulwark".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_BULWARK_MUL));
+        }
         // 被动·巨人杀手：对 Boss 专伤乘区
         if (m.boss && s.passives.contains("boss_hunter")) {
             perHit = Num.mul(perHit, Num.of(GameConst.BOSS_HUNTER_MUL));

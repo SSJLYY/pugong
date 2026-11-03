@@ -258,6 +258,9 @@ public class PlayerState {
         public long dailyClaims = 0;
         /** 弱点打击触发次数（第七批，终身口径）。 */
         public long weakCrits = 0;
+        /** 材料出售累计（第七批，终身口径）：份数与金币收入（商贾成就口径）。 */
+        public long matSold = 0;
+        public long matSoldGold = 0;
         public long born = 0;
         public long playSeconds = 0;
         public long bestMaxHP = 0;

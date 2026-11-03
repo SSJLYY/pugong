@@ -561,6 +561,11 @@ public final class GameConst {
             "fire_crystal", new String[]{"火晶", "🔥"},
             "abyss_crystal", new String[]{"深渊结晶", "🕳️"});
 
+    /** 材料出售单价（第七批，金币/份）：越深的区域材料越值钱；仅区域材料可售（图纸/卷轴不可）。 */
+    public static final Map<String, Integer> MAT_SELL_PRICE = Map.of(
+            "pelt", 20, "wolf_fang", 35, "ore", 60, "toad_gland", 90,
+            "mana_dust", 140, "fire_crystal", 220, "abyss_crystal", 400);
+
     /** 增益类 buff（永久存续天赋作用对象）。 */
     public static final Set<String> ETERNAL_BUFFS = Set.of(
             "burn", "block", "rapid", "surge", "regen_food", "spd_pot", "growth_pot", "iron_pot");

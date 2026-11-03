@@ -148,6 +148,34 @@ public class CraftService {
         return m;
     }
 
+    /**
+     * 材料出售（第七批）：区域材料按 GameConst.MAT_SELL_PRICE 卖金币；
+     * count<=0 表示全部卖出，超出库存按库存封顶；图纸/卷轴不在价目表内、不可售。
+     */
+    public Map<String, Object> sell(PlayerState s, String code, int count) {
+        Integer price = com.gongpu.game.GameConst.MAT_SELL_PRICE.get(code);
+        if (price == null) {
+            throw ApiException.badRequest("这种材料不能出售");
+        }
+        int have = s.materials.getOrDefault(code, 0);
+        if (have <= 0) {
+            throw ApiException.badRequest("没有这种材料");
+        }
+        int n = count <= 0 ? have : Math.min(count, have);
+        s.materials.put(code, have - n);
+        long gold = (long) price * n;
+        s.gold = com.gongpu.common.Num.add(s.gold, com.gongpu.common.Num.of(gold));
+        s.stats.matSold += n;
+        s.stats.matSoldGold += gold;
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("id", code);
+        m.put("count", n);
+        m.put("gold", gold);
+        m.put("have", s.materials.getOrDefault(code, 0));
+        return m;
+    }
+
     /** 执行合成：全校验通过才扣料，产物入背包。 */
     public Map<String, Object> craft(PlayerState s, String code) {
         CraftTemplate t = GameData.instance().craft(code);

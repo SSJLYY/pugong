@@ -404,6 +404,17 @@ public class GameController {
                 s -> crafts.exchange(s, reqStr(body.from(), "from"), reqStr(body.to(), "to")));
     }
 
+    public record SellMatReq(String id, Integer count) {
+    }
+
+    /** 材料出售：区域材料按单价卖金币（count 缺省/小于等于 0 = 全部卖出）。 */
+    @PostMapping("/{slot}/sell-material")
+    public Map<String, Object> sellMaterial(HttpServletRequest req, @PathVariable int slot,
+                                            @RequestBody SellMatReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
+                s -> crafts.sell(s, reqStr(body.id(), "id"), body.count() == null ? 0 : body.count()));
+    }
+
     /** 一键穿最强装备（按评分自动换装）。 */
     @PostMapping("/{slot}/autoequip")
     public Map<String, Object> autoEquip(HttpServletRequest req, @PathVariable int slot) {

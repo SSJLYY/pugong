@@ -390,6 +390,12 @@
         renderSkillButtons();
       }).catch(() => { /* 静默:下个周期再试 */ });
     }
+    // 死亡态世界已冻结:5 次才发 1 次轮询(约 5 秒一帧)——死亡界面的回档/重开都是写请求,
+    // 会即时带回新视图,不靠轮询;活着时不降频,挂机结算一秒一帧不变
+    if (S.view && S.view.dead) {
+      S._deadSkip = ((S._deadSkip || 0) + 1) % 5;
+      if (S._deadSkip !== 0) return;
+    }
     // 页面隐藏(后台标签/锁屏)时 5 次才发 1 次轮询:移动端省电省流量,服务端少一半空转
     if (document.hidden) {
       S._hiddenSkip = ((S._hiddenSkip || 0) + 1) % 5;

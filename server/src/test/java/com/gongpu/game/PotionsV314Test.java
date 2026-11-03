@@ -34,7 +34,7 @@ class PotionsV314Test {
     @Test
     void potionTableHas18Entries() {
         // 18 = v3.14 基线（8 旧 + 10 新）；第四批扩充后总数在 PotionsExpand 系测试里锁（21 起）
-        assertEquals(21, GameConst.POTIONS.size(), "GameConst 兜底表应有 21 种药剂(18 + 回复系 3)");
+        assertEquals(24, GameConst.POTIONS.size(), "GameConst 兜底表应有 24 种药剂(21 + 新维度 3)");
         for (String id : new String[]{"crit", "critd", "lifesteal", "atk", "def", "aspd",
                 "acc", "eva", "mregen", "shield"}) {
             assertNotNull(GameConst.POTIONS.get(id), "缺少新药剂: " + id);

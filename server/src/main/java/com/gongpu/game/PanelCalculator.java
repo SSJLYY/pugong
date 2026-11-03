@@ -74,6 +74,10 @@ public final class PanelCalculator {
         BigDecimal accPot = (active(s, "acc_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal evaPot = (active(s, "eva_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal mregenPot = (active(s, "mregen_pot") && !silenced) ? Num.of(10) : Num.ZERO;
+        // 第四批新维度药剂：持续回复/射程/移速（同受沉默压制）
+        BigDecimal regenPot = (active(s, "regen_pot") && !silenced) ? Num.of(25) : Num.ZERO;
+        BigDecimal rngPot = (active(s, "rng_pot") && !silenced) ? Num.of(1) : Num.ZERO;
+        BigDecimal fleetPot = (active(s, "fleet_pot") && !silenced) ? Num.of(40) : Num.ZERO;
 
         // 装备：底子 + 词条 + 强化
         Map<String, BigDecimal> flat = new HashMap<>();
@@ -133,11 +137,11 @@ public final class PanelCalculator {
                 Num.mul(Num.mul(Num.mul(pctApply(L.MATK, flat, pct, "MATK"), pmul.getOrDefault("MATK", Num.of(1))), burnMul), atkPotMul),
                 Num.mul(Num.mul(Num.mul(pctApply(L.PDEF, flat, pct, "PDEF"), pmul.getOrDefault("PDEF", Num.of(1))), ironPotMul), defPotMul),
                 Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul),
-                Num.mul(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), pmul.getOrDefault("REGEN", Num.of(1))),
+                Num.mul(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
                 Num.mul(Num.mul(Num.mul(aspdWithBonus(s.fixed.ASPD, flat, pct), rapidMul), spdPotMul), aspdPotMul),
-                Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)),
-                Num.mul(Num.add(Num.add(s.fixed.SPD, flat.getOrDefault("SPD", Num.ZERO)),
+                Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot),
+                Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),
                 Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot)),
                 Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot),

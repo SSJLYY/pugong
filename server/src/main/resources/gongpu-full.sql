@@ -856,6 +856,11 @@ DELETE FROM `cfg_affix` WHERE `code` IN ('bloodpact');
 INSERT INTO `cfg_affix`
   (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
   ('bloodpact', '血契', 'LIFESTEAL', 'flat', 0.03, 0.06, 'epic', NULL, NULL, 1, 17);
+-- 第 12 轮：高阶词条「磐石」（物防上位版）
+DELETE FROM `cfg_affix` WHERE `code` IN ('bedrock');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('bedrock', '磐石', 'PDEF', 'flat', 20, 45, 'epic', NULL, NULL, 1, 18);
 
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 口径）：

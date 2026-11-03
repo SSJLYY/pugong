@@ -24,4 +24,13 @@ class AffixBatch6Test {
         assertEquals("epic", a.rarity());
         assertTrue(a.min() >= 0.03 && a.max() <= 0.06, "血契区间应为 3%~6%：" + a.min() + "~" + a.max());
     }
+
+    @Test
+    void round12Bedrock() {
+        GameConst.Affix a = byName("磐石");
+        assertNotNull(a, "磐石应进词条池");
+        assertEquals("PDEF", a.key());
+        assertEquals("epic", a.rarity());
+        assertTrue(a.min() >= 20 && a.max() <= 45, "磐石区间应为 20~45：" + a.min() + "~" + a.max());
+    }
 }

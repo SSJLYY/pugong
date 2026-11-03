@@ -59,9 +59,20 @@
     container.innerHTML = html;
   }
 
+  // ---------------- 特效开关（第七批）：低特效模式存 localStorage，飘字与 CSS 动画一并停用 ----------------
+  function fxOff() {
+    try { return localStorage.getItem('gongpu_fx') === 'off'; } catch (e) { return false; }
+  }
+  function applyFxPref() {
+    document.body.classList.toggle('fx-off', fxOff());
+    const b = $('btnFx');
+    if (b) b.textContent = fxOff() ? '🚫 特效' : '✨ 特效';
+  }
+
   // ---------------- 战斗飘字（预算节流防爆屏） ----------------
   let _floatLayer = null, _floatBudget = 0, _floatLast = 0;
   function floatDmg(text, cls, anchorId) {
+    if (fxOff()) return;
     const now = performance.now();
     if (now - _floatLast > 120) { _floatBudget = 4; _floatLast = now; }
     if (_floatBudget <= 0) return;
@@ -1079,6 +1090,13 @@
       } catch (e) {
         infoModal('📋 战绩摘要', '<pre style="white-space:pre-wrap">' + esc(text) + '</pre>');
       }
+    });
+
+    applyFxPref();
+    $('btnFx').addEventListener('click', () => {
+      try { localStorage.setItem('gongpu_fx', fxOff() ? 'on' : 'off'); } catch (e) { /* 忽略 */ }
+      applyFxPref();
+      toast(fxOff() ? '🚫 特效已关（飘字与动画停用）' : '✨ 特效已开', 'ok');
     });
 
     $('btnDaily').addEventListener('click', async () => {

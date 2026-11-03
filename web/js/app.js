@@ -490,6 +490,7 @@
       el.innerHTML =
         '<div class="bp-row bp-mob" id="bpMob"></div>' +
         '<div class="bp-row bp-mats" id="bpMats" title="材料库存（锻造原料，详情见锻造页）"></div>' +
+        '<div class="bp-row bp-daily" id="bpDaily" title="每日任务进度（详情见任务页）"></div>' +
         '<div class="bp-bar"><div class="bp-fill hp" id="bpHp"></div><span id="bpHpTx"></span></div>' +
         '<div class="bp-bar"><div class="bp-fill mp" id="bpMp"></div><span id="bpMpTx"></span></div>' +
         '<label class="bp-row"><input type="checkbox" id="bpMaintain"> 自动管护（卖/吞噬/穿最强）</label>' +
@@ -537,10 +538,14 @@
     const mats = view.materials || {};
     const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥']];
     const bpCount = Object.keys(mats).filter(k => k.startsWith('bp_')).reduce((t, k) => t + (mats[k] || 0), 0);
+    const daily = view.dailyTasks || [];
+    const dailyClaimed = daily.filter(t => t.claimed).length;
+    const dailyReady = daily.filter(t => t.done && !t.claimed).length;
     const sig = [Math.round(hpPct / 5), Math.round(mpPct / 5), view.zone, view.mob ? view.mob.name : '',
       view.autoEquipBest ? 1 : 0, view.autoSellKeep || 0, view.autoSmeltKeep || 0,
       pot.hp_s || 0, pot.hp_l || 0, pot.mp || 0, pot.food || 0, view.dead ? 1 : 0,
-      MAT6.map(([c]) => mats[c] || 0).join(','), bpCount].join('|');
+      MAT6.map(([c]) => mats[c] || 0).join(','), bpCount,
+      dailyClaimed, dailyReady, daily.map(t => t.progress).join(',')].join('|');
     if (renderButlerPanel._sig === sig) return;
     renderButlerPanel._sig = sig;
     $('bpHp').style.width = hpPct.toFixed(0) + '%';
@@ -556,6 +561,9 @@
     if (bsm && String(bsm.value) !== String(view.autoSmeltKeep || 0)) bsm.value = String(view.autoSmeltKeep || 0);
     const bm = $('bpMats');
     if (bm) bm.textContent = MAT6.map(([c, e]) => e + (mats[c] || 0)).join(' ') + ' · 📐' + bpCount;
+    const bd = $('bpDaily');
+    if (bd) bd.textContent = '📅 每日 ' + dailyClaimed + '/' + daily.length + ' 已领' +
+      (dailyReady > 0 ? ' · 🎁 ' + dailyReady + ' 个可领取' : '');
     $('bpDrinkHp').textContent = '🧪 血药 ×' + ((pot.hp_s || 0) + (pot.hp_l || 0));
     $('bpDrinkMp').textContent = '🔵 蓝药 ×' + (pot.mp || 0);
     $('bpEat').textContent = '🍖 吃食 ×' + (pot.food || 0);

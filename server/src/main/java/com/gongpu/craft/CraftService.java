@@ -36,6 +36,17 @@ public class CraftService {
         return "bp_" + craftCode;
     }
 
+    /** 材料来源区域名（区域材料反查 ZONE_MAT；非区域材料返回 null，前端不显示来源）。 */
+    static String matSourceZone(String matCode) {
+        for (Map.Entry<String, String> e : com.gongpu.game.GameConst.ZONE_MAT.entrySet()) {
+            if (e.getValue().equals(matCode)) {
+                com.gongpu.game.GameConst.ZoneDef z = com.gongpu.game.GameConst.ZONES.get(e.getKey());
+                return z == null ? null : z.name();
+            }
+        }
+        return null;
+    }
+
     static Map<String, Integer> parseMats(String matsJson) {
         if (matsJson == null || matsJson.isBlank()) {
             return Map.of();
@@ -87,6 +98,10 @@ public class CraftService {
                 m.put("emoji", info == null ? "🧩" : info[1]);
                 m.put("have", have);
                 m.put("need", e.getValue());
+                String srcZone = matSourceZone(e.getKey());
+                if (srcZone != null) {
+                    m.put("zone", srcZone);
+                }
                 mats.add(m);
             }
             row.put("mats", mats);

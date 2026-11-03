@@ -2138,7 +2138,7 @@
     try { data = await API.craftBoard(API.state.slot); } catch (e) { return; }
     const rows = (data.crafts || []).map(c => {
       const mats = (c.mats || []).map(m =>
-        '<span class="mat-chip' + (m.have >= m.need ? '' : ' lack') + '">' + m.emoji + ' ' + esc(m.name) + ' ' + m.have + '/' + m.need + '</span>').join(' ');
+        '<span class="mat-chip' + (m.have >= m.need ? '' : ' lack') + '" title="' + (m.zone ? '来源区域：' + esc(m.zone) + '（打怪/分解该区装备）' : '') + '">' + m.emoji + ' ' + esc(m.name) + ' ' + m.have + '/' + m.need + (m.zone ? ' <i class="mat-src">@' + esc(m.zone) + '</i>' : '') + '</span>').join(' ');
       const bp = c.needBlueprint
         ? '<span class="mat-chip' + (c.blueprintHave >= 1 ? '' : ' lack') + '">📐 图纸 ' + c.blueprintHave + '/1</span>'
         : '<span class="mat-chip">🆓 无需图纸</span>';

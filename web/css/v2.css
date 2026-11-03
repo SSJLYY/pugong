@@ -935,3 +935,4 @@
 .event-log{margin-top:6px;font-size:12px;color:#d8c98a}
 .event-log .event-line{padding:1px 0;border-top:1px dashed rgba(255,255,255,.07)}
 .event-log .event-line:first-child{border-top:none}
+.mat-src{font-style:normal;opacity:.65;font-size:11px}

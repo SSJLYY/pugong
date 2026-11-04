@@ -66,6 +66,7 @@
     { id: 'rend_10', name: '裂空克星', emoji: '✴️', desc: '击杀 10 只带「裂空」词条的怪物' },
     { id: 'monthly_1', name: '月令初成', emoji: '📆', desc: '领满一整月月常任务（累计领取 3 个）' },
     { id: 'monthly_6', name: '半年月令', emoji: '📆', desc: '累计领取 18 个月常任务（六个月全清）' },
+    { id: 'fuse_5', name: '融合大师', emoji: '💎', desc: '累计融合出 5 颗璀璨二阶宝石' },
     { id: 'pierce_learn', name: '破甲之道', emoji: '🏹', desc: '学会被动「破甲专精」' },
     { id: 'flurry_500', name: '连环如雨', emoji: '🤲', desc: '连环掌累计追加命中 500 次' },
     { id: 'star_first', name: '星瞳初开', emoji: '🌌', desc: '首次击杀星界的怪物' },

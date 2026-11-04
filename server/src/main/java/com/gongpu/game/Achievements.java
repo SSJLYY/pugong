@@ -77,6 +77,7 @@ public final class Achievements {
             new Def("rend_10", "裂空克星", "✴️", "击杀 10 只带「裂空」词条的怪物"),
             new Def("monthly_1", "月令初成", "📆", "领满一整月月常任务（累计领取 3 个）"),
             new Def("monthly_6", "半年月令", "📆", "累计领取 18 个月常任务（六个月全清）"),
+            new Def("fuse_5", "融合大师", "💎", "累计融合出 5 颗璀璨二阶宝石"),
             new Def("pierce_learn", "破甲之道", "🏹", "学会被动「破甲专精」"),
             new Def("flurry_500", "连环如雨", "🤲", "连环掌累计追加命中 500 次"),
             new Def("star_first", "星瞳初开", "🌌", "首次击杀星界的怪物"),
@@ -107,7 +108,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
                     "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord", "monthly_6" -> 5_000L;
             default -> 500L;
@@ -281,6 +282,7 @@ public final class Achievements {
             case "rend_10" -> new long[]{s.stats.rendKills, 10};
             case "monthly_1" -> new long[]{s.stats.monthlyClaims, 3};
             case "monthly_6" -> new long[]{s.stats.monthlyClaims, 18};
+            case "fuse_5" -> new long[]{s.stats.gemsFused, 5};
             case "gem_10" -> new long[]{s.stats.gemsSocketed, 10};
             case "pierce_learn" -> new long[]{s.passives.contains("armor_pierce") ? 1 : 0, 1};
             case "flurry_500" -> new long[]{s.stats.flurryExtra.longValue(), 500};
@@ -375,6 +377,7 @@ public final class Achievements {
                 case "rend_10" -> s.stats.rendKills >= 10;
                 case "monthly_1" -> s.stats.monthlyClaims >= 3;
                 case "monthly_6" -> s.stats.monthlyClaims >= 18;
+                case "fuse_5" -> s.stats.gemsFused >= 5;
                 case "daily_1" -> s.stats.dailyClaims >= 1;
                 case "daily_30" -> s.stats.dailyClaims >= 30;
                 case "phase_breaker" -> s.stats.bossPhaseKills >= 1;

@@ -71,6 +71,8 @@ public final class Achievements {
             new Def("epic_affix", "史诗词条", "🟣", "拥有 3 条史诗词条（已装备与背包合计）"),
             new Def("gem_first", "镶嵌初体验", "💠", "首次把宝石镶嵌到装备上"),
             new Def("gem_10", "珠光宝气", "💎", "累计镶嵌 10 颗宝石"),
+            new Def("pet_first", "宠物伙伴", "🐾", "首次领养一只宠物"),
+            new Def("pet_25", "宠物大师", "🐾", "任一宠物达到 25 级"),
             new Def("pierce_learn", "破甲之道", "🏹", "学会被动「破甲专精」"),
             new Def("flurry_500", "连环如雨", "🤲", "连环掌累计追加命中 500 次"),
             new Def("star_first", "星瞳初开", "🌌", "首次击杀星界的怪物"),
@@ -99,7 +101,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
                     "kill_100k", "gold_100m", "craft_200", "gen_30" -> 5_000L;
             default -> 500L;
@@ -251,6 +253,8 @@ public final class Achievements {
                     : s.mastery.getOrDefault("hex_slow", java.math.BigDecimal.ZERO).longValue(), 20};
             case "epic_affix" -> new long[]{epicAffixCount(s), 3};
             case "gem_first" -> new long[]{s.stats.gemsSocketed, 1};
+            case "pet_first" -> new long[]{s.petsOwned.size(), 1};
+            case "pet_25" -> new long[]{s.petLevels.values().stream().mapToInt(Integer::intValue).max().orElse(0), 25};
             case "gem_10" -> new long[]{s.stats.gemsSocketed, 10};
             case "pierce_learn" -> new long[]{s.passives.contains("armor_pierce") ? 1 : 0, 1};
             case "flurry_500" -> new long[]{s.stats.flurryExtra.longValue(), 500};

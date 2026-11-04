@@ -23,6 +23,6 @@ class PetAchievementTest {
 
     @Test
     void countsNow68() {
-        assertEquals(70, Achievements.ALL.size());
+        assertEquals(72, Achievements.ALL.size());
     }
 }

@@ -16,7 +16,7 @@ class Batch9ParityTest {
         assertEquals(6, GameConst.PETS.size(), "宠物 6");
         assertEquals(10, GameConst.ZONES.size(), "区域 10");
         assertEquals(8, Sets.ALL.size(), "套装 8");
-        assertEquals(70, Achievements.ALL.size(), "成就 70");
+        assertEquals(72, Achievements.ALL.size(), "成就 72");
         assertEquals(33, GameConst.codexTotal(), "图鉴 33（虚空 +5）");
         String sql = Files.readString(Path.of("src/main/resources/gongpu-full.sql"));
         for (String code : new String[]{

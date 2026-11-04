@@ -597,6 +597,12 @@ public final class GameEngine {
         if ("star_eclipse".equals(m.trait)) {
             s.stats.eclipseKills++;
         }
+        if ("mana_drain".equals(m.trait)) {
+            s.stats.drainKills++;
+        }
+        if ("void_rend".equals(m.trait)) {
+            s.stats.rendKills++;
+        }
         // 宠物经验（第九批）：出战宠物随击杀成长，升级时播报
         if (s.pet != null) {
             int[] petR = GameService.gainPetExp(s, GameConst.PET_EXP_PER_KILL);

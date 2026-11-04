@@ -311,6 +311,10 @@ public class PlayerState {
         public long matSoldGold = 0;
         /** 累计镶嵌宝石数（第八批）。 */
         public long gemsSocketed = 0;
+        /** 累计击杀带「噬能」词条的怪物数（第九批）。 */
+        public long drainKills = 0;
+        /** 累计击杀带「裂空」词条的怪物数（第九批）。 */
+        public long rendKills = 0;
         /** 累计喂食宠物次数（第九批）。 */
         public long petFeeds = 0;
         /** 累计直购宝石数（第八批）。 */

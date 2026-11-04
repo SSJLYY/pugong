@@ -969,6 +969,7 @@
     renderDaily(view);
     renderWeekly(view);
     renderPets(view);
+    renderExtSkills();
     renderMarket(view);
     renderEvents(view);
     renderPotions(view);
@@ -2751,6 +2752,23 @@
         } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
       });
     });
+  }
+
+  // ================= 扩展技能按钮行（第九批补齐：冲锋/迟缓咒/连环掌/虚空斩此前无按钮） =================
+  function renderExtSkills() {
+    const row = $('extSkillRow');
+    if (!row || renderExtSkills._built) return;
+    const want = ['charge', 'hex_slow', 'flurry', 'void_slash'];
+    const defs = ((S.meta && S.meta.skills) || []).filter(d => want.includes(d.id));
+    if (!defs.length) return;
+    renderExtSkills._built = true;
+    row.innerHTML = defs.map(d =>
+      '<button class="skill-btn" data-ext-skill="' + esc(d.id) + '" title="' + esc(d.desc) + '（蓝 ' + d.mp + ' / 冷却 ' + d.cd + 's）">' +
+      d.emoji + ' ' + esc(d.name) + '</button>').join('');
+    row.querySelectorAll('[data-ext-skill]').forEach(b => b.addEventListener('click', async () => {
+      const r = await call(() => API.castSkill(API.state.slot, b.dataset.extSkill));
+      if (r) applyView(r);
+    }));
   }
 
   // ================= 宠物伙伴（第九批） =================

@@ -161,6 +161,9 @@ public final class PanelCalculator {
         // 套装加成（第七批）：已穿套装件数达标的 flat 加成，与装备词条同区（不受沉默压制）
         Sets.activeBonus(s).forEach((k, v) -> flat.merge(k, v, Num::add));
 
+        // 宠物伙伴（第九批）：出战宠物按等级放大 flat 加成（伙伴来源，不受沉默压制）
+        petBonus(s).forEach((k, v) -> flat.merge(k, v, Num::add));
+
         // 无限属性点天赋(statlord):自由加点并入 flat 区——全部属性走既有读法
         // (含 min(BLESS_CAP) 封顶),加点单位见 GameConst.STAT_POINT_STEP
         for (Map.Entry<String, BigDecimal> e : s.statPoints.entrySet()) {
@@ -220,6 +223,22 @@ public final class PanelCalculator {
                                        Map<String, BigDecimal> pct, String key) {
         BigDecimal v = Num.add(base, flat.getOrDefault(key, Num.ZERO));
         return Num.mul(v, Num.add(Num.of(1), pct.getOrDefault(key, Num.ZERO)));
+    }
+
+    /** 出战宠物的面板加成（第九批）：基础属性 × (1 + 0.15 × (等级 − 1))；无出战宠物为空。 */
+    public static Map<String, BigDecimal> petBonus(PlayerState s) {
+        Map<String, BigDecimal> out = new HashMap<>();
+        if (s.pet == null) {
+            return out;
+        }
+        GameConst.PetDef def = GameConst.PETS.get(s.pet);
+        if (def == null) {
+            return out;
+        }
+        int lv = s.petLevels.getOrDefault(s.pet, 1);
+        BigDecimal mul = Num.of(1 + GameConst.PET_LEVEL_MUL * (lv - 1));
+        def.stats().forEach((k, v) -> out.put(k, Num.mul(v, mul)));
+        return out;
     }
 
     private static void applyTalent(PlayerState s, Map<String, BigDecimal> flat, Map<String, BigDecimal> pct) {

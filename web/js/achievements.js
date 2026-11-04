@@ -64,6 +64,8 @@
     { id: 'pet_25', name: '宠物大师', emoji: '🐾', desc: '任一宠物达到 25 级' },
     { id: 'drain_10', name: '噬能克星', emoji: '🔋', desc: '击杀 10 只带「噬能」词条的怪物' },
     { id: 'rend_10', name: '裂空克星', emoji: '✴️', desc: '击杀 10 只带「裂空」词条的怪物' },
+    { id: 'monthly_1', name: '月令初成', emoji: '📆', desc: '领满一整月月常任务（累计领取 3 个）' },
+    { id: 'monthly_6', name: '半年月令', emoji: '📆', desc: '累计领取 18 个月常任务（六个月全清）' },
     { id: 'pierce_learn', name: '破甲之道', emoji: '🏹', desc: '学会被动「破甲专精」' },
     { id: 'flurry_500', name: '连环如雨', emoji: '🤲', desc: '连环掌累计追加命中 500 次' },
     { id: 'star_first', name: '星瞳初开', emoji: '🌌', desc: '首次击杀星界的怪物' },

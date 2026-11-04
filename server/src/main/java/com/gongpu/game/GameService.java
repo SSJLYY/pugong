@@ -868,6 +868,32 @@ public class GameService {
         return m;
     }
 
+    /** 周常任务领取（第八批）：三任务全领触发全清奖励——50,000 金 + 随机宝石 ×2（每周一次）。 */
+    public Map<String, Object> claimWeekly(PlayerState s, String taskId) {
+        long reward = WeeklyQuests.claim(s, taskId);
+        long bonus = 0;
+        List<String> bonusGems = new ArrayList<>();
+        if (!s.weeklyBonusGiven && s.weeklyTasks.stream().allMatch(t -> t.claimed)) {
+            bonus = WeeklyQuests.ALL_CLEAR_BONUS;
+            s.weeklyBonusGiven = true;
+            s.gold = Num.add(s.gold, Num.of(bonus));
+            for (int i = 0; i < WeeklyQuests.ALL_CLEAR_GEMS; i++) {
+                String gem = GameEngine.randomGem();
+                if (gem != null) {
+                    s.materials.merge(gem, 1, Integer::sum);
+                    bonusGems.add(gem);
+                }
+            }
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("id", taskId);
+        m.put("reward", reward);
+        m.put("allClearBonus", bonus);
+        m.put("allClearGems", bonusGems);
+        return m;
+    }
+
     /** 每日黑市购买（第七批）：货单/限购/折扣价规则在 BlackMarket，返回小回执。 */
     public Map<String, Object> buyBlackMarket(PlayerState s, String id) {
         long paid = BlackMarket.buy(s, id);
@@ -1664,7 +1690,9 @@ public class GameService {
         // 每日任务/黑市/洗炼保底（第七批实测修复）：此前误挂在 autoconfig 回执上，
         // fullView 轮询帧拿不到——前端每日卡片与黑市永远刷不出来，现归位到主视图
         DailyQuests.ensure(s);
+        WeeklyQuests.ensure(s);
         m.put("dailyTasks", DailyQuests.viewOf(s));
+        m.put("weeklyTasks", WeeklyQuests.viewOf(s));
         m.put("blackMarket", BlackMarket.viewOf(s));
         m.put("rerollPity", s.rerollPity);
         // v3.13 背包截断防复发:此前全量下发 3.3 万件=13.9MB JSON,前端每秒解析+渲染

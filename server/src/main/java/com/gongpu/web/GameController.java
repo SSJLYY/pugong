@@ -146,6 +146,7 @@ public class GameController {
         // 落库在动作后的 finally 里、fullView 在落库之后才建，签发若只活在视图里，
         // 下一帧读档又是未签发状态（dailyDay 为空）→ 每次重签、基线永远贴着当前计数、进度恒 0
         com.gongpu.game.DailyQuests.ensure(s);
+        com.gongpu.game.WeeklyQuests.ensure(s);
         com.gongpu.game.BlackMarket.ensure(s);
         // 经济审计基线：advance/autoMaintain 之后、动作之前取金币（挂机收益不算进动作账）
         java.math.BigDecimal goldBefore = auditLabel == null ? null : s.gold;
@@ -540,6 +541,14 @@ public class GameController {
                                           @RequestBody AchReq body) {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "daily-claim",
                 s -> game.claimDaily(s, reqStr(body.id(), "id")));
+    }
+
+    /** 周常任务奖励领取（第八批）。 */
+    @PostMapping("/{slot}/weekly-claim")
+    public Map<String, Object> weeklyClaim(HttpServletRequest req, @PathVariable int slot,
+                                           @RequestBody AchReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "weekly-claim",
+                s -> game.claimWeekly(s, reqStr(body.id(), "id")));
     }
 
     /** 每日黑市购买（第七批）：当日货单内打折药剂，限购校验在 BlackMarket。 */

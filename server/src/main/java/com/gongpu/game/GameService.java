@@ -1272,6 +1272,35 @@ public class GameService {
         return m;
     }
 
+    /** 连续喂食（第九批）：最多喂 times 次，金币不足或满级时提前停（不报错，回执带实际次数）。 */
+    public Map<String, Object> feedPetBatch(PlayerState s, int times) {
+        if (s.pet == null) {
+            throw ApiException.badRequest("还没有出战宠物");
+        }
+        int fed = 0;
+        int ups = 0;
+        for (int i = 0; i < Math.max(1, Math.min(times, 100)); i++) {
+            int lv = s.petLevels.getOrDefault(s.pet, 1);
+            if (lv >= GameConst.PET_MAX_LEVEL || Num.lt(s.gold, Num.of(GameConst.PET_FEED_COST))) {
+                break;
+            }
+            Map<String, Object> r = feedPet(s);
+            fed++;
+            ups += ((Number) r.get("leveledUp")).intValue();
+        }
+        if (fed == 0) {
+            throw ApiException.badRequest("喂不了：金币不足或宠物已满级");
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("pet", s.pet);
+        m.put("fed", fed);
+        m.put("leveledUp", ups);
+        m.put("level", s.petLevels.getOrDefault(s.pet, 1));
+        m.put("gold", Num.plain(s.gold));
+        return m;
+    }
+
     /** 宠物获得经验并连升（第九批）：返回 {新等级, 本次升了几级}；满级经验不再累积。 */
     public static int[] gainPetExp(PlayerState s, double exp) {
         if (s.pet == null || exp <= 0) {

@@ -284,6 +284,60 @@ public class CraftService {
         return m;
     }
 
+    /** 一键出售多余图纸（第九批）：每种图纸保留 1 张（合成要用），多余的按 blueprintPrice 卖出。 */
+    public Map<String, Object> sellExtraBlueprints(PlayerState s) {
+        long gold = 0;
+        long count = 0;
+        for (String code : new java.util.ArrayList<>(s.materials.keySet())) {
+            Integer price = blueprintPrice(code);
+            if (price == null) {
+                continue;
+            }
+            int have = s.materials.getOrDefault(code, 0);
+            if (have <= 1) {
+                continue;
+            }
+            int n = have - 1;
+            s.materials.put(code, 1);
+            gold += (long) price * n;
+            count += n;
+        }
+        if (count == 0) {
+            throw ApiException.badRequest("没有多余的图纸可卖（每种保留 1 张）");
+        }
+        s.gold = com.gongpu.common.Num.add(s.gold, com.gongpu.common.Num.of(gold));
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("count", count);
+        m.put("gold", gold);
+        return m;
+    }
+
+    /** 一键兑换（第九批）：把源材料按 3:1 尽可能多地换成目标材料，口径与逐次兑换一致。 */
+    public Map<String, Object> exchangeAll(PlayerState s, String from, String to) {
+        if (from == null || to == null || from.equals(to)
+                || !com.gongpu.game.GameConst.ZONE_MAT.containsValue(from)
+                || !com.gongpu.game.GameConst.ZONE_MAT.containsValue(to)) {
+            throw ApiException.badRequest("只能在区域材料之间兑换（同种不可换）");
+        }
+        int cost = com.gongpu.game.GameConst.MAT_EXCHANGE_COST;
+        int have = s.materials.getOrDefault(from, 0);
+        int n = have / cost;
+        if (n <= 0) {
+            throw ApiException.badRequest("材料不足（兑换需要 " + cost + " 份）");
+        }
+        s.materials.put(from, have - n * cost);
+        s.materials.merge(to, n, Integer::sum);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("from", from);
+        m.put("to", to);
+        m.put("times", n);
+        m.put("fromHave", s.materials.getOrDefault(from, 0));
+        m.put("toHave", s.materials.getOrDefault(to, 0));
+        return m;
+    }
+
     /** 执行合成：全校验通过才扣料，产物入背包。 */
     public Map<String, Object> craft(PlayerState s, String code) {
         CraftTemplate t = GameData.instance().craft(code);

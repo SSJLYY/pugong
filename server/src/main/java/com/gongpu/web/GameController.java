@@ -562,6 +562,28 @@ public class GameController {
                 s -> crafts.sellAllMaterials(s));
     }
 
+    /** 连续喂食宠物 ×10（第九批）。 */
+    @PostMapping("/{slot}/feed-pet-batch")
+    public Map<String, Object> feedPetBatch(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "feed-pet-batch",
+                s -> game.feedPetBatch(s, 10));
+    }
+
+    /** 一键出售多余图纸（第九批，每种保留 1 张）。 */
+    @PostMapping("/{slot}/sell-extra-blueprints")
+    public Map<String, Object> sellExtraBlueprints(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "sell-extra-blueprints",
+                s -> crafts.sellExtraBlueprints(s));
+    }
+
+    /** 一键兑换材料（第九批，3:1 尽可能多换）。 */
+    @PostMapping("/{slot}/mat-exchange-all")
+    public Map<String, Object> matExchangeAll(HttpServletRequest req, @PathVariable int slot,
+                                              @RequestBody MatExchangeReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "mat-exchange-all",
+                s -> crafts.exchangeAll(s, reqStr(body.from(), "from"), reqStr(body.to(), "to")));
+    }
+
     /** 宝石直购（第八批）：一阶宝石按售价 ×4 买入；二阶只能融合。 */
     @PostMapping("/{slot}/buy-gem")
     public Map<String, Object> buyGem(HttpServletRequest req, @PathVariable int slot,

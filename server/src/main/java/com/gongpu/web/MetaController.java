@@ -91,7 +91,9 @@ public class MetaController {
                     + ",skills=" + snap.skills().size()
                     + ",crafts=" + snap.crafts().size()
                     // 词条是代码侧常量（不在 cfg 表），单独计入指纹以便核对新代码是否生效
-                    + ",traits=" + GameConst.MOB_TRAITS.size());
+                    + ",traits=" + GameConst.MOB_TRAITS.size()
+                    // 宠物同为代码侧图鉴（第九批），并入指纹核对新代码生效
+                    + ",pets=" + GameConst.PETS.size());
         } catch (RuntimeException ignored) {
             // GameData 未就绪时省略
         }

@@ -960,6 +960,7 @@
     renderSets(view);
     renderDaily(view);
     renderWeekly(view);
+    renderPets(view);
     renderMarket(view);
     renderEvents(view);
     renderPotions(view);
@@ -2740,6 +2741,50 @@
         } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
       });
     });
+  }
+
+  // ================= 宠物伙伴（第九批） =================
+  function renderPets(view) {
+    const box = $('petList');
+    if (!box) return;
+    const pv = view.pet || {};
+    const defs = (S.meta && S.meta.pets) || [];
+    const sig = JSON.stringify(pv) + '|' + view.gold + '|' + defs.length;
+    if (sig === renderPets._sig) return;
+    renderPets._sig = sig;
+    const owned = new Set(pv.owned || []);
+    box.innerHTML = defs.map(d => {
+      const isActive = pv.active === d.id;
+      const isOwned = owned.has(d.id);
+      let btn;
+      if (isActive) {
+        btn = '<button class="daily-claim" disabled>⭐ 出战中 · ' + (pv.level || 1) + ' 级（' +
+          Math.floor(pv.exp || 0) + '/' + (pv.expNeed || '—') + ' 经验）</button>' +
+          (pv.level < (pv.maxLevel || 50) ? ' <button class="daily-claim ready" data-pet-feed="1">🍖 喂食 150 金</button>' : '');
+      } else if (isOwned) {
+        btn = '<button class="daily-claim ready" data-pet-switch="' + esc(d.id) + '">出战</button>';
+      } else {
+        btn = '<button class="daily-claim ready" data-pet-adopt="' + esc(d.id) + '">领养 ' + fmt(d.price) + ' 金</button>';
+      }
+      return '<div class="daily-card' + (isActive ? ' done' : '') + '">' +
+        '<div class="daily-head"><span>' + d.emoji + ' ' + esc(d.name) + '</span></div>' +
+        '<div class="daily-desc">' + esc(d.desc) + '（随等级放大）</div>' + btn + '</div>';
+    }).join('') || '<p class="empty-hint">暂无宠物</p>';
+    box.querySelectorAll('[data-pet-adopt]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try { const r = await call(() => API.adoptPet(API.state.slot, b.dataset.petAdopt)); toast('🐾 领养成功！', 'ok'); if (r) applyView(r); }
+      catch (err) { toast(err.message, 'err'); b.disabled = false; }
+    }));
+    box.querySelectorAll('[data-pet-switch]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try { const r = await call(() => API.switchPet(API.state.slot, b.dataset.petSwitch)); if (r) applyView(r); }
+      catch (err) { toast(err.message, 'err'); b.disabled = false; }
+    }));
+    box.querySelectorAll('[data-pet-feed]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try { const r = await call(() => API.feedPet(API.state.slot)); const res = (r && r.result) || {}; if (res.leveledUp > 0) toast('🐾 宠物升到了 ' + res.level + ' 级！', 'ok'); if (r) applyView(r); }
+      catch (err) { toast(err.message, 'err'); b.disabled = false; }
+    }));
   }
 
   // ================= 每日黑市（第七批） =================

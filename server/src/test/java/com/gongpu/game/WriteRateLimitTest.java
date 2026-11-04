@@ -29,4 +29,22 @@ class WriteRateLimitTest {
         // 其他账号互不影响
         assertDoesNotThrow(() -> GameController.checkWriteRate(123_456_789L, now));
     }
+
+    /** 第九批第 68 轮：接线锁——限流检查须在 run 的 load 之前执行，且本批新端点都带 action 名走 run（自动纳入限流）。 */
+    @Test
+    void rateCheckWiredBeforeLoadAndBatch9EndpointsCarryActions() throws Exception {
+        String src = java.nio.file.Files.readString(
+                java.nio.file.Path.of("src/main/java/com/gongpu/web/GameController.java"));
+        int runStart = src.indexOf("Map<String, Object> run(");
+        int rate = src.indexOf("checkWriteRate(uid", runStart);
+        int load = src.indexOf("saves.load", runStart);
+        org.junit.jupiter.api.Assertions.assertTrue(rate > runStart, "run 内须调用 checkWriteRate");
+        org.junit.jupiter.api.Assertions.assertTrue(load > rate, "限流检查必须在 load 之前（省掉被限流请求的读盘）");
+        for (String action : new String[]{"\"adopt-pet\"", "\"feed-pet-batch\"", "\"monthly-claim\"",
+                "\"sell-all-materials\"", "\"fuse-all-gems\"", "\"unsocket-all\"",
+                "\"sell-extra-blueprints\"", "\"mat-exchange-all\"", "\"rename-pet\""}) {
+            org.junit.jupiter.api.Assertions.assertTrue(src.contains(action),
+                    "端点须带 action 名走 run 以纳入写限流: " + action);
+        }
+    }
 }

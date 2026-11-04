@@ -633,7 +633,7 @@
     if (bp) {
       const pv = view.pet || {};
       const def = pv.active && (S.meta.pets || []).find(d => d.id === pv.active);
-      bp.textContent = def ? '🐾 ' + def.emoji + def.name + ' ' + (pv.level || 1) + ' 级' : '🐾 暂无出战宠物';
+      bp.textContent = def ? '🐾 ' + def.emoji + ((pv.names || {})[pv.active] || def.name) + ' ' + (pv.level || 1) + ' 级' : '🐾 暂无出战宠物';
     }
     $('bpDrinkHp').textContent = '🧪 血药 ×' + ((pot.hp_s || 0) + (pot.hp_l || 0));
     $('bpDrinkMp').textContent = '🔵 蓝药 ×' + (pot.mp || 0);

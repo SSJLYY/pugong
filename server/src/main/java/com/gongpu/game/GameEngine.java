@@ -608,7 +608,7 @@ public final class GameEngine {
             int[] petR = GameService.gainPetExp(s, GameConst.PET_EXP_PER_KILL);
             if (petR[1] > 0) {
                 GameConst.PetDef pd = GameConst.PETS.get(s.pet);
-                pushEvent(s, "🐾 " + (pd == null ? "宠物" : pd.name()) + "升到了 " + petR[0] + " 级！");
+                pushEvent(s, "🐾 " + GameService.petDisplayName(s, s.pet) + "升到了 " + petR[0] + " 级！");
             }
         }
         // 无限属性点天赋:每杀一怪 +1 自由属性点

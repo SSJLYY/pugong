@@ -195,7 +195,7 @@ public final class GameConst {
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
-            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss");
+            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star");
 
     /**
      * 出生掷词条：村口不出；平原 10% 起、每深一层 +3%。
@@ -312,6 +312,22 @@ public final class GameConst {
                                 "魔伤滔天射程极远，混沌在裂隙深处胎动", List.of())),
                 mob("boss_abyss", "渊底之主·无光君王", "🕳️", "30000000", "1500", "1800", "300", "300", 1.2, 5, 100, 60000,
                         "裂隙最深处的主人，沉默如渊，万光不入", List.of())));
+
+        // 星界（第八批）：深渊之上的群星回廊——当前版本终局之终局
+        m.put("star", new ZoneDef("star", "星界", "🌌", false,
+                "建议生命 ≥ 2000万 / 双防 ≥ 400 / 攻击 ≥ 12000（群星回廊）",
+                Map.of("maxHP", "20000000", "PDEF", "400", "MDEF", "400", "ATK", "12000"),
+                List.of(
+                        mob("star_sprite", "星尘精灵", "✨", "12000000", "300", "2000", "120", "400", 1.1, 6, 100, 4000,
+                                "星尘凝成的精灵，魔光如雨，掉落星核碎片", List.of()),
+                        mob("void_walker", "虚空行者", "🚶", "20000000", "2400", "0", "380", "200", 1.5, 2, 145, 5000,
+                                "踏虚而行，出手快到只剩残影", List.of()),
+                        mob("star_guard", "星核守卫", "🛡️", "32000000", "2000", "1400", "550", "550", 0.8, 3, 85, 7000,
+                                "双防如星核般致密，回廊的执盾者", List.of()),
+                        mob("star_eater", "噬星巨兽", "🦖", "48000000", "1600", "2800", "300", "650", 1.0, 7, 90, 9500,
+                                "以星辰为食的巨兽，魔焰滔天射程极远", List.of())),
+                mob("boss_star", "星核主宰·噬光之心", "🌌", "300000000", "3800", "4500", "750", "750", 1.2, 5, 100, 200000,
+                        "群星回廊的尽头，它的心跳即是星辰的熄灭", List.of())));
 
         return java.util.Collections.unmodifiableMap(m);
     }
@@ -630,10 +646,10 @@ public final class GameConst {
             Map.entry("LIFESTEAL", new BigDecimal("0.002")));
 
     /** 区域材料（DESIGN.md §9：皮毛/狼牙/矿石/毒腺/魔尘/火晶）。 */
-    public static final Map<String, String> ZONE_MAT = Map.of(
-            "plain", "pelt", "forest", "wolf_fang", "mine", "ore",
-            "swamp", "toad_gland", "snow", "mana_dust", "volcano", "fire_crystal",
-            "abyss", "abyss_crystal");
+    public static final Map<String, String> ZONE_MAT = Map.ofEntries(
+            Map.entry("plain", "pelt"), Map.entry("forest", "wolf_fang"), Map.entry("mine", "ore"),
+            Map.entry("swamp", "toad_gland"), Map.entry("snow", "mana_dust"), Map.entry("volcano", "fire_crystal"),
+            Map.entry("abyss", "abyss_crystal"), Map.entry("star", "star_shard"));
 
     /** 附魔卷轴（DESIGN.md §6.2/§8）：给武器/弓附加魔伤词条，火/冰/雷三系。 */
     public static final Map<String, Object[]> SCROLLS = Map.of(
@@ -655,6 +671,7 @@ public final class GameConst {
             Map.entry("mana_dust", new String[]{"魔尘", "✨"}),
             Map.entry("fire_crystal", new String[]{"火晶", "🔥"}),
             Map.entry("abyss_crystal", new String[]{"深渊结晶", "🕳️"}),
+            Map.entry("star_shard", new String[]{"星核碎片", "🌟"}),
             Map.entry("gem_ruby", new String[]{"红宝石", "🔺"}),
             Map.entry("gem_sapphire", new String[]{"蓝宝石", "🔷"}),
             Map.entry("gem_emerald", new String[]{"翡翠", "💚"}),
@@ -669,9 +686,10 @@ public final class GameConst {
             Map.entry("gem_opal_2", new String[]{"璀璨蛋白石", "💎"}));
 
     /** 材料出售单价（第七批，金币/份）：越深的区域材料越值钱；仅区域材料可售（图纸/卷轴不可）。 */
-    public static final Map<String, Integer> MAT_SELL_PRICE = Map.of(
-            "pelt", 20, "wolf_fang", 35, "ore", 60, "toad_gland", 90,
-            "mana_dust", 140, "fire_crystal", 220, "abyss_crystal", 400);
+    public static final Map<String, Integer> MAT_SELL_PRICE = Map.ofEntries(
+            Map.entry("pelt", 20), Map.entry("wolf_fang", 35), Map.entry("ore", 60), Map.entry("toad_gland", 90),
+            Map.entry("mana_dust", 140), Map.entry("fire_crystal", 220), Map.entry("abyss_crystal", 400),
+            Map.entry("star_shard", 650));
 
     /** 增益类 buff（永久存续天赋作用对象）。 */
     public static final Set<String> ETERNAL_BUFFS = Set.of(

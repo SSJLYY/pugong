@@ -1,0 +1,45 @@
+package com.gongpu.game;
+
+import com.gongpu.cfg.GameData;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * 第八批第 21 轮：第九区域「星界」——定义/门槛/材料/词条池深度口径。
+ */
+class ZoneStarTest {
+
+    @BeforeAll
+    static void initGameData() {
+        new GameData(null, null, null, null, null, null, null);
+    }
+
+    @Test
+    void starZoneDefined() {
+        GameConst.ZoneDef z = GameConst.ZONES.get("star");
+        assertNotNull(z, "星界应存在");
+        assertEquals("20000000", z.req().get("maxHP"));
+        assertEquals("400", z.req().get("PDEF"));
+        assertEquals(4, z.mobs().size());
+        assertEquals("boss_star", z.boss().id());
+        assertEquals("300000000", z.boss().maxHP());
+        assertEquals("star", GameEngine.nextZoneId("abyss"));
+    }
+
+    @Test
+    void starMaterialWired() {
+        assertEquals("star_shard", GameConst.ZONE_MAT.get("star"));
+        assertEquals("星核碎片", GameConst.MAT_INFO.get("star_shard")[0]);
+        assertEquals(650, GameConst.MAT_SELL_PRICE.get("star_shard"));
+    }
+
+    @Test
+    void starDepthUsesFullTraitPool() {
+        assertEquals(16, GameConst.traitPool(8).size(), "星界深度应全池 16 条");
+        assertTrue(new java.util.ArrayList<>(GameConst.ZONES.keySet()).indexOf("star") == 8, "星界应为第 9 区（序 8）");
+    }
+}

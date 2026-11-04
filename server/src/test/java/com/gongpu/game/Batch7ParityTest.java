@@ -26,7 +26,7 @@ class Batch7ParityTest {
         assertEquals(16, GameConst.MOB_TRAITS.size(), "怪物词条 16");
         assertEquals(52, Achievements.ALL.size(), "成就 52");
         assertEquals(6, Sets.ALL.size(), "套装 6");
-        assertEquals(8, GameConst.ZONES.size(), "区域 8");
+        assertEquals(9, GameConst.ZONES.size(), "区域 9");
     }
 
     @Test

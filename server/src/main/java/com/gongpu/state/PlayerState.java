@@ -134,6 +134,13 @@ public class PlayerState {
     /** 当日全清奖励是否已发（第七批第 36 轮）。 */
     public boolean dailyBonusGiven = false;
 
+    /** 周常任务签发周（第八批，ISO 周键如 2026-W45）；跨周由 WeeklyQuests.ensure 重签。 */
+    public String weeklyWeek;
+    /** 本周周常任务（与每日任务共用 DailyTask 结构：基线快照口径相同）。 */
+    public List<DailyTask> weeklyTasks = new ArrayList<>();
+    /** 本周全清奖励是否已发（第八批）。 */
+    public boolean weeklyBonusGiven = false;
+
     /** 每日黑市刷新日期（第七批，Asia/Shanghai）；跨日由 BlackMarket.ensure 重刷。 */
     public String marketDay;
     /** 当日黑市货单（生成时快照折扣价，整日不变）。 */
@@ -280,6 +287,8 @@ public class PlayerState {
         public long rerolls = 0;
         public long potionsUsed = 0;
         public long dailyClaims = 0;
+        /** 累计领取的周常任务数（第八批）。 */
+        public long weeklyClaims = 0;
         /** 弱点打击触发次数（第七批，终身口径）。 */
         public long weakCrits = 0;
         /** 连环掌累计追加命中数（第八批）。 */

@@ -167,6 +167,7 @@ public class CraftService {
         }
         s.gold = com.gongpu.common.Num.sub(s.gold, com.gongpu.common.Num.of(cost));
         s.materials.merge(code, 1, Integer::sum);
+        s.stats.gemsBought++;
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("id", code);

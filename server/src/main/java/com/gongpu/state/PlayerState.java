@@ -300,6 +300,8 @@ public class PlayerState {
         public long matSoldGold = 0;
         /** 累计镶嵌宝石数（第八批）。 */
         public long gemsSocketed = 0;
+        /** 累计直购宝石数（第八批）。 */
+        public long gemsBought = 0;
         /** 黑市累计购买件数（第七批，终身口径）。 */
         public long marketBuys = 0;
         public long born = 0;

@@ -761,7 +761,8 @@
       master: ['📕 武学奇才', '冷却 -15%', ''],
       lucky: ['🍀 幸运儿', '掉落率 +15%', ''],
       iron_gut: ['🍲 铁胃', '食物效果 +50%', ''],
-      gem_affinity: ['🔷 宝石亲和', '镶嵌宝石效果 +25%', '']
+      gem_affinity: ['🔷 宝石亲和', '镶嵌宝石效果 +25%', ''],
+      pet_whisper: ['🐾 兽语者', '宠物经验 +100%', '']
     };
     const badge = $('talentBadge');
     if (badge) {
@@ -1398,7 +1399,8 @@
       master: ['📕', '武学奇才', '冷却 -15%'],
       lucky: ['🍀', '幸运儿', '掉落率 +15%'],
       iron_gut: ['🍲', '铁胃', '食物效果 +50%'],
-      gem_affinity: ['🔷', '宝石亲和', '镶嵌宝石效果 +25%']
+      gem_affinity: ['🔷', '宝石亲和', '镶嵌宝石效果 +25%'],
+      pet_whisper: ['🐾', '兽语者', '宠物经验 +100%']
     };
 
     const talent = view.talent && talentMeta[view.talent];

@@ -1337,6 +1337,10 @@ public class GameService {
         if (s.pet == null || exp <= 0) {
             return new int[]{s.pet == null ? 0 : s.petLevels.getOrDefault(s.pet, 1), 0};
         }
+        // 天赋「兽语者」：经验翻倍（击杀与喂食共用此单点）
+        if ("pet_whisper".equals(s.talent)) {
+            exp *= GameConst.PET_WHISPER_MUL;
+        }
         int lv = s.petLevels.getOrDefault(s.pet, 1);
         if (lv >= GameConst.PET_MAX_LEVEL) {
             return new int[]{lv, 0};

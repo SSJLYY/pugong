@@ -706,10 +706,14 @@ public final class GameConst {
             Map.entry("master", new TalentDef("master", "武学奇才", "📕", "主动技能冷却 -15%")),
             Map.entry("lucky", new TalentDef("lucky", "幸运儿", "🍀", "装备与图纸掉落率 +15%")),
             Map.entry("iron_gut", new TalentDef("iron_gut", "铁胃", "🍲", "食物回血效果 +50%、持续时间 +50%")),
-            Map.entry("gem_affinity", new TalentDef("gem_affinity", "宝石亲和", "🔷", "镶嵌宝石的效果 +25%，宝石在你手里更亮")));
+            Map.entry("gem_affinity", new TalentDef("gem_affinity", "宝石亲和", "🔷", "镶嵌宝石的效果 +25%，宝石在你手里更亮")),
+            Map.entry("pet_whisper", new TalentDef("pet_whisper", "兽语者", "🐾", "宠物经验 +100%：击杀与喂食所得经验翻倍")));
 
     /** 天赋「宝石亲和」（第八批）：宝石 flat 加成乘区（天赋不受沉默压制）。 */
     public static final double GEM_AFFINITY_MUL = 1.25;
+
+    /** 天赋「兽语者」（第九批）：宠物经验乘区（gainPetExp 单点，击杀/喂食同享）。 */
+    public static final double PET_WHISPER_MUL = 2.0;
 
     /** 天赋「幸运儿」（第七批）：掉落率乘区（与鸿运药剂/幸运星被动乘算）。 */
     public static final double LUCKY_TALENT_MUL = 1.15;

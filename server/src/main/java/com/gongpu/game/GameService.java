@@ -995,6 +995,60 @@ public class GameService {
         return m;
     }
 
+    /** 宝石镶嵌（第八批）：消耗背包材料里的宝石 1 颗，镶入背包装备（孔上限 GEM_SOCKET_MAX）。 */
+    public Map<String, Object> socketGem(PlayerState s, int bagIdx, String gemCode) {
+        if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
+            throw ApiException.badRequest("背包索引越界");
+        }
+        GameConst.GemDef def = GameConst.GEMS.get(gemCode);
+        if (def == null) {
+            throw ApiException.badRequest("宝石不存在");
+        }
+        PlayerState.Item it = s.equipBag.get(bagIdx);
+        if (it.gems == null) {
+            it.gems = new java.util.ArrayList<>();
+        }
+        if (it.gems.size() >= GameConst.GEM_SOCKET_MAX) {
+            throw ApiException.badRequest("镶嵌孔已满（" + GameConst.GEM_SOCKET_MAX + "）");
+        }
+        int have = s.materials.getOrDefault(gemCode, 0);
+        if (have <= 0) {
+            throw ApiException.badRequest("没有" + def.name() + "了");
+        }
+        s.materials.put(gemCode, have - 1);
+        it.gems.add(gemCode);
+        s.stats.gemsSocketed++;
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("gem", gemCode);
+        m.put("sockets", it.gems.size());
+        return m;
+    }
+
+    /** 宝石拆卸（第八批）：花 200 金把一颗已镶宝石完好取回材料仓。 */
+    public static final int UNSOCKET_GOLD = 200;
+
+    public Map<String, Object> unsocketGem(PlayerState s, int bagIdx, int gemIdx) {
+        if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
+            throw ApiException.badRequest("背包索引越界");
+        }
+        PlayerState.Item it = s.equipBag.get(bagIdx);
+        if (it.gems == null || gemIdx < 0 || gemIdx >= it.gems.size()) {
+            throw ApiException.badRequest("宝石位越界");
+        }
+        if (Num.lt(s.gold, Num.of(UNSOCKET_GOLD))) {
+            throw ApiException.badRequest("金币不足，需要 " + UNSOCKET_GOLD);
+        }
+        s.gold = Num.sub(s.gold, Num.of(UNSOCKET_GOLD));
+        String code = it.gems.remove(gemIdx);
+        s.materials.merge(code, 1, Integer::sum);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("gem", code);
+        m.put("sockets", it.gems.size());
+        return m;
+    }
+
     /** 附魔（DESIGN.md §6.2/§8）：消耗卷轴给武器/弓附加魔伤词条（元素亲和被动加成）。 */
     public Map<String, Object> enchant(PlayerState s, String scrollCode, int bagIdx) {
         Object[] scroll = GameConst.SCROLLS.get(scrollCode);

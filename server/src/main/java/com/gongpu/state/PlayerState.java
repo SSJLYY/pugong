@@ -281,6 +281,8 @@ public class PlayerState {
         /** 材料出售累计（第七批，终身口径）：份数与金币收入（商贾成就口径）。 */
         public long matSold = 0;
         public long matSoldGold = 0;
+        /** 累计镶嵌宝石数（第八批）。 */
+        public long gemsSocketed = 0;
         /** 黑市累计购买件数（第七批，终身口径）。 */
         public long marketBuys = 0;
         public long born = 0;

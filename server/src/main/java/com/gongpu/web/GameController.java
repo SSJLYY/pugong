@@ -345,6 +345,25 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "temper", s -> game.temper(s, reqIdx(body.index(), "index")));
     }
 
+    public record SocketReq(Integer index, String gem, Integer gemIndex) {
+    }
+
+    /** 宝石镶嵌（第八批）：index=背包位，gem=宝石 code。 */
+    @PostMapping("/{slot}/socket")
+    public Map<String, Object> socket(HttpServletRequest req, @PathVariable int slot,
+                                      @RequestBody SocketReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "socket",
+                s -> game.socketGem(s, reqIdx(body.index(), "index"), reqStr(body.gem(), "gem")));
+    }
+
+    /** 宝石拆卸（第八批）：index=背包位，gemIndex=孔位。 */
+    @PostMapping("/{slot}/unsocket")
+    public Map<String, Object> unsocket(HttpServletRequest req, @PathVariable int slot,
+                                        @RequestBody SocketReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "unsocket",
+                s -> game.unsocketGem(s, reqIdx(body.index(), "index"), reqIdx(body.gemIndex(), "gemIndex")));
+    }
+
     @PostMapping("/{slot}/reroll")
     public Map<String, Object> reroll(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody RerollReq body) {

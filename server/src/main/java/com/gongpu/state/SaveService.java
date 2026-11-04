@@ -34,6 +34,34 @@ public class SaveService {
         this.cache = cache;
     }
 
+    // 存档体积观测（第八批）：落库 JSON 字节数——体积膨胀是编解码/落库成本的第一指标
+    private static final java.util.concurrent.atomic.AtomicLong STATE_BYTES_LAST =
+            new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong STATE_BYTES_MAX =
+            new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong STATE_BYTES_SUM =
+            new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong STATE_PERSISTS =
+            new java.util.concurrent.atomic.AtomicLong();
+
+    static void recordStateBytes(int bytes) {
+        STATE_BYTES_LAST.set(bytes);
+        STATE_BYTES_MAX.accumulateAndGet(bytes, Math::max);
+        STATE_BYTES_SUM.addAndGet(bytes);
+        STATE_PERSISTS.incrementAndGet();
+    }
+
+    /** 存档体积快照（health 用）：最近/平均/最大字节与带备份环的存档数（环计数由 health 侧查库补）。 */
+    public static java.util.Map<String, Object> stateSizeStats() {
+        long n = STATE_PERSISTS.get();
+        java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+        m.put("lastBytes", STATE_BYTES_LAST.get());
+        m.put("avgBytes", n == 0 ? 0 : STATE_BYTES_SUM.get() / n);
+        m.put("maxBytes", STATE_BYTES_MAX.get());
+        m.put("persists", n);
+        return m;
+    }
+
     /** 取档（优先 Redis，未命中回源 MySQL）。 */
     public PlayerState load(long userId, int slot) {
         PlayerState cached = cache.get(userId, slot);
@@ -202,6 +230,7 @@ public class SaveService {
             gs.setRebirthsTotal(s.stats.rebirths);
         }
         String stateJson = StateCodec.encode(s);
+        recordStateBytes(stateJson.length());
         gs.setStateJson(stateJson);
         // 滚动备份环：落库顺手轮转（≥10 分钟一份、留 3 份），主档损坏时 decodeOrRecover 靠它自愈
         String rotated = rotateBackupRing(gs.getBackupRing(), stateJson, System.currentTimeMillis());

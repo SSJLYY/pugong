@@ -66,6 +66,18 @@ public class MetaController {
         m.put("cache", StateCache.stats());
         // advance 帧耗时（第八批）：帧数/平均/慢帧（≥50ms）/最大
         m.put("frames", TimingInterceptor.frameStats());
+        // 存档体积（第八批）：落库 JSON 字节最近/平均/最大 + 带备份环存档数（查库失败省略计数）
+        java.util.Map<String, Object> saveStats = com.gongpu.state.SaveService.stateSizeStats();
+        try (Connection c = dataSource.getConnection();
+             var st = c.createStatement();
+             var rs = st.executeQuery("SELECT COUNT(*) FROM game_save WHERE backup_ring IS NOT NULL AND backup_ring <> ''")) {
+            if (rs.next()) {
+                saveStats.put("savesWithBackupRing", rs.getLong(1));
+            }
+        } catch (Exception ignored) {
+            // 计数失败不拖垮 health
+        }
+        m.put("save", saveStats);
         addDiskWarn(m);
         // 内容版本指纹：部署后核对新内容是否生效（数字与库内 cfg 行数一致才算部署到位）；
         // 探测失败不加字段，绝不拖垮健康检查

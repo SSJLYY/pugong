@@ -1162,6 +1162,29 @@ body.theme-ink .float-dmg{text-shadow:0 1px 3px rgba(255,255,255,.9)}
 body.theme-ink .zone-btn.req{color:#7c6a4a}
 body.theme-ink .zone-btn.ready::after{color:#2e7d32}
 
+/* 水墨主题·居中卡片布局（第九批，参照文字修仙的居中纸面卡） */
+body.theme-ink .topbar{
+  background:rgba(255,255,255,.55); border:1px solid var(--border);
+  border-radius:12px; box-shadow:var(--shadow);
+  margin:10px auto 8px; padding-left:14px; padding-right:14px;
+}
+body.theme-ink .game-shell{
+  background:rgba(255,255,255,.38); border:1px solid var(--border);
+  border-radius:14px; box-shadow:var(--shadow);
+  margin:0 auto 14px; padding:10px;
+}
+body.theme-ink .panel{
+  background:rgba(255,255,255,.5); border:1px solid rgba(46,58,56,.28);
+  border-radius:10px;
+}
+body.theme-ink .game-header{text-align:center}
+body.theme-ink .game-title{
+  font-family:"Noto Serif SC","Songti SC","STSong",serif; letter-spacing:4px; color:#22271f;
+}
+body.theme-ink h2{
+  font-family:"Noto Serif SC","Songti SC","STSong",serif; letter-spacing:1px;
+}
+
 /* 移动端布局打磨（第七批） */
 @media (max-width: 768px){
   .topbar{flex-wrap:wrap;row-gap:6px}

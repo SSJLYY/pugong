@@ -603,6 +603,9 @@ public final class GameEngine {
         if ("void_rend".equals(m.trait)) {
             s.stats.rendKills++;
         }
+        if ("blood_fury".equals(m.trait)) {
+            s.stats.burnKills++;
+        }
         // 宠物经验（第九批）：出战宠物随击杀成长，升级时播报
         if (s.pet != null) {
             int[] petR = GameService.gainPetExp(s, GameConst.PET_EXP_PER_KILL);
@@ -902,6 +905,13 @@ public final class GameEngine {
         if (m.boss && m.phase2) {
             phys = Num.mul(phys, Num.of(GameConst.BOSS_PHASE2_ATK_MUL));
             mag = Num.mul(mag, Num.of(GameConst.BOSS_PHASE2_ATK_MUL));
+        }
+        // 词条·燃血（第九批）：怪越残血越危险——按已损失生命比例放大双攻（满额 +60%）
+        if ("blood_fury".equals(m.trait) && m.maxHP != null && Num.gt(m.maxHP, Num.ZERO)) {
+            double lost = 1 - Num.div(m.curHP, m.maxHP).doubleValue();
+            double furyMul = 1 + Math.max(0, Math.min(1, lost)) * GameConst.TRAIT_BLOOD_FURY_MAX;
+            phys = Num.mul(phys, Num.of(furyMul));
+            mag = Num.mul(mag, Num.of(furyMul));
         }
         BigDecimal perHit = Num.max(Num.of(1), Num.add(phys, mag));   // 设计 §2.3 承伤同理:至少 1 点
 

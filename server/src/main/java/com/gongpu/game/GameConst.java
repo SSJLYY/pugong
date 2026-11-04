@@ -149,7 +149,8 @@ public final class GameConst {
             Map.entry("tenacity", new TraitDef("tenacity", "坚韧", "🪨", "心志如磐：你的暴击很难撼动它，暴击率对它减半，堆面板平推克它")),
             Map.entry("star_eclipse", new TraitDef("star_eclipse", "星蚀", "🌑", "星光被吞噬：你的暴击威力大减（暴伤超额部分减半），只在星界出现，靠平推与攻速克它")),
             Map.entry("mana_drain", new TraitDef("mana_drain", "噬能", "🔋", "命中你时吞噬你的法力：按所造成伤害的 10% 抽蓝，蓝量见底的法师会被它活活耗死")),
-            Map.entry("void_rend", new TraitDef("void_rend", "裂空", "✴️", "攻击撕裂空间：你的闪避对它减半，只在虚空界出现，身法流在它面前无处可躲")));
+            Map.entry("void_rend", new TraitDef("void_rend", "裂空", "✴️", "攻击撕裂空间：你的闪避对它减半，只在虚空界出现，身法流在它面前无处可躲")),
+            Map.entry("blood_fury", new TraitDef("blood_fury", "燃血", "🩸", "血越少越疯：攻击随自身已损失生命放大，残血时 +60%，拖得越久越危险，速杀或留爆发收尾")));
 
     /** 词条「再生」（第八批）：怪物每秒回复上限的比例。 */
     public static final double TRAIT_REGEN_PCT = 0.03;
@@ -161,6 +162,9 @@ public final class GameConst {
     public static final double TRAIT_DRAIN_MP_PCT = 0.10;
     /** 词条「裂空」（第九批）：玩家闪避被撕裂的乘数（仅虚空界池）。 */
     public static final double TRAIT_REND_EVA_MUL = 0.5;
+
+    /** 词条·燃血（第九批）：残血攻击放大满额（按已损失生命比例线性）。 */
+    public static final double TRAIT_BLOOD_FURY_MAX = 0.6;
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -235,11 +239,11 @@ public final class GameConst {
                                         ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow", "curse", "regen")
                                         : zoneIdx >= 9
                                                 // 虚空界专属池：全词条 + 噬能 + 裂空（无星蚀，星蚀只属星界）
-                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend")
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury")
                                                 : zoneIdx == 8
                                                 // 星界专属池：全词条 + 星蚀（仅此一池，别的区域刷不出）
-                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "star_eclipse", "mana_drain")
-                                                : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain");
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "star_eclipse", "mana_drain", "blood_fury")
+                                                : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "blood_fury");
     }
 
     private static Map<String, ZoneDef> buildZones() {

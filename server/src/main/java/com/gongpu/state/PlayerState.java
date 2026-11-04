@@ -326,6 +326,7 @@ public class PlayerState {
         public long drainKills = 0;
         /** 累计击杀带「裂空」词条的怪物数（第九批）。 */
         public long rendKills = 0;
+        public long burnKills = 0;
         /** 累计喂食宠物次数（第九批）。 */
         public long petFeeds = 0;
         /** 累计融合出二阶宝石数（第九批）。 */

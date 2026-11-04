@@ -51,10 +51,31 @@ public class StateCache {
         return "gongpu:state:" + userId + ":" + slot;
     }
 
+    // 缓存命中观测（第八批）：进程级计数，health 输出命中率便于判断缓存是否真在工作
+    private static final java.util.concurrent.atomic.AtomicLong HITS = new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong MISSES = new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong PUTS = new java.util.concurrent.atomic.AtomicLong();
+
+    public static java.util.Map<String, Object> stats() {
+        long h = HITS.get();
+        long mi = MISSES.get();
+        java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+        m.put("hits", h);
+        m.put("misses", mi);
+        m.put("puts", PUTS.get());
+        m.put("hitRate", (h + mi) == 0 ? 0 : Math.round(1000.0 * h / (h + mi)) / 10.0);
+        return m;
+    }
+
     public PlayerState get(long userId, int slot) {
         try {
             String json = redis.opsForValue().get(key(userId, slot));
-            return json == null ? null : StateCodec.decode(json);
+            if (json == null) {
+                MISSES.incrementAndGet();
+                return null;
+            }
+            HITS.incrementAndGet();
+            return StateCodec.decode(json);
         } catch (RuntimeException e) {
             // Redis 故障不应阻断读取，直接回源 DB
             return null;
@@ -64,6 +85,7 @@ public class StateCache {
     public void put(long userId, int slot, PlayerState state) {
         try {
             redis.opsForValue().set(key(userId, slot), StateCodec.encode(state), ttl);
+            PUTS.incrementAndGet();
         } catch (RuntimeException ignored) {
             // 缓存写失败可接受
         }

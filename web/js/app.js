@@ -589,7 +589,7 @@
     const mpPct = Math.max(0, Math.min(100, new Decimal(p.curMP).div(new Decimal(p.MP).max(1)).toNumber() * 100));
     const pot = view.potions || {};
     const mats = view.materials || {};
-    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥'], ['abyss_crystal', '🕳️'], ['star_shard', '🌟']];
+    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥'], ['abyss_crystal', '🕳️'], ['star_shard', '🌟'], ['void_shard', '🌀']];
     const bpCount = Object.keys(mats).filter(k => k.startsWith('bp_')).reduce((t, k) => t + (mats[k] || 0), 0);
     const daily = view.dailyTasks || [];
     const dailyClaimed = daily.filter(t => t.claimed).length;
@@ -597,12 +597,16 @@
     const weekly = view.weeklyTasks || [];
     const weeklyClaimed = weekly.filter(t => t.claimed).length;
     const weeklyReady = weekly.filter(t => t.done && !t.claimed).length;
+    const monthly = view.monthlyTasks || [];
+    const monthlyClaimed = monthly.filter(t => t.claimed).length;
+    const monthlyReady = monthly.filter(t => t.done && !t.claimed).length;
     const sig = [Math.round(hpPct / 5), Math.round(mpPct / 5), view.zone, view.mob ? view.mob.name : '',
       view.autoEquipBest ? 1 : 0, view.autoSellKeep || 0, view.autoSmeltKeep || 0,
       pot.hp_s || 0, pot.hp_l || 0, pot.mp || 0, pot.food || 0, view.dead ? 1 : 0,
       MAT6.map(([c]) => mats[c] || 0).join(','), bpCount,
       dailyClaimed, dailyReady, daily.map(t => t.progress).join(','),
-      weeklyClaimed, weeklyReady, weekly.map(t => t.progress).join(',')].join('|');
+      weeklyClaimed, weeklyReady, weekly.map(t => t.progress).join(','),
+      monthlyClaimed, monthlyReady, monthly.map(t => t.progress).join(',')].join('|');
     if (renderButlerPanel._sig === sig) return;
     renderButlerPanel._sig = sig;
     $('bpHp').style.width = hpPct.toFixed(0) + '%';
@@ -622,7 +626,9 @@
     if (bd) bd.textContent = '📅 每日 ' + dailyClaimed + '/' + daily.length + ' 已领' +
       (dailyReady > 0 ? ' · 🎁 ' + dailyReady + ' 个可领取' : '') +
       ' · 🗓️ 周常 ' + weeklyClaimed + '/' + weekly.length +
-      (weeklyReady > 0 ? ' · 🎁 ' + weeklyReady + ' 个可领取' : '');
+      (weeklyReady > 0 ? ' · 🎁 ' + weeklyReady + ' 个可领取' : '') +
+      ' · 📆 月常 ' + monthlyClaimed + '/' + monthly.length +
+      (monthlyReady > 0 ? ' · 🎁 ' + monthlyReady + ' 个可领取' : '');
     const bp = $('bpPet');
     if (bp) {
       const pv = view.pet || {};

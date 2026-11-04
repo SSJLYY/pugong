@@ -1097,6 +1097,10 @@
 /* 低特效模式（第七批）：停用全部动画与过渡（飘字由 JS 侧同步停用） */
 body.fx-off *, body.fx-off *::before, body.fx-off *::after{animation:none!important;transition:none!important}
 
+/* 字号档位（第八批）：根字号缩放，rem 布局整体跟随 */
+body.fs-l{font-size:17.5px}
+body.fs-xl{font-size:19.5px}
+
 /* 星空主题（第八批）：深空蓝紫 + 星辉金，呼应第九区域星界 */
 body.theme-star{
   --bg0:#070a1e; --bg1:#0b1030; --bg2:#141b45;

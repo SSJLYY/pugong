@@ -77,6 +77,17 @@
     return themeName() === 'light';
   }
   const THEME_LABEL = { dark: '🌗 主题', light: '☀️ 宣纸', star: '🌌 星空' };
+  // 字号切换（第八批）：标准/大/特大三档，body 类驱动根字号，存 localStorage
+  function fontSizeName() {
+    try { return localStorage.getItem('gongpu_font') || 'm'; } catch (e) { return 'm'; }
+  }
+  function applyFontPref() {
+    const f = fontSizeName();
+    document.body.classList.toggle('fs-l', f === 'l');
+    document.body.classList.toggle('fs-xl', f === 'xl');
+    const b = $('btnFont');
+    if (b) b.textContent = { m: '🔠 字号', l: '🔠 大字', xl: '🔠 特大' }[f] || '🔠 字号';
+  }
   function applyThemePref() {
     const t = themeName();
     document.body.classList.toggle('theme-light', t === 'light');
@@ -1198,6 +1209,15 @@
       toast(fxOff() ? '🚫 特效已关（飘字与动画停用）' : '✨ 特效已开', 'ok');
     });
     applyThemePref();
+    applyFontPref();
+    const fontBtn = $('btnFont');
+    if (fontBtn) fontBtn.addEventListener('click', () => {
+      const order = ['m', 'l', 'xl'];
+      const next = order[(order.indexOf(fontSizeName()) + 1) % order.length];
+      try { localStorage.setItem('gongpu_font', next); } catch (e) { /* 忽略 */ }
+      applyFontPref();
+      toast({ m: '🔠 字号：标准', l: '🔠 字号：大', xl: '🔠 字号：特大' }[next], 'ok');
+    });
     $('btnTheme').addEventListener('click', () => {
       const order = ['dark', 'light', 'star'];
       const next = order[(order.indexOf(themeName()) + 1) % order.length];

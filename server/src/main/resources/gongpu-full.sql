@@ -1305,6 +1305,13 @@ INSERT INTO `cfg_equipment_template`
   ('void_treads', '踏虚胫甲', '🦿', 'legs', 4, 'void', '{"maxHP":"14000","PDEF":"180","SPD":"22"}', 10, 3200, '每一步都踩在不存在的地面上', 1, 71),
   ('void_ring', '无相指环', '💍', 'ring1', 4, 'void', '{"MATK":"600","MREGEN":"10","EVA":"0.04"}', 10, 3800, '指环内侧刻着一个不存在的名字', 1, 72);
 
+-- 第九批第 86 轮：高阶装备 ×2（星核之盾/无相之瞳）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('star_aegis','void_eye_charm');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('star_aegis', '星核之盾', '🛡️', 'offhand', 4, 'star', '{"maxHP":"24000","PDEF":"320","MDEF":"280"}', 10, 4000, '以星核碎片锻成的盾，盾面映着整条回廊', 1, 73),
+  ('void_eye_charm', '无相之瞳', '👁️', 'necklace', 4, 'void', '{"MATK":"700","CRIT":"0.05","MREGEN":"12"}', 10, 4200, '戴上它，你能看见虚空在看你', 1, 74);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-04 第八批 100 轮收官口径）：
 --   cfg_equipment_template 66 / cfg_item 药剂 39 / cfg_affix 26

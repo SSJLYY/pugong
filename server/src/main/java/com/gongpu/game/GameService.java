@@ -984,8 +984,8 @@ public class GameService {
     }
 
     /** 成就里程碑档位（第八批）：累计已领成就数达标线与一次性奖金（每档只发一次，掩码落档）。 */
-    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60};
-    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000};
+    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75};
+    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000};
 
     /** 领取后结算里程碑：返回本次新发的里程碑奖金（0 = 未跨新档），奖金已入账。 */
     static long settleAchMilestone(PlayerState s) {

@@ -59,6 +59,6 @@ class TraitDrainTest {
         assertFalse(GameConst.traitPool(9).contains("star_eclipse"), "虚空池不应含星蚀");
         assertTrue(GameConst.traitPool(8).contains("star_eclipse"), "星界池保留星蚀");
         assertFalse(GameConst.traitPool(8).contains("void_rend"), "裂空只在虚空界");
-        assertEquals(20, GameConst.MOB_TRAITS.size());
+        assertEquals(23, GameConst.MOB_TRAITS.size());
     }
 }

@@ -76,7 +76,7 @@ class DataParityTest {
         for (String code : new String[]{"wuying", "buxi"}) {
             assertTrue(sql.contains("'" + code + "'"), "第八批词条 " + code + " 应在 SQL 中");
         }
-        assertEquals(28, GameConst.AFFIXES.size());
+        assertEquals(30, GameConst.AFFIXES.size());
     }
 
     @Test

@@ -10,7 +10,7 @@ class EconomySanityTest {
 
     @Test
     void potionsSane() {
-        assertEquals(41, GameConst.POTIONS.size(), "药剂总数应为 40");
+        assertEquals(44, GameConst.POTIONS.size(), "药剂总数应为 40");
         for (GameConst.PotionDef p : GameConst.POTIONS.values()) {
             assertTrue(p.price() > 0, p.id() + " 价格应为正");
             assertTrue(p.price() <= 100_000, p.id() + " 价格不应离谱：" + p.price());
@@ -20,14 +20,15 @@ class EconomySanityTest {
             }
             assertTrue(p.healHP() >= 0 && p.healHP() <= 1.0, p.id() + " 回血比应在 [0,1]");
             assertTrue(p.healMP() >= 0 && p.healMP() <= 1.0, p.id() + " 回蓝比应在 [0,1]");
-            assertTrue(p.healHP() > 0 || p.healMP() > 0 || p.buff() != null || "cure".equals(p.id()) || "food".equals(p.id()),
+            assertTrue(p.healHP() > 0 || p.healMP() > 0 || p.buff() != null || "cure".equals(p.id()) || "food".equals(p.id())
+                            || "pet_treat".equals(p.id()),
                     p.id() + " 必须至少有一种效果（回复/buff/解毒/食物）");
         }
     }
 
     @Test
     void affixesSane() {
-        assertEquals(28, GameConst.AFFIXES.size(), "词条总数应为 26");
+        assertEquals(30, GameConst.AFFIXES.size(), "词条总数应为 26");
         for (GameConst.Affix a : GameConst.AFFIXES) {
             assertTrue(a.min() <= a.max(), a.name() + " 区间下限不应大于上限");
             assertTrue(a.max() > 0, a.name() + " 区间上限应为正");

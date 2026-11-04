@@ -148,7 +148,7 @@ class DailyQuestsTest {
 
     @Test
     void templatePoolIntegrity() {
-        assertEquals(7, DailyQuests.TEMPLATES.size(), "模板池应为 7 个");
+        assertEquals(9, DailyQuests.TEMPLATES.size(), "模板池应为 9 个");
         Set<String> ids = new HashSet<>();
         for (DailyQuests.Template t : DailyQuests.TEMPLATES) {
             assertTrue(ids.add(t.id()), "模板 id 不应重复");

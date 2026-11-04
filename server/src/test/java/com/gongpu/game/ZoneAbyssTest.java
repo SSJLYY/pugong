@@ -35,14 +35,14 @@ class ZoneAbyssTest {
         assertNotNull(z.boss());
         assertEquals("boss_abyss", z.boss().id());
         List<String> order = new ArrayList<>(GameConst.ZONES.keySet());
-        assertEquals("star", order.get(order.size() - 2), "星界应为次深区域（第九批虚空界在其后）");
+        assertEquals("void", order.get(order.size() - 2), "虚空界应为次深区域（第十批混沌界在其后）");
         assertEquals("abyss", GameEngine.nextZoneId("volcano"), "火山之后应推进到深渊");
         assertEquals("star", GameEngine.nextZoneId("abyss"), "第八批：深渊之后推进星界");
     }
 
     @Test
     void codexTotalGrowsTo23() {
-        assertEquals(33, GameConst.codexTotal(), "图鉴总数 = 28 + 虚空界 4 怪 1 Boss（第九批）");
+        assertEquals(38, GameConst.codexTotal(), "图鉴总数 = 33 + 混沌界 4 怪 1 Boss（第十批）");
     }
 
     @Test
@@ -53,7 +53,7 @@ class ZoneAbyssTest {
 
     @Test
     void traitPoolAtAbyssDepthIsFull() {
-        assertEquals(18, GameConst.traitPool(7).size(), "深区词条池应全开（17 条）");
+        assertEquals(20, GameConst.traitPool(7).size(), "深区词条池应全开（20 条）");
     }
 
     /** 第 23 轮：深渊 6 件毕业装在 SQL 里 min_zone=abyss（掉落池按区域取模板）。 */

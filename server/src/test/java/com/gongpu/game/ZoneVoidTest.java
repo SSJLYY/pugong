@@ -19,7 +19,7 @@ class ZoneVoidTest {
         assertEquals(4, z.mobs().size());
         assertEquals("boss_void", z.boss().id());
         assertEquals("3000000000", z.boss().maxHP());
-        assertEquals(10, GameConst.ZONES.size());
+        assertEquals(11, GameConst.ZONES.size());
     }
 
     @Test
@@ -41,6 +41,6 @@ class ZoneVoidTest {
     @Test
     void advanceChainEndsAtVoid() {
         assertEquals("void", GameEngine.nextZoneId("star"));
-        assertNull(GameEngine.nextZoneId("void"));
+        assertEquals("chaos", GameEngine.nextZoneId("void"));
     }
 }

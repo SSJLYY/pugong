@@ -58,6 +58,8 @@ public final class Achievements {
             new Def("set_4", "整装待发", "🧩", "集齐任意一套装的 4 件"),
             new Def("set_dual", "双套加身", "🎭", "同时激活两套套装（各 ≥2 件）"),
             new Def("temper_5", "淬火成钢", "🔨", "任意一件装备淬炼满级"),
+            new Def("star_1", "初升之星", "⭐", "任意一件装备升至 1 星"),
+            new Def("star_5", "五星神装", "🌟", "任意一件装备升至满星（5 星）"),
             new Def("reroll_50", "洗炼大师", "🎲", "累计洗炼 50 次"),
             new Def("abyss_first", "渊瞳初开", "🕳️", "首次击杀深渊裂隙的怪物"),
             new Def("abyss_lord", "深渊主宰", "👑", "击杀渊底之主·无光君王"),
@@ -74,14 +76,26 @@ public final class Achievements {
             new Def("pet_first", "宠物伙伴", "🐾", "首次领养一只宠物"),
             new Def("pet_25", "宠物大师", "🐾", "任一宠物达到 25 级"),
             new Def("pet_50", "宠物宗师", "🐾", "任一宠物达到 50 级（满级）"),
-            new Def("pet_all", "宠物收藏家", "🐾", "集齐全部 6 只宠物"),
+            new Def("pet_all", "宠物收藏家", "🐾", "集齐全部 8 只宠物"),
             new Def("pet_feed_100", "喂食达人", "🐾", "累计喂食宠物 100 次"),
+            new Def("pet_bond_100", "羁绊深厚", "💞", "全部宠物总等级达到 100"),
+            new Def("pet_treat_10", "零食大户", "🍬", "累计喂宠物零食 10 次"),
+            new Def("pet_bond_250", "万兽羁绊", "💞", "全部宠物总等级达到 250"),
+            new Def("pet_treat_50", "零食宗师", "🍬", "累计喂宠物零食 50 次"),
+            new Def("star_25", "升星大师", "⭐", "累计升星 25 次"),
+            new Def("enchant_500", "附魔宗师", "🖋️", "累计附魔 500 次"),
             new Def("punch_100m", "拳倾天下", "☄️", "累计出拳 1 亿次"),
             new Def("merchant_500k", "材料大亨", "💰", "卖材料累计收入 500,000 金币"),
+            new Def("merchant_1m", "材料巨鳄", "💰", "卖材料累计收入 1,000,000 金币"),
+            new Def("feed_500", "喂食宗师", "🐾", "累计喂食宠物 500 次"),
             new Def("greed_learn", "招财之道", "🪙", "学会被动「招财手」"),
             new Def("burn_50", "燃血克星", "🩸", "击杀 50 只带「燃血」词条的怪物"),
             new Def("drain_10", "噬能克星", "🔋", "击杀 10 只带「噬能」词条的怪物"),
             new Def("rend_10", "裂空克星", "✴️", "击杀 10 只带「裂空」词条的怪物"),
+            new Def("mirror_10", "镜面克星", "🪞", "击杀 10 只带「镜像」词条的怪物"),
+            new Def("weaken_10", "虚弱克星", "🥀", "击杀 10 只带「虚弱」词条的怪物"),
+            new Def("frenzy_10", "狂乱克星", "🌀", "击杀 10 只带「狂乱」词条的怪物"),
+            new Def("phoenix_1", "凤凰初啜", "🦅", "首次饮下凤凰之血"),
             new Def("monthly_1", "月令初成", "📆", "领满一整月月常任务（累计领取 3 个）"),
             new Def("monthly_6", "半年月令", "📆", "累计领取 18 个月常任务（六个月全清）"),
             new Def("fuse_5", "融合大师", "💎", "累计融合出 5 颗璀璨二阶宝石"),
@@ -91,6 +105,8 @@ public final class Achievements {
             new Def("star_lord", "群星主宰", "👑", "击杀星核主宰·噬光之心"),
             new Def("void_first", "虚空初临", "🌀", "首次击杀虚空界的怪物"),
             new Def("void_lord", "无相之主", "👑", "击杀虚空之主·无相天魔"),
+            new Def("chaos_first", "混沌初临", "🌪️", "首次击杀混沌界的怪物"),
+            new Def("chaos_lord", "无序之主", "👑", "击杀混沌魔君·无序之源"),
             new Def("weekly_1", "周常初成", "🗓️", "领取 3 个周常任务奖励（整整一周全清）"),
             new Def("weekly_8", "周常老兵", "🎖️", "累计领取 24 个周常任务奖励（八周全清）"),
             new Def("gem_collector", "宝石收藏家", "💠", "累计直购 10 颗宝石"),
@@ -115,9 +131,9 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5", "pet_all", "pet_feed_100", "burn_50" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5", "pet_all", "pet_feed_100", "burn_50", "pet_bond_100", "mirror_10", "weaken_10", "pet_treat_50", "star_25", "enchant_500", "frenzy_10" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
-                    "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord", "monthly_6", "pet_50", "punch_100m", "merchant_500k" -> 5_000L;
+                    "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord", "monthly_6", "pet_50", "punch_100m", "merchant_500k", "chaos_lord", "merchant_1m", "feed_500", "pet_bond_250" -> 5_000L;
             default -> 500L;
         };
     }
@@ -178,6 +194,36 @@ public final class Achievements {
         return n;
     }
 
+    /** 混沌界图鉴命中数（第十批，chaos_first 成就口径）。 */
+    static int chaosCodexHits(PlayerState s) {
+        if (s.codex == null) {
+            return 0;
+        }
+        int n = 0;
+        for (String id : new String[]{"chaos_wisp", "chaos_hound", "chaos_titan", "chaos_dragon"}) {
+            if (s.codex.contains(id)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /** 当前最高升星等级（已装备 + 背包，第十批 star 成就口径）。 */
+    static int maxStar(PlayerState s) {
+        int max = 0;
+        for (PlayerState.Item it : s.equipped.values()) {
+            if (it != null) {
+                max = Math.max(max, it.star);
+            }
+        }
+        for (PlayerState.Item it : s.equipBag) {
+            if (it != null) {
+                max = Math.max(max, it.star);
+            }
+        }
+        return max;
+    }
+
     /** 当前最高淬炼等级（已装备 + 背包，temper_5 成就口径）。 */
     static int maxTemper(PlayerState s) {
         int max = 0;
@@ -232,6 +278,8 @@ public final class Achievements {
             case "punch_1m" -> new long[]{sat(s.stats.lifetimePunches), 1_000_000};
             case "punch_100m" -> new long[]{sat(s.stats.lifetimePunches), 100_000_000};
             case "merchant_500k" -> new long[]{s.stats.matSoldGold, 500_000};
+            case "merchant_1m" -> new long[]{s.stats.matSoldGold, 1_000_000};
+            case "feed_500" -> new long[]{s.stats.petFeeds, 500};
             case "greed_learn" -> new long[]{s.passives.contains("goldtouch") ? 1 : 0, 1};
             case "burn_50" -> new long[]{s.stats.burnKills, 50};
             case "kill_100k" -> new long[]{sat(s.stats.lifetimeKills), 100_000};
@@ -263,6 +311,8 @@ public final class Achievements {
             case "craft_50" -> new long[]{s.stats.crafts, 50};
             case "craft_200" -> new long[]{s.stats.crafts, 200};
             case "temper_5" -> new long[]{maxTemper(s), GameConst.TEMPER_MAX_LV};
+            case "star_1" -> new long[]{maxStar(s), 1};
+            case "star_5" -> new long[]{maxStar(s), GameConst.STAR_MAX_LV};
             case "reroll_50" -> new long[]{s.stats.rerolls, 50};
             case "abyss_first" -> new long[]{abyssCodexHits(s), 1};
             case "abyss_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_abyss") ? 1 : 0, 1};
@@ -270,6 +320,8 @@ public final class Achievements {
             case "star_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_star") ? 1 : 0, 1};
             case "void_first" -> new long[]{voidCodexHits(s), 1};
             case "void_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_void") ? 1 : 0, 1};
+            case "chaos_first" -> new long[]{chaosCodexHits(s), 1};
+            case "chaos_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_chaos") ? 1 : 0, 1};
             case "weekly_1" -> new long[]{s.stats.weeklyClaims, 3};
             case "weekly_8" -> new long[]{s.stats.weeklyClaims, 24};
             case "gem_collector" -> new long[]{s.stats.gemsBought, 10};
@@ -292,8 +344,18 @@ public final class Achievements {
             case "pet_50" -> new long[]{s.petLevels.values().stream().mapToInt(Integer::intValue).max().orElse(0), 50};
             case "pet_all" -> new long[]{s.petsOwned.size(), GameConst.PETS.size()};
             case "pet_feed_100" -> new long[]{s.stats.petFeeds, 100};
+            case "pet_bond_100" -> new long[]{s.petLevels.values().stream().mapToInt(Integer::intValue).sum(), 100};
+            case "pet_treat_10" -> new long[]{s.stats.petTreats, 10};
+            case "pet_bond_250" -> new long[]{s.petLevels.values().stream().mapToInt(Integer::intValue).sum(), 250};
+            case "pet_treat_50" -> new long[]{s.stats.petTreats, 50};
+            case "star_25" -> new long[]{s.stats.starsDone, 25};
+            case "enchant_500" -> new long[]{s.stats.enchants, 500};
             case "drain_10" -> new long[]{s.stats.drainKills, 10};
             case "rend_10" -> new long[]{s.stats.rendKills, 10};
+            case "mirror_10" -> new long[]{s.stats.mirrorKills, 10};
+            case "weaken_10" -> new long[]{s.stats.weakenKills, 10};
+            case "frenzy_10" -> new long[]{s.stats.frenzyKills, 10};
+            case "phoenix_1" -> new long[]{s.usedPotions != null && s.usedPotions.contains("phoenix") ? 1 : 0, 1};
             case "monthly_1" -> new long[]{s.stats.monthlyClaims, 3};
             case "monthly_6" -> new long[]{s.stats.monthlyClaims, 18};
             case "fuse_5" -> new long[]{s.stats.gemsFused, 5};
@@ -336,6 +398,8 @@ public final class Achievements {
                 case "punch_1m" -> punches >= 1_000_000;
                 case "punch_100m" -> punches >= 100_000_000;
                 case "merchant_500k" -> s.stats.matSoldGold >= 500_000;
+                case "merchant_1m" -> s.stats.matSoldGold >= 1_000_000;
+                case "feed_500" -> s.stats.petFeeds >= 500;
                 case "greed_learn" -> s.passives.contains("goldtouch");
                 case "burn_50" -> s.stats.burnKills >= 50;
                 case "first_kill" -> kills >= 1;
@@ -378,6 +442,8 @@ public final class Achievements {
                 case "set_4" -> setCounts.values().stream().anyMatch(n -> n >= 4);
                 case "set_dual" -> setCounts.values().stream().filter(n -> n >= 2).count() >= 2;
                 case "temper_5" -> maxTemper(s) >= GameConst.TEMPER_MAX_LV;
+                case "star_1" -> maxStar(s) >= 1;
+                case "star_5" -> maxStar(s) >= GameConst.STAR_MAX_LV;
                 case "reroll_50" -> s.stats.rerolls >= 50;
                 case "abyss_first" -> abyssCodexHits(s) >= 1;
                 case "abyss_lord" -> s.bossKills != null && s.bossKills.contains("boss_abyss");
@@ -385,6 +451,8 @@ public final class Achievements {
                 case "star_lord" -> s.bossKills != null && s.bossKills.contains("boss_star");
                 case "void_first" -> voidCodexHits(s) >= 1;
                 case "void_lord" -> s.bossKills != null && s.bossKills.contains("boss_void");
+                case "chaos_first" -> chaosCodexHits(s) >= 1;
+                case "chaos_lord" -> s.bossKills != null && s.bossKills.contains("boss_chaos");
                 case "weekly_1" -> s.stats.weeklyClaims >= 3;
                 case "weekly_8" -> s.stats.weeklyClaims >= 24;
                 case "gem_collector" -> s.stats.gemsBought >= 10;
@@ -393,6 +461,10 @@ public final class Achievements {
                 case "new_meds" -> s.usedPotions.contains("focus") && s.usedPotions.contains("vigor");
                 case "drain_10" -> s.stats.drainKills >= 10;
                 case "rend_10" -> s.stats.rendKills >= 10;
+                case "mirror_10" -> s.stats.mirrorKills >= 10;
+                case "weaken_10" -> s.stats.weakenKills >= 10;
+                case "frenzy_10" -> s.stats.frenzyKills >= 10;
+                case "phoenix_1" -> s.usedPotions != null && s.usedPotions.contains("phoenix");
                 case "monthly_1" -> s.stats.monthlyClaims >= 3;
                 case "monthly_6" -> s.stats.monthlyClaims >= 18;
                 case "fuse_5" -> s.stats.gemsFused >= 5;
@@ -410,6 +482,12 @@ public final class Achievements {
                 case "pet_50" -> s.petLevels.values().stream().mapToInt(Integer::intValue).max().orElse(0) >= 50;
                 case "pet_all" -> s.petsOwned.size() >= GameConst.PETS.size();
                 case "pet_feed_100" -> s.stats.petFeeds >= 100;
+                case "pet_bond_100" -> s.petLevels.values().stream().mapToInt(Integer::intValue).sum() >= 100;
+                case "pet_treat_10" -> s.stats.petTreats >= 10;
+                case "pet_bond_250" -> s.petLevels.values().stream().mapToInt(Integer::intValue).sum() >= 250;
+                case "pet_treat_50" -> s.stats.petTreats >= 50;
+                case "star_25" -> s.stats.starsDone >= 25;
+                case "enchant_500" -> s.stats.enchants >= 500;
                 case "gem_first" -> s.stats.gemsSocketed >= 1;
                 case "gem_10" -> s.stats.gemsSocketed >= 10;
                 case "pierce_learn" -> s.passives.contains("armor_pierce");

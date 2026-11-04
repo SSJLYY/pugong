@@ -17,6 +17,6 @@ class TraitKillAchTest {
         s.stats.rendKills = 4;
         assertArrayEquals(new long[]{10, 10}, Achievements.progressOf(s, "drain_10"));
         assertArrayEquals(new long[]{4, 10}, Achievements.progressOf(s, "rend_10"));
-        assertEquals(82, Achievements.ALL.size());
+        assertEquals(98, Achievements.ALL.size());
     }
 }

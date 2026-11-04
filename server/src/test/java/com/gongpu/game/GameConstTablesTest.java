@@ -60,8 +60,8 @@ class GameConstTablesTest {
         }
 
         // 区域材料:恰好覆盖八个可狩猎区（第八批加星界）,村口(安全区)不产材料
-        Set<String> huntingZones = Set.of("plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star", "void");
-        assertEquals(huntingZones, GameConst.ZONE_MAT.keySet(), "材料表应恰好覆盖九区");
+        Set<String> huntingZones = Set.of("plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star", "void", "chaos");
+        assertEquals(huntingZones, GameConst.ZONE_MAT.keySet(), "材料表应恰好覆盖十区");
         Set<String> mats = new HashSet<>();
         for (Map.Entry<String, String> e : GameConst.ZONE_MAT.entrySet()) {
             assertTrue(GameConst.ZONES.containsKey(e.getKey()), e.getKey() + " 必须是真实区域");
@@ -70,6 +70,6 @@ class GameConstTablesTest {
                     "材料 " + e.getValue() + " 缺少 MAT_INFO 展示配置");
             mats.add(e.getValue());
         }
-        assertEquals(9, mats.size(), "九区材料应各不相同");
+        assertEquals(10, mats.size(), "十区材料应各不相同");
     }
 }

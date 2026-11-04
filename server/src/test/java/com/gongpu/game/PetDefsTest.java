@@ -11,7 +11,7 @@ class PetDefsTest {
 
     @Test
     void sixPetsWithValidDefs() {
-        assertEquals(6, GameConst.PETS.size());
+        assertEquals(8, GameConst.PETS.size());
         for (GameConst.PetDef d : GameConst.PETS.values()) {
             assertFalse(d.name().isBlank());
             assertFalse(d.stats().isEmpty());

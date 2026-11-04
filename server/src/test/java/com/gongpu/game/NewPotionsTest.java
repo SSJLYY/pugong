@@ -34,7 +34,7 @@ class NewPotionsTest {
         // REGEN 基线 2（NewState）+ 生机 150
         assertTrue(Num.gte(p.REGEN(), Num.of(152)), "回复应含生机 +150，实际 " + p.REGEN());
         // GameConst 镜像齐备
-        assertEquals(41, GameConst.POTIONS.size(), "药剂总数应为 40");
+        assertEquals(44, GameConst.POTIONS.size(), "药剂总数应为 40");
         assertTrue(GameConst.POTIONS.containsKey("focus") && GameConst.POTIONS.containsKey("vigor"));
     }
 }

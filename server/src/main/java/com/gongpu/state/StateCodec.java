@@ -157,6 +157,17 @@ public final class StateCodec {
         s.petLevels.replaceAll((k, v) -> v == null ? 1
                 : Math.max(1, Math.min(GameConst.PET_MAX_LEVEL, v)));
         s.petExps.replaceAll((k, v) -> v == null ? 0.0 : Math.max(0.0, v));
+        // 升星等级钳制（第十批）：坏档星级越界会放大面板乘区，统一钳到 [0, STAR_MAX_LV]
+        for (PlayerState.Item it : s.equipped.values()) {
+            if (it != null) {
+                it.star = Math.max(0, Math.min(GameConst.STAR_MAX_LV, it.star));
+            }
+        }
+        for (PlayerState.Item it : s.equipBag) {
+            if (it != null) {
+                it.star = Math.max(0, Math.min(GameConst.STAR_MAX_LV, it.star));
+            }
+        }
         convertLegacyPctAffixes(s);
         if (s.lastTickAt <= 0) {
             s.lastTickAt = System.currentTimeMillis();

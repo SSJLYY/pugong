@@ -244,6 +244,8 @@ public class PlayerState {
         public String code;
         /** 淬炼等级（0..TEMPER_MAX_LV）：底子额外乘区 +4%/级，与强化独立计层；旧档默认 0。 */
         public int temper;
+        /** 升星等级（0..STAR_MAX_LV，第十批）：底子额外乘区 +3%/星，与强化/淬炼独立计层；旧档默认 0。 */
+        public int star;
         /** 已镶嵌宝石 code 列表（第八批，上限 GameConst.GEM_SOCKET_MAX）；旧档为 null，读取处兜底。 */
         public List<String> gems = new ArrayList<>();
     }
@@ -304,6 +306,8 @@ public class PlayerState {
         public long bossPhaseKills = 0;
         public long enchants = 0;
         public long tempers = 0;
+        /** 累计升星次数（第十批）。 */
+        public long starsDone = 0;
         public long rerolls = 0;
         public long potionsUsed = 0;
         public long dailyClaims = 0;
@@ -329,6 +333,14 @@ public class PlayerState {
         public long burnKills = 0;
         /** 累计喂食宠物次数（第九批）。 */
         public long petFeeds = 0;
+        /** 宠物零食使用次数（第十批）。 */
+        public long petTreats = 0;
+        /** 镜像词条怪击杀数（第十批）。 */
+        public long mirrorKills = 0;
+        /** 虚弱词条怪击杀数（第十批）。 */
+        public long weakenKills = 0;
+        /** 狂乱词条怪击杀数（第十批）。 */
+        public long frenzyKills = 0;
         /** 累计融合出二阶宝石数（第九批）。 */
         public long gemsFused = 0;
         /** 累计直购宝石数（第八批）。 */

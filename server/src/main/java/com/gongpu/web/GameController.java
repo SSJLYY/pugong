@@ -375,6 +375,13 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "temper", s -> game.temper(s, reqIdx(body.index(), "index")));
     }
 
+    /** 装备升星（第十批）：星核碎片 + 金币，底子 +3%/星。 */
+    @PostMapping("/{slot}/star-up")
+    public Map<String, Object> starUp(HttpServletRequest req, @PathVariable int slot,
+                                      @RequestBody IdxReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "star-up", s -> game.starUp(s, reqIdx(body.index(), "index")));
+    }
+
     public record SocketReq(Integer index, String gem, Integer gemIndex) {
     }
 
@@ -578,6 +585,13 @@ public class GameController {
     public Map<String, Object> feedPetBatch(HttpServletRequest req, @PathVariable int slot) {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "feed-pet-batch",
                 s -> game.feedPetBatch(s, 10));
+    }
+
+    /** 喂食宠物到满级或金币耗尽（第十批）。 */
+    @PostMapping("/{slot}/feed-pet-max")
+    public Map<String, Object> feedPetMax(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "feed-pet-max",
+                s -> game.feedPetMax(s));
     }
 
     /** 一键出售多余图纸（第九批，每种保留 1 张）。 */

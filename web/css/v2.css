@@ -1102,6 +1102,13 @@ body.theme-ink .event-log .event-line{border-top-color:rgba(46,58,56,.15)}
 /* 低特效模式（第七批）：停用全部动画与过渡（飘字由 JS 侧同步停用） */
 body.fx-off *, body.fx-off *::before, body.fx-off *::after{animation:none!important;transition:none!important}
 
+/* 静态模式（第十批）：与低特效独立的开关，一键停用全部动画与过渡（晕动敏感/省电） */
+body.motion-off *, body.motion-off *::before, body.motion-off *::after{animation:none!important;transition:none!important}
+
+/* 宠物经验进度条（第十批）：出战宠物卡内细条，金色填充 */
+.pet-exp-bar{height:6px;border-radius:3px;background:rgba(127,127,127,.25);margin:4px 0 6px;overflow:hidden}
+.pet-exp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#c9a227,#e8c84a);transition:width .3s}
+
 .ev-filter-bar{display:flex;gap:4px;margin:4px 0}
 .tab-badge{display:inline-block;min-width:16px;margin-left:5px;padding:0 4px;border-radius:999px;background:#e5484d;color:#fff;font-size:11px;line-height:16px;text-align:center;vertical-align:2px}
 
@@ -1119,6 +1126,28 @@ body.theme-star{
   --shadow:0 4px 22px rgba(30,40,120,.45);
 }
 body.theme-star .zone-btn[data-zone="star"]{box-shadow:0 0 12px rgba(160,140,255,.55)}
+
+/* 霓虹主题（第十批）：深紫夜幕 + 青/品红霓虹描边，标题与面板带辉光 */
+body.theme-neon{
+  --bg0:#0d0618; --bg1:#150a2a; --bg2:#1f0f3d;
+  --panel:rgba(0,229,255,.05); --panel-2:rgba(255,43,214,.07);
+  --border:rgba(0,229,255,.4); --border-strong:rgba(255,43,214,.6);
+  --gold:#00e5ff; --gold-bright:#7df9ff; --gold-dim:#ff2bd6;
+  --txt:#f2eaff; --txt-dim:#c4b5e8; --txt-faint:#8d7fb8;
+  --shadow:0 4px 22px rgba(255,43,214,.25);
+}
+body.theme-neon .game-title{text-shadow:0 0 14px rgba(0,229,255,.8),0 0 34px rgba(255,43,214,.45)}
+body.theme-neon .panel{box-shadow:0 0 14px rgba(0,229,255,.12),var(--shadow)}
+body.theme-neon input, body.theme-neon select, body.theme-neon textarea{
+  background:#1a0b33; color:#f2eaff; border-color:rgba(0,229,255,.45);
+}
+body.theme-neon .panel-tip{color:#9d8fd0}
+body.theme-neon .daily-desc{color:#c4b5e8}
+body.theme-neon .codex-item{color:#e6dcff}
+body.theme-neon .pi-desc, body.theme-neon .gi-meta{color:#c4b5e8}
+body.theme-neon .trait-row span{color:#e6dcff}
+body.theme-neon .event-log{color:#7df9ff}
+body.theme-neon .float-dmg{text-shadow:0 0 8px rgba(0,229,255,.6),0 1px 3px rgba(0,0,0,.85)}
 
 /* 宣纸主题（第七批）：变量层换色 + 少量硬编码深色元素适配 */
 body.theme-light{

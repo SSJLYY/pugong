@@ -59,7 +59,11 @@ public final class Sets {
             // 无相战装（第九批，虚空界 4 件套：第八套）
             new SetDef("voidset", "无相战装", "🌀",
                     List.of("void_blade", "void_hood", "void_robe", "void_treads"),
-                    b("PATK", "220", "MATK", "220"), b("PATK", "550", "MATK", "550", "CRITD", "0.30")));
+                    b("PATK", "220", "MATK", "220"), b("PATK", "550", "MATK", "550", "CRITD", "0.30")),
+            // 混沌战装（第十批，混沌界 4 件套：第九套）
+            new SetDef("chaossuit", "混沌战装", "🌪️",
+                    List.of("chaos_blade", "chaos_hood", "chaos_robe", "chaos_treads"),
+                    b("PATK", "600", "MATK", "600"), b("PATK", "1500", "MATK", "1500", "CRITD", "0.35")));
 
     private static final Map<String, SetDef> BY_MEMBER = buildByMember();
     private static final Map<String, SetDef> BY_ID = buildById();

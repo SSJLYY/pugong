@@ -1280,6 +1280,12 @@ INSERT INTO `cfg_buff`
   (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('void_pot', '虚空精华', '🌀', 'good', 'passive', '{"critdAdd":0.30,"accAdd":0.05}', '60s 内暴击伤害 +30%、命中 +5%', 1, 57);
 
+-- 第十批第 6 轮：宠物零食（使用后出战宠物 +60 经验，usePotion 特殊分支）
+DELETE FROM `cfg_item` WHERE `code` IN ('pet_treat');
+INSERT INTO `cfg_item`
+  (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('pet_treat', '宠物零食', '🍬', 'potion', 300, '{}', '喂给出战宠物，经验 +60', 1, 59);
+
 -- 第九批第 81 轮：新药剂星尘甘露
 DELETE FROM `cfg_item` WHERE `code` IN ('stardust');
 INSERT INTO `cfg_item`
@@ -1314,13 +1320,99 @@ INSERT INTO `cfg_equipment_template`
   ('star_aegis', '星核之盾', '🛡️', 'offhand', 4, 'star', '{"maxHP":"24000","PDEF":"320","MDEF":"280"}', 10, 4000, '以星核碎片锻成的盾，盾面映着整条回廊', 1, 73),
   ('void_eye_charm', '无相之瞳', '👁️', 'necklace', 4, 'void', '{"MATK":"700","CRIT":"0.05","MREGEN":"12"}', 10, 4200, '戴上它，你能看见虚空在看你', 1, 74);
 
+-- 第十批第 13 轮：混沌界装备 ×6（tier 4，sort 75-80）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('chaos_blade','chaos_bow','chaos_hood','chaos_robe','chaos_treads','chaos_ring');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('chaos_blade', '混沌之刃', '🗡️', 'weapon', 4, 'chaos', '{"PATK":"2400","CRITD":"0.3"}', 10, 12000, '刃口每秒都在重组自己的形状', 1, 75),
+  ('chaos_bow', '混沌长弓', '🏹', 'bow', 4, 'chaos', '{"PATK":"1900","RNG":"2","ASPD":"0.22"}', 10, 12000, '箭会先命中，然后再被射出', 1, 76),
+  ('chaos_hood', '混沌兜帽', '🎩', 'head', 4, 'chaos', '{"maxHP":"90000","PDEF":"700","MDEF":"980"}', 10, 10000, '戴上它，你的影子开始有自己的想法', 1, 77),
+  ('chaos_robe', '混沌法袍', '🥋', 'chest', 4, 'chaos', '{"maxHP":"120000","PDEF":"900","MDEF":"1100"}', 10, 11000, '把一片无序穿在身上', 1, 78),
+  ('chaos_treads', '混沌胫甲', '🦿', 'legs', 4, 'chaos', '{"maxHP":"70000","PDEF":"800","SPD":"40"}', 10, 10000, '每一步都踩在还没出现的地面上', 1, 79),
+  ('chaos_ring', '混沌指环', '💍', 'ring1', 4, 'chaos', '{"MATK":"2100","MREGEN":"40","EVA":"0.03"}', 10, 11500, '指环内侧刻着明天的日期', 1, 80);
+
+-- 第十批第 14 轮：混沌界委托 ×2
+DELETE FROM `cfg_quest` WHERE `code` IN ('chaos_patrol','chaos_heart');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('chaos_patrol', '混沌巡狩', '🌪️', '无序在混沌界边缘膨胀：于混沌界猎杀一百只魔物', 'chaos', '{"maxHP":2000000000,"ATK":150000}', 100, 1500000, 'pet_treat', 5, 1, 1, 27),
+  ('chaos_heart', '混沌之心', '💠', '直面无序之源的爪牙：于混沌界猎杀六十只魔物', 'chaos', '{"maxHP":2000000000,"ATK":150000}', 60, 3000000, 'stardust', 3, 1, 1, 28);
+
+-- 第十批第 23 轮：新主动时停 + 新被动时之体
+DELETE FROM `cfg_skill` WHERE `code` IN ('time_stop','chrono_body');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('time_stop', '时停', '⌛', 'active', 1500, 60, 90, 10, '{"id":"time_stop"}', '10s 内怪物攻速减半（时间在你这边冻结）', 1, 34),
+  ('chrono_body', '时之体', '⌛', 'passive', 800, 0, 0, 0, '{"id":"chrono_body"}', '攻速 +0.08（时间在你皮肤上流速不同）', 1, 35);
+
+-- 第十批第 25 轮：新药剂混沌精华
+DELETE FROM `cfg_item` WHERE `code` IN ('chaos');
+INSERT INTO `cfg_item`
+  (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('chaos', '混沌精华', '🌪️', 'potion', 1500, '{"buff":"chaos_pot","buffVal":0.40,"buffDur":60}', '60s 内暴击伤害 +40%、闪避 +5%', 1, 60);
+DELETE FROM `cfg_buff` WHERE `code` IN ('chaos_pot');
+INSERT INTO `cfg_buff`
+  (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('chaos_pot', '混沌精华', '🌪️', 'good', 'passive', '{"critdAdd":0.40,"evaAdd":0.05}', '60s 内暴击伤害 +40%、闪避 +5%', 1, 60);
+
+-- 第十批第 81 轮：新药剂凤凰之血
+DELETE FROM `cfg_item` WHERE `code` IN ('phoenix');
+INSERT INTO `cfg_item`
+  (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('phoenix', '凤凰之血', '🦅', 'potion', 2000, '{"buff":"phoenix_pot","buffVal":0.50,"buffDur":60}', '60s 内暴击伤害 +50%、吸血 +5%', 1, 61);
+DELETE FROM `cfg_buff` WHERE `code` IN ('phoenix_pot');
+INSERT INTO `cfg_buff`
+  (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('phoenix_pot', '凤凰之血', '🦅', 'good', 'passive', '{"critdAdd":0.50,"lifestealAdd":0.05}', '60s 内暴击伤害 +50%、吸血 +5%', 1, 61);
+
+-- 第十批第 82 轮：新词条 ×2（混沌/永恒，史诗池）
+DELETE FROM `cfg_affix` WHERE `code` IN ('chaos_aff','eternal_aff');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('chaos_aff', '混沌', 'PATK', 'flat', 40, 90, 'epic', NULL, NULL, 1, 29),
+  ('eternal_aff', '永恒', 'maxHP', 'flat', 8000, 20000, 'epic', NULL, NULL, 1, 30);
+
+-- 第十批第 83 轮：新被动混沌亲和
+DELETE FROM `cfg_skill` WHERE `code` IN ('chaos_affinity');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('chaos_affinity', '混沌亲和', '🌪️', 'passive', 1200, 0, 0, 0, '{"id":"chaos_affinity"}', '对混沌界怪物伤害 +25%（与无序共鸣）', 1, 36);
+
+-- 第十批第 84 轮：混沌界长线委托 ×2
+DELETE FROM `cfg_quest` WHERE `code` IN ('chaos_longhunt','chaos_deep');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('chaos_longhunt', '混沌长猎', '🌪️', '无序的潮汐一波接一波：于混沌界猎杀二百只魔物', 'chaos', '{"maxHP":2000000000,"ATK":150000}', 200, 3000000, 'chaos', 2, 1, 1, 29),
+  ('chaos_deep', '深入无序', '🌀', '走到规则崩坏的尽头再回来：于混沌界猎杀一百五十只魔物', 'chaos', '{"maxHP":2000000000,"ATK":150000}', 150, 2400000, 'pet_treat', 5, 1, 1, 30);
+
+-- 第十批第 85 轮：混沌套装余件配方补全 ×2
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_chaos_hood','c_chaos_robe');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_chaos_hood', '混沌兜帽织造', '📐', 'chaos_hood', '{"chaos_core":4,"void_shard":2}', 42000, 1, 1, 40),
+  ('c_chaos_robe', '混沌法袍织造', '📐', 'chaos_robe', '{"chaos_core":6,"star_shard":3}', 55000, 1, 1, 41);
+
+-- 第十批第 86 轮：高阶装备 ×2（混沌壁垒/无序之瞳）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('chaos_aegis','chaos_eye');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('chaos_aegis', '混沌壁垒', '🛡️', 'offhand', 4, 'chaos', '{"maxHP":"150000","PDEF":"1500","MDEF":"1300"}', 10, 13000, '以混沌核心锻成的壁垒，形状从未重复', 1, 81),
+  ('chaos_eye', '无序之瞳', '👁️', 'necklace', 4, 'chaos', '{"MATK":"2400","CRIT":"0.05","MREGEN":"45"}', 10, 12500, '戴上它，时间开始倒着流', 1, 82);
+
+-- 第十批第 15 轮：混沌套装余件配方 ×2
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_chaos_blade','c_chaos_ring');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_chaos_blade', '混沌之刃铸造', '📐', 'chaos_blade', '{"chaos_core":5,"void_shard":3}', 50000, 1, 1, 38),
+  ('c_chaos_ring', '混沌指环铸造', '📐', 'chaos_ring', '{"chaos_core":5,"star_shard":4}', 48000, 1, 1, 39);
+
 -- ============================================================
--- 整合完毕。验收参考（2026-11-04 第九批 100 轮收官口径）：
---   cfg_equipment_template 74 / cfg_item 药剂 41 / cfg_affix 28
---   cfg_craft 26 / cfg_quest 26 / cfg_skill 33（主动 14 + 被动 19）
---   怪物词条 20（代码 GameConst.MOB_TRAITS）/ 成就 82（代码 Achievements）
---   天赋 12 / 套装 8（代码 GameConst.TALENTS / Sets）/ 区域 10（含虚空界）
---   宝石 12 种（代码 GameConst.GEMS）/ 图鉴 33（代码 GameConst 口径）/ 宠物 6（代码 GameConst.PETS）
+-- 整合完毕。验收参考（2026-11-04 第十批 100 轮收官口径）：
+--   cfg_equipment_template 82 / cfg_item 药剂 44 / cfg_affix 30
+--   cfg_craft 30 / cfg_quest 30 / cfg_skill 36（主动 15 + 被动 21）
+--   怪物词条 23（代码 GameConst.MOB_TRAITS）/ 成就 98（代码 Achievements）
+--   天赋 13 / 套装 9（代码 GameConst.TALENTS / Sets）/ 区域 11（含混沌界）
+--   宝石 12 种（代码 GameConst.GEMS）/ 图鉴 38（代码 GameConst 口径）/ 宠物 8（代码 GameConst.PETS）
 --   运行时可用 /api/health 的 content 指纹交叉核对：
---   items=41,affixes=28,equipment=74,skills=33,crafts=26,traits=20,pets=6
+--   items=44,affixes=30,equipment=82,skills=36,crafts=30,traits=23,pets=8
 -- ============================================================

@@ -71,7 +71,7 @@ class AutoAdvanceTest {
         assertEquals("abyss", GameEngine.nextZoneId("volcano"));   // 第七批：火山之后是深渊裂隙
         assertEquals("star", GameEngine.nextZoneId("abyss"));   // 第八批：深渊之后是星界
         assertEquals("void", GameEngine.nextZoneId("star"));
-        assertEquals(null, GameEngine.nextZoneId("void"));
+        assertEquals("chaos", GameEngine.nextZoneId("void"));   // 第十批：虚空之后是混沌界
         assertTrue(GameEngine.zoneReqMet(fighter(true), "forest"), "强档应达标森林");
         assertFalse(GameEngine.zoneReqMet(fighter(false), "forest"), "弱档不应达标森林");
     }

@@ -150,7 +150,10 @@ public final class GameConst {
             Map.entry("star_eclipse", new TraitDef("star_eclipse", "星蚀", "🌑", "星光被吞噬：你的暴击威力大减（暴伤超额部分减半），只在星界出现，靠平推与攻速克它")),
             Map.entry("mana_drain", new TraitDef("mana_drain", "噬能", "🔋", "命中你时吞噬你的法力：按所造成伤害的 10% 抽蓝，蓝量见底的法师会被它活活耗死")),
             Map.entry("void_rend", new TraitDef("void_rend", "裂空", "✴️", "攻击撕裂空间：你的闪避对它减半，只在虚空界出现，身法流在它面前无处可躲")),
-            Map.entry("blood_fury", new TraitDef("blood_fury", "燃血", "🩸", "血越少越疯：攻击随自身已损失生命放大，残血时 +60%，拖得越久越危险，速杀或留爆发收尾")));
+            Map.entry("blood_fury", new TraitDef("blood_fury", "燃血", "🩸", "血越少越疯：攻击随自身已损失生命放大，残血时 +60%，拖得越久越危险，速杀或留爆发收尾")),
+            Map.entry("mirror", new TraitDef("mirror", "镜像", "🪞", "以彼之道：反弹你造成伤害的 10%（按它实际承受封顶，与荆棘同口径），高爆发慎打，先叠护盾或吸血克它")),
+            Map.entry("weaken", new TraitDef("weaken", "虚弱", "🥀", "无序低语侵蚀你的气力：你的普攻伤害 -15%（与缴械同乘区），堆面板硬碾克它")),
+            Map.entry("chaos_frenzy", new TraitDef("chaos_frenzy", "狂乱", "🌀", "无序狂乱：攻速 +40%、攻击 +20% 常驻，只在混沌界出现，时停与迟缓咒叠加压制克它")));
 
     /** 词条「再生」（第八批）：怪物每秒回复上限的比例。 */
     public static final double TRAIT_REGEN_PCT = 0.03;
@@ -173,6 +176,17 @@ public final class GameConst {
     public static final double TRAIT_SUNDER_IGNORE = 0.30;
     /** 缴械的普攻伤害乘区。 */
     public static final double TRAIT_DISARM_MUL = 0.85;
+    /** 虚弱的普攻伤害乘区（第十批，与缴械同口径乘算）。 */
+    public static final double TRAIT_WEAKEN_MUL = 0.85;
+    /** 镜像的反弹比例（第十批，对开帧目标实际承受伤害，与荆棘同口径）。 */
+    public static final double TRAIT_MIRROR_MUL = 0.10;
+    /** 时停 buff 期间怪物攻速乘区（第十批主动技能）。 */
+    public static final double TIME_STOP_ASPD_MUL = 0.5;
+    /** 狂乱词条（第十批）：怪物攻速/攻击常驻乘区。 */
+    public static final double TRAIT_CHAOS_FRENZY_HASTE = 1.4;
+    public static final double TRAIT_CHAOS_FRENZY_ATK = 1.2;
+    /** 被动·混沌亲和（第十批）：对混沌界怪物的伤害乘区。 */
+    public static final double CHAOS_AFFINITY_MUL = 1.25;
     /** 嗜血的吸血比例（对玩家实际掉血量）。 */
     public static final double TRAIT_LEECH_MUL = 0.30;
     /** 荆棘的反弹比例（对玩家本帧所造伤害量）。 */
@@ -208,7 +222,7 @@ public final class GameConst {
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
-            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star", "void");
+            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star", "void", "chaos");
 
     /**
      * 出生掷词条：村口不出；平原 10% 起、每深一层 +3%。
@@ -237,13 +251,16 @@ public final class GameConst {
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : zoneIdx == 4
                                         ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow", "curse", "regen")
-                                        : zoneIdx >= 9
+                                        : zoneIdx >= 10
+                                                // 混沌界专属池：虚空池 + 镜像 + 虚弱 + 狂乱（第十批）
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury", "mirror", "weaken", "chaos_frenzy")
+                                                : zoneIdx == 9
                                                 // 虚空界专属池：全词条 + 噬能 + 裂空（无星蚀，星蚀只属星界）
-                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury")
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury", "mirror", "weaken")
                                                 : zoneIdx == 8
                                                 // 星界专属池：全词条 + 星蚀（仅此一池，别的区域刷不出）
-                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "star_eclipse", "mana_drain", "blood_fury")
-                                                : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "blood_fury");
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "star_eclipse", "mana_drain", "blood_fury", "mirror", "weaken")
+                                                : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "blood_fury", "mirror", "weaken");
     }
 
     private static Map<String, ZoneDef> buildZones() {
@@ -364,6 +381,22 @@ public final class GameConst {
                 mob("boss_void", "虚空之主·无相天魔", "🌀", "3000000000", "8200", "9600", "1600", "1600", 1.2, 5, 100, 2000000,
                         "它没有形体、没有名字、没有过去——只有你出拳的回响是它存在的证明", List.of())));
 
+        // 混沌界（第十批）：虚空之外的无序——规则本身在此崩坏重组
+        m.put("chaos", new ZoneDef("chaos", "混沌界", "🌪️", false,
+                "建议生命 ≥ 20亿 / 双防 ≥ 3000 / 攻击 ≥ 150000（无序之源）",
+                Map.of("maxHP", "2000000000", "PDEF", "3000", "MDEF", "3000", "ATK", "150000"),
+                List.of(
+                        mob("chaos_wisp", "混沌灵", "🌪️", "1200000000", "2600", "8000", "900", "2600", 1.1, 6, 100, 40000,
+                                "无序凝成的灵体，魔光乱流，掉落混沌核心", List.of()),
+                        mob("chaos_hound", "混沌猎犬", "🐺", "2000000000", "15000", "0", "2400", "1200", 1.5, 2, 148, 55000,
+                                "三头六眼，猎杀一切有序之物", List.of()),
+                        mob("chaos_titan", "混沌泰坦", "🗿", "3200000000", "11000", "8800", "3400", "3400", 0.8, 3, 88, 75000,
+                                "双防如崩坏的世界壁垒，混沌的执盾者", List.of()),
+                        mob("chaos_dragon", "混沌魔龙", "🐉", "4800000000", "8800", "17000", "2000", "4000", 1.0, 7, 92, 100000,
+                                "以秩序为食的魔龙，吐息即是熵增", List.of())),
+                mob("boss_chaos", "混沌魔君·无序之源", "🌪️", "30000000000", "25000", "29000", "4800", "4800", 1.2, 5, 100, 20000000,
+                        "它不是某个存在，而是所有规则失效的那一刻", List.of())));
+
         return java.util.Collections.unmodifiableMap(m);
     }
 
@@ -390,7 +423,8 @@ public final class GameConst {
             Map.entry("charge", new SkillDef("charge", "冲锋", "🐎", 15, 20, 0, "下一击 ×3 伤害")),
             Map.entry("hex_slow", new SkillDef("hex_slow", "迟缓咒", "🐌", 20, 25, 8, "当前怪物攻速 -30%，持续 8 秒")),
             Map.entry("flurry", new SkillDef("flurry", "连环掌", "🤲", 25, 30, 0, "接下来 30 次命中各追加一次同额命中（双击）")),
-            Map.entry("void_slash", new SkillDef("void_slash", "虚空斩", "🌀", 40, 45, 0, "下一击 ×4 伤害（撕裂空间的一斩）")));
+            Map.entry("void_slash", new SkillDef("void_slash", "虚空斩", "🌀", 40, 45, 0, "下一击 ×4 伤害（撕裂空间的一斩）")),
+            Map.entry("time_stop", new SkillDef("time_stop", "时停", "⌛", 60, 90, 10, "10s 内怪物攻速减半（时间在你这边冻结）")));
 
     /** 主动「虚空斩」（第九批）：下一击伤害倍率（冲锋 ×3 的上位）。 */
     public static final double VOID_SLASH_MUL = 4;
@@ -423,7 +457,9 @@ public final class GameConst {
             Map.entry("armor_pierce", new PassiveDef("armor_pierce", "破甲专精", "🏹", "攻击无视目标 20% 的物防与魔防，厚甲在你面前如薄纸")),
             Map.entry("gem_sniffer", new PassiveDef("gem_sniffer", "宝石嗅觉", "👃", "词条怪的宝石掉率 +50%（10%→15%），宝石党的鼻子")),
             Map.entry("pet_bond", new PassiveDef("pet_bond", "宠物亲和", "🐾", "出战宠物的面板加成 +30%（与宠物心意相通，被沉默压制）")),
-            Map.entry("goldtouch", new PassiveDef("goldtouch", "招财手", "🪙", "击杀金币 +15%（招财进宝，经济类增益不受沉默影响）")));
+            Map.entry("goldtouch", new PassiveDef("goldtouch", "招财手", "🪙", "击杀金币 +15%（招财进宝，经济类增益不受沉默影响）")),
+            Map.entry("chrono_body", new PassiveDef("chrono_body", "时之体", "⌛", "攻速 +0.08（时间在你皮肤上流速不同，被沉默压制）")),
+            Map.entry("chaos_affinity", new PassiveDef("chaos_affinity", "混沌亲和", "🌪️", "对混沌界怪物伤害 +25%（与无序共鸣，被沉默压制）")));
 
     /** 被动「宠物亲和」（第九批）：宠物面板加成乘区。 */
     public static final double PET_BOND_MUL = 1.3;
@@ -520,7 +556,10 @@ public final class GameConst {
             // ---- 第九批扩充：虚空精华（暴伤+命中） ----
             java.util.Map.entry("void", new PotionDef("void", "虚空精华", "🌀", "60s 内暴击伤害 +30%、命中 +5%", 0, 0, "void_pot", 0.30, 60, 900)),
             // ---- 第九批集群九扩充：星尘甘露（暴击+平直攻速） ----
-            java.util.Map.entry("stardust", new PotionDef("stardust", "星尘甘露", "✨", "90s 内暴击 +6%、攻速 +1.5", 0, 0, "stardust_pot", 0.06, 90, 1200)));
+            java.util.Map.entry("stardust", new PotionDef("stardust", "星尘甘露", "✨", "90s 内暴击 +6%、攻速 +1.5", 0, 0, "stardust_pot", 0.06, 90, 1200)),
+            java.util.Map.entry("pet_treat", new PotionDef("pet_treat", "宠物零食", "🍬", "喂给出战宠物，经验 +60", 0, 0, null, 0, 0, 300)),
+            java.util.Map.entry("chaos", new PotionDef("chaos", "混沌精华", "🌪️", "60s 内暴击伤害 +40%、闪避 +5%", 0, 0, "chaos_pot", 0.40, 60, 1500)),
+            java.util.Map.entry("phoenix", new PotionDef("phoenix", "凤凰之血", "🦅", "60s 内暴击伤害 +50%、吸血 +5%", 0, 0, "phoenix_pot", 0.50, 60, 2000)));
 
     /** 破甲药剂（第八批）：无视防御比例（与破甲专精被动在 effDef 内乘算叠加）。 */
     public static final double PIERCE_POT_RATIO = 0.20;
@@ -575,7 +614,10 @@ public final class GameConst {
             new Affix("不息", "REGEN", "flat", 5, 12, "epic", null, null),
             // ---- 第九批：法系维度上位（魔力/回魔的史诗版） ----
             new Affix("裂帛", "MATK", "flat", 16, 40, "epic", null, null),
-            new Affix("灵泉", "MREGEN", "flat", 5, 12, "epic", null, null));
+            new Affix("灵泉", "MREGEN", "flat", 5, 12, "epic", null, null),
+            // ---- 第十批：终局维度上位（物攻/生命的混沌版） ----
+            new Affix("混沌", "PATK", "flat", 40, 90, "epic", null, null),
+            new Affix("永恒", "maxHP", "flat", 8000, 20000, "epic", null, null));
 
     /** 掉落概率（按区域）。 */
     public static final Map<String, Double> DROP_RATE = Map.of(
@@ -595,6 +637,11 @@ public final class GameConst {
     /** 淬炼（第七批）：与强化独立的第二成长线，满 5 级，底子 +4%/级（成本属性不吃乘区，同强化口径）。 */
     public static final int TEMPER_MAX_LV = 5;
     public static final double TEMPER_STAT_BONUS = 0.04;
+    /** 升星上限与每星底子加成（第十批）。 */
+    public static final int STAR_MAX_LV = 5;
+    public static final double STAR_STAT_BONUS = 0.03;
+    /** 升星金币成本基数：第 n 星（0 起）需 5000×(n+1) 金 + (n+1) 颗星核碎片。 */
+    public static final long STAR_GOLD_BASE = 5000;
 
     // ==================== 宝石镶嵌（第八批） ====================
 
@@ -671,7 +718,7 @@ public final class GameConst {
         return 20 + (level - 1) * 10;
     }
 
-    /** 宠物全表（6 只）：金币领养，领养后可切换出战，出战宠物按等级放大面板加成。 */
+    /** 宠物全表（8 只）：金币领养，领养后可切换出战，出战宠物按等级放大面板加成。 */
     public static final Map<String, PetDef> PETS = Map.ofEntries(
             Map.entry("pet_cat", new PetDef("pet_cat", "招财猫", "🐱", Map.of("PATK", new BigDecimal("30")), "物攻 +30", 2000)),
             Map.entry("pet_dog", new PetDef("pet_dog", "忠犬", "🐶", Map.of("maxHP", new BigDecimal("1500")), "生命上限 +1500", 2000)),
@@ -679,7 +726,31 @@ public final class GameConst {
             Map.entry("pet_turtle", new PetDef("pet_turtle", "玄龟", "🐢",
                     Map.of("PDEF", new BigDecimal("25"), "MDEF", new BigDecimal("25")), "双防各 +25", 4000)),
             Map.entry("pet_hawk", new PetDef("pet_hawk", "苍鹰", "🦅", Map.of("CRIT", new BigDecimal("0.02")), "暴击率 +2%", 6000)),
-            Map.entry("pet_deer", new PetDef("pet_deer", "森鹿", "🦌", Map.of("REGEN", new BigDecimal("20")), "生命回复 +20", 5000)));
+            Map.entry("pet_deer", new PetDef("pet_deer", "森鹿", "🦌", Map.of("REGEN", new BigDecimal("20")), "生命回复 +20", 5000)),
+            Map.entry("pet_panda", new PetDef("pet_panda", "团团熊猫", "🐼",
+                    Map.of("maxHP", new BigDecimal("3000"), "REGEN", new BigDecimal("30")), "生命上限 +3000、生命回复 +30", 8000)),
+            Map.entry("pet_ferret", new PetDef("pet_ferret", "雪貂", "🦦",
+                    Map.of("SPD", new BigDecimal("25"), "EVA", new BigDecimal("0.03")), "速度 +25、闪避 +3%", 7000)));
+
+    /** 宠物羁绊（第十批）：全部已领养宠物总等级达档，出战宠物加成再乘羁绊倍率。 */
+    public static final int[] PET_BOND_TIERS = {30, 100, 250};
+    public static final double[] PET_BOND_MULS = {1.25, 1.6, 2.2};
+
+    /** 羁绊倍率：总等级 <30 为 1.0，逐档 1.25/1.6/2.2；天赋「混沌之心」再 ×1.5（第十批）。 */
+    public static double petBondMul(int totalLevels, boolean chaosHeart) {
+        double mul = 1.0;
+        for (int i = 0; i < PET_BOND_TIERS.length; i++) {
+            if (totalLevels >= PET_BOND_TIERS[i]) {
+                mul = PET_BOND_MULS[i];
+            }
+        }
+        return chaosHeart ? mul * 1.5 : mul;
+    }
+
+    /** 宠物零食（第十批）：使用后出战宠物 +60 经验。 */
+    public static final int PET_TREAT_EXP = 60;
+    /** 经验分享（第十批）：非出战宠物获得出战宠物经验的 25%。 */
+    public static final double PET_SHARE_RATE = 0.25;
 
     public static final int ENHANCE_COST_BASE = 100;
     public static final double ENHANCE_COST_MUL = 1.5;
@@ -711,7 +782,8 @@ public final class GameConst {
             Map.entry("lucky", new TalentDef("lucky", "幸运儿", "🍀", "装备与图纸掉落率 +15%")),
             Map.entry("iron_gut", new TalentDef("iron_gut", "铁胃", "🍲", "食物回血效果 +50%、持续时间 +50%")),
             Map.entry("gem_affinity", new TalentDef("gem_affinity", "宝石亲和", "🔷", "镶嵌宝石的效果 +25%，宝石在你手里更亮")),
-            Map.entry("pet_whisper", new TalentDef("pet_whisper", "兽语者", "🐾", "宠物经验 +100%：击杀与喂食所得经验翻倍")));
+            Map.entry("pet_whisper", new TalentDef("pet_whisper", "兽语者", "🐾", "宠物经验 +100%：击杀与喂食所得经验翻倍")),
+            Map.entry("chaos_heart", new TalentDef("chaos_heart", "混沌之心", "🌪️", "宠物羁绊倍率 ×1.5：无序之心与万兽共鸣")));
 
     /** 天赋「宝石亲和」（第八批）：宝石 flat 加成乘区（天赋不受沉默压制）。 */
     public static final double GEM_AFFINITY_MUL = 1.25;
@@ -750,7 +822,8 @@ public final class GameConst {
     public static final Map<String, String> ZONE_MAT = Map.ofEntries(
             Map.entry("plain", "pelt"), Map.entry("forest", "wolf_fang"), Map.entry("mine", "ore"),
             Map.entry("swamp", "toad_gland"), Map.entry("snow", "mana_dust"), Map.entry("volcano", "fire_crystal"),
-            Map.entry("abyss", "abyss_crystal"), Map.entry("star", "star_shard"), Map.entry("void", "void_shard"));
+            Map.entry("abyss", "abyss_crystal"), Map.entry("star", "star_shard"), Map.entry("void", "void_shard"),
+            Map.entry("chaos", "chaos_core"));
 
     /** 附魔卷轴（DESIGN.md §6.2/§8）：给武器/弓附加魔伤词条，火/冰/雷三系。 */
     public static final Map<String, Object[]> SCROLLS = Map.of(
@@ -774,6 +847,7 @@ public final class GameConst {
             Map.entry("abyss_crystal", new String[]{"深渊结晶", "🕳️"}),
             Map.entry("star_shard", new String[]{"星核碎片", "🌟"}),
             Map.entry("void_shard", new String[]{"虚空碎片", "🌀"}),
+            Map.entry("chaos_core", new String[]{"混沌核心", "🌪️"}),
             Map.entry("gem_ruby", new String[]{"红宝石", "🔺"}),
             Map.entry("gem_sapphire", new String[]{"蓝宝石", "🔷"}),
             Map.entry("gem_emerald", new String[]{"翡翠", "💚"}),
@@ -791,7 +865,7 @@ public final class GameConst {
     public static final Map<String, Integer> MAT_SELL_PRICE = Map.ofEntries(
             Map.entry("pelt", 20), Map.entry("wolf_fang", 35), Map.entry("ore", 60), Map.entry("toad_gland", 90),
             Map.entry("mana_dust", 140), Map.entry("fire_crystal", 220), Map.entry("abyss_crystal", 400),
-            Map.entry("star_shard", 650), Map.entry("void_shard", 2000));
+            Map.entry("star_shard", 650), Map.entry("void_shard", 2000), Map.entry("chaos_core", 6000));
 
     /** 增益类 buff（永久存续天赋作用对象）。 */
     public static final Set<String> ETERNAL_BUFFS = Set.of(

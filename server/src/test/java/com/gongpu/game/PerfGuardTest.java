@@ -81,6 +81,29 @@ class PerfGuardTest {
                 "总伤害不得为负/NaN");
     }
 
+    /** 第十批：混沌界极端数值帧守卫——最深区域 + 镜像词条怪 + 攻速拉满，帧结算不爆不 NaN。 */
+    @Test
+    void chaosExtremeFrameStaysBounded() {
+        PlayerState s = richState();
+        s.zone = "chaos";
+        s.fixed.ASPD = new java.math.BigDecimal("100000");
+        s.life.maxHP = new java.math.BigDecimal("10000000000");
+        s.life.curHP = new java.math.BigDecimal("10000000000");
+        long now = System.currentTimeMillis();
+        s.lastTickAt = now - 1000;
+        GameEngine.advance(s, now, 1.0, false); // 热身
+        if (s.mob != null) {
+            s.mob.trait = "mirror";
+        }
+        s.lastTickAt = now - 1000;
+        long t0 = System.nanoTime();
+        GameEngine.advance(s, now, 60.0, true);
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        assertTrue(ms < 5000, "混沌界极端数值 60 秒帧应 <5s，实际 " + ms + "ms");
+        assertTrue(s.stats.totalDamage != null && s.stats.totalDamage.signum() >= 0,
+                "总伤害不得为负/NaN");
+    }
+
     @Test
     void longOfflineFrameStaysBounded() {
         PlayerState s = richState();

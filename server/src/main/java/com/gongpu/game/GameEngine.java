@@ -243,6 +243,9 @@ public final class GameEngine {
         if ("disarm".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_DISARM_MUL));
         }
+        if ("weaken".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_WEAKEN_MUL));
+        }
         if ("bulwark".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_BULWARK_MUL));
         }
@@ -258,6 +261,11 @@ public final class GameEngine {
         }
         if (m.boss && buffOn(s, p, "giant_pot")) {
             perHit = Num.mul(perHit, Num.of(GameConst.GIANT_POT_MUL));
+        }
+        // 被动·混沌亲和（第十批）：身处混沌界时对怪伤害 +25%（与预估口径一致）
+        if ("chaos".equals(s.zone) && s.passives.contains("chaos_affinity")
+                && !PanelCalculator.isSilenced(s)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.CHAOS_AFFINITY_MUL));
         }
         return perHit;
     }
@@ -337,6 +345,10 @@ public final class GameEngine {
         if ("disarm".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_DISARM_MUL));
         }
+        // 词条·虚弱（第十批）：气力被蚀，普攻伤害打折（与缴械同乘区乘算）
+        if ("weaken".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_WEAKEN_MUL));
+        }
         // 词条·堡垒：皮糙肉厚，你对它造成的伤害打折（同乘区）
         if ("bulwark".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_BULWARK_MUL));
@@ -356,6 +368,11 @@ public final class GameEngine {
         // 药剂·巨人：对 Boss 专伤乘区（与被动乘算叠加，沉默压制）
         if (m.boss && buffOn(s, p, "giant_pot")) {
             perHit = Num.mul(perHit, Num.of(GameConst.GIANT_POT_MUL));
+        }
+        // 被动·混沌亲和（第十批）：身处混沌界时对怪伤害 +25%（expectedPerHit 同口径）
+        if ("chaos".equals(s.zone) && s.passives.contains("chaos_affinity")
+                && !PanelCalculator.isSilenced(s)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.CHAOS_AFFINITY_MUL));
         }
         if (PanelCalculator.active(s, "heavy")) {
             perHit = Num.mul(perHit, Num.of(5));
@@ -495,6 +512,15 @@ public final class GameEngine {
                 kill(s, startMob);
             }
         }
+        // 词条「镜像」（第十批）：与荆棘同口径——开帧目标实际承受伤害的 10% 反弹，护盾先吸，扎死当场死亡
+        if ("mirror".equals(startTrait) && !s.dead && Num.gt(totalDmg, Num.ZERO)) {
+            BigDecimal absorbed = Num.min(totalDmg, startMobHp);
+            BigDecimal reflect = Num.mul(absorbed, Num.of(GameConst.TRAIT_MIRROR_MUL));
+            s.life.curHP = Num.sub(s.life.curHP, absorbShield(s, reflect));
+            if (Num.lte(s.life.curHP, Num.ZERO)) {
+                kill(s, startMob);
+            }
+        }
         // Boss 二阶段判定（第七批）：本帧打完仍存活的 Boss 跌破半血即狂怒（只触发一次）
         checkBossPhase(s);
         return drops;
@@ -605,6 +631,15 @@ public final class GameEngine {
         }
         if ("blood_fury".equals(m.trait)) {
             s.stats.burnKills++;
+        }
+        if ("mirror".equals(m.trait)) {
+            s.stats.mirrorKills++;
+        }
+        if ("weaken".equals(m.trait)) {
+            s.stats.weakenKills++;
+        }
+        if ("chaos_frenzy".equals(m.trait)) {
+            s.stats.frenzyKills++;
         }
         // 宠物经验（第九批）：出战宠物随击杀成长，升级时播报
         if (s.pet != null) {
@@ -776,6 +811,9 @@ public final class GameEngine {
                 && Num.lt(m.curHP, Num.mul(m.maxHP, Num.of(GameConst.TRAIT_FRENZY_HP_LINE)))) {
             return GameConst.TRAIT_FRENZY_HASTE;
         }
+        if ("chaos_frenzy".equals(m.trait)) {
+            return GameConst.TRAIT_CHAOS_FRENZY_HASTE;
+        }
         return 1.0;
     }
 
@@ -892,6 +930,10 @@ public final class GameEngine {
         if (m.slowT > 0) {
             hits *= GameConst.HEX_SLOW_ASPD_MUL;
         }
+        // 主动·时停（第十批）：buff 期间怪物攻速减半（与迟缓咒乘算）
+        if (PanelCalculator.active(s, "time_stop")) {
+            hits *= GameConst.TIME_STOP_ASPD_MUL;
+        }
         // 词条·破甲：结算时玩家的双防按比例打折
         BigDecimal defMul = "sunder".equals(m.trait)
                 ? Num.of(1 - GameConst.TRAIT_SUNDER_IGNORE)
@@ -912,6 +954,11 @@ public final class GameEngine {
             double furyMul = 1 + Math.max(0, Math.min(1, lost)) * GameConst.TRAIT_BLOOD_FURY_MAX;
             phys = Num.mul(phys, Num.of(furyMul));
             mag = Num.mul(mag, Num.of(furyMul));
+        }
+        // 词条·狂乱（第十批）：无序常驻攻击 +20%（与二阶段/燃血同乘区）
+        if ("chaos_frenzy".equals(m.trait)) {
+            phys = Num.mul(phys, Num.of(GameConst.TRAIT_CHAOS_FRENZY_ATK));
+            mag = Num.mul(mag, Num.of(GameConst.TRAIT_CHAOS_FRENZY_ATK));
         }
         BigDecimal perHit = Num.max(Num.of(1), Num.add(phys, mag));   // 设计 §2.3 承伤同理:至少 1 点
 

@@ -38,7 +38,11 @@ public final class MonthlyQuests {
                     new long[]{500000, 1500000, 4000000}, new long[]{120000, 250000, 420000}),
             new Template("damage", "月山令", "💥", "造成伤害", "点",
                     new long[]{1_000_000_000L, 10_000_000_000L, 100_000_000_000L},
-                    new long[]{150000, 300000, 500000}));
+                    new long[]{150000, 300000, 500000}),
+            new Template("enchant", "月铭令", "🖋️", "附魔装备", "次",
+                    new long[]{100, 250, 500}, new long[]{120000, 240000, 380000}),
+            new Template("rebirth", "月轮回令", "♻️", "转生轮回", "世",
+                    new long[]{1, 2, 3}, new long[]{150000, 300000, 500000}));
 
     /** 每月全清奖励：金币部分（另加随机宝石 ×3，见 GameService.claimMonthly）。 */
     public static final long ALL_CLEAR_BONUS = 300_000;

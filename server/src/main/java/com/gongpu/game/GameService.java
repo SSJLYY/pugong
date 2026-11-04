@@ -118,6 +118,7 @@ public class GameService {
             case "heavy" -> s.buffs.put("heavy", 30.0);
             case "charge" -> s.buffs.put("charge", 30.0);
             case "void_slash" -> s.buffs.put("void_slash", 30.0);
+            case "time_stop" -> s.buffs.put("time_stop", (double) def.dur());
             case "flurry" -> s.flurryHits += GameConst.FLURRY_HITS;
             case "hex_slow" -> {
                 // 迟缓咒（第七批）：作用于当前怪物（无目标时空放，仅进 CD 不报错——与怒吼的强校验不同，容错优先）
@@ -172,7 +173,21 @@ public class GameService {
         if (have <= 0) {
             throw ApiException.badRequest("没有" + def.name() + "了");
         }
+        // 宠物零食（第十批）：无出战宠物时不消耗，先校验再扣
+        if ("pet_treat".equals(potionId) && s.pet == null) {
+            throw ApiException.badRequest("先领养并出战一只宠物再喂零食");
+        }
         s.potions.put(potionId, have - 1);
+        if ("pet_treat".equals(potionId)) {
+            s.stats.petTreats++;
+            int[] r = gainPetExp(s, GameConst.PET_TREAT_EXP);
+            Map<String, Object> tm = new LinkedHashMap<>();
+            tm.put("ok", true);
+            tm.put("left", s.potions.get(potionId));
+            tm.put("petLevel", r[0]);
+            tm.put("petUps", r[1]);
+            return tm;
+        }
         s.usedPotions.add(potionId);   // 品药成就：记录用过的种类
         s.stats.potionsUsed++;         // 终身用药次数（每日任务「品药令」计数口径）
 
@@ -625,6 +640,37 @@ public class GameService {
         return m;
     }
 
+    /**
+     * 升星（第十批）：背包装备 +1 星（上限 5），成本 = 5000×(当前星+1) 金币 + (当前星+1) 颗星核碎片；
+     * 底子乘区 +3%/星，与强化/淬炼独立计层（PanelCalculator 三乘区）。
+     */
+    public Map<String, Object> starUp(PlayerState s, int bagIdx) {
+        if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
+            throw ApiException.badRequest("背包索引越界");
+        }
+        PlayerState.Item it = s.equipBag.get(bagIdx);
+        if (it.star >= GameConst.STAR_MAX_LV) {
+            throw ApiException.badRequest("已升至满星");
+        }
+        int n = it.star + 1;
+        java.math.BigDecimal goldCost = Num.of(GameConst.STAR_GOLD_BASE * n);
+        if (s.materials.getOrDefault("star_shard", 0) < n) {
+            throw ApiException.badRequest("材料不足：升星需要 " + n + " 颗星核碎片（星界掉落/分解可得）");
+        }
+        if (Num.lt(s.gold, goldCost)) {
+            throw ApiException.badRequest("金币不足，升星需要 " + Num.cn(goldCost));
+        }
+        s.materials.merge("star_shard", -n, Integer::sum);
+        s.gold = Num.sub(s.gold, goldCost);
+        it.star++;
+        s.stats.starsDone++;
+        Map<String, Object> m = inventoryView(s);
+        m.put("starredTo", it.star);
+        m.put("matCost", n);
+        m.put("goldCost", Num.plain(goldCost));
+        return m;
+    }
+
     /** 一键卖出：把背包里品质低于 keepQuality 的全部卖掉（1=白及以下…4=紫及以下即全卖）。 */
     public Map<String, Object> autoSell(PlayerState s, int keepQuality) {
         if (keepQuality < 0 || keepQuality > 4) {
@@ -837,7 +883,7 @@ public class GameService {
                 score += g != null && g.endsWith("_2") ? 200 : 80;
             }
         }
-        return score * (1 + it.enhance * 0.05) * (1 + it.temper * 0.04);
+        return score * (1 + it.enhance * 0.05) * (1 + it.temper * 0.04) * (1 + it.star * 0.03);
     }
 
     public Map<String, Object> discard(PlayerState s, int bagIdx) {
@@ -984,8 +1030,8 @@ public class GameService {
     }
 
     /** 成就里程碑档位（第八批）：累计已领成就数达标线与一次性奖金（每档只发一次，掩码落档）。 */
-    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75};
-    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000};
+    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75, 90};
+    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000, 1_000_000};
 
     /** 领取后结算里程碑：返回本次新发的里程碑奖金（0 = 未跨新档），奖金已入账。 */
     static long settleAchMilestone(PlayerState s) {
@@ -1272,6 +1318,35 @@ public class GameService {
         return m;
     }
 
+    /** 喂到满级（第十批）：一直喂到满级或金币耗尽（硬顶 2000 次防失控），回执带实际次数。 */
+    public Map<String, Object> feedPetMax(PlayerState s) {
+        if (s.pet == null) {
+            throw ApiException.badRequest("还没有出战宠物");
+        }
+        int fed = 0;
+        int ups = 0;
+        while (fed < 2000) {
+            int lv = s.petLevels.getOrDefault(s.pet, 1);
+            if (lv >= GameConst.PET_MAX_LEVEL || Num.lt(s.gold, Num.of(GameConst.PET_FEED_COST))) {
+                break;
+            }
+            Map<String, Object> r = feedPet(s);
+            fed++;
+            ups += ((Number) r.get("leveledUp")).intValue();
+        }
+        if (fed == 0) {
+            throw ApiException.badRequest("喂不了：金币不足或宠物已满级");
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("pet", s.pet);
+        m.put("fed", fed);
+        m.put("leveledUp", ups);
+        m.put("level", s.petLevels.getOrDefault(s.pet, 1));
+        m.put("gold", Num.plain(s.gold));
+        return m;
+    }
+
     /** 连续喂食（第九批）：最多喂 times 次，金币不足或满级时提前停（不报错，回执带实际次数）。 */
     public Map<String, Object> feedPetBatch(PlayerState s, int times) {
         if (s.pet == null) {
@@ -1332,20 +1407,13 @@ public class GameService {
         return def == null ? petCode : def.name();
     }
 
-    /** 宠物获得经验并连升（第九批）：返回 {新等级, 本次升了几级}；满级经验不再累积。 */
-    public static int[] gainPetExp(PlayerState s, double exp) {
-        if (s.pet == null || exp <= 0) {
-            return new int[]{s.pet == null ? 0 : s.petLevels.getOrDefault(s.pet, 1), 0};
+    /** 单只宠物获得经验并连升：返回本次升了几级；满级经验不再累积。 */
+    private static int gainOnePetExp(PlayerState s, String petId, double exp) {
+        int lv = s.petLevels.getOrDefault(petId, 1);
+        if (lv >= GameConst.PET_MAX_LEVEL || exp <= 0) {
+            return 0;
         }
-        // 天赋「兽语者」：经验翻倍（击杀与喂食共用此单点）
-        if ("pet_whisper".equals(s.talent)) {
-            exp *= GameConst.PET_WHISPER_MUL;
-        }
-        int lv = s.petLevels.getOrDefault(s.pet, 1);
-        if (lv >= GameConst.PET_MAX_LEVEL) {
-            return new int[]{lv, 0};
-        }
-        double cur = s.petExps.getOrDefault(s.pet, 0.0) + exp;
+        double cur = s.petExps.getOrDefault(petId, 0.0) + exp;
         int ups = 0;
         while (lv < GameConst.PET_MAX_LEVEL && cur >= GameConst.petExpNeed(lv)) {
             cur -= GameConst.petExpNeed(lv);
@@ -1355,9 +1423,33 @@ public class GameService {
         if (lv >= GameConst.PET_MAX_LEVEL) {
             cur = 0;
         }
-        s.petLevels.put(s.pet, lv);
-        s.petExps.put(s.pet, cur);
-        return new int[]{lv, ups};
+        s.petLevels.put(petId, lv);
+        s.petExps.put(petId, cur);
+        return ups;
+    }
+
+    /**
+     * 宠物获得经验并连升（第九批）：返回 {新等级, 本次升了几级}；满级经验不再累积。
+     * 第十批起非出战宠物分享 25% 经验（天赋兽语者翻倍在分享前统一结算）。
+     */
+    public static int[] gainPetExp(PlayerState s, double exp) {
+        if (s.pet == null || exp <= 0) {
+            return new int[]{s.pet == null ? 0 : s.petLevels.getOrDefault(s.pet, 1), 0};
+        }
+        // 天赋「兽语者」：经验翻倍（击杀与喂食共用此单点）
+        if ("pet_whisper".equals(s.talent)) {
+            exp *= GameConst.PET_WHISPER_MUL;
+        }
+        int ups = gainOnePetExp(s, s.pet, exp);
+        double share = exp * GameConst.PET_SHARE_RATE;
+        if (share >= 1) {
+            for (String other : s.petsOwned) {
+                if (!other.equals(s.pet)) {
+                    gainOnePetExp(s, other, share);
+                }
+            }
+        }
+        return new int[]{s.petLevels.getOrDefault(s.pet, 1), ups};
     }
 
     /** 批量融合（第九批）：把所有一阶宝石按 3:1 全部融合成璀璨二阶，口径与逐颗融合一致。 */
@@ -1700,6 +1792,12 @@ public class GameService {
         if (src.enhance > dst.enhance) {
             dst.enhance = src.enhance;
         }
+        if (src.temper > dst.temper) {
+            dst.temper = src.temper;
+        }
+        if (src.star > dst.star) {
+            dst.star = src.star;
+        }
         if (dst.quality < src.quality) {
             dst.quality = src.quality;
         }
@@ -1938,6 +2036,18 @@ public class GameService {
         v.put("owned", new ArrayList<>(s.petsOwned));
         v.put("names", new LinkedHashMap<>(s.petNames));
         v.put("levels", new LinkedHashMap<>(s.petLevels));
+        // 羁绊（第十批）：总等级与当前倍率/下一档门槛，供宠物卡展示
+        int totalLevels = s.petLevels.values().stream().mapToInt(Integer::intValue).sum();
+        v.put("totalLevels", totalLevels);
+        v.put("bondMul", GameConst.petBondMul(totalLevels, "chaos_heart".equals(s.talent)));
+        int nextTier = 0;
+        for (int t : GameConst.PET_BOND_TIERS) {
+            if (totalLevels < t) {
+                nextTier = t;
+                break;
+            }
+        }
+        v.put("bondNext", nextTier);
         if (s.pet != null && GameConst.PETS.containsKey(s.pet)) {
             int lv = s.petLevels.getOrDefault(s.pet, 1);
             v.put("level", lv);

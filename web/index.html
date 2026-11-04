@@ -9,8 +9,8 @@
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="css/style.css?v=202">
-<link rel="stylesheet" href="css/v2.css?v=202">
+<link rel="stylesheet" href="css/style.css?v=210">
+<link rel="stylesheet" href="css/v2.css?v=210">
 </head>
 <body>
 
@@ -59,6 +59,7 @@
   <span id="dpsChip" class="dps-chip" title="面板理论 DPS 估算：（物攻+魔攻）×攻速×暴击期望倍率，未计怪物防御/闪避">⚔️ DPS —</span>
   <span id="powerChip" class="dps-chip" title="综合战力（参照文字修仙「总体实力」）：DPS×(1+生命上限/双攻和÷10)×(1+双防/2000)，仅供横向比较">💪 战力 —</span>
   <span id="titleChip" class="dps-chip" title="当前最高称号（全部称号见角色页）" hidden></span>
+  <span id="petChip" class="dps-chip" title="出战宠物速览（领养/喂食/改名见委托页宠物卡）" hidden></span>
 
   <!-- 属性悬浮卡：悬浮/点击头像展开，不占主画面布局 -->
   <div id="statCard" class="stat-hover-card">
@@ -116,7 +117,8 @@
     <span id="saveState" class="saveok">✅ 云端已同步</span>
     <button id="btnDaily" class="daily-btn" title="每日签到：金币+药剂礼包">🎁 签到</button>
     <button id="btnFx" class="daily-btn" title="特效开关：关掉飘字与动画（低配/省电）">✨ 特效</button>
-    <button id="btnTheme" class="daily-btn" title="主题切换：玄夜（暗）/宣纸（亮）/星空（紫）">🌗 主题</button>
+    <button id="btnMotion" class="daily-btn" title="静态模式：停用全部动画与过渡（晕动敏感/更省电）">🧘 静态模式</button>
+    <button id="btnTheme" class="daily-btn" title="主题切换：玄夜（暗）/宣纸（亮）/星空（紫）/水墨（纸）/霓虹（夜）">🌗 主题</button>
     <button id="btnFont" class="daily-btn" title="字号切换：标准/大/特大">🔠 字号</button>
     <button id="btnHelp" class="daily-btn" title="玩法说明与新功能一览">❓ 帮助</button>
     <span id="netState" class="netok">●</span>
@@ -177,7 +179,7 @@
       <button id="tabBtnSkills" class="game-tab" data-tab="skills">✋ 技能药剂</button>
       <button id="tabBtnQuest" class="game-tab" data-tab="quest">📜 委托<span id="questBadge" class="tab-badge" hidden></span></button>
       <button id="tabBtnCraft" class="game-tab" data-tab="craft">⚒️ 锻造</button>
-      <button id="tabBtnRole" class="game-tab" data-tab="role">👤 角色</button>
+      <button id="tabBtnRole" class="game-tab" data-tab="role">👤 角色<span id="achBadge" class="tab-badge" hidden></span></button>
       <button id="tabBtnSave" class="game-tab" data-tab="save">💾 存档</button>
       <button id="tabBtnSocial" class="game-tab" data-tab="social">🏮 江湖</button>
       <button id="tabBtnRank" class="game-tab" data-tab="rank">🏆 榜单</button>
@@ -342,10 +344,10 @@
 <div id="toast" class="toast"></div>
 
 <script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=202"></script>
-<script src="js/api.js?v=202"></script>
-<script src="js/achievements.js?v=202"></script>
-<script src="js/tutorial.js?v=202"></script>
-<script src="js/app.js?v=202"></script>
+<script src="js/audio.js?v=210"></script>
+<script src="js/api.js?v=210"></script>
+<script src="js/achievements.js?v=210"></script>
+<script src="js/tutorial.js?v=210"></script>
+<script src="js/app.js?v=210"></script>
 </body>
 </html>

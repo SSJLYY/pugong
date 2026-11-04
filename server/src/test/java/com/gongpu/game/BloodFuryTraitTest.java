@@ -59,6 +59,6 @@ class BloodFuryTraitTest {
         assertTrue(GameConst.traitPool(8).contains("blood_fury"), "星界池应含燃血");
         assertTrue(GameConst.traitPool(9).contains("blood_fury"), "虚空池应含燃血");
         assertTrue(!GameConst.traitPool(4).contains("blood_fury"), "沼泽池不应含燃血");
-        assertEquals(20, GameConst.MOB_TRAITS.size(), "怪物词条 20");
+        assertEquals(23, GameConst.MOB_TRAITS.size(), "怪物词条 23");
     }
 }

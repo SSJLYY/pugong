@@ -90,6 +90,14 @@ public final class PanelCalculator {
         // 星尘甘露（第九批）：暴击 +6%（锐眼同加区）、攻速平直 +1.5（时之砂同口径，进乘区前）
         BigDecimal stardustCrit = (active(s, "stardust_pot") && !silenced) ? Num.of(0.06) : Num.ZERO;
         BigDecimal stardustAspd = (active(s, "stardust_pot") && !silenced) ? Num.of(1.5) : Num.ZERO;
+        // 混沌精华（第十批）：暴伤 +40%（虚空同加区）、闪避 +5%（幻影同加区）
+        BigDecimal chaosCritd = (active(s, "chaos_pot") && !silenced) ? Num.of(0.40) : Num.ZERO;
+        BigDecimal chaosEva = (active(s, "chaos_pot") && !silenced) ? Num.of(0.05) : Num.ZERO;
+        // 凤凰之血（第十批）：暴伤 +50%（同加区）、吸血 +5%（吸血药剂同加区）
+        BigDecimal phoenixCritd = (active(s, "phoenix_pot") && !silenced) ? Num.of(0.50) : Num.ZERO;
+        BigDecimal phoenixSteal = (active(s, "phoenix_pot") && !silenced) ? Num.of(0.05) : Num.ZERO;
+        // 被动·时之体（第十批）：平直攻速 +0.08（进乘区前，被动受沉默压制）
+        BigDecimal chronoAspd = (s.passives.contains("chrono_body") && !silenced) ? Num.of(0.08) : Num.ZERO;
         // 时之砂（第七批）：平直攻速加算（进乘区之前，与词条平直攻速同口径）
         BigDecimal sandAspd = (active(s, "sand_pot") && !silenced) ? Num.of(0.2) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -122,10 +130,11 @@ public final class PanelCalculator {
             if (it == null) {
                 continue;
             }
-            // 强化与淬炼双乘区（淬炼第七批：+4%/级独立计层）；BULLET_MP 成本不吃任一乘区（下方分支处理）
-            BigDecimal enh = Num.mul(
+            // 强化/淬炼/升星三乘区（淬炼 +4%/级、升星第十批 +3%/星，各自独立计层）；BULLET_MP 成本不吃任一乘区（下方分支处理）
+            BigDecimal enh = Num.mul(Num.mul(
                     Num.of(1 + (double) it.enhance * GameConst.ENHANCE_STAT_BONUS),
-                    Num.of(1 + (double) it.temper * GameConst.TEMPER_STAT_BONUS));
+                    Num.of(1 + (double) it.temper * GameConst.TEMPER_STAT_BONUS)),
+                    Num.of(1 + (double) it.star * GameConst.STAR_STAT_BONUS));
             for (Map.Entry<String, BigDecimal> e : it.base.entrySet()) {
                 // BULLET_MP 是每发耗蓝的「成本」而非战力:强化只放大战力,成本不吃强化乘区
                 // (否则魔弹枪越强化越哑火,与吞噬合并的同口径修复,见 GameService.devourInto)
@@ -168,9 +177,11 @@ public final class PanelCalculator {
         Sets.activeBonus(s).forEach((k, v) -> flat.merge(k, v, Num::add));
 
         // 宠物伙伴（第九批）：出战宠物按等级放大 flat 加成（伙伴来源，不受沉默压制）；
-        // 被动·宠物亲和再乘 1.3（被动本身受沉默压制）
-        BigDecimal petMul = (!silenced && s.passives.contains("pet_bond"))
-                ? Num.of(GameConst.PET_BOND_MUL) : Num.of(1);
+        // 被动·宠物亲和再乘 1.3（被动本身受沉默压制）；羁绊倍率（第十批，总等级档位）同乘、不受压制
+        int petTotalLevels = s.petLevels.values().stream().mapToInt(Integer::intValue).sum();
+        BigDecimal petMul = Num.mul(
+                (!silenced && s.passives.contains("pet_bond")) ? Num.of(GameConst.PET_BOND_MUL) : Num.of(1),
+                Num.of(GameConst.petBondMul(petTotalLevels, "chaos_heart".equals(s.talent))));
         petBonus(s).forEach((k, v) -> flat.merge(k, Num.mul(v, petMul), Num::add));
 
         // 无限属性点天赋(statlord):自由加点并入 flat 区——全部属性走既有读法
@@ -207,16 +218,16 @@ public final class PanelCalculator {
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
                 Num.mul(Num.add(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), vigorPot), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
-                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(Num.add(Num.add(aspdWithBonus(s.fixed.ASPD, flat, pct), sandAspd), stardustAspd), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
+                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(Num.add(Num.add(Num.add(aspdWithBonus(s.fixed.ASPD, flat, pct), sandAspd), stardustAspd), chronoAspd), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
                 Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),
                 Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit), stardustCrit)),
-                Num.add(Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd), voidCritd),
+                Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd), voidCritd), chaosCritd), phoenixCritd),
                 Num.min(GameConst.BLESS_CAP.get("ACC"),
                         Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot), focusPot), voidAcc)),
-                Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot)),
-                Num.add(Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot), bloodlustBuff),
+                Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot), chaosEva)),
+                Num.add(Num.add(Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot), bloodlustBuff), phoenixSteal),
                 // 枪械：纯魔法弹每发耗蓝标记（BULLET_MP，来自武器 base_stats；非枪/物理弹武器为 0）
                 flat.getOrDefault("BULLET_MP", Num.ZERO),
                 silenced,

@@ -62,6 +62,6 @@ class AffixExpandTest {
     void newAffixesInTable() {
         assertTrue(GameConst.AFFIXES.stream().anyMatch(a -> "maxHP".equals(a.key())));
         assertTrue(GameConst.AFFIXES.stream().anyMatch(a -> "EVA".equals(a.key())));
-        assertEquals(28, GameConst.AFFIXES.size(), "词条表应为 26 条（第八批终版口径）");
+        assertEquals(30, GameConst.AFFIXES.size(), "词条表应为 26 条（第八批终版口径）");
     }
 }

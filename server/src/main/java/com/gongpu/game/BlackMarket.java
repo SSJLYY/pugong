@@ -29,7 +29,8 @@ public final class BlackMarket {
     /** 黑市药池（增益/功能向为主，基础补给不进黑市）。 */
     static final List<String> POOL = List.of(
             "atk", "def", "aspd", "crit", "critd", "lifesteal", "giant", "fortune",
-            "luck", "might", "guard", "stone", "thorn", "spirit", "vital", "elixir");
+            "luck", "might", "guard", "stone", "thorn", "spirit", "vital", "elixir",
+            "stardust", "void", "chaos", "pet_treat");
 
     static String today() {
         return LocalDate.now(GameConst.DAILY_ZONE).toString();

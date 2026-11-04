@@ -54,12 +54,12 @@ class ZoneStarTest {
         assertTrue(set.isPresent(), "星辰战装应存在");
         assertEquals(4, set.get().members().size());
         assertTrue(set.get().members().contains("star_blade"));
-        assertEquals(8, Sets.ALL.size(), "套装应达 8 套");
+        assertEquals(9, Sets.ALL.size(), "套装应达 9 套");
     }
 
     @Test
     void starDepthUsesFullTraitPool() {
-        assertEquals(19, GameConst.traitPool(8).size(), "星界深度应全池 18 条（含星界专属星蚀）");
+        assertEquals(21, GameConst.traitPool(8).size(), "星界深度应全池 21 条（含星界专属星蚀）");
         assertTrue(new java.util.ArrayList<>(GameConst.ZONES.keySet()).indexOf("star") == 8, "星界应为第 9 区（序 8）");
     }
 }

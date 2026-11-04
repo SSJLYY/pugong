@@ -42,7 +42,11 @@ public final class DailyQuests {
             new Template("punch", "出拳令", "👊", "打出普攻", "拳",
                     new long[]{1000, 3000, 6000}, new long[]{1000, 3000, 6000}),
             new Template("damage", "摧山令", "💥", "造成伤害", "点",
-                    new long[]{1_000_000, 10_000_000, 100_000_000}, new long[]{2000, 4000, 8000}));
+                    new long[]{1_000_000, 10_000_000, 100_000_000}, new long[]{2000, 4000, 8000}),
+            new Template("feed", "喂宠令", "🐾", "喂食宠物", "次",
+                    new long[]{5, 10, 20}, new long[]{900, 1500, 2400}),
+            new Template("fuse", "融晶令", "💎", "融合宝石", "次",
+                    new long[]{1, 2, 3}, new long[]{1200, 2400, 4000}));
 
     /** 每日全清奖励：3 个任务全领后额外发放（每日一次）。 */
     public static final long ALL_CLEAR_BONUS = 5000;
@@ -66,6 +70,10 @@ public final class DailyQuests {
             case "potion" -> BigDecimal.valueOf(s.stats.potionsUsed);
             case "punch" -> s.stats.lifetimePunches == null ? BigDecimal.ZERO : s.stats.lifetimePunches;
             case "damage" -> s.stats.totalDamage == null ? BigDecimal.ZERO : s.stats.totalDamage;
+            case "enchant" -> BigDecimal.valueOf(s.stats.enchants);
+            case "rebirth" -> BigDecimal.valueOf(s.gen);
+            case "feed" -> BigDecimal.valueOf(s.stats.petFeeds);
+            case "fuse" -> BigDecimal.valueOf(s.stats.gemsFused);
             default -> BigDecimal.ZERO;
         };
     }

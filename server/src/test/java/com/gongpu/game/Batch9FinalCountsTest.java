@@ -39,25 +39,25 @@ class Batch9FinalCountsTest {
 
     @Test
     void codeSideCounts() {
-        assertEquals(41, GameConst.POTIONS.size(), "药剂 41");
-        assertEquals(28, GameConst.AFFIXES.size(), "词条 28");
-        assertEquals(33, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 33");
-        assertEquals(20, GameConst.MOB_TRAITS.size(), "怪物词条 20");
-        assertEquals(12, GameConst.TALENTS.size(), "天赋 12");
-        assertEquals(6, GameConst.PETS.size(), "宠物 6");
-        assertEquals(10, GameConst.ZONES.size(), "区域 10");
-        assertEquals(33, GameConst.codexTotal(), "图鉴 33");
-        assertEquals(82, Achievements.ALL.size(), "成就 82");
+        assertEquals(44, GameConst.POTIONS.size(), "药剂 41");
+        assertEquals(30, GameConst.AFFIXES.size(), "词条 28");
+        assertEquals(36, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 36");
+        assertEquals(23, GameConst.MOB_TRAITS.size(), "怪物词条 23");
+        assertEquals(13, GameConst.TALENTS.size(), "天赋 12");
+        assertEquals(8, GameConst.PETS.size(), "宠物 8");
+        assertEquals(11, GameConst.ZONES.size(), "区域 11");
+        assertEquals(38, GameConst.codexTotal(), "图鉴 38");
+        assertEquals(98, Achievements.ALL.size(), "成就 98");
     }
 
     @Test
     void sqlSideCounts() throws Exception {
         String sql = sql();
-        assertEquals(74, countRows(sql, "cfg_equipment_template"), "SQL 装备 74");
-        assertEquals(41, countRows(sql, "cfg_item"), "SQL 药剂 41");
-        assertEquals(28, countRows(sql, "cfg_affix"), "SQL 词条 28");
-        assertEquals(33, countRows(sql, "cfg_skill"), "SQL 技能 33");
-        assertEquals(26, countRows(sql, "cfg_quest"), "SQL 委托 26");
-        assertEquals(26, countRows(sql, "cfg_craft"), "SQL 配方 26");
+        assertEquals(82, countRows(sql, "cfg_equipment_template"), "SQL 装备 82");
+        assertEquals(44, countRows(sql, "cfg_item"), "SQL 药剂 41");
+        assertEquals(30, countRows(sql, "cfg_affix"), "SQL 词条 30");
+        assertEquals(36, countRows(sql, "cfg_skill"), "SQL 技能 36");
+        assertEquals(30, countRows(sql, "cfg_quest"), "SQL 委托 30");
+        assertEquals(30, countRows(sql, "cfg_craft"), "SQL 配方 30");
     }
 }

@@ -233,7 +233,7 @@ public final class GameEngine {
      * 不含蓄力重击等一次性 buff）。供 mobView 的击杀预估展示，改伤害公式必须同步这里。
      */
     static BigDecimal expectedPerHit(PlayerState s, PanelCalculator.Panel p, PlayerState.MobState m) {
-        BigDecimal critMul = Num.add(Num.of(1), Num.mul(p.CRIT(), Num.sub(p.CRITD(), Num.of(1))));
+        BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(p.CRITD(), Num.of(1))));
         BigDecimal pd = Num.max(Num.of(1),
                 Num.sub(Num.mul(p.PATK(), critMul), Num.mul(m.PDEF, Num.of(GameConst.DMG_DEF_FACTOR))));
         BigDecimal md = Num.gt(p.MATK(), Num.ZERO)
@@ -262,6 +262,14 @@ public final class GameEngine {
         return perHit;
     }
 
+    /** 对当前目标的有效暴击率（词条·坚韧第八批：暴击率减半；dealDamage 与 expectedPerHit 同口径）。 */
+    static BigDecimal effCrit(PanelCalculator.Panel p, PlayerState.MobState m) {
+        if (m != null && "tenacity".equals(m.trait)) {
+            return Num.mul(p.CRIT(), Num.of(GameConst.TRAIT_TENACITY_CRIT_MUL));
+        }
+        return p.CRIT();
+    }
+
     /** Boss 是否残血（处决者触发口径：当前/上限 < EXECUTIONER_HP_LINE；上限非正不触发）。 */
     static boolean bossLowHp(PlayerState.MobState m) {
         return m.maxHP != null && m.maxHP.signum() > 0
@@ -275,7 +283,7 @@ public final class GameEngine {
         }
 
         // 有效每拳伤害（含暴击期望）
-        BigDecimal critMul = Num.add(Num.of(1), Num.mul(p.CRIT(), Num.sub(p.CRITD(), Num.of(1))));
+        BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(p.CRITD(), Num.of(1))));
         BigDecimal pd = Num.max(Num.of(1),
                 Num.sub(Num.mul(p.PATK(), critMul), Num.mul(m.PDEF, Num.of(GameConst.DMG_DEF_FACTOR))));
         BigDecimal md = Num.gt(p.MATK(), Num.ZERO)

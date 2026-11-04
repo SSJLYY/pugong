@@ -299,6 +299,14 @@ public final class GameEngine {
         if (m == null) {
             return 0;
         }
+        // 词条预警（第八批）：带词条的怪首次交手时播报其词条与克制提示（每只怪仅一次）
+        if (m.trait != null && !m.traitWarned) {
+            m.traitWarned = true;
+            GameConst.TraitDef td = GameConst.MOB_TRAITS.get(m.trait);
+            if (td != null) {
+                pushEvent(s, td.emoji() + " 「" + (m.name == null ? "野怪" : m.name) + "」带词条【" + td.name() + "】：" + td.desc());
+            }
+        }
 
         // 有效每拳伤害（含暴击期望）
         BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(p.CRITD(), Num.of(1))));

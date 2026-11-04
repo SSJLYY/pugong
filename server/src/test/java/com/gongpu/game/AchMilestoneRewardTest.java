@@ -43,6 +43,17 @@ class AchMilestoneRewardTest {
         assertEquals(0L, r3.get("milestoneBonus"), "无新跨档不应再发");
     }
 
+    /** 第九批第 78 轮：75 档（第五档）结算——从 60 档已付状态直达 75 已领，只发 500,000 且不重发旧档。 */
+    @Test
+    void top75TierPaysOnce() {
+        PlayerState s = stateWithUnlocked(75);
+        s.achClaimed.addAll(s.achievements); // 已领口径（settle 按 achClaimed 计数）
+        s.stats.achMilestonePaid = 0b01111; // 前四档已发
+        long bonus = GameService.settleAchMilestone(s);
+        assertEquals(500_000L, bonus, "跨 75 档应发 500,000");
+        assertEquals(0L, GameService.settleAchMilestone(s), "75 档只发一次");
+    }
+
     @Test
     void singleClaimAlsoSettles() {
         PlayerState s = stateWithUnlocked(15);

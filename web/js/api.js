@@ -177,6 +177,7 @@
     fuseGem: (slot, id) => request('POST', '/api/game/' + slot + '/fuse-gem', { id }),
     claimDaily: (slot, id) => request('POST', '/api/game/' + slot + '/daily-claim', { id }),
     claimWeekly: (slot, id) => request('POST', '/api/game/' + slot + '/weekly-claim', { id }),
+    claimMonthly: (slot, id) => request('POST', '/api/game/' + slot + '/monthly-claim', { id }),
     adoptPet: (slot, id) => request('POST', '/api/game/' + slot + '/adopt-pet', { id }),
     switchPet: (slot, id) => request('POST', '/api/game/' + slot + '/switch-pet', { id }),
     feedPet: (slot) => request('POST', '/api/game/' + slot + '/feed-pet'),

@@ -647,7 +647,8 @@
     const qb = $('questBadge');
     if (qb) {
       const ready = (view.dailyTasks || []).filter(t => t.done && !t.claimed).length
-        + (view.weeklyTasks || []).filter(t => t.done && !t.claimed).length;
+        + (view.weeklyTasks || []).filter(t => t.done && !t.claimed).length
+        + (view.monthlyTasks || []).filter(t => t.done && !t.claimed).length;
       qb.hidden = ready <= 0;
       qb.textContent = ready > 0 ? String(ready) : '';
     }
@@ -969,6 +970,7 @@
     renderDaily(view);
     renderWeekly(view);
     renderPets(view);
+    renderMonthly(view);
     renderExtSkills();
     renderMarket(view);
     renderEvents(view);
@@ -2749,6 +2751,48 @@
           toast('🗓️ 周常任务奖励：+' + fmt(res.reward || 0) + ' 金币', 'ok');
           if (res.allClearBonus > 0) {
             toast('🎉 周常全清！额外 +' + fmt(res.allClearBonus) + ' 金币与宝石 ×' + (res.allClearGems || []).length, 'ok');
+          }
+          if (r) applyView(r);
+        } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
+      });
+    });
+  }
+
+  // ================= 月常任务（第九批，与周常同构） =================
+  function renderMonthly(view) {
+    const box = $('monthlyList');
+    if (!box) return;
+    const tasks = view.monthlyTasks || [];
+    const sig = JSON.stringify(tasks);
+    if (sig === renderMonthly._sig) return;
+    renderMonthly._sig = sig;
+    if (!tasks.length) {
+      box.innerHTML = '<p class="empty-hint">本月暂无任务</p>';
+      return;
+    }
+    box.innerHTML = tasks.map(t => {
+      const pct = t.target > 0 ? Math.min(100, Math.floor(100 * t.progress / t.target)) : 0;
+      const btn = t.claimed
+        ? '<button class="daily-claim" disabled>✅ 已领取</button>'
+        : t.done
+          ? '<button class="daily-claim ready" data-monthly-claim="' + esc(t.id) + '">🎁 领取 +' + fmt(t.rewardGold) + ' 金</button>'
+          : '<button class="daily-claim" disabled>未完成</button>';
+      return '<div class="daily-card weekly-card monthly-card' + (t.claimed ? ' claimed' : t.done ? ' done' : '') + '">' +
+        '<div class="daily-head"><span>' + t.emoji + ' ' + esc(t.name) + '</span><span class="daily-reward">+' + fmt(t.rewardGold) + ' 金</span></div>' +
+        '<div class="daily-desc">' + esc(t.desc) + '</div>' +
+        '<div class="daily-prog"><span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
+        fmt(t.progress) + '/' + fmt(t.target) + '</div>' + btn + '</div>';
+    }).join('') + (tasks.every(t => t.claimed)
+      ? '<p class="daily-allclear">🎉 本月任务已全清，全清奖励也到手了——下月见！</p>' : '');
+    box.querySelectorAll('[data-monthly-claim]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          const r = await call(() => API.claimMonthly(API.state.slot, btn.dataset.monthlyClaim));
+          const res = (r && r.result) || {};
+          toast('📆 月常任务奖励：+' + fmt(res.reward || 0) + ' 金币', 'ok');
+          if (res.allClearBonus > 0) {
+            toast('🎉 月常全清！额外 +' + fmt(res.allClearBonus) + ' 金币与宝石 ×' + (res.allClearGems || []).length, 'ok');
           }
           if (r) applyView(r);
         } catch (err) { toast(err.message, 'err'); btn.disabled = false; }

@@ -38,6 +38,16 @@ class ZoneStarTest {
     }
 
     @Test
+    void starEquipmentInSql() throws Exception {
+        String sql = new String(java.nio.file.Files.readAllBytes(
+                java.nio.file.Path.of("src/main/resources/gongpu-full.sql")), java.nio.charset.StandardCharsets.UTF_8);
+        for (String code : new String[]{"star_blade", "comet_bow", "nebula_helm", "galaxy_plate", "meteor_greaves", "quasar_ring"}) {
+            assertTrue(sql.contains("'" + code + "'"), "星界装备应写入 SQL：" + code);
+            assertTrue(sql.contains("'star'"), "星界装备 min_zone 应为 star");
+        }
+    }
+
+    @Test
     void starDepthUsesFullTraitPool() {
         assertEquals(16, GameConst.traitPool(8).size(), "星界深度应全池 16 条");
         assertTrue(new java.util.ArrayList<>(GameConst.ZONES.keySet()).indexOf("star") == 8, "星界应为第 9 区（序 8）");

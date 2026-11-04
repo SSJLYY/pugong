@@ -1110,6 +1110,17 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('snow_throne', '雪原王座', '👑', '雪狼王盘踞王座已久：于雪原猎杀五十只魔物，向公会证明你的实力', 'snow', '{"maxHP":200000,"ATK":1500}', 50, 22000, 'fortune', 1, 1, 1, 18);
 
+-- 第八批第 22 轮：星界毕业装 ×6（tier 4，min_zone=star，底子约为深渊装 2.2 倍）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('star_blade','comet_bow','nebula_helm','galaxy_plate','meteor_greaves','quasar_ring');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('star_blade', '星陨之刃', '☄️', 'weapon', 4, 'star', '{"PATK":"580","CRITD":"0.35"}', 10, 2400, '一颗熄灭恒星的全部重量', 1, 59),
+  ('comet_bow', '彗星长弓', '🌠', 'bow', 4, 'star', '{"PATK":"470","RNG":"2","ASPD":"0.18"}', 10, 2400, '箭出如彗星拖尾', 1, 60),
+  ('nebula_helm', '星云兜鍪', '🌌', 'head', 4, 'star', '{"maxHP":"9000","PDEF":"80","MDEF":"130"}', 10, 1800, '兜鍪里缓缓旋转着一片星云', 1, 61),
+  ('galaxy_plate', '银河重铠', '🛡️', 'chest', 4, 'star', '{"maxHP":"13000","PDEF":"150","MDEF":"110"}', 10, 2100, '把一条旋臂穿在身上', 1, 62),
+  ('meteor_greaves', '流星胫甲', '🦿', 'legs', 4, 'star', '{"maxHP":"8000","PDEF":"100","SPD":"18"}', 10, 1800, '踏步即是坠落的流星', 1, 63),
+  ('quasar_ring', '类星指环', '💍', 'ring1', 4, 'star', '{"MATK":"330","MREGEN":"8","EVA":"0.03"}', 10, 2200, '指环中央是一颗微缩的类星体', 1, 64);
+
 -- 第八批第 15 轮：新药剂破甲药剂
 DELETE FROM `cfg_item` WHERE `code` IN ('pierce');
 INSERT INTO `cfg_item`

@@ -904,6 +904,11 @@ public final class GameEngine {
         s.life.curHP = Num.sub(s.life.curHP, total);
         // 词条·嗜血：怪按玩家实际掉血量比例吸回自身生命（封顶其上限；
         // 置于格挡反弹之前——反弹致死时怪已死，不存在吸血复活的顺序问题）
+        // 词条·噬能（第九批）：怪按实际伤害比例抽玩家蓝（蓝量不低于 0）
+        if ("mana_drain".equals(m.trait) && total.signum() > 0) {
+            BigDecimal drain = Num.mul(total, Num.of(GameConst.TRAIT_DRAIN_MP_PCT));
+            s.life.curMP = Num.max(Num.ZERO, Num.sub(s.life.curMP, drain));
+        }
         if ("leech".equals(m.trait) && m.maxHP != null && total.signum() > 0) {
             BigDecimal heal = Num.mul(total, Num.of(GameConst.TRAIT_LEECH_MUL));
             m.curHP = Num.min(m.maxHP, Num.add(m.curHP, heal));

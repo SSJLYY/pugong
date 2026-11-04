@@ -713,6 +713,10 @@ public final class GameEngine {
         if (buffLeft(s, "fortune_pot") > 0) {
             mul = Num.mul(mul, Num.of(GameConst.FORTUNE_POT_MUL));
         }
+        // 被动「点金手」（第九批）：击杀金币 +15%，经济类增益同口径不查沉默
+        if (s.passives != null && s.passives.contains("goldtouch")) {
+            mul = Num.mul(mul, Num.of(GameConst.GOLDTOUCH_MUL));
+        }
         return mul;
     }
 

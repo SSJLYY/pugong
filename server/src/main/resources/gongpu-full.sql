@@ -1236,6 +1236,12 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('void_heart', '无相之心', '💜', '无相天魔没有心——公会偏要你带一颗回来：于虚空界猎杀六十只魔物', 'void', '{"maxHP":200000000,"ATK":40000}', 60, 450000, 'pierce', 3, 1, 1, 24);
 
+-- 第九批第 83 轮：新被动点金手
+DELETE FROM `cfg_skill` WHERE `code` IN ('goldtouch');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('goldtouch', '点金手', '🪙', 'passive', 800, 0, 0, 0, '{"effect":"goldtouch","mul":1.15}', '击杀金币 +15%', 1, 33);
+
 -- 第九批第 24 轮：新被动宠物亲和
 DELETE FROM `cfg_skill` WHERE `code` IN ('pet_bond');
 INSERT INTO `cfg_skill`

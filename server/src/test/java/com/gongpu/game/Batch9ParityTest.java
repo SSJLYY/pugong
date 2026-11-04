@@ -18,7 +18,7 @@ class Batch9ParityTest {
         assertEquals(8, Sets.ALL.size(), "套装 8");
         assertEquals(80, Achievements.ALL.size(), "成就 80");
         assertEquals(19, GameConst.MOB_TRAITS.size(), "怪物词条 19");
-        assertEquals(32, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 32");
+        assertEquals(33, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 33");
         assertEquals(41, GameConst.POTIONS.size(), "药剂 41");
         assertEquals(5, MonthlyQuests.TEMPLATES.size(), "月常模板 5");
         assertEquals(5, WeeklyQuests.TEMPLATES.size(), "周常模板 5");

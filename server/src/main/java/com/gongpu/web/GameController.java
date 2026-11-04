@@ -404,6 +404,32 @@ public class GameController {
                 s -> game.fuseGem(s, reqStr(body.id(), "id")));
     }
 
+    public record PetReq(String id) {
+    }
+
+    /** 领养宠物（第九批）。 */
+    @PostMapping("/{slot}/adopt-pet")
+    public Map<String, Object> adoptPet(HttpServletRequest req, @PathVariable int slot,
+                                        @RequestBody PetReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "adopt-pet",
+                s -> game.adoptPet(s, reqStr(body.id(), "id")));
+    }
+
+    /** 切换出战宠物（第九批）。 */
+    @PostMapping("/{slot}/switch-pet")
+    public Map<String, Object> switchPet(HttpServletRequest req, @PathVariable int slot,
+                                         @RequestBody PetReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "switch-pet",
+                s -> game.switchPet(s, reqStr(body.id(), "id")));
+    }
+
+    /** 喂食出战宠物（第九批）。 */
+    @PostMapping("/{slot}/feed-pet")
+    public Map<String, Object> feedPet(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "feed-pet",
+                s -> game.feedPet(s));
+    }
+
     @PostMapping("/{slot}/reroll")
     public Map<String, Object> reroll(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody RerollReq body) {

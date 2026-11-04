@@ -1179,6 +1179,95 @@ public class GameService {
         return m;
     }
 
+    /** 领养宠物（第九批）：金币领养，首次领养自动出战。 */
+    public Map<String, Object> adoptPet(PlayerState s, String petCode) {
+        GameConst.PetDef def = GameConst.PETS.get(petCode);
+        if (def == null) {
+            throw ApiException.badRequest("宠物不存在：" + petCode);
+        }
+        if (s.petsOwned.contains(petCode)) {
+            throw ApiException.badRequest("已经领养了" + def.name());
+        }
+        if (Num.lt(s.gold, Num.of(def.price()))) {
+            throw ApiException.badRequest("金币不足，领养" + def.name() + "需要 " + def.price() + " 金币");
+        }
+        s.gold = Num.sub(s.gold, Num.of(def.price()));
+        s.petsOwned.add(petCode);
+        s.petLevels.putIfAbsent(petCode, 1);
+        s.petExps.putIfAbsent(petCode, 0.0);
+        if (s.pet == null) {
+            s.pet = petCode;
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("pet", petCode);
+        m.put("gold", Num.plain(s.gold));
+        return m;
+    }
+
+    /** 切换出战宠物（第九批）：只能切换到已领养的宠物。 */
+    public Map<String, Object> switchPet(PlayerState s, String petCode) {
+        if (!GameConst.PETS.containsKey(petCode)) {
+            throw ApiException.badRequest("宠物不存在：" + petCode);
+        }
+        if (!s.petsOwned.contains(petCode)) {
+            throw ApiException.badRequest("尚未领养这只宠物");
+        }
+        s.pet = petCode;
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("pet", petCode);
+        return m;
+    }
+
+    /** 喂食出战宠物（第九批）：金币换经验，连升多级一次结算；满级拒绝。 */
+    public Map<String, Object> feedPet(PlayerState s) {
+        if (s.pet == null) {
+            throw ApiException.badRequest("还没有出战宠物");
+        }
+        int lv = s.petLevels.getOrDefault(s.pet, 1);
+        if (lv >= GameConst.PET_MAX_LEVEL) {
+            throw ApiException.badRequest("宠物已满级");
+        }
+        if (Num.lt(s.gold, Num.of(GameConst.PET_FEED_COST))) {
+            throw ApiException.badRequest("金币不足，喂食需要 " + GameConst.PET_FEED_COST + " 金币");
+        }
+        s.gold = Num.sub(s.gold, Num.of(GameConst.PET_FEED_COST));
+        s.stats.petFeeds++;
+        int[] r = gainPetExp(s, GameConst.PET_FEED_EXP);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("pet", s.pet);
+        m.put("level", r[0]);
+        m.put("leveledUp", r[1]);
+        m.put("gold", Num.plain(s.gold));
+        return m;
+    }
+
+    /** 宠物获得经验并连升（第九批）：返回 {新等级, 本次升了几级}；满级经验不再累积。 */
+    public static int[] gainPetExp(PlayerState s, double exp) {
+        if (s.pet == null || exp <= 0) {
+            return new int[]{s.pet == null ? 0 : s.petLevels.getOrDefault(s.pet, 1), 0};
+        }
+        int lv = s.petLevels.getOrDefault(s.pet, 1);
+        if (lv >= GameConst.PET_MAX_LEVEL) {
+            return new int[]{lv, 0};
+        }
+        double cur = s.petExps.getOrDefault(s.pet, 0.0) + exp;
+        int ups = 0;
+        while (lv < GameConst.PET_MAX_LEVEL && cur >= GameConst.petExpNeed(lv)) {
+            cur -= GameConst.petExpNeed(lv);
+            lv++;
+            ups++;
+        }
+        if (lv >= GameConst.PET_MAX_LEVEL) {
+            cur = 0;
+        }
+        s.petLevels.put(s.pet, lv);
+        s.petExps.put(s.pet, cur);
+        return new int[]{lv, ups};
+    }
+
     /** 附魔（DESIGN.md §6.2/§8）：消耗卷轴给武器/弓附加魔伤词条（元素亲和被动加成）。 */
     public Map<String, Object> enchant(PlayerState s, String scrollCode, int bagIdx) {
         Object[] scroll = GameConst.SCROLLS.get(scrollCode);

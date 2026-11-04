@@ -311,6 +311,8 @@ public class PlayerState {
         public long matSoldGold = 0;
         /** 累计镶嵌宝石数（第八批）。 */
         public long gemsSocketed = 0;
+        /** 累计喂食宠物次数（第九批）。 */
+        public long petFeeds = 0;
         /** 累计直购宝石数（第八批）。 */
         public long gemsBought = 0;
         /** 成就里程碑已发档位掩码（第八批）：bit i 对应第 i 档（15/30/45/60 已领数）。 */

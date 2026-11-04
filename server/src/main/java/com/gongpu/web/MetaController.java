@@ -187,6 +187,18 @@ public class MetaController {
             traits.add(tm);
         }
         m.put("traits", traits);
+        // 宠物图鉴（第九批）：与 GameConst.PETS 同源
+        List<Map<String, Object>> pets = new ArrayList<>();
+        for (GameConst.PetDef d : GameConst.PETS.values()) {
+            Map<String, Object> pm = new LinkedHashMap<>();
+            pm.put("id", d.id());
+            pm.put("name", d.name());
+            pm.put("emoji", d.emoji());
+            pm.put("desc", d.desc());
+            pm.put("price", d.price());
+            pets.add(pm);
+        }
+        m.put("pets", pets);
 
         // 套装图鉴（第七批）：成员名按模板池解析，加成文案与 state 视图同源（Sets.bonusText）
         Map<String, String> codeName = new LinkedHashMap<>();

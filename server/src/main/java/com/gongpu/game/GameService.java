@@ -1789,6 +1789,21 @@ public class GameService {
         return m;
     }
 
+    /** 宠物视图（第九批）：出战宠物 + 等级/经验/升级所需 + 已领养列表（挂 fullView 本体，轮询可见）。 */
+    public static Map<String, Object> petView(PlayerState s) {
+        Map<String, Object> v = new LinkedHashMap<>();
+        v.put("active", s.pet);
+        v.put("owned", new ArrayList<>(s.petsOwned));
+        if (s.pet != null && GameConst.PETS.containsKey(s.pet)) {
+            int lv = s.petLevels.getOrDefault(s.pet, 1);
+            v.put("level", lv);
+            v.put("exp", s.petExps.getOrDefault(s.pet, 0.0));
+            v.put("expNeed", lv >= GameConst.PET_MAX_LEVEL ? 0 : GameConst.petExpNeed(lv));
+            v.put("maxLevel", GameConst.PET_MAX_LEVEL);
+        }
+        return v;
+    }
+
     public Map<String, Object> fullView(PlayerState s) {
         PanelCalculator.Panel p = PanelCalculator.of(s);
         Map<String, Object> m = new LinkedHashMap<>();
@@ -1861,6 +1876,7 @@ public class GameService {
         // 连环掌剩余次数（第八批收官实测修复）：此前误挂在 setAutoLines 回执上，
         // fullView 没有——前端 buff 条的 🤲 计数芯片永远读不到（与第七批 dailyTasks 同类事故）
         m.put("flurryHits", s.flurryHits);
+        m.put("pet", petView(s));
         m.put("blackMarket", BlackMarket.viewOf(s));
         m.put("rerollPity", s.rerollPity);
         // v3.13 背包截断防复发:此前全量下发 3.3 万件=13.9MB JSON,前端每秒解析+渲染

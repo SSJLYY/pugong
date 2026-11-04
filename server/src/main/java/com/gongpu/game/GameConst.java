@@ -511,20 +511,48 @@ public final class GameConst {
     public static final int GEM_SOCKET_MAX = 3;
     /** 词条怪掉落宝石概率（Boss 必掉，见 GameEngine 击杀漏斗）。 */
     public static final double GEM_TRAIT_DROP_RATE = 0.10;
-    /** 宝石出售单价（第八批，金币/颗）：率型宝石（暴击/攻速）最贵。 */
-    public static final Map<String, Integer> GEM_SELL_PRICE = Map.of(
-            "gem_ruby", 500, "gem_sapphire", 500, "gem_emerald", 600,
-            "gem_opal", 700, "gem_topaz", 800, "gem_amethyst", 800);
+    /** 宝石出售单价（第八批，金币/颗）：率型宝石（暴击/攻速）最贵；二阶为一阶 ×3。 */
+    public static final Map<String, Integer> GEM_SELL_PRICE = Map.ofEntries(
+            Map.entry("gem_ruby", 500), Map.entry("gem_sapphire", 500), Map.entry("gem_emerald", 600),
+            Map.entry("gem_opal", 700), Map.entry("gem_topaz", 800), Map.entry("gem_amethyst", 800),
+            Map.entry("gem_ruby_2", 1500), Map.entry("gem_sapphire_2", 1500), Map.entry("gem_emerald_2", 1800),
+            Map.entry("gem_opal_2", 2100), Map.entry("gem_topaz_2", 2400), Map.entry("gem_amethyst_2", 2400));
 
-    /** 六种宝石：Boss 与精英掉落，存放在 materials 里（code 即宝石 id）。 */
-    public static final Map<String, GemDef> GEMS = Map.of(
-            "gem_ruby", new GemDef("gem_ruby", "红宝石", "🔺", Map.of("PATK", new BigDecimal("60")), "物攻 +60"),
-            "gem_sapphire", new GemDef("gem_sapphire", "蓝宝石", "🔷", Map.of("MATK", new BigDecimal("60")), "魔攻 +60"),
-            "gem_emerald", new GemDef("gem_emerald", "翡翠", "💚", Map.of("maxHP", new BigDecimal("3000")), "生命上限 +3000"),
-            "gem_topaz", new GemDef("gem_topaz", "黄玉", "💛", Map.of("CRIT", new BigDecimal("0.03")), "暴击率 +3%"),
-            "gem_amethyst", new GemDef("gem_amethyst", "紫水晶", "💜", Map.of("ASPD", new BigDecimal("0.12")), "攻速 +0.12"),
-            "gem_opal", new GemDef("gem_opal", "蛋白石", "⚪",
-                    Map.of("PDEF", new BigDecimal("40"), "MDEF", new BigDecimal("40")), "双防各 +40"));
+    /**
+     * 宝石全表（一阶 6 种 + 璀璨二阶 6 种）：一阶由 Boss/词条怪掉落；
+     * 二阶由 3 颗同种一阶融合（属性 ×2.5），code 为一阶 code + "_2"，不进掉落池。
+     */
+    public static final Map<String, GemDef> GEMS = buildGems();
+
+    private static Map<String, GemDef> buildGems() {
+        Map<String, GemDef> m = new java.util.LinkedHashMap<>();
+        m.put("gem_ruby", new GemDef("gem_ruby", "红宝石", "🔺", Map.of("PATK", new BigDecimal("60")), "物攻 +60"));
+        m.put("gem_sapphire", new GemDef("gem_sapphire", "蓝宝石", "🔷", Map.of("MATK", new BigDecimal("60")), "魔攻 +60"));
+        m.put("gem_emerald", new GemDef("gem_emerald", "翡翠", "💚", Map.of("maxHP", new BigDecimal("3000")), "生命上限 +3000"));
+        m.put("gem_topaz", new GemDef("gem_topaz", "黄玉", "💛", Map.of("CRIT", new BigDecimal("0.03")), "暴击率 +3%"));
+        m.put("gem_amethyst", new GemDef("gem_amethyst", "紫水晶", "💜", Map.of("ASPD", new BigDecimal("0.12")), "攻速 +0.12"));
+        m.put("gem_opal", new GemDef("gem_opal", "蛋白石", "⚪",
+                Map.of("PDEF", new BigDecimal("40"), "MDEF", new BigDecimal("40")), "双防各 +40"));
+        for (GemDef t1 : new java.util.ArrayList<>(m.values())) {
+            Map<String, BigDecimal> stats = new java.util.LinkedHashMap<>();
+            t1.stats().forEach((k, v) -> stats.put(k, v.multiply(new BigDecimal("2.5"))));
+            StringBuilder sb = new StringBuilder();
+            stats.forEach((k, v) -> {
+                if (sb.length() > 0) {
+                    sb.append("、");
+                }
+                sb.append(k).append(" +").append(v.stripTrailingZeros().toPlainString());
+            });
+            m.put(t1.id() + "_2", new GemDef(t1.id() + "_2", "璀璨" + t1.name(), "💎", Map.copyOf(stats),
+                    "融合宝石：" + sb));
+        }
+        return java.util.Collections.unmodifiableMap(m);
+    }
+
+    /** 一阶宝石 id 列表（掉落池口径，二阶不进池）。 */
+    public static java.util.List<String> gemTier1Ids() {
+        return GEMS.keySet().stream().filter(id -> !id.endsWith("_2")).toList();
+    }
     public static final int ENHANCE_COST_BASE = 100;
     public static final double ENHANCE_COST_MUL = 1.5;
 
@@ -613,7 +641,13 @@ public final class GameConst {
             Map.entry("gem_emerald", new String[]{"翡翠", "💚"}),
             Map.entry("gem_topaz", new String[]{"黄玉", "💛"}),
             Map.entry("gem_amethyst", new String[]{"紫水晶", "💜"}),
-            Map.entry("gem_opal", new String[]{"蛋白石", "⚪"}));
+            Map.entry("gem_opal", new String[]{"蛋白石", "⚪"}),
+            Map.entry("gem_ruby_2", new String[]{"璀璨红宝石", "💎"}),
+            Map.entry("gem_sapphire_2", new String[]{"璀璨蓝宝石", "💎"}),
+            Map.entry("gem_emerald_2", new String[]{"璀璨翡翠", "💎"}),
+            Map.entry("gem_topaz_2", new String[]{"璀璨黄玉", "💎"}),
+            Map.entry("gem_amethyst_2", new String[]{"璀璨紫水晶", "💎"}),
+            Map.entry("gem_opal_2", new String[]{"璀璨蛋白石", "💎"}));
 
     /** 材料出售单价（第七批，金币/份）：越深的区域材料越值钱；仅区域材料可售（图纸/卷轴不可）。 */
     public static final Map<String, Integer> MAT_SELL_PRICE = Map.of(

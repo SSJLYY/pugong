@@ -364,6 +364,17 @@ public class GameController {
                 s -> game.unsocketGem(s, reqIdx(body.index(), "index"), reqIdx(body.gemIndex(), "gemIndex")));
     }
 
+    public record GemReq(String id) {
+    }
+
+    /** 宝石融合（第八批）：3 颗同种一阶 → 1 颗璀璨二阶。 */
+    @PostMapping("/{slot}/fuse-gem")
+    public Map<String, Object> fuseGem(HttpServletRequest req, @PathVariable int slot,
+                                       @RequestBody GemReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "fuse-gem",
+                s -> game.fuseGem(s, reqStr(body.id(), "id")));
+    }
+
     @PostMapping("/{slot}/reroll")
     public Map<String, Object> reroll(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody RerollReq body) {

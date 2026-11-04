@@ -624,9 +624,9 @@ public final class GameEngine {
     }
 
     /** 战斗日志：追加一条事件，环形保留最近 20 条（旧档 events 为 null 时懒建）。 */
-    /** 随机宝石（第八批）：六种等权。 */
+    /** 随机宝石（第八批）：一阶六种等权（二阶为融合产物，不进掉落池）。 */
     static String randomGem() {
-        java.util.List<String> ids = new java.util.ArrayList<>(GameConst.GEMS.keySet());
+        java.util.List<String> ids = GameConst.gemTier1Ids();
         return ids.isEmpty() ? null : ids.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(ids.size()));
     }
 

@@ -54,6 +54,22 @@ class GemSocketTest {
     }
 
     @Test
+    void fuseThreeIntoTier2() {
+        PlayerState s = withItem();
+        GameService g = new GameService();
+        s.materials.put("gem_ruby", 5);
+        java.util.Map<String, Object> r = g.fuseGem(s, "gem_ruby");
+        assertEquals("gem_ruby_2", r.get("gem"));
+        assertEquals(2, s.materials.get("gem_ruby"));
+        assertEquals(1, s.materials.get("gem_ruby_2"));
+        // 二阶属性 ×2.5：红宝石 60 → 150
+        assertEquals(0, GameConst.GEMS.get("gem_ruby_2").stats().get("PATK")
+                .compareTo(new java.math.BigDecimal("150")));
+        assertThrows(ApiException.class, () -> g.fuseGem(s, "gem_ruby_2"), "二阶不可再融合");
+        assertThrows(ApiException.class, () -> g.fuseGem(s, "gem_ruby"), "不足 3 颗应拒绝");
+    }
+
+    @Test
     void unsocketRefundsForGold() {
         PlayerState s = withItem();
         GameService g = new GameService();

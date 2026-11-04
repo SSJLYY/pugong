@@ -1049,6 +1049,26 @@ public class GameService {
         return m;
     }
 
+    /** 宝石融合（第八批）：3 颗同种一阶 → 1 颗璀璨二阶（属性 ×2.5）。 */
+    public Map<String, Object> fuseGem(PlayerState s, String gemCode) {
+        GameConst.GemDef def = GameConst.GEMS.get(gemCode);
+        if (def == null || gemCode.endsWith("_2")) {
+            throw ApiException.badRequest("只能融合一阶宝石");
+        }
+        int have = s.materials.getOrDefault(gemCode, 0);
+        if (have < 3) {
+            throw ApiException.badRequest("融合需要 3 颗" + def.name() + "（当前 " + have + "）");
+        }
+        s.materials.put(gemCode, have - 3);
+        String t2 = gemCode + "_2";
+        s.materials.merge(t2, 1, Integer::sum);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("gem", t2);
+        m.put("left", have - 3);
+        return m;
+    }
+
     /** 附魔（DESIGN.md §6.2/§8）：消耗卷轴给武器/弓附加魔伤词条（元素亲和被动加成）。 */
     public Map<String, Object> enchant(PlayerState s, String scrollCode, int bagIdx) {
         Object[] scroll = GameConst.SCROLLS.get(scrollCode);

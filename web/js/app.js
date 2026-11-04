@@ -2516,6 +2516,10 @@
     if ((view.bossKills || []).length >= 6) out.push(['👑', '屠龙者', '全区域 Boss 首杀']);
     if (view.talent) out.push(['✨', '觉醒者', '觉醒天赋']);
     if ((view.blessings && Object.keys(view.blessings).length) >= 5) out.push(['🧿', '多线修行', '5 条赋能同修']);
+    // 第八批新称号：宝石/周常/星界三条线
+    if (Number(st.gemsSocketed || 0) >= 10) out.push(['💎', '宝石大师', '累计镶嵌宝石 ≥ 10']);
+    if (Number(st.weeklyClaims || 0) >= 3) out.push(['🗓️', '周常勤勉', '完成一整周周常全清']);
+    if ((view.bossKills || []).includes('boss_star')) out.push(['🌌', '星界行者', '击杀星核主宰']);
     return out;
   }
 
@@ -2527,7 +2531,9 @@
     const st = view.stats || {};
     const sig = JSON.stringify([view.gen, st.bestMaxHP, st.kills, st.deaths,
       (view.bossKills || []).length, view.talent,
-      view.blessings ? Object.keys(view.blessings).length : 0]);
+      view.blessings ? Object.keys(view.blessings).length : 0,
+      st.gemsSocketed || 0, st.weeklyClaims || 0,
+      (view.bossKills || []).includes('boss_star')]);
     if (sig === renderTitles._sig) return;
     renderTitles._sig = sig;
     const list = computeTitles(view);

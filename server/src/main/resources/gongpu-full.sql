@@ -1176,6 +1176,12 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('armor_pierce', '破甲专精', '🏹', 'passive', 450, 0, 0, 0, '{"effect":"armor_pierce","ignore":0.2}', '攻击无视目标 20% 的物防与魔防', 1, 28);
 
+-- 第八批第 83 轮：新被动宝石嗅觉
+DELETE FROM `cfg_skill` WHERE `code` IN ('gem_sniffer');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('gem_sniffer', '宝石嗅觉', '👃', 'passive', 420, 0, 0, 0, '{"effect":"gem_sniffer","mul":1.5}', '词条怪的宝石掉率 +50%（10%→15%）', 1, 30);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第七批 100 轮收官口径）：
 --   cfg_equipment_template 58 / cfg_item 药剂 36 / cfg_affix 24

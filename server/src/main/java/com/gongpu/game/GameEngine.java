@@ -608,7 +608,7 @@ public final class GameEngine {
             s.materials.merge(scroll, 1, Integer::sum);
         }
         // 宝石掉落（第八批）：Boss 必掉 1 颗随机宝石、词条怪 10%——宝石是镶嵌系统的唯一产出源
-        if (m.boss || (m.trait != null && Math.random() < GameConst.GEM_TRAIT_DROP_RATE)) {
+        if (m.boss || (m.trait != null && Math.random() < gemDropRate(s))) {
             String gem = randomGem();
             if (gem != null) {
                 s.materials.merge(gem, 1, Integer::sum);
@@ -992,6 +992,15 @@ public final class GameEngine {
             chance += GameConst.MAT_SENSE_BONUS;
         }
         return chance;
+    }
+
+    /** 词条怪宝石掉率（第八批）：基础 10%；被动·宝石嗅觉 ×1.5（受沉默压制）。 */
+    static double gemDropRate(PlayerState s) {
+        double rate = GameConst.GEM_TRAIT_DROP_RATE;
+        if (s.passives.contains("gem_sniffer") && !PanelCalculator.isSilenced(s)) {
+            rate *= GameConst.GEM_SNIFFER_MUL;
+        }
+        return rate;
     }
 
     static double dropLuckMul(PlayerState s) {

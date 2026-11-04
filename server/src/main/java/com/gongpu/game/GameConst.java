@@ -381,7 +381,8 @@ public final class GameConst {
             Map.entry("material_sense", new PassiveDef("material_sense", "材料嗅觉", "👃", "击杀材料掉率 +25 个百分点（50%→75%），锻造党的鼻子")),
             Map.entry("bloodrage", new PassiveDef("bloodrage", "血怒", "🩸", "生命低于 30% 时物理与魔法攻击 +15%，越残越怒")),
             Map.entry("executioner", new PassiveDef("executioner", "处决者", "🪓", "Boss 生命低于 30% 时对其伤害 +25%，斩尽杀绝")),
-            Map.entry("armor_pierce", new PassiveDef("armor_pierce", "破甲专精", "🏹", "攻击无视目标 20% 的物防与魔防，厚甲在你面前如薄纸")));
+            Map.entry("armor_pierce", new PassiveDef("armor_pierce", "破甲专精", "🏹", "攻击无视目标 20% 的物防与魔防，厚甲在你面前如薄纸")),
+            Map.entry("gem_sniffer", new PassiveDef("gem_sniffer", "宝石嗅觉", "👃", "词条怪的宝石掉率 +50%（10%→15%），宝石党的鼻子")));
 
     public static final double COMBO_CHANCE = 0.15;
 
@@ -551,6 +552,8 @@ public final class GameConst {
     public static final int GEM_SOCKET_MAX = 3;
     /** 词条怪掉落宝石概率（Boss 必掉，见 GameEngine 击杀漏斗）。 */
     public static final double GEM_TRAIT_DROP_RATE = 0.10;
+    /** 被动·宝石嗅觉（第八批）：词条怪宝石掉率倍率。 */
+    public static final double GEM_SNIFFER_MUL = 1.5;
     /** 宝石出售单价（第八批，金币/颗）：率型宝石（暴击/攻速）最贵；二阶为一阶 ×3。 */
     public static final Map<String, Integer> GEM_SELL_PRICE = Map.ofEntries(
             Map.entry("gem_ruby", 500), Map.entry("gem_sapphire", 500), Map.entry("gem_emerald", 600),

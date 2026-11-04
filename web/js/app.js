@@ -1500,12 +1500,36 @@
     document.body.appendChild(mask);
   }
 
-  // 战斗日志：最近 6 条大事倒序（签名守卫，无变化不重建）
+  // 战斗日志：最近 6 条大事倒序（签名守卫，无变化不重建）；第八批加分类过滤筹码
+  let eventFilter = 'all';
+  function evKind(e) {
+    if (/Boss|👑|狂怒|二阶段/.test(e)) return 'boss';
+    if (/掉|图纸|宝石|获得|爆出/.test(e)) return 'loot';
+    return 'sys';
+  }
   function renderEvents(view) {
     const box = $('eventLog');
     if (!box) return;
-    const evs = view.events || [];
-    const sig = evs.join('|');
+    // 过滤筹码只建一次，挂在日志上方
+    if (!$('evFilterBar')) {
+      const bar = document.createElement('div');
+      bar.id = 'evFilterBar';
+      bar.className = 'ev-filter-bar';
+      bar.innerHTML = [['all', '全部'], ['boss', '👑 Boss'], ['loot', '🎁 掉落'], ['sys', '📌 系统']]
+        .map(([v, n]) => '<button class="bf-chip" data-ev-f="' + v + '">' + n + '</button>').join('');
+      bar.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-ev-f]');
+        if (!b) return;
+        eventFilter = b.dataset.evF;
+        renderEvents._sig = null;
+        if (S.view) renderEvents(S.view);
+      });
+      box.parentNode.insertBefore(bar, box);
+    }
+    document.querySelectorAll('#evFilterBar .bf-chip').forEach(c =>
+      c.classList.toggle('on', c.dataset.evF === eventFilter));
+    const evs = (view.events || []).filter(e => eventFilter === 'all' || evKind(e) === eventFilter);
+    const sig = eventFilter + '|' + evs.join('|');
     if (sig === renderEvents._sig) return;
     renderEvents._sig = sig;
     box.innerHTML = evs.length

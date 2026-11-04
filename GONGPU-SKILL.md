@@ -118,7 +118,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 - 改数值三选一：运维端页面改（推荐）/ 直接 UPDATE cfg_* 表后 POST /api/admin/config/reload / 重启服务
 - 所有运维操作落 admin_audit_log 审计表
 
-## 7. 玩法系统速查（持续更新至 2026-11-03 第七批）
+## 7. 玩法系统速查（持续更新至 2026-11-04 第八批）
 
 | 系统 | 位置 | 要点 |
 |---|---|---|
@@ -163,6 +163,16 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | 装备淬炼（第七批） | POST /{slot}/temper {index} | Item.temper 0–5，底子乘区 ×(1+4%/级) 与强化分层（BULLET_MP 排除），equipScore 同乘；成本 = Item.zone 区域材料 2×(级+1) + 金币 300×(级+1)×(品质+1)，锁定件可淬炼 |
 | 洗炼保底/双锁（第七批） | PlayerState.rerollPity + POST /{slot}/reroll | 连 9 次未出史诗第 10 次强制（rerollAffixes forceEpic，锁定位不换）；双锁需 ≥3 条词条、成本 ×1/×3/×5；响应带 pity/pityTriggered |
 | 深渊裂隙（第七批） | zone abyss（ZONES 末位） | 门槛 maxHP 200 万/双防 150/ATK 4000；4 怪 + Boss 无光君王（30M）；材料 abyss_crystal；深度 7 词条率 28%、全 14 词条池；autoAdvance 链尾自动到达（nextZoneId 按序） |
+| 宝石镶嵌（第八批） | GameConst.GEMS + POST /{slot}/socket·unsocket·fuse-gem | 12 种（一阶 6：物攻/魔攻/生命/暴击/攻速/双防 flat；二阶 = 一阶 ×2.5、code 后缀 _2）；Item.gems 每件 3 孔，flat 并入装备区（沉默不压制，天赋宝石亲和再 ×1.25）；掉落：Boss 必掉、词条怪 10%（宝石嗅觉被动 ×1.5）；融合 3 颗同种一阶 → 二阶；出售 500–800/二阶 ×3、直购 = 售价 ×4（仅一阶） |
+| 周常任务（第八批） | WeeklyQuests + POST /{slot}/weekly-claim | ISO 周键（2026-W45 式）签发，5 模板（猎杀/Boss/锻造/出拳/总伤害）抽 3、基线口径复用 DailyQuests.counterOf；全清 +50,000 金 + 随机宝石 ×2；ensure 在 runLocked 落库前（与每日同纪律），fullView.weeklyTasks 下发 |
+| 星界（第八批） | zone star（ZONES 末位，序 8） | 门槛 maxHP 2000 万/双防 400/ATK 12000；4 怪 + Boss 星核主宰（3 亿）；材料 star_shard 售 650；词条率 31%、专属池 17 条（含星蚀）；装备 6+2 件 tier 4、星辰套装（第 7 套）、委托/配方各 +2、图鉴总数 28 |
+| 怪物词条·星蚀（第八批） | GameConst.MOB_TRAITS star_eclipse + GameEngine.effCritD | 🌑 暴伤超额部分（CRITD−1）减半，dealDamage 与 expectedPerHit 同口径；仅星界池（traitPool(8)），其余池不含；击杀计数 Stats.eclipseKills |
+| 怪物词条·再生/坚韧（第八批） | GameEngine advance 主流程 / effCrit | 🌿 再生：怪每秒回上限 3%（结算点在怪物反击之前，不放 mobAttack）；🪨 坚韧：暴击率减半（effCrit 单点），仅最深池（序 ≥5 的 else 池与星界池） |
+| 商店三件（第八批） | POST /{slot}/buy-material·buy-gem + sell-material 扩 | 材料买入 = 售价 ×3（仅区域材料、单次 ≤999）；宝石直购 = 售价 ×4（仅一阶）；图纸出售 = 300 + 产物区域深度 ×250（查不到配方不予定价）；全部买贵卖贱防套利，EconomyLinkageTest 锁 |
+| 一键穿套装（第八批） | POST /{slot}/equip-set {id} | 按成员 code 从背包挑评分最高件逐件走 equip 换装，已穿跳过、缺件回执列明；前端套装图鉴弹窗每套一钮 |
+| 成就里程碑（第八批） | GameService.settleAchMilestone | 累计已领成就达 15/30/45/60 项一次性奖金 1万/3万/8万/20万，Stats.achMilestonePaid 掩码防重发；单领与一键全领都结算，回执 milestoneBonus |
+| health 观测（第八批） | GET /api/health | 在 perf/content 之外加 cache（StateCache 命中/未命中/写入/命中率）、frames（advance 帧数/平均/慢帧 ≥50ms/最大）、save（存档 JSON 字节最近/平均/最大 + 带备份环存档数，计数与探活共用同一连接） |
+| 写端点限流（第八批） | GameController.checkWriteRate | 账号级滑动窗口 10 秒 60 次写动作，超限 429；纯轮询（action==null 的 GET /state）不计；检查在 saves.load 之前 |
 | 每日任务（第七批） | DailyQuests + POST /{slot}/daily-claim | 7 模板每日抽 3、随机档位；进度 = 终身计数 − 签发基线（DailyTask.baseline 字符串存大数），跨世保留；三任务全领全清奖 +5000（dailyBonusGiven 日切重置） |
 | 每日黑市（第七批） | BlackMarket + POST /{slot}/market-buy | 16 种增益药池每日抽 3、折扣 30–50%、单品限购 5（marketBought 日切清零）；种子 = 日期 hash×31 + born，同日同号同单；购买不写 potionBought 不影响商店阶梯价 |
 | 材料出售/补给包（第七批） | POST /{slot}/sell-material、/{slot}/buyfill-kit | MAT_SELL_PRICE 仅七种区域材料（图纸/卷轴不可卖），count≤0 全卖、超量封顶；补给包 = hp_s 10/mp 5/cure 3/food 3 走 buyFill 同口径、单件失败不拖垮整包 |

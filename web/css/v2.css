@@ -1205,6 +1205,14 @@ body.theme-ink .stat-hover-card.statlord table.stats tr[data-stat]:hover{
   border-color:#9e2b25;background:rgba(158,43,37,.08);
 }
 
+/* 水墨主题·移动端居中卡适配（第九批） */
+@media (max-width: 900px){
+  body.theme-ink .game-shell{padding:6px;margin:0 4px 10px;border-radius:10px}
+  body.theme-ink .topbar{margin:6px 4px;border-radius:10px}
+  body.theme-ink .stat-hover-card table.stats tr{padding:2px 8px}
+  .story-line{font-size:12.5px}
+}
+
 /* 移动端布局打磨（第七批） */
 @media (max-width: 768px){
   .topbar{flex-wrap:wrap;row-gap:6px}

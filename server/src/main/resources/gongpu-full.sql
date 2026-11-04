@@ -1145,6 +1145,16 @@ INSERT INTO `cfg_craft`
   (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
   ('c_quasar_ring', '类星指环铸造', '📐', 'quasar_ring', '{"star_shard":4,"mana_dust":8}', 10000, 1, 1, 31);
 
+-- 第八批第 85 轮：星界配方补强 ×2（兜鍪/重铠）
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_nebula_helm');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_nebula_helm', '星云兜鍪铸造', '📐', 'nebula_helm', '{"star_shard":5,"mana_dust":6}', 11000, 1, 1, 32);
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_galaxy_plate');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_galaxy_plate', '银河重铠铸造', '📐', 'galaxy_plate', '{"star_shard":7,"abyss_crystal":3}', 13000, 1, 1, 33);
+
 -- 第八批第 22 轮：星界毕业装 ×6（tier 4，min_zone=star，底子约为深渊装 2.2 倍）
 DELETE FROM `cfg_equipment_template` WHERE `code` IN ('star_blade','comet_bow','nebula_helm','galaxy_plate','meteor_greaves','quasar_ring');
 INSERT INTO `cfg_equipment_template`

@@ -198,7 +198,7 @@ public final class GameConst {
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
-            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star");
+            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star", "void");
 
     /**
      * 出生掷词条：村口不出；平原 10% 起、每深一层 +3%。
@@ -334,6 +334,22 @@ public final class GameConst {
                                 "以星辰为食的巨兽，魔焰滔天射程极远", List.of())),
                 mob("boss_star", "星核主宰·噬光之心", "🌌", "300000000", "3800", "4500", "750", "750", 1.2, 5, 100, 200000,
                         "群星回廊的尽头，它的心跳即是星辰的熄灭", List.of())));
+
+        // 虚空界（第九批）：星界之外的无——没有光、没有声、没有回响的终局之外
+        m.put("void", new ZoneDef("void", "虚空界", "🌀", false,
+                "建议生命 ≥ 2亿 / 双防 ≥ 1200 / 攻击 ≥ 40000（无光无声之境）",
+                Map.of("maxHP", "200000000", "PDEF", "1200", "MDEF", "1200", "ATK", "40000"),
+                List.of(
+                        mob("void_mote", "虚空尘埃", "🌑", "120000000", "900", "2600", "300", "900", 1.1, 6, 100, 12000,
+                                "虚空里漂浮的残渣，魔光无声，掉落虚空碎片", List.of()),
+                        mob("void_reaper", "虚空收割者", "💀", "200000000", "5200", "0", "800", "420", 1.5, 2, 148, 16000,
+                                "镰刀过处，连影子都被收割", List.of()),
+                        mob("void_eye", "虚空之眼", "👁️", "320000000", "3600", "2900", "1150", "1150", 0.8, 3, 88, 22000,
+                                "双防如事件视界，被它注视即被看穿", List.of()),
+                        mob("void_leviathan", "虚空利维坦", "🐋", "480000000", "2900", "5600", "650", "1350", 1.0, 7, 92, 30000,
+                                "以虚空本身为食的巨兽，魔焰无声滔天", List.of())),
+                mob("boss_void", "虚空之主·无相天魔", "🌀", "3000000000", "8200", "9600", "1600", "1600", 1.2, 5, 100, 2000000,
+                        "它没有形体、没有名字、没有过去——只有你出拳的回响是它存在的证明", List.of())));
 
         return java.util.Collections.unmodifiableMap(m);
     }

@@ -77,6 +77,8 @@ public final class Achievements {
             new Def("flurry_500", "连环如雨", "🤲", "连环掌累计追加命中 500 次"),
             new Def("star_first", "星瞳初开", "🌌", "首次击杀星界的怪物"),
             new Def("star_lord", "群星主宰", "👑", "击杀星核主宰·噬光之心"),
+            new Def("void_first", "虚空初临", "🌀", "首次击杀虚空界的怪物"),
+            new Def("void_lord", "无相之主", "👑", "击杀虚空之主·无相天魔"),
             new Def("weekly_1", "周常初成", "🗓️", "领取 3 个周常任务奖励（整整一周全清）"),
             new Def("weekly_8", "周常老兵", "🎖️", "累计领取 24 个周常任务奖励（八周全清）"),
             new Def("gem_collector", "宝石收藏家", "💠", "累计直购 10 颗宝石"),
@@ -103,7 +105,7 @@ public final class Achievements {
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
                     "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
-                    "kill_100k", "gold_100m", "craft_200", "gen_30" -> 5_000L;
+                    "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord" -> 5_000L;
             default -> 500L;
         };
     }
@@ -143,6 +145,20 @@ public final class Achievements {
         }
         int n = 0;
         for (String id : new String[]{"star_sprite", "void_walker", "star_guard", "star_eater"}) {
+            if (s.codex.contains(id)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /** 虚空界图鉴命中数（第九批，void_first 成就口径）。 */
+    static int voidCodexHits(PlayerState s) {
+        if (s.codex == null) {
+            return 0;
+        }
+        int n = 0;
+        for (String id : new String[]{"void_mote", "void_reaper", "void_eye", "void_leviathan"}) {
             if (s.codex.contains(id)) {
                 n++;
             }
@@ -236,6 +252,8 @@ public final class Achievements {
             case "abyss_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_abyss") ? 1 : 0, 1};
             case "star_first" -> new long[]{starCodexHits(s), 1};
             case "star_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_star") ? 1 : 0, 1};
+            case "void_first" -> new long[]{voidCodexHits(s), 1};
+            case "void_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_void") ? 1 : 0, 1};
             case "weekly_1" -> new long[]{s.stats.weeklyClaims, 3};
             case "weekly_8" -> new long[]{s.stats.weeklyClaims, 24};
             case "gem_collector" -> new long[]{s.stats.gemsBought, 10};
@@ -337,6 +355,8 @@ public final class Achievements {
                 case "abyss_lord" -> s.bossKills != null && s.bossKills.contains("boss_abyss");
                 case "star_first" -> starCodexHits(s) >= 1;
                 case "star_lord" -> s.bossKills != null && s.bossKills.contains("boss_star");
+                case "void_first" -> voidCodexHits(s) >= 1;
+                case "void_lord" -> s.bossKills != null && s.bossKills.contains("boss_void");
                 case "weekly_1" -> s.stats.weeklyClaims >= 3;
                 case "weekly_8" -> s.stats.weeklyClaims >= 24;
                 case "gem_collector" -> s.stats.gemsBought >= 10;

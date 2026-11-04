@@ -21,7 +21,7 @@ class Batch8ParityTest {
         assertEquals(30, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 30");
         assertEquals(17, GameConst.MOB_TRAITS.size(), "怪物词条 17");
         assertEquals(11, GameConst.TALENTS.size(), "天赋 11");
-        assertEquals(68, Achievements.ALL.size(), "成就 68");
+        assertEquals(70, Achievements.ALL.size(), "成就 70");
         assertEquals(7, Sets.ALL.size(), "套装 7");
         String sql = Files.readString(Path.of("src/main/resources/gongpu-full.sql"));
         for (String code : new String[]{

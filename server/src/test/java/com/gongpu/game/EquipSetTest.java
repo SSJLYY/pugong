@@ -60,4 +60,18 @@ class EquipSetTest {
         assertTrue(s.equipped.get("weapon") == worn, "已穿件不应被换下");
         assertThrows(ApiException.class, () -> g.equipSet(s, "nope"), "未知套装应拒绝");
     }
+
+
+    @Test
+    void voidSetEquipsAndMissingReported() {
+        PlayerState s = NewState.create();
+        GameService g = new GameService();
+        s.equipBag.add(item("void_blade", "weapon", 3));
+        s.equipBag.add(item("void_hood", "head", 3));
+        Map<String, Object> r = g.equipSet(s, "voidset");
+        assertEquals(2, r.get("equipped"));
+        assertEquals(java.util.List.of("void_robe", "void_treads"), r.get("missing"));
+        // 无相 2 件档：双攻 +220
+        assertEquals(0, new java.math.BigDecimal("220").compareTo(Sets.activeBonus(s).get("PATK")));
+    }
 }

@@ -1769,6 +1769,9 @@ public class GameService {
         WeeklyQuests.ensure(s);
         m.put("dailyTasks", DailyQuests.viewOf(s));
         m.put("weeklyTasks", WeeklyQuests.viewOf(s));
+        // 连环掌剩余次数（第八批收官实测修复）：此前误挂在 setAutoLines 回执上，
+        // fullView 没有——前端 buff 条的 🤲 计数芯片永远读不到（与第七批 dailyTasks 同类事故）
+        m.put("flurryHits", s.flurryHits);
         m.put("blackMarket", BlackMarket.viewOf(s));
         m.put("rerollPity", s.rerollPity);
         // v3.13 背包截断防复发:此前全量下发 3.3 万件=13.9MB JSON,前端每秒解析+渲染

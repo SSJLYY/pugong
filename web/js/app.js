@@ -1021,13 +1021,26 @@
     return String(Math.round(n * 100000) / 100000);
   }
 
+  // 区域收益预览（第八批）：材料与售价镜像后端 MAT_INFO/MAT_SELL_PRICE，悬浮在区域按钮上看
+  const ZONE_LOOT = {
+    plain: '🟫 兽皮（售 20）', forest: '🦷 狼牙（售 35）', mine: '⛏️ 矿石（售 60）',
+    swamp: '🟢 毒腺（售 90）', snow: '✨ 魔尘（售 140）', volcano: '🔥 火晶（售 220）',
+    abyss: '🕳️ 深渊结晶（售 400）', star: '🌟 星核碎片（售 650）'
+  };
+
   function renderZoneButtons() {
     const box = $('zoneBtns');
     box.innerHTML = '';
-    S.meta.zones.forEach(z => {
+    S.meta.zones.forEach((z, zi) => {
       const b = document.createElement('button');
       b.className = 'zone-btn';
       b.dataset.zone = z.id;
+      const loot = ZONE_LOOT[z.id];
+      if (loot) {
+        // 词条率与后端同公式：平原 10% 起、每深一层 +3%（深度 = 序号−1）
+        const rate = Math.round((0.10 + Math.max(0, zi - 1) * 0.03) * 100);
+        b.title = '区域材料：' + loot + ' · 词条怪概率约 ' + rate + '% · Boss 必掉宝石';
+      }
       b.innerHTML = z.emoji + ' ' + z.name +
         (ZONE_REQ_TEXT[z.id] ? '<span class="req">' + ZONE_REQ_TEXT[z.id] + '</span>' : '');
       b.addEventListener('click', async () => {

@@ -84,6 +84,9 @@ public final class PanelCalculator {
         // 狂怒药剂（第七批）：复合暴击——暴击率与暴伤同补，与锐眼/残暴可叠加
         BigDecimal rageCrit = (active(s, "rage_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal rageCritd = (active(s, "rage_pot") && !silenced) ? Num.of(0.30) : Num.ZERO;
+        // 虚空精华（第九批）：暴伤 +30%（与狂怒同加区）
+        BigDecimal voidCritd = (active(s, "void_pot") && !silenced) ? Num.of(0.30) : Num.ZERO;
+        BigDecimal voidAcc = (active(s, "void_pot") && !silenced) ? Num.of(0.05) : Num.ZERO;
         // 时之砂（第七批）：平直攻速加算（进乘区之前，与词条平直攻速同口径）
         BigDecimal sandAspd = (active(s, "sand_pot") && !silenced) ? Num.of(0.2) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -206,9 +209,9 @@ public final class PanelCalculator {
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),
                 Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit)),
-                Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd),
+                Num.add(Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd), voidCritd),
                 Num.min(GameConst.BLESS_CAP.get("ACC"),
-                        Num.add(Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot), focusPot)),
+                        Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot), focusPot), voidAcc)),
                 Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot)),
                 Num.add(Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot), bloodlustBuff),
                 // 枪械：纯魔法弹每发耗蓝标记（BULLET_MP，来自武器 base_stats；非枪/物理弹武器为 0）

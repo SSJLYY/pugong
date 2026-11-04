@@ -1235,6 +1235,16 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('pet_bond', '宠物亲和', '🐾', 'passive', 500, 0, 0, 0, '{"effect":"pet_bond","mul":1.3}', '出战宠物的面板加成 +30%', 1, 32);
 
+-- 第九批第 25 轮：新药剂虚空精华
+DELETE FROM `cfg_item` WHERE `code` IN ('void');
+INSERT INTO `cfg_item`
+  (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('void', '虚空精华', '🌀', 'potion', 900, '{"buff":"void_pot","buffVal":0.30,"buffDur":60}', '60s 内暴击伤害 +30%、命中 +5%', 1, 57);
+DELETE FROM `cfg_buff` WHERE `code` IN ('void_pot');
+INSERT INTO `cfg_buff`
+  (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('void_pot', '虚空精华', '🌀', 'good', 'passive', '{"critdAdd":0.30,"accAdd":0.05}', '60s 内暴击伤害 +30%、命中 +5%', 1, 57);
+
 -- 第九批第 23 轮：新主动虚空斩
 DELETE FROM `cfg_skill` WHERE `code` IN ('void_slash');
 INSERT INTO `cfg_skill`

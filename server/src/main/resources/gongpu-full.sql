@@ -1256,11 +1256,11 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('void_dust', '虚空拾尘', '🧹', '虚空尘埃里藏着凝固的星光：于虚空界猎杀八十只魔物', 'void', '{"maxHP":200000000,"ATK":40000}', 80, 600000, 'stardust', 3, 1, 1, 26);
 
--- 第九批第 83 轮：新被动点金手
+-- 第九批第 83 轮：新被动招财手（原名点金手与天赋重名，第 89 轮订正）
 DELETE FROM `cfg_skill` WHERE `code` IN ('goldtouch');
 INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
-  ('goldtouch', '点金手', '🪙', 'passive', 800, 0, 0, 0, '{"effect":"goldtouch","mul":1.15}', '击杀金币 +15%', 1, 33);
+  ('goldtouch', '招财手', '🪙', 'passive', 800, 0, 0, 0, '{"effect":"goldtouch","mul":1.15}', '击杀金币 +15%', 1, 33);
 
 -- 第九批第 24 轮：新被动宠物亲和
 DELETE FROM `cfg_skill` WHERE `code` IN ('pet_bond');

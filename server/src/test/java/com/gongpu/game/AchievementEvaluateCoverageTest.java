@@ -31,6 +31,6 @@ class AchievementEvaluateCoverageTest {
         if (!missing.isEmpty()) {
             fail("以下成就在 evaluate 中无判定分支（永不解锁）: " + missing);
         }
-        assertTrue(Achievements.ALL.size() >= 80);
+        assertTrue(Achievements.ALL.size() >= 82);
     }
 }

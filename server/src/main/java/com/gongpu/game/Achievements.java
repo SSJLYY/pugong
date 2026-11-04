@@ -78,6 +78,8 @@ public final class Achievements {
             new Def("pet_feed_100", "喂食达人", "🐾", "累计喂食宠物 100 次"),
             new Def("punch_100m", "拳倾天下", "☄️", "累计出拳 1 亿次"),
             new Def("merchant_500k", "材料大亨", "💰", "卖材料累计收入 500,000 金币"),
+            new Def("greed_learn", "招财之道", "🪙", "学会被动「招财手」"),
+            new Def("burn_50", "燃血克星", "🩸", "击杀 50 只带「燃血」词条的怪物"),
             new Def("drain_10", "噬能克星", "🔋", "击杀 10 只带「噬能」词条的怪物"),
             new Def("rend_10", "裂空克星", "✴️", "击杀 10 只带「裂空」词条的怪物"),
             new Def("monthly_1", "月令初成", "📆", "领满一整月月常任务（累计领取 3 个）"),
@@ -113,7 +115,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5", "pet_all", "pet_feed_100" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5", "pet_all", "pet_feed_100", "burn_50" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
                     "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord", "monthly_6", "pet_50", "punch_100m", "merchant_500k" -> 5_000L;
             default -> 500L;
@@ -230,6 +232,8 @@ public final class Achievements {
             case "punch_1m" -> new long[]{sat(s.stats.lifetimePunches), 1_000_000};
             case "punch_100m" -> new long[]{sat(s.stats.lifetimePunches), 100_000_000};
             case "merchant_500k" -> new long[]{s.stats.matSoldGold, 500_000};
+            case "greed_learn" -> new long[]{s.passives.contains("goldtouch") ? 1 : 0, 1};
+            case "burn_50" -> new long[]{s.stats.burnKills, 50};
             case "kill_100k" -> new long[]{sat(s.stats.lifetimeKills), 100_000};
             case "gold_100m" -> new long[]{sat(s.gold), 100_000_000};
             case "kill_100" -> new long[]{sat(s.stats.kills), 100};
@@ -332,6 +336,8 @@ public final class Achievements {
                 case "punch_1m" -> punches >= 1_000_000;
                 case "punch_100m" -> punches >= 100_000_000;
                 case "merchant_500k" -> s.stats.matSoldGold >= 500_000;
+                case "greed_learn" -> s.passives.contains("goldtouch");
+                case "burn_50" -> s.stats.burnKills >= 50;
                 case "first_kill" -> kills >= 1;
                 case "kill_100" -> kills >= 100;
                 case "hp_5000" -> maxHp >= 5_000;

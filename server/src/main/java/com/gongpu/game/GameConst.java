@@ -423,7 +423,7 @@ public final class GameConst {
             Map.entry("armor_pierce", new PassiveDef("armor_pierce", "破甲专精", "🏹", "攻击无视目标 20% 的物防与魔防，厚甲在你面前如薄纸")),
             Map.entry("gem_sniffer", new PassiveDef("gem_sniffer", "宝石嗅觉", "👃", "词条怪的宝石掉率 +50%（10%→15%），宝石党的鼻子")),
             Map.entry("pet_bond", new PassiveDef("pet_bond", "宠物亲和", "🐾", "出战宠物的面板加成 +30%（与宠物心意相通，被沉默压制）")),
-            Map.entry("goldtouch", new PassiveDef("goldtouch", "点金手", "🪙", "击杀金币 +15%（点石成金，经济类增益不受沉默影响）")));
+            Map.entry("goldtouch", new PassiveDef("goldtouch", "招财手", "🪙", "击杀金币 +15%（招财进宝，经济类增益不受沉默影响）")));
 
     /** 被动「宠物亲和」（第九批）：宠物面板加成乘区。 */
     public static final double PET_BOND_MUL = 1.3;

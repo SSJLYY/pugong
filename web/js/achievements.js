@@ -67,6 +67,8 @@
     { id: 'pet_feed_100', name: '喂食达人', emoji: '🐾', desc: '累计喂食宠物 100 次' },
     { id: 'punch_100m', name: '拳倾天下', emoji: '☄️', desc: '累计出拳 1 亿次' },
     { id: 'merchant_500k', name: '材料大亨', emoji: '💰', desc: '卖材料累计收入 500,000 金币' },
+    { id: 'greed_learn', name: '招财之道', emoji: '🪙', desc: '学会被动「招财手」' },
+    { id: 'burn_50', name: '燃血克星', emoji: '🩸', desc: '击杀 50 只带「燃血」词条的怪物' },
     { id: 'drain_10', name: '噬能克星', emoji: '🔋', desc: '击杀 10 只带「噬能」词条的怪物' },
     { id: 'rend_10', name: '裂空克星', emoji: '✴️', desc: '击杀 10 只带「裂空」词条的怪物' },
     { id: 'monthly_1', name: '月令初成', emoji: '📆', desc: '领满一整月月常任务（累计领取 3 个）' },

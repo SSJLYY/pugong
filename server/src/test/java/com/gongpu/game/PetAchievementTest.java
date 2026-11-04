@@ -39,11 +39,11 @@ class PetAchievementTest {
             }
         }
         assertTrue(Achievements.evaluate(s).contains("pet_all"), "集齐应解锁 pet_all");
-        assertArrayEquals(new long[]{8, 8}, Achievements.progressOf(s, "pet_all"));
+        assertArrayEquals(new long[]{9, 9}, Achievements.progressOf(s, "pet_all"));
     }
 
     @Test
     void countsNow68() {
-        assertEquals(98, Achievements.ALL.size());
+        assertEquals(113, Achievements.ALL.size());
     }
 }

@@ -141,6 +141,11 @@ public final class StateCodec {
         if (s.petNames == null) {
             s.petNames = new java.util.LinkedHashMap<>();
         }
+        // 进化集合兜底（第十一批）：null 重建，只保留图鉴内且已领养的宠物
+        if (s.petEvolved == null) {
+            s.petEvolved = new java.util.LinkedHashSet<>();
+        }
+        s.petEvolved.removeIf(id -> !GameConst.PETS.containsKey(id) || !s.petsOwned.contains(id));
         if (s.monthlyTasks == null) {
             s.monthlyTasks = new java.util.ArrayList<>();
         }
@@ -161,11 +166,13 @@ public final class StateCodec {
         for (PlayerState.Item it : s.equipped.values()) {
             if (it != null) {
                 it.star = Math.max(0, Math.min(GameConst.STAR_MAX_LV, it.star));
+                it.awaken = Math.max(0, Math.min(GameConst.AWAKEN_MAX_LV, it.awaken));
             }
         }
         for (PlayerState.Item it : s.equipBag) {
             if (it != null) {
                 it.star = Math.max(0, Math.min(GameConst.STAR_MAX_LV, it.star));
+                it.awaken = Math.max(0, Math.min(GameConst.AWAKEN_MAX_LV, it.awaken));
             }
         }
         convertLegacyPctAffixes(s);

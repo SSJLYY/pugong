@@ -26,7 +26,7 @@ class AchievementMilestoneTest {
     @Test
     void totalIs28() {
         // 28 = 第五批口径；第六批 +6；第七批 +2（套装）+2（淬炼/洗炼）+2（深渊）
-        assertEquals(98, Achievements.ALL.size());
+        assertEquals(113, Achievements.ALL.size());
     }
 
     @Test

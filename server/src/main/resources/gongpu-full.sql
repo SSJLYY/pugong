@@ -1406,6 +1406,48 @@ INSERT INTO `cfg_craft`
   ('c_chaos_blade', '混沌之刃铸造', '📐', 'chaos_blade', '{"chaos_core":5,"void_shard":3}', 50000, 1, 1, 38),
   ('c_chaos_ring', '混沌指环铸造', '📐', 'chaos_ring', '{"chaos_core":5,"star_shard":4}', 48000, 1, 1, 39);
 
+-- 第十一批第 23 轮：新主动万剑归宗 + 新被动鸿蒙体
+DELETE FROM `cfg_skill` WHERE `code` IN ('sword_rain','hongmeng_body');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('sword_rain', '万剑归宗', '🗡️', 'active', 2500, 80, 120, 0, '{"id":"sword_rain"}', '下一击 ×5 伤害（万剑齐发，归于一击）', 1, 36),
+  ('hongmeng_body', '鸿蒙体', '🌌', 'passive', 1500, 0, 0, 0, '{"id":"hongmeng_body"}', '攻速 +0.10（紫气淬体，出手如太初之风）', 1, 37);
+
+-- 第十一批第 25 轮：新药剂鸿蒙灵液
+DELETE FROM `cfg_item` WHERE `code` IN ('hongmeng');
+INSERT INTO `cfg_item`
+  (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('hongmeng', '鸿蒙灵液', '🌌', 'potion', 5000, '{"buff":"hongmeng_pot","buffVal":0.60,"buffDur":60}', '60s 内暴击伤害 +60%、吸血 +6%', 1, 62);
+DELETE FROM `cfg_buff` WHERE `code` IN ('hongmeng_pot');
+INSERT INTO `cfg_buff`
+  (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('hongmeng_pot', '鸿蒙灵液', '🌌', 'good', 'passive', '{"critdAdd":0.60,"lifestealAdd":0.06}', '60s 内暴击伤害 +60%、吸血 +6%', 1, 62);
+
+-- 第十一批第 13 轮：鸿蒙界装备 ×6（tier 4，sort 83-88）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('hongmeng_blade','hongmeng_bow','hongmeng_hood','hongmeng_robe','hongmeng_treads','hongmeng_ring');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('hongmeng_blade', '鸿蒙之刃', '🗡️', 'weapon', 4, 'hongmeng', '{"PATK":"6500","CRITD":"0.35"}', 10, 40000, '开天辟地的第一缕锋芒', 1, 83),
+  ('hongmeng_bow', '鸿蒙长弓', '🏹', 'bow', 4, 'hongmeng', '{"PATK":"5200","RNG":"2","ASPD":"0.25"}', 10, 40000, '弦上搭着尚未诞生的星辰', 1, 84),
+  ('hongmeng_hood', '鸿蒙兜帽', '🎩', 'head', 4, 'hongmeng', '{"maxHP":"260000","PDEF":"1900","MDEF":"2600"}', 10, 34000, '戴上它，你听见太初的心跳', 1, 85),
+  ('hongmeng_robe', '鸿蒙法袍', '🥋', 'chest', 4, 'hongmeng', '{"maxHP":"340000","PDEF":"2400","MDEF":"3000"}', 10, 36000, '以紫气织成的袍，万法不侵', 1, 86),
+  ('hongmeng_treads', '鸿蒙胫甲', '🦿', 'legs', 4, 'hongmeng', '{"maxHP":"200000","PDEF":"2100","SPD":"60"}', 10, 34000, '踏碎虚空，如履太初', 1, 87),
+  ('hongmeng_ring', '鸿蒙指环', '💍', 'ring1', 4, 'hongmeng', '{"MATK":"5800","MREGEN":"110","EVA":"0.04"}', 10, 38000, '指环里封着一整个未开的天地', 1, 88);
+
+-- 第十一批第 14 轮：鸿蒙界委托 ×2
+DELETE FROM `cfg_quest` WHERE `code` IN ('hongmeng_patrol','hongmeng_heart');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('hongmeng_patrol', '鸿蒙巡狩', '🌌', '太初之地凶兽横行：于鸿蒙界猎杀一百只魔物', 'hongmeng', '{"maxHP":50000000000,"ATK":400000}', 100, 6000000, 'chaos_core', 2, 1, 1, 31),
+  ('hongmeng_heart', '鸿蒙之心', '💠', '直面太初的守卫：于鸿蒙界猎杀六十只魔物', 'hongmeng', '{"maxHP":50000000000,"ATK":400000}', 60, 12000000, 'star_shard', 5, 1, 1, 32);
+
+-- 第十一批第 15 轮：鸿蒙装备配方 ×2
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_hongmeng_blade','c_hongmeng_ring');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_hongmeng_blade', '鸿蒙之刃铸造', '📐', 'hongmeng_blade', '{"hongmeng_qi":6,"chaos_core":4}', 500000, 1, 1, 42),
+  ('c_hongmeng_ring', '鸿蒙指环铸造', '📐', 'hongmeng_ring', '{"hongmeng_qi":4,"star_shard":6}', 400000, 1, 1, 43);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-04 第十批 100 轮收官口径）：
 --   cfg_equipment_template 82 / cfg_item 药剂 44 / cfg_affix 30
@@ -1415,4 +1457,44 @@ INSERT INTO `cfg_craft`
 --   宝石 12 种（代码 GameConst.GEMS）/ 图鉴 38（代码 GameConst 口径）/ 宠物 8（代码 GameConst.PETS）
 --   运行时可用 /api/health 的 content 指纹交叉核对：
 --   items=44,affixes=30,equipment=82,skills=36,crafts=30,traits=23,pets=8
+-- ============================================================
+
+-- ---------- 第十一批·集群九：内容扩充七（药剂/词条/被动/委托/配方/装备） ----------
+
+DELETE FROM `cfg_item` WHERE `code` IN ('taixu');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('taixu', '太虚神液', '🕳️', 'potion', 8000, '{"gold":0,"hp":0,"mp":0,"buff":"taixu_pot","buffVal":0.30,"duration":60}', '60s 内暴击率 +10%、暴击伤害 +30%', 1, 63);
+DELETE FROM `cfg_buff` WHERE `code` IN ('taixu_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('taixu_pot', '太虚', '🕳️', 'atk', 'potion', '{"kind":"taixu"}', '太虚神液：暴击率 +10%、暴击伤害 +30%', 1, 46);
+
+DELETE FROM `cfg_affix` WHERE `code` IN ('hongmeng_aff','taichu_aff');
+INSERT INTO `cfg_affix` (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('hongmeng_aff', '鸿蒙', 'MATK', 'flat', 60, 120, 'epic', NULL, NULL, 1, 31),
+  ('taichu_aff', '太初', 'maxHP', 'flat', 20000, 50000, 'epic', NULL, NULL, 1, 32);
+
+DELETE FROM `cfg_skill` WHERE `code` IN ('taixu_sword');
+INSERT INTO `cfg_skill` (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('taixu_sword', '太虚剑意', '🗡️', 'passive', 0, 0, 0, 0, '{"kind":"critd","val":0.20}', '暴击伤害 +20%（剑意自太虚来）', 1, 38);
+
+DELETE FROM `cfg_quest` WHERE `code` IN ('hongmeng_longhunt','hongmeng_deep');
+INSERT INTO `cfg_quest` (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('hongmeng_longhunt', '鸿蒙长猎', '🌌', '在鸿蒙界猎杀 200 只怪物', 'hongmeng', '{"maxHP":50000000000,"ATK":400000}', 200, 9000000, 'hongmeng', 2, 1, 1, 33),
+  ('hongmeng_deep', '深入太虚', '🕳️', '在鸿蒙界猎杀 150 只怪物', 'hongmeng', '{"maxHP":50000000000,"ATK":400000}', 150, 7000000, 'pet_treat', 5, 1, 1, 34);
+
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_hongmeng_hood','c_hongmeng_robe');
+INSERT INTO `cfg_craft` (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_hongmeng_hood', '锻造鸿蒙兜帽', '🎩', 'hongmeng_hood', '{"hongmeng_qi":5,"chaos_core":2}', 450000, 0, 1, 44),
+  ('c_hongmeng_robe', '锻造鸿蒙法袍', '🥋', 'hongmeng_robe', '{"hongmeng_qi":6,"chaos_core":3}', 480000, 0, 1, 45);
+
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('hongmeng_aegis','hongmeng_eye');
+INSERT INTO `cfg_equipment_template` (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('hongmeng_aegis', '鸿蒙神盾', '🛡️', 'offhand', 4, 'hongmeng', '{"maxHP":"300000","PDEF":"3200","MDEF":"3200"}', 10, 38000, '太初之气凝成的盾，挡下过开天一击', 1, 89),
+  ('hongmeng_eye', '鸿蒙之瞳', '👁️', 'necklace', 4, 'hongmeng', '{"PATK":"1400","MATK":"1400","CRIT":"0.06","CRITD":"0.30"}', 10, 38000, '戴上它，你能看见紫气流动的轨迹', 1, 90);
+
+-- ============================================================
+-- 第十一批验收口径（2026-11-04，按 code 去重后的有效条目）：
+--   cfg_equipment_template 90 / cfg_item 46 / cfg_affix 32 / cfg_skill 39 / cfg_quest 34 / cfg_craft 34
+--   代码镜像：怪物词条 26 / 成就 113 / 天赋 14 / 套装 10 / 区域 12 / 图鉴 43 / 宠物 9
+--   （Batch11FinalCountsTest 三方锁；全文件可重复执行）
 -- ============================================================

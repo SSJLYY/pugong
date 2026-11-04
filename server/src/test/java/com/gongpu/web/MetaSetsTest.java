@@ -67,7 +67,7 @@ class MetaSetsTest {
     void metaCarriesSetCatalog() {
         Map<String, Object> meta = new MetaController(null, null).meta();
         List<Map<String, Object>> sets = (List<Map<String, Object>>) meta.get("sets");
-        assertEquals(9, sets.size(), "meta 应下发九套图鉴");
+        assertEquals(10, sets.size(), "meta 应下发十套图鉴");
         Map<String, Object> far = sets.stream()
                 .filter(r -> "farwalker".equals(r.get("id"))).findFirst().orElseThrow();
         assertEquals(List.of("皮帽", "皮甲", "皮裤", "草鞋"), far.get("members"), "成员名应按模板池解析");

@@ -9,7 +9,9 @@
 前端纯静态（nginx），后端 Spring Boot 3.2.5 + Java 21（8081），
 MySQL 8 持久 + Redis 缓存/锁/榜单。数值全部服务端结算，前端只发意图。
 
-## 0.5 当前状态速览（2026-11-04 更新，第十批 100 轮后）
+## 0.5 当前状态速览（2026-11-04 更新，第十一批 100 轮后）
+
+- **第十一批一百轮增强（2026-11-04，本批按玩家要求全程单次提交；本地内网自测）**：新系统——宠物进化（PlayerState.petEvolved 集合：满级 50 可进化、属性 ×2，成本 20 万金 + 混沌核心 ×3，端点 /evolve-pet，petView 下发 evolved；StateCodec 兜底剔除未领养/图鉴外）/ 宠物 8→9（麒麟 pet_qilin）/ 第十二区域鸿蒙界 hongmeng（门槛 500 亿血/双防 8000/攻 400000，Boss 鸿蒙道祖 5000 亿血，鸿蒙紫气售 20000、鸿蒙战装第 10 套、图鉴 43）/ 装备觉醒（Item.awaken 0~3、满 5 星前置、底子第四乘区 +5%/级，成本 10 万×级金 + 混沌核心×级，端点 /awaken，StateCodec 钳制 [0,3]，吞噬取 max）。战斗深化——怪物词条 23→26（💀不朽首次致死保留 30% 血、👹吞噬攻击额外真伤 2% 上限、🕳️太虚自带 25% 闪避等效普攻 ×0.75 鸿蒙专属）/ 主动万剑归宗（下一击 ×5）/ 被动鸿蒙体（攻速 +0.10）+ 太虚剑意（暴伤 +20%）。任务经济——周常/月常模板 +star/treat 两类（counterOf 共用）、黑市池 20→24、成就里程碑奖金扩七档（105→300 万）。前端——第六主题极光 theme-aurora、日志搜索、页签标题 DPS 峰值、进化/觉醒按钮、称号 17→19（鸿蒙主宰压轴）。内容——药剂 44→46（鸿蒙灵液/太虚神液）、词条 30→32（鸿蒙/太初）、技能 36→39、委托 30→34、配方 30→34、装备 82→90、天赋 13→14（鸿蒙之心：羁绊 ×1.5 与混沌之心叠乘，petBondMul 三参重载）、成就 98→113。前端升 **v=218**。收官总口径见 Batch11FinalCountsTest。详见 README「变更记录（2026-11-04 · 第十一批一百轮增强）」。
 
 - **第十批一百轮增强（2026-11-04，本批按玩家要求全程单次提交；本地内网自测）**：新系统——宠物羁绊（GameConst.petBondMul：总等级 30/100/250 档 ×1.25/1.6/2.2，PanelCalculator 宠物乘区同乘、伙伴来源不压制；天赋混沌之心再 ×1.5；petView 下发 totalLevels/bondMul/bondNext）/ 宠物 6→8（熊猫/雪貂）、宠物零食 pet_treat（usePotion 特殊分支 +60 经验、无出战先校验不消耗）、板凳宠物经验分享 25%（gainPetExp 单点）/ 第十一区域混沌界 chaos（门槛 20 亿血/双防 3000/攻 150000，Boss 混沌魔君 300 亿血，混沌核心售 6000、混沌战装第 9 套、图鉴 38）/ 装备升星（Item.star 0~5、底子 +3%/星第三乘区，成本 5000×n 金 + star_shard×n，sellPrice ×(1+0.1星)、equipScore 同乘、devourInto 取 max（顺带补 temper 取 max）、StateCodec 钳制 [0,5]、端点 /star-up）。战斗深化——怪物词条 20→23（🪞镜像反弹实际承受 10% 与荆棘同段同口径、🥀虚弱普攻 ×0.85 与缴械双点同乘、🌀狂乱攻速 ×1.4/攻击 ×1.2 混沌专属）/ 主动时停（buff time_stop、mobAttack ×0.5）/ 被动时之体（ASPD 平直 +0.08 进乘区前）+ 混沌亲和（混沌界专伤 ×1.25，dealDamage 与 expectedPerHit 双点）。任务经济——月常模板 5→7（enchant/rebirth，counterOf 四新类型 feed/fuse/enchant/rebirth 共用）、每日模板 7→9、黑市池 16→20、里程碑六档（90→100 万，achMilestonePaid 位掩码自动兼容）、feed-pet-max 端点。前端——第五主题霓虹 theme-neon、petChip、DPS 峰值、成就徽标、静态模式 gongpu_motion、日志掉落过滤、Q/E 快捷键；称号 15→17（万兽之王/混沌主宰压轴，renderTitles 签名补 boss_chaos 与宠物总等级）。内容——药剂 41→44（混沌精华/凤凰之血）、词条 28→30（混沌/永恒）、技能 33→36、委托 26→30、配方 26→30、装备 74→82、天赋 12→13（混沌之心）、成就 82→98。前端升 **v=210**。收官总口径见 Batch10FinalCountsTest。详见 README「变更记录（2026-11-04 · 第十批一百轮增强）」。
 
@@ -125,7 +127,12 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 
 | 系统 | 位置 | 要点 |
 |---|---|---|
-| 宠物伙伴 | GameConst.PETS + GameService.petView | 8 只（+熊猫/雪貂）；adopt-pet/switch-pet/feed-pet/feed-pet-batch/feed-pet-max/rename-pet 六端点；击杀 +1 经验（天赋兽语者 ×2）、满级 50、petExpNeed=20+(lv−1)×10；petBonus 并入 flat 区（不压制），被动宠物亲和 PET_BOND_MUL=1.3 乘区受沉默压制；petView 挂 fullView 本体（含 levels 全表供称号/宠物卡） |
+| 宠物进化 | PlayerState.petEvolved + GameService.evolvePet + POST /{slot}/evolve-pet | 满级 50 可进化：属性 ×2（PanelCalculator petBonus 乘区，伙伴来源不压制）；成本 200,000 金 + chaos_core×3；petView 下发 evolved 名单；StateCodec 兜底剔除未领养/图鉴外；Stats.petEvolves；宠物共 9 只（+麒麟 pet_qilin） |
+| 鸿蒙界（第十二区域） | GameConst.ZONES hongmeng | 门槛 maxHP 5e10/双防 8000/ATK 400000；Boss 鸿蒙道祖 5000 亿血/金 1 亿；ZONE_MAT=hongmeng_qi（售 20000）；鸿蒙战装 hongmengsuit 第 10 套；词条率 40%、专属池 25 条（混沌池 + 太虚）；nextZoneId(chaos)=hongmeng |
+| 装备觉醒 | Item.awaken + GameService.awaken + POST /{slot}/awaken | 0~3 级，满 5 星前置；底子 +5%/级（PanelCalculator 第四乘区，与强化/淬炼/升星独立）；成本 100000×(级+1) 金 + chaos_core×(级+1)；sellPrice ×(1+0.15级)、equipScore ×(1+0.05级)、devourInto 取 max；StateCodec 钳制 [0,3]；Stats.awakens |
+| 怪物词条·不朽/吞噬/太虚 | GameConst.MOB_TRAITS immortal/devour/taixu | 不朽：dealDamage 击杀分支前拦截、首次致死保留 30% 血（MobState.immortalUsed、溢出同帧可真杀）；吞噬：mobAttack 额外真伤 = 玩家上限 ×2%（护盾先吸）；太虚：dealDamage+expectedPerHit 双点 ×0.75（鸿蒙专属）；计数 immortalKills/devourKills/taixuKills 在 onMobKilled |
+| 万剑归宗/鸿蒙体/鸿蒙之心 | GameService.castSkill + PanelCalculator + GameConst.petBondMul | 万剑归宗：主动、buff sword_rain 30s、dealDamage 下一击 ×5；鸿蒙体：被动 ASPD 平直 +0.10 进乘区前；鸿蒙之心：天赋、petBondMul 三参重载再 ×1.5（与混沌之心叠乘 ×2.25，PanelCalculator 与 petView 双调用点） |
+| 宠物伙伴 | GameConst.PETS + GameService.petView | 9 只（+熊猫/雪貂/麒麟）；adopt-pet/switch-pet/feed-pet/feed-pet-batch/feed-pet-max/rename-pet/evolve-pet 七端点；击杀 +1 经验（天赋兽语者 ×2）、满级 50、petExpNeed=20+(lv−1)×10；petBonus 并入 flat 区（不压制），被动宠物亲和 PET_BOND_MUL=1.3 乘区受沉默压制；petView 挂 fullView 本体（含 levels 全表供称号/宠物卡） |
 | 宠物羁绊/零食/分享 | GameConst.petBondMul + PanelCalculator + GameService.gainPetExp | 羁绊：总等级 30/100/250 → 出战加成 ×1.25/1.6/2.2（天赋混沌之心 ×1.5），petView 下发 totalLevels/bondMul/bondNext；宠物零食 pet_treat 走 usePotion 特殊分支 +60 经验（无出战先校验不消耗，Stats.petTreats）；非出战宠物分享 25% 经验（gainPetExp 单点、兽语者翻倍在分享前结算） |
 | 混沌界（第十一区域） | GameConst.ZONES chaos | 门槛 maxHP 2e9/双防 3000/ATK 150000；Boss 混沌魔君 300 亿血/金 2000 万；ZONE_MAT=chaos_core（售 6000）；混沌战装 chaossuit 第 9 套；词条率 37%、专属池 22 条（含狂乱）；nextZoneId(void)=chaos |
 | 装备升星 | Item.star + GameService.starUp + POST /{slot}/star-up | 0~5 星，底子 +3%/星（PanelCalculator 第三乘区，与强化/淬炼独立）；成本 5000×(星+1) 金 + star_shard×(星+1)；sellPrice ×(1+0.1星)、equipScore ×(1+0.03星)、devourInto 取 max；StateCodec 钳制 [0,5]；Stats.starsDone |

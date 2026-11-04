@@ -30,7 +30,8 @@ public final class BlackMarket {
     static final List<String> POOL = List.of(
             "atk", "def", "aspd", "crit", "critd", "lifesteal", "giant", "fortune",
             "luck", "might", "guard", "stone", "thorn", "spirit", "vital", "elixir",
-            "stardust", "void", "chaos", "pet_treat");
+            "stardust", "void", "chaos", "pet_treat",
+            "phoenix", "hongmeng", "timesand", "fleet");
 
     static String today() {
         return LocalDate.now(GameConst.DAILY_ZONE).toString();

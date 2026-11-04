@@ -118,6 +118,7 @@ public class GameService {
             case "heavy" -> s.buffs.put("heavy", 30.0);
             case "charge" -> s.buffs.put("charge", 30.0);
             case "void_slash" -> s.buffs.put("void_slash", 30.0);
+            case "sword_rain" -> s.buffs.put("sword_rain", 30.0);
             case "time_stop" -> s.buffs.put("time_stop", (double) def.dur());
             case "flurry" -> s.flurryHits += GameConst.FLURRY_HITS;
             case "hex_slow" -> {
@@ -671,6 +672,40 @@ public class GameService {
         return m;
     }
 
+    /**
+     * 觉醒（第十一批）：满星（5 星）背包装备 +1 觉醒（上限 3），成本 = 100000×(当前觉醒+1) 金币 + (当前觉醒+1) 颗混沌核心；
+     * 底子乘区 +5%/级，与强化/淬炼/升星独立计层（PanelCalculator 四乘区）。
+     */
+    public Map<String, Object> awaken(PlayerState s, int bagIdx) {
+        if (bagIdx < 0 || bagIdx >= s.equipBag.size()) {
+            throw ApiException.badRequest("背包索引越界");
+        }
+        PlayerState.Item it = s.equipBag.get(bagIdx);
+        if (it.star < GameConst.STAR_MAX_LV) {
+            throw ApiException.badRequest("觉醒需要先升至满星（当前 " + it.star + " 星）");
+        }
+        if (it.awaken >= GameConst.AWAKEN_MAX_LV) {
+            throw ApiException.badRequest("已觉醒至上限");
+        }
+        int n = it.awaken + 1;
+        java.math.BigDecimal goldCost = Num.of(GameConst.AWAKEN_GOLD_BASE * n);
+        if (s.materials.getOrDefault("chaos_core", 0) < n) {
+            throw ApiException.badRequest("材料不足：觉醒需要 " + n + " 颗混沌核心（混沌界掉落）");
+        }
+        if (Num.lt(s.gold, goldCost)) {
+            throw ApiException.badRequest("金币不足，觉醒需要 " + Num.cn(goldCost));
+        }
+        s.materials.merge("chaos_core", -n, Integer::sum);
+        s.gold = Num.sub(s.gold, goldCost);
+        it.awaken++;
+        s.stats.awakens++;
+        Map<String, Object> m = inventoryView(s);
+        m.put("awakenedTo", it.awaken);
+        m.put("matCost", n);
+        m.put("goldCost", Num.plain(goldCost));
+        return m;
+    }
+
     /** 一键卖出：把背包里品质低于 keepQuality 的全部卖掉（1=白及以下…4=紫及以下即全卖）。 */
     public Map<String, Object> autoSell(PlayerState s, int keepQuality) {
         if (keepQuality < 0 || keepQuality > 4) {
@@ -883,7 +918,7 @@ public class GameService {
                 score += g != null && g.endsWith("_2") ? 200 : 80;
             }
         }
-        return score * (1 + it.enhance * 0.05) * (1 + it.temper * 0.04) * (1 + it.star * 0.03);
+        return score * (1 + it.enhance * 0.05) * (1 + it.temper * 0.04) * (1 + it.star * 0.03) * (1 + it.awaken * 0.05);
     }
 
     public Map<String, Object> discard(PlayerState s, int bagIdx) {
@@ -1030,8 +1065,8 @@ public class GameService {
     }
 
     /** 成就里程碑档位（第八批）：累计已领成就数达标线与一次性奖金（每档只发一次，掩码落档）。 */
-    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75, 90};
-    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000, 1_000_000};
+    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75, 90, 105};
+    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000, 1_000_000, 3_000_000};
 
     /** 领取后结算里程碑：返回本次新发的里程碑奖金（0 = 未跨新档），奖金已入账。 */
     static long settleAchMilestone(PlayerState s) {
@@ -1272,6 +1307,40 @@ public class GameService {
         if (s.pet == null) {
             s.pet = petCode;
         }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("pet", petCode);
+        m.put("gold", Num.plain(s.gold));
+        return m;
+    }
+
+    /** 宠物进化（第十一批）：满级 50 级、20 万金 + 混沌核心 ×3，进化后该宠物属性 ×2（一只仅一次）。 */
+    public Map<String, Object> evolvePet(PlayerState s, String petCode) {
+        GameConst.PetDef def = GameConst.PETS.get(petCode);
+        if (def == null) {
+            throw ApiException.badRequest("宠物不存在：" + petCode);
+        }
+        if (!s.petsOwned.contains(petCode)) {
+            throw ApiException.badRequest("尚未领养这只宠物");
+        }
+        if (s.petEvolved.contains(petCode)) {
+            throw ApiException.badRequest(def.name() + "已经进化过了");
+        }
+        int lv = s.petLevels.getOrDefault(petCode, 1);
+        if (lv < GameConst.PET_MAX_LEVEL) {
+            throw ApiException.badRequest(def.name() + "需要满级 " + GameConst.PET_MAX_LEVEL + " 才能进化（当前 " + lv + " 级）");
+        }
+        if (Num.lt(s.gold, Num.of(GameConst.PET_EVOLVE_GOLD))) {
+            throw ApiException.badRequest("金币不足，进化需要 " + GameConst.PET_EVOLVE_GOLD + " 金币");
+        }
+        int have = s.materials.getOrDefault(GameConst.PET_EVOLVE_MAT, 0);
+        if (have < GameConst.PET_EVOLVE_MAT_COUNT) {
+            throw ApiException.badRequest("混沌核心不足，进化需要 " + GameConst.PET_EVOLVE_MAT_COUNT + " 个（当前 " + have + "）");
+        }
+        s.gold = Num.sub(s.gold, Num.of(GameConst.PET_EVOLVE_GOLD));
+        s.materials.put(GameConst.PET_EVOLVE_MAT, have - GameConst.PET_EVOLVE_MAT_COUNT);
+        s.petEvolved.add(petCode);
+        s.stats.petEvolves++;
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("pet", petCode);
@@ -1798,6 +1867,9 @@ public class GameService {
         if (src.star > dst.star) {
             dst.star = src.star;
         }
+        if (src.awaken > dst.awaken) {
+            dst.awaken = src.awaken;
+        }
         if (dst.quality < src.quality) {
             dst.quality = src.quality;
         }
@@ -2034,12 +2106,13 @@ public class GameService {
         Map<String, Object> v = new LinkedHashMap<>();
         v.put("active", s.pet);
         v.put("owned", new ArrayList<>(s.petsOwned));
+        v.put("evolved", new ArrayList<>(s.petEvolved));
         v.put("names", new LinkedHashMap<>(s.petNames));
         v.put("levels", new LinkedHashMap<>(s.petLevels));
         // 羁绊（第十批）：总等级与当前倍率/下一档门槛，供宠物卡展示
         int totalLevels = s.petLevels.values().stream().mapToInt(Integer::intValue).sum();
         v.put("totalLevels", totalLevels);
-        v.put("bondMul", GameConst.petBondMul(totalLevels, "chaos_heart".equals(s.talent)));
+        v.put("bondMul", GameConst.petBondMul(totalLevels, "chaos_heart".equals(s.talent), "hongmeng_heart".equals(s.talent)));
         int nextTier = 0;
         for (int t : GameConst.PET_BOND_TIERS) {
             if (totalLevels < t) {

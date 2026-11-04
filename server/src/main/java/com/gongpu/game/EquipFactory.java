@@ -403,9 +403,10 @@ public final class EquipFactory {
                 Num.of(Math.pow(GameConst.ENHANCE_COST_MUL, it.enhance)));
     }
 
-    /** 卖价：品质越高越值钱；升星每星 +10%（第十批）。 */
+    /** 卖价：品质越高越值钱；升星每星 +10%（第十批）、觉醒每级 +15%（第十一批）。 */
     public static BigDecimal sellPrice(PlayerState.Item it) {
-        return Num.mul(Num.mul(Num.of(20L * (it.quality + 1)), Num.of(1 + it.enhance * 0.5)),
-                Num.of(1 + it.star * 0.1));
+        return Num.mul(Num.mul(Num.mul(Num.of(20L * (it.quality + 1)), Num.of(1 + it.enhance * 0.5)),
+                Num.of(1 + it.star * 0.1)),
+                Num.of(1 + it.awaken * 0.15));
     }
 }

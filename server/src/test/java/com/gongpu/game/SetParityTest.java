@@ -56,7 +56,7 @@ class SetParityTest {
             "marshwalk", "swamp",
             "snowwolf", "snow",
             "molten", "volcano",
-            "starset", "star", "voidset", "void", "chaossuit", "chaos");
+            "starset", "star", "voidset", "void", "chaossuit", "chaos", "hongmengsuit", "hongmeng");
 
     @Test
     void everySetMemberExistsInSqlWithMatchingZone() throws Exception {

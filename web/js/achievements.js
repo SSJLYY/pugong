@@ -49,6 +49,8 @@
     { id: 'temper_5', name: '淬火成钢', emoji: '🔨', desc: '任意一件装备淬炼满级' },
     { id: 'star_1', name: '初升之星', emoji: '⭐', desc: '任意一件装备升至 1 星' },
     { id: 'star_5', name: '五星神装', emoji: '🌟', desc: '任意一件装备升至满星（5 星）' },
+    { id: 'awaken_1', name: '觉醒之光', emoji: '☀️', desc: '任意一件装备觉醒至 1 级' },
+    { id: 'awaken_3', name: '完全觉醒', emoji: '🌞', desc: '任意一件装备觉醒至满级（3 级）' },
     { id: 'reroll_50', name: '洗炼大师', emoji: '🎲', desc: '累计洗炼 50 次' },
     { id: 'abyss_first', name: '渊瞳初开', emoji: '🕳️', desc: '首次击杀深渊裂隙的怪物' },
     { id: 'abyss_lord', name: '深渊主宰', emoji: '👑', desc: '击杀渊底之主·无光君王' },
@@ -65,19 +67,32 @@
     { id: 'pet_first', name: '宠物伙伴', emoji: '🐾', desc: '首次领养一只宠物' },
     { id: 'pet_25', name: '宠物大师', emoji: '🐾', desc: '任一宠物达到 25 级' },
     { id: 'pet_50', name: '宠物宗师', emoji: '🐾', desc: '任一宠物达到 50 级（满级）' },
-    { id: 'pet_all', name: '宠物收藏家', emoji: '🐾', desc: '集齐全部 8 只宠物' },
+    { id: 'pet_all', name: '宠物收藏家', emoji: '🐾', desc: '集齐全部 9 只宠物' },
+    { id: 'evolve_1', name: '进化之光', emoji: '🦋', desc: '首次让一只宠物进化' },
+    { id: 'evolve_3', name: '进化大师', emoji: '🦋', desc: '累计让宠物进化 3 次' },
+    { id: 'awaken_10', name: '觉醒大师', emoji: '☀️', desc: '累计装备觉醒 10 次' },
+    { id: 'immortal_50', name: '不朽终结者', emoji: '💀', desc: '击杀 50 只带「不朽」词条的怪物' },
+    { id: 'devour_50', name: '吞噬终结者', emoji: '👹', desc: '击杀 50 只带「吞噬」词条的怪物' },
+    { id: 'taixu_1', name: '太虚初啜', emoji: '🕳️', desc: '首次饮下太虚神液' },
+    { id: 'taixu_10', name: '太虚猎手', emoji: '🕳️', desc: '击杀 10 只带「太虚」词条的怪物' },
     { id: 'pet_feed_100', name: '喂食达人', emoji: '🐾', desc: '累计喂食宠物 100 次' },
     { id: 'pet_bond_100', name: '羁绊深厚', emoji: '💞', desc: '全部宠物总等级达到 100' },
     { id: 'pet_bond_250', name: '万兽羁绊', emoji: '💞', desc: '全部宠物总等级达到 250' },
     { id: 'pet_treat_50', name: '零食宗师', emoji: '🍬', desc: '累计喂宠物零食 50 次' },
     { id: 'star_25', name: '升星大师', emoji: '⭐', desc: '累计升星 25 次' },
+    { id: 'star_100', name: '升星宗师', emoji: '🌟', desc: '累计升星 100 次' },
+    { id: 'treat_200', name: '零食皇帝', emoji: '🍬', desc: '累计喂宠物零食 200 次' },
     { id: 'enchant_500', name: '附魔宗师', emoji: '🖋️', desc: '累计附魔 500 次' },
     { id: 'mirror_10', name: '镜面克星', emoji: '🪞', desc: '击杀 10 只带「镜像」词条的怪物' },
     { id: 'frenzy_10', name: '狂乱克星', emoji: '🌀', desc: '击杀 10 只带「狂乱」词条的怪物' },
+    { id: 'immortal_10', name: '不朽克星', emoji: '💀', desc: '击杀 10 只带「不朽」词条的怪物' },
+    { id: 'devour_10', name: '吞噬克星', emoji: '👹', desc: '击杀 10 只带「吞噬」词条的怪物' },
     { id: 'phoenix_1', name: '凤凰初啜', emoji: '🦅', desc: '首次饮下凤凰之血' },
     { id: 'weaken_10', name: '虚弱克星', emoji: '🥀', desc: '击杀 10 只带「虚弱」词条的怪物' },
     { id: 'chaos_first', name: '混沌初临', emoji: '🌪️', desc: '首次击杀混沌界的怪物' },
     { id: 'chaos_lord', name: '无序之主', emoji: '👑', desc: '击杀混沌魔君·无序之源' },
+    { id: 'hongmeng_first', name: '鸿蒙初临', emoji: '🌌', desc: '首次击杀鸿蒙界的怪物' },
+    { id: 'hongmeng_lord', name: '太初之主', emoji: '👑', desc: '击杀鸿蒙道祖·太初' },
     { id: 'merchant_1m', name: '材料巨鳄', emoji: '💰', desc: '卖材料累计收入 1,000,000 金币' },
     { id: 'feed_500', name: '喂食宗师', emoji: '🐾', desc: '累计喂食宠物 500 次' },
     { id: 'pet_treat_10', name: '零食大户', emoji: '🍬', desc: '累计喂宠物零食 10 次' },
@@ -187,7 +202,7 @@
     }
     // 里程碑进度（第八批，第九批扩 75 档）：与服务端档位镜像——累计已领 15/30/45/60/75 项各发一次奖金
     var claimedN = ACH.filter(function (a) { return claimed[a.id]; }).length;
-    var TIERS = [[15, 10000], [30, 30000], [45, 80000], [60, 200000], [75, 500000], [90, 1000000]];
+    var TIERS = [[15, 10000], [30, 30000], [45, 80000], [60, 200000], [75, 500000], [90, 1000000], [105, 3000000]];
     var nextTier = TIERS.filter(function (t) { return claimedN < t[0]; })[0];
     html.push('<div class="effect-item"><span>🏆</span><b>成就里程碑：已领 ' + claimedN + ' 项</b><i>' +
       (nextTier ? '下一档 ' + nextTier[0] + ' 项（奖金 +' + nextTier[1] + ' 金）' : '全部里程碑奖金已达成 🎉') +

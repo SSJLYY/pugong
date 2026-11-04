@@ -86,7 +86,7 @@
   function lightTheme() {
     return themeName() === 'light';
   }
-  const THEME_LABEL = { dark: '🌗 主题', light: '☀️ 宣纸', star: '🌌 星空', ink: '🖌 水墨', neon: '🌆 霓虹' };
+  const THEME_LABEL = { dark: '🌗 主题', light: '☀️ 宣纸', star: '🌌 星空', ink: '🖌 水墨', neon: '🌆 霓虹', aurora: '🌌 极光' };
   // 字号切换（第八批）：标准/大/特大三档，body 类驱动根字号，存 localStorage
   function fontSizeName() {
     try { return localStorage.getItem('gongpu_font') || 'm'; } catch (e) { return 'm'; }
@@ -104,6 +104,7 @@
     document.body.classList.toggle('theme-star', t === 'star');
     document.body.classList.toggle('theme-ink', t === 'ink');
     document.body.classList.toggle('theme-neon', t === 'neon');
+    document.body.classList.toggle('theme-aurora', t === 'aurora');
     const b = $('btnTheme');
     if (b) b.textContent = THEME_LABEL[t] || THEME_LABEL.dark;
   }
@@ -177,7 +178,8 @@
     abyss: '≥200万血/双防150/攻4000',
     star: '≥2000万血/双防400/攻12000',
     void: '≥2亿血/双防1200/攻40000',
-    chaos: '≥20亿血/双防3000/攻150000'
+    chaos: '≥20亿血/双防3000/攻150000',
+    hongmeng: '≥500亿血/双防8000/攻400000'
   };
 
   function toast(msg, kind) {
@@ -602,7 +604,7 @@
     const mpPct = Math.max(0, Math.min(100, new Decimal(p.curMP).div(new Decimal(p.MP).max(1)).toNumber() * 100));
     const pot = view.potions || {};
     const mats = view.materials || {};
-    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥'], ['abyss_crystal', '🕳️'], ['star_shard', '🌟'], ['void_shard', '🌀'], ['chaos_core', '🌪️']];
+    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥'], ['abyss_crystal', '🕳️'], ['star_shard', '🌟'], ['void_shard', '🌀'], ['chaos_core', '🌪️'], ['hongmeng_qi', '🌌']];
     const bpCount = Object.keys(mats).filter(k => k.startsWith('bp_')).reduce((t, k) => t + (mats[k] || 0), 0);
     const daily = view.dailyTasks || [];
     const dailyClaimed = daily.filter(t => t.claimed).length;
@@ -753,11 +755,17 @@
       const zt = $('zoneName') ? $('zoneName').textContent : '';
       // 宠物速览（第十批）：出战宠物在标题里带 🐾Lv.x，进签名防漏刷
       const petSeg = (view.pet && view.pet.active) ? '🐾Lv.' + (view.pet.level || 1) : '';
-      const tsig = pct + '|' + zt + '|' + (view.dead ? 1 : 0) + '|' + petSeg;
+      // DPS 峰值速览（第十一批）：标题带 ⚔️ 历史峰值（紧凑格式），峰值变化进签名防漏刷
+      let dpsSeg = '';
+      try {
+        const pk = localStorage.getItem('gongpu_dps_max');
+        if (pk && new Decimal(pk).gt(0)) dpsSeg = '⚔️' + fmt(new Decimal(pk));
+      } catch (e) { /* 峰值读取失败不冒泡 */ }
+      const tsig = pct + '|' + zt + '|' + (view.dead ? 1 : 0) + '|' + petSeg + '|' + dpsSeg;
       if (tsig !== applyView._titleSig) {
         applyView._titleSig = tsig;
         document.title = view.dead ? '💀 已阵亡 | 普攻永久增加生命上限'
-          : '❤' + pct + '% ' + zt + (petSeg ? ' ' + petSeg : '') + ' | 普攻永久增加生命上限';
+          : '❤' + pct + '% ' + zt + (petSeg ? ' ' + petSeg : '') + (dpsSeg ? ' ' + dpsSeg : '') + ' | 普攻永久增加生命上限';
       }
     }
     const hg = $('hudGold');
@@ -793,7 +801,8 @@
       iron_gut: ['🍲 铁胃', '食物效果 +50%', ''],
       gem_affinity: ['🔷 宝石亲和', '镶嵌宝石效果 +25%', ''],
       pet_whisper: ['🐾 兽语者', '宠物经验 +100%', ''],
-      chaos_heart: ['🌪️ 混沌之心', '宠物羁绊倍率 ×1.5', '']
+      chaos_heart: ['🌪️ 混沌之心', '宠物羁绊倍率 ×1.5', ''],
+      hongmeng_heart: ['🌌 鸿蒙之心', '宠物羁绊倍率 ×1.5（与混沌之心叠乘）', '']
     };
     const badge = $('talentBadge');
     if (badge) {
@@ -1075,7 +1084,9 @@
         focus_pot: ['🎯', '鹰目', true], vigor_pot: ['🌿', '生机', true],
         charge: ['🐎', '冲锋·下一击×3', true], void_slash: ['🌀', '虚空斩·下一击×4', true], void_pot: ['🌀', '虚空精华', true],
         time_stop: ['⌛', '时停·怪攻速减半', true], chaos_pot: ['🌪️', '混沌精华', true],
-        stardust_pot: ['✨', '星尘甘露', true]
+        stardust_pot: ['✨', '星尘甘露', true],
+        sword_rain: ['🗡️', '万剑归宗·下一击×5', true], hongmeng_pot: ['🌌', '鸿蒙灵液', true],
+        taixu_pot: ['🕳️', '太虚神液', true], phoenix_pot: ['🦅', '凤凰之血', true]
       };
       const isEt = view.talent === 'eternal';
       let html = '';
@@ -1137,7 +1148,8 @@
     plain: '🟫 兽皮（售 20）', forest: '🦷 狼牙（售 35）', mine: '⛏️ 矿石（售 60）',
     swamp: '🟢 毒腺（售 90）', snow: '✨ 魔尘（售 140）', volcano: '🔥 火晶（售 220）',
     abyss: '🕳️ 深渊结晶（售 400）', star: '🌟 星核碎片（售 650）', void: '🌀 虚空碎片（售 2000）',
-    chaos: '🌪️ 混沌核心（售 6000）'
+    chaos: '🌪️ 混沌核心（售 6000）',
+    hongmeng: '🌌 鸿蒙紫气（售 20000）'
   };
 
   function renderZoneButtons() {
@@ -1227,10 +1239,12 @@
         '<div class="trait-row"><b>✨ 新内容</b><span>星尘甘露（暴击 +6%/攻速 +1.5）、被动「招财手」（击杀金币 +15%）、天赋「兽语者」（宠物经验翻倍）；锻造页多了无相兜帽/虚空法袍配方，星界与虚空还有长线委托等你清。</span></div>',
         '<div class="trait-row"><b>🌪️ 混沌界</b><span>虚空之外的第十一区域：门槛 20 亿血/双防 3000/攻 150000，Boss 混沌魔君 300 亿血；混沌核心售 6000，混沌战装是第九套套装。新词条「镜像」（反弹你 10% 伤害）与「虚弱」（你普攻 -15%）在深区起出没。</span></div>',
         '<div class="trait-row"><b>⭐ 升星与宠物羁绊</b><span>装备可升星（背包按钮，底子 +3%/星、耗星核碎片）；宠物新增熊猫/雪貂与「羁绊」（总等级 30/100/250 档放大出战加成）、宠物零食（+60 经验）、板凳宠物分享 25% 经验、喂到满级按钮；新技能「时停」（怪攻速减半）与被动「时之体」。</span></div>',
+        '<div class="trait-row"><b>🌌 鸿蒙与觉醒</b><span>第十二区域「鸿蒙界」（500 亿血门槛）与鸿蒙战装；满级宠物可进化（属性 ×2，耗 20 万金 + 混沌核心 ×3）；满 5 星装备可觉醒（底子 +5%/级、满 3 级）；新怪词条不朽/吞噬/太虚、新技能万剑归宗（下一击 ×5）、新天赋鸿蒙之心。</span></div>',
         '<div class="trait-row"><b>🌿 新词条与破甲</b><span>新词条🌿再生（怪每秒回 3% 血，速杀克它）与🪨坚韧（你的暴击对它减半，平推克它）已入深区；被动「破甲专精」与破甲药剂能无视防御、乘算叠加，厚甲怪不再难啃；新招「连环掌」让接下来 30 次命中全部双击。</span></div>',
         '<div class="trait-row"><b>🏅 成就</b><span>角色页成就带进度条与金币奖励，可按可领取/进行中筛选，解锁后记得领取（可一键全领）。累计领取达 15/30/45/60/75 项还有里程碑奖金（1 万/3 万/8 万/20 万/50 万，每档一次）。</span></div>',
         '<div class="trait-row"><b>✋ 扩展技能</b><span>战斗区第二行：治愈术（回 35% 血）/ 嗜血术 / 铁壁 / 净化（清中毒·灼烧·沉默·时滞·寒霜）/ 冲锋（下一击 ×3）/ 迟缓咒（怪攻速 -30%）。</span></div>',
-        '<div class="trait-row"><b>🎨 界面偏好</b><span>顶栏可关特效（省电低配）、循环切换玄夜/宣纸/星空/水墨/霓虹五种主题；药剂可 📌 置顶常用款，弱网时轮询会自动降频。</span></div>',
+        '<div class="trait-row"><b>🎨 界面偏好</b><span>顶栏可关特效（省电低配）、循环切换玄夜/宣纸/星空/水墨/霓虹/极光六种主题；药剂可 📌 置顶常用款，弱网时轮询会自动降频。</span></div>',
+        '<div class="trait-row"><b>🌌 极光与日志搜索</b><span>第六种主题「🌌 极光」：深蓝夜幕打底，青绿与蓝紫极光辉光描边，标题自带流光。战斗日志上方新增 🔍 搜索框：输入关键词即按文本过滤日志（与 👑 Boss/🧺 掉落/📌 系统分类筹码叠加生效，清空恢复）；页签标题也会带上 ⚔️ DPS 历史峰值，切去别的标签页也能瞄见战力。</span></div>',
         '<div class="trait-row"><b>🌆 霓虹与静态模式</b><span>新主题「🌆 霓虹」：深紫夜幕打底、青与品红霓虹描边，标题自带辉光；顶栏「🧘 静态模式」是与特效开关独立的偏好，一键停用全站动画与过渡，晕动敏感或想更省电时开启。另：顶栏 ⚔️ DPS 筹码会记住你的历史峰值（悬浮可见），委托页出战宠物卡带经验进度条。</span></div>',
         '<div class="trait-row"><b>🖌 水墨主题</b><span>参照文字修仙类游戏的纸面居中卡布局：水墨远山底、朱砂点缀、属性改标签网格、已装备改品质标签、战斗区顶部有随场景变化的叙事条；顶栏另有 💪 综合战力（DPS×生存×防御）供横向比较。布局灵感致谢开源项目《我的文字修仙全靠刷》（vue-XiuXianGame，CC BY-NC 4.0），本作实现为原创代码。</span></div>',
         '<div class="trait-row"><b>🧧 聚宝与嗅觉</b><span>聚宝药剂 300s 金币 +50%；被动「材料嗅觉」让材料掉率升到 75%，配晶化词条刷材料最快。</span></div>',
@@ -1331,11 +1345,11 @@
       toast({ m: '🔠 字号：标准', l: '🔠 字号：大', xl: '🔠 字号：特大' }[next], 'ok');
     });
     $('btnTheme').addEventListener('click', () => {
-      const order = ['dark', 'light', 'star', 'ink', 'neon'];
+      const order = ['dark', 'light', 'star', 'ink', 'neon', 'aurora'];
       const next = order[(order.indexOf(themeName()) + 1) % order.length];
       try { localStorage.setItem('gongpu_theme', next); } catch (e) { /* 忽略 */ }
       applyThemePref();
-      toast({ dark: '🌙 已切换玄夜主题', light: '☀️ 已切换宣纸主题', star: '🌌 已切换星空主题', ink: '🖌 已切换水墨主题', neon: '🌆 已切换霓虹主题' }[next], 'ok');
+      toast({ dark: '🌙 已切换玄夜主题', light: '☀️ 已切换宣纸主题', star: '🌌 已切换星空主题', ink: '🖌 已切换水墨主题', neon: '🌆 已切换霓虹主题', aurora: '🌌 已切换极光主题' }[next], 'ok');
     });
 
     $('btnDaily').addEventListener('click', async () => {
@@ -1453,7 +1467,8 @@
       iron_gut: ['🍲', '铁胃', '食物效果 +50%'],
       gem_affinity: ['🔷', '宝石亲和', '镶嵌宝石效果 +25%'],
       pet_whisper: ['🐾', '兽语者', '宠物经验 +100%'],
-      chaos_heart: ['🌪️', '混沌之心', '宠物羁绊倍率 ×1.5']
+      chaos_heart: ['🌪️', '混沌之心', '宠物羁绊倍率 ×1.5'],
+      hongmeng_heart: ['🌌', '鸿蒙之心', '宠物羁绊倍率 ×1.5（与混沌之心叠乘）']
     };
 
     const talent = view.talent && talentMeta[view.talent];
@@ -1621,6 +1636,15 @@
 
   // 战斗日志：最近 6 条大事倒序（签名守卫，无变化不重建）；第八批加分类过滤筹码
   let eventFilter = 'all';
+  // 日志关键词搜索（第十一批）：与分类过滤叠加；输入时先对已渲染条目即时显隐，渲染管线读 logSearchKw 保持一致
+  let logSearchKw = '';
+  function applyLogSearchDom() {
+    const box = $('eventLog');
+    if (!box) return;
+    box.querySelectorAll('.event-line').forEach(el => {
+      el.style.display = (!logSearchKw || el.textContent.includes(logSearchKw)) ? '' : 'none';
+    });
+  }
   function evKind(e) {
     if (/Boss|👑|狂怒|二阶段/.test(e)) return 'boss';
     if (/掉|图纸|宝石|获得|爆出|拾取|拾得/.test(e)) return 'loot';
@@ -1636,6 +1660,12 @@
       bar.className = 'ev-filter-bar';
       bar.innerHTML = [['all', '全部'], ['boss', '👑 Boss'], ['loot', '🧺 掉落'], ['sys', '📌 系统']]
         .map(([v, n]) => '<button class="bf-chip" data-ev-f="' + v + '">' + n + '</button>').join('');
+      // 日志搜索框接线（第十一批）：静态元素只绑一次，输入即对已渲染条目显隐
+      const ls = $('logSearch');
+      if (ls) ls.addEventListener('input', () => {
+        logSearchKw = ls.value.trim();
+        applyLogSearchDom();
+      });
       bar.addEventListener('click', (e) => {
         const b = e.target.closest('[data-ev-f]');
         if (!b) return;
@@ -1647,8 +1677,9 @@
     }
     document.querySelectorAll('#evFilterBar .bf-chip').forEach(c =>
       c.classList.toggle('on', c.dataset.evF === eventFilter));
-    const evs = (view.events || []).filter(e => eventFilter === 'all' || evKind(e) === eventFilter);
-    const sig = eventFilter + '|' + evs.join('|');
+    const evs = (view.events || []).filter(e => (eventFilter === 'all' || evKind(e) === eventFilter)
+      && (!logSearchKw || e.includes(logSearchKw)));
+    const sig = eventFilter + '|' + logSearchKw + '|' + evs.join('|');
     if (sig === renderEvents._sig) return;
     renderEvents._sig = sig;
     box.innerHTML = evs.length
@@ -1949,6 +1980,7 @@
           <button data-act="enhance">强化</button>
           <button data-act="temper" title="淬炼：底子 +4%/级（满 5 级，与强化独立），耗来源区域材料 + 金币" ${it.temper >= 5 ? 'disabled' : ''}>${it.temper >= 5 ? '淬炼 MAX' : '淬炼'}</button>
           <button data-act="star" title="升星：底子 +3%/星（满 5 星，与强化/淬炼独立），耗星核碎片×(星+1) + 金币 5000×(星+1)" ${it.star >= 5 ? 'disabled' : ''}>${it.star >= 5 ? '⭐ MAX' : '⭐ 升星' + (it.star ? ' ·' + it.star : '')}</button>
+          ${(it.star || 0) >= 5 ? '<button data-act="awaken" title="觉醒：底子 +5%/级（满 3 级，需满 5 星），耗混沌核心×(级+1) + 金币 100000×(级+1)" ' + ((it.awaken || 0) >= 3 ? 'disabled' : '') + '>' + ((it.awaken || 0) >= 3 ? '☀️ 觉醒 MAX' : '☀️ 觉醒' + (it.awaken ? ' ·' + it.awaken : '')) + '</button>' : ''}
           <button data-act="reroll">洗炼</button>
           <button data-act="socket" title="镶嵌宝石（最多 3 孔）：宝石由 Boss 必掉、词条怪概率掉" ${(it.gems || []).length >= 3 ? 'disabled' : ''}>${(it.gems || []).length >= 3 ? '💠 孔满' : '💠 镶嵌'}</button>
           ${(it.gems || []).length ? '<button data-act="unsocket" title="拆卸一颗宝石回材料仓（200 金）">拆卸</button>' : ''}
@@ -2047,19 +2079,25 @@
             const nxt = (it.star || 0) + 1;
             if (!confirm('升星「' + it.name + '」→ ' + nxt + ' 星：底子 +3%\n消耗 星核碎片×' + nxt + ' + 金币 ' + (5000 * nxt) + '。确认？')) return;
           }
+          if (act === 'awaken') {
+            // 觉醒确认：成本与服务端同公式（混沌核心×下一级序、金币 100000×下一级序，需满 5 星）
+            const nxt = (it.awaken || 0) + 1;
+            if (!confirm('觉醒「' + it.name + '」→ ' + nxt + ' 级：底子 +5%\n消耗 混沌核心×' + nxt + ' + 金币 ' + (100000 * nxt) + '。确认？')) return;
+          }
           const fn = act === 'lock' ? () => API.toggleLock(API.state.slot, idx)
             : act === 'equip' ? () => API.equip(API.state.slot, idx)
             : act === 'equipExtra' ? () => API.equipExtra(API.state.slot, idx)
             : act === 'enhance' ? () => API.enhanceItem(API.state.slot, idx)
               : act === 'temper' ? () => API.temperItem(API.state.slot, idx)
               : act === 'star' ? () => API.starUp(API.state.slot, idx)
+              : act === 'awaken' ? () => API.awaken(API.state.slot, idx)
               : act === 'reroll' ? () => API.rerollItem(API.state.slot, idx, lockIdx, lockIdx2)
               : act === 'discard' ? () => API.discardItem(API.state.slot, idx)
               : act === 'dismantle' ? () => API.dismantleItem(API.state.slot, idx)
               : () => API.sellItem(API.state.slot, idx);
           sfx(act === 'sell' ? 'sell' : 'click');
           const r = await call(fn, act === 'lock' ? (it.locked ? '已解锁' : '已锁定') : act === 'equip' || act === 'equipExtra' ? '已装备' : act === 'enhance' ? '强化成功'
-            : act === 'temper' ? '淬炼成功' : act === 'star' ? '升星成功' : act === 'reroll' ? '词条已重刷' : act === 'dismantle' ? '已分解' : '已卖出');
+            : act === 'temper' ? '淬炼成功' : act === 'star' ? '升星成功' : act === 'awaken' ? '觉醒成功' : act === 'reroll' ? '词条已重刷' : act === 'dismantle' ? '已分解' : '已卖出');
           if (act === 'dismantle' && r && r.result && r.result.dismantled) {
             const dz = r.result.dismantled;
             toast('♻️ 分解 ' + (dz.itemName || '装备') + ' → ' + (dz.matName || dz.mat) + ' ×' + dz.count, 'ok');
@@ -2645,6 +2683,10 @@
     const petTotal = Object.values(petLevels).map(Number).reduce((a, b) => a + b, 0);
     if (petTotal >= 200) out.push(['🦁', '万兽之王', '全部宠物总等级 ≥ 200']);
     if ((view.bossKills || []).includes('boss_chaos')) out.push(['🌪️', '混沌主宰', '击杀混沌魔君·无序之源']);
+    // 第十一批新称号：进化宗师（进化 3 只）与鸿蒙主宰（终局 Boss，新压轴）
+    const evolvedCount = ((view.pet && view.pet.evolved) || []).length;
+    if (evolvedCount >= 3) out.push(['🦋', '进化宗师', '让 3 只宠物完成进化']);
+    if ((view.bossKills || []).includes('boss_hongmeng')) out.push(['🌌', '鸿蒙主宰', '击杀鸿蒙道祖·太初']);
     return out;
   }
 
@@ -2661,6 +2703,8 @@
       (view.bossKills || []).includes('boss_star'),
       (view.bossKills || []).includes('boss_void'),
       (view.bossKills || []).includes('boss_chaos'),
+      (view.bossKills || []).includes('boss_hongmeng'),
+      ((view.pet && view.pet.evolved) || []).length,
       st.monthlyClaims || 0,
       Math.max(0, ...Object.values((view.pet && view.pet.levels) || {}).map(Number)),
       Object.values((view.pet && view.pet.levels) || {}).map(Number).reduce((a, b) => a + b, 0)]);
@@ -2908,7 +2952,7 @@
   function renderExtSkills() {
     const row = $('extSkillRow');
     if (!row || renderExtSkills._built) return;
-    const want = ['charge', 'hex_slow', 'flurry', 'void_slash', 'time_stop'];
+    const want = ['charge', 'hex_slow', 'flurry', 'void_slash', 'time_stop', 'sword_rain'];
     const defs = ((S.meta && S.meta.skills) || []).filter(d => want.includes(d.id));
     if (!defs.length) return;
     renderExtSkills._built = true;
@@ -2946,6 +2990,11 @@
       } else {
         btn = '<button class="daily-claim ready" data-pet-adopt="' + esc(d.id) + '">领养 ' + fmt(d.price) + ' 金</button>';
       }
+      // 宠物进化（第十一批）：满级且未进化时给进化按钮；已进化打徽章
+      const isEvolved = (pv.evolved || []).includes(d.id);
+      if (isOwned && !isEvolved && (((pv.levels || {})[d.id]) || 1) >= (pv.maxLevel || 50)) {
+        btn += ' <button class="daily-claim ready" data-pet-evolve="' + esc(d.id) + '">🦋 进化（属性 ×2）</button>';
+      }
       const nick = (pv.names || {})[d.id];
       // 出战宠物经验进度条（第十批）：整数百分比渲染（pv 已在签名内，经验变化自然触发重渲）
       let expBar = '';
@@ -2956,7 +3005,8 @@
       }
       return '<div class="daily-card' + (isActive ? ' done' : '') + '">' +
         '<div class="daily-head"><span>' + d.emoji + ' ' + esc(nick || d.name) + (nick ? '（' + esc(d.name) + '）' : '') +
-        (isOwned ? ' <span class="panel-tip">' + (((pv.levels || {})[d.id]) || 1) + ' 级</span>' : '') + '</span>' +
+        (isOwned ? ' <span class="panel-tip">' + (((pv.levels || {})[d.id]) || 1) + ' 级</span>' : '') +
+        (isEvolved ? ' <span class="panel-tip">🦋 已进化</span>' : '') + '</span>' +
         (isOwned ? '<button class="mat-sell" data-pet-rename="' + esc(d.id) + '">✏️ 改名</button>' : '') + '</div>' +
         '<div class="daily-desc">' + esc(d.desc) + '（随等级放大）</div>' + expBar + btn + '</div>';
     }).join('') || '<p class="empty-hint">暂无宠物</p>';
@@ -2990,6 +3040,12 @@
     box.querySelectorAll('[data-pet-feed]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true;
       try { const r = await call(() => API.feedPet(API.state.slot)); const res = (r && r.result) || {}; if (res.leveledUp > 0) toast('🐾 宠物升到了 ' + res.level + ' 级！', 'ok'); if (r) applyView(r); }
+      catch (err) { toast(err.message, 'err'); b.disabled = false; }
+    }));
+    box.querySelectorAll('[data-pet-evolve]').forEach(b => b.addEventListener('click', async () => {
+      if (!confirm('让这只宠物进化？消耗 200,000 金 + 混沌核心 ×3，进化后属性 ×2（不可撤销）。')) return;
+      b.disabled = true;
+      try { const r = await call(() => API.evolvePet(API.state.slot, b.dataset.petEvolve)); toast('🦋 进化成功！属性翻倍', 'ok'); if (r) applyView(r); }
       catch (err) { toast(err.message, 'err'); b.disabled = false; }
     }));
   }
@@ -3113,7 +3169,7 @@
     // 材料出售（第七批）：价目与库存筹码，全卖一键
     const MAT_SELL = [['pelt', '🟫 兽皮', 20], ['wolf_fang', '🦷 狼牙', 35], ['ore', '⛏️ 矿石', 60],
       ['toad_gland', '🟢 毒腺', 90], ['mana_dust', '✨ 魔尘', 140], ['fire_crystal', '🔥 火晶', 220],
-      ['abyss_crystal', '🕳️ 深渊结晶', 400], ['star_shard', '🌟 星核碎片', 650], ['void_shard', '🌀 虚空碎片', 2000], ['chaos_core', '🌪️ 混沌核心', 6000]];
+      ['abyss_crystal', '🕳️ 深渊结晶', 400], ['star_shard', '🌟 星核碎片', 650], ['void_shard', '🌀 虚空碎片', 2000], ['chaos_core', '🌪️ 混沌核心', 6000], ['hongmeng_qi', '🌌 鸿蒙紫气', 20000]];
     const myMats = (S.view && S.view.materials) || {};
     const sellChips = MAT_SELL.map(([c, n, price]) => {
       const have = myMats[c] || 0;

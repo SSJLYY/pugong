@@ -244,7 +244,8 @@ class DailyQuestsTest {
     void usePotionIncrementsLifetimeCounter() {
         GameService game = new GameService();
         PlayerState s = NewState.create();
-        String code = GameConst.POTIONS.keySet().iterator().next();
+        // 用确定性的普通药剂（Map.ofEntries 迭代序不稳定，首项可能是 pet_treat 这类需前置条件的特殊道具）
+        String code = "ironpot";
         s.potions.put(code, 2);
         long before = s.stats.potionsUsed;
         game.usePotion(s, code);

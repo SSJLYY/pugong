@@ -63,7 +63,11 @@ public final class Sets {
             // 混沌战装（第十批，混沌界 4 件套：第九套）
             new SetDef("chaossuit", "混沌战装", "🌪️",
                     List.of("chaos_blade", "chaos_hood", "chaos_robe", "chaos_treads"),
-                    b("PATK", "600", "MATK", "600"), b("PATK", "1500", "MATK", "1500", "CRITD", "0.35")));
+                    b("PATK", "600", "MATK", "600"), b("PATK", "1500", "MATK", "1500", "CRITD", "0.35")),
+            // 鸿蒙战装（第十一批，鸿蒙界 4 件套：第十套）
+            new SetDef("hongmengsuit", "鸿蒙战装", "🌌",
+                    List.of("hongmeng_blade", "hongmeng_hood", "hongmeng_robe", "hongmeng_treads"),
+                    b("PATK", "1600", "MATK", "1600"), b("PATK", "4000", "MATK", "4000", "CRITD", "0.40")));
 
     private static final Map<String, SetDef> BY_MEMBER = buildByMember();
     private static final Map<String, SetDef> BY_ID = buildById();

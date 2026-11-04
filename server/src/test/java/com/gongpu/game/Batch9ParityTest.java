@@ -13,17 +13,17 @@ class Batch9ParityTest {
 
     @Test
     void batch9CountsAndCodes() throws Exception {
-        assertEquals(8, GameConst.PETS.size(), "宠物 8");
-        assertEquals(11, GameConst.ZONES.size(), "区域 11");
-        assertEquals(9, Sets.ALL.size(), "套装 9");
-        assertEquals(98, Achievements.ALL.size(), "成就 98");
-        assertEquals(23, GameConst.MOB_TRAITS.size(), "怪物词条 23");
-        assertEquals(36, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 36");
-        assertEquals(44, GameConst.POTIONS.size(), "药剂 41");
-        assertEquals(7, MonthlyQuests.TEMPLATES.size(), "月常模板 7");
-        assertEquals(5, WeeklyQuests.TEMPLATES.size(), "周常模板 5");
-        assertEquals(8, GameConst.PETS.size(), "宠物 8（代码常量）");
-        assertEquals(38, GameConst.codexTotal(), "图鉴 38（混沌 +5）");
+        assertEquals(9, GameConst.PETS.size(), "宠物 9");
+        assertEquals(12, GameConst.ZONES.size(), "区域 12");
+        assertEquals(10, Sets.ALL.size(), "套装 10");
+        assertEquals(113, Achievements.ALL.size(), "成就 113");
+        assertEquals(26, GameConst.MOB_TRAITS.size(), "怪物词条 25");
+        assertEquals(39, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 38");
+        assertEquals(46, GameConst.POTIONS.size(), "药剂 45");
+        assertEquals(9, MonthlyQuests.TEMPLATES.size(), "月常模板 9");
+        assertEquals(7, WeeklyQuests.TEMPLATES.size(), "周常模板 7");
+        assertEquals(9, GameConst.PETS.size(), "宠物 9（代码常量）");
+        assertEquals(43, GameConst.codexTotal(), "图鉴 43");
         String sql = Files.readString(Path.of("src/main/resources/gongpu-full.sql"));
         for (String code : new String[]{
                 "void_blade", "void_bow", "void_hood", "void_robe", "void_treads", "void_ring",

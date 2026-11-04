@@ -382,6 +382,13 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "star-up", s -> game.starUp(s, reqIdx(body.index(), "index")));
     }
 
+    /** 装备觉醒（第十一批）：满星后混沌核心 + 金币，底子 +5%/级。 */
+    @PostMapping("/{slot}/awaken")
+    public Map<String, Object> awaken(HttpServletRequest req, @PathVariable int slot,
+                                      @RequestBody IdxReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "awaken", s -> game.awaken(s, reqIdx(body.index(), "index")));
+    }
+
     public record SocketReq(Integer index, String gem, Integer gemIndex) {
     }
 
@@ -421,6 +428,14 @@ public class GameController {
                                         @RequestBody PetReq body) {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "adopt-pet",
                 s -> game.adoptPet(s, reqStr(body.id(), "id")));
+    }
+
+    /** 宠物进化（第十一批）。 */
+    @PostMapping("/{slot}/evolve-pet")
+    public Map<String, Object> evolvePet(HttpServletRequest req, @PathVariable int slot,
+                                         @RequestBody PetReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "evolve-pet",
+                s -> game.evolvePet(s, reqStr(body.id(), "id")));
     }
 
     /** 切换出战宠物（第九批）。 */

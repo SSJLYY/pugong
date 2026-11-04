@@ -40,6 +40,6 @@ class GemAffinityTest {
         aff.talent = "gem_affinity";
         // 60 × 1.25 = 75 → 2 + 75
         assertEquals(0, PanelCalculator.of(aff).PATK().compareTo(Num.of(77)));
-        assertEquals(13, GameConst.TALENTS.size(), "天赋总数应为 11");
+        assertEquals(14, GameConst.TALENTS.size(), "天赋总数应为 11");
     }
 }

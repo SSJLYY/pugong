@@ -160,6 +160,8 @@ public class PlayerState {
     /** 宠物自定义昵称（第九批，code → 昵称，空则用默认名）。 */
     public Map<String, String> petNames = new LinkedHashMap<>();
     public Map<String, Double> petExps = new LinkedHashMap<>();
+    /** 已进化宠物 code 集合（第十一批）：满级进化后属性 ×2。 */
+    public java.util.Set<String> petEvolved = new java.util.LinkedHashSet<>();
 
     /** 每日黑市刷新日期（第七批，Asia/Shanghai）；跨日由 BlackMarket.ensure 重刷。 */
     public String marketDay;
@@ -246,6 +248,8 @@ public class PlayerState {
         public int temper;
         /** 升星等级（0..STAR_MAX_LV，第十批）：底子额外乘区 +3%/星，与强化/淬炼独立计层；旧档默认 0。 */
         public int star;
+        /** 觉醒等级（0..AWAKEN_MAX_LV，第十一批）：满星后觉醒，底子额外乘区 +5%/级；旧档默认 0。 */
+        public int awaken;
         /** 已镶嵌宝石 code 列表（第八批，上限 GameConst.GEM_SOCKET_MAX）；旧档为 null，读取处兜底。 */
         public List<String> gems = new ArrayList<>();
     }
@@ -284,6 +288,8 @@ public class PlayerState {
         public String trait;
         /** Boss 二阶段（第七批）：血量跌破 50% 后置位，攻速/攻击提升，只触发一次。 */
         public boolean phase2;
+        /** 词条「不朽」是否已触发（第十一批，每只怪仅一次）。 */
+        public boolean immortalUsed;
     }
 
     public static class Stats {
@@ -335,6 +341,16 @@ public class PlayerState {
         public long petFeeds = 0;
         /** 宠物零食使用次数（第十批）。 */
         public long petTreats = 0;
+        /** 累计宠物进化次数（第十一批）。 */
+        public long petEvolves = 0;
+        /** 累计击杀不朽词条怪（第十一批）。 */
+        public long immortalKills = 0;
+        /** 累计击杀吞噬词条怪（第十一批）。 */
+        public long devourKills = 0;
+        /** 累计击杀太虚词条怪（第十一批）。 */
+        public long taixuKills = 0;
+        /** 累计装备觉醒次数（第十一批）。 */
+        public long awakens = 0;
         /** 镜像词条怪击杀数（第十批）。 */
         public long mirrorKills = 0;
         /** 虚弱词条怪击杀数（第十批）。 */

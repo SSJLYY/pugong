@@ -20,13 +20,13 @@ class Batch10ContentTest {
 
     @Test
     void countsGrow() {
-        assertEquals(44, GameConst.POTIONS.size(), "药剂 44");
-        assertEquals(30, GameConst.AFFIXES.size(), "词条 30");
-        assertEquals(23, GameConst.MOB_TRAITS.size(), "怪物词条 23");
-        assertEquals(13, GameConst.TALENTS.size(), "天赋 13");
-        assertEquals(36, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 36");
+        assertEquals(46, GameConst.POTIONS.size(), "药剂 45");
+        assertEquals(32, GameConst.AFFIXES.size(), "词条 30");
+        assertEquals(26, GameConst.MOB_TRAITS.size(), "怪物词条 25");
+        assertEquals(14, GameConst.TALENTS.size(), "天赋 13");
+        assertEquals(39, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 38");
         assertTrue(GameConst.traitPool(10).contains("chaos_frenzy"), "混沌池应含狂乱");
-        assertEquals(22, GameConst.traitPool(10).size(), "混沌池 22 条");
+        assertEquals(24, GameConst.traitPool(10).size(), "混沌池 24 条");
     }
 
     @Test

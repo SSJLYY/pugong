@@ -246,6 +246,9 @@ public final class GameEngine {
         if ("weaken".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_WEAKEN_MUL));
         }
+        if ("taixu".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_TAIXU_MUL));
+        }
         if ("bulwark".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_BULWARK_MUL));
         }
@@ -349,6 +352,9 @@ public final class GameEngine {
         if ("weaken".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_WEAKEN_MUL));
         }
+        if ("taixu".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_TAIXU_MUL));
+        }
         // 词条·堡垒：皮糙肉厚，你对它造成的伤害打折（同乘区）
         if ("bulwark".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_BULWARK_MUL));
@@ -387,6 +393,11 @@ public final class GameEngine {
         if (PanelCalculator.active(s, "void_slash")) {
             perHit = Num.mul(perHit, Num.of(GameConst.VOID_SLASH_MUL));
             s.buffs.remove("void_slash");
+        }
+        // 主动·万剑归宗（第十一批）：下一击 ×5，一次性消费 buff（与虚空斩/冲锋/重击可叠乘）
+        if (PanelCalculator.active(s, "sword_rain")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.SWORD_RAIN_MUL));
+            s.buffs.remove("sword_rain");
         }
 
         BigDecimal totalDmg = Num.mul(perHit, punches);
@@ -445,6 +456,14 @@ public final class GameEngine {
                 m.curHP = Num.sub(m.curHP, dmgLeft);
                 dmgLeft = Num.ZERO;
                 break;
+            }
+            // 词条「不朽」（第十一批）：首次致死不死——保留 30% 生命复苏，本帧溢出伤害继续结算（可同帧真杀）
+            if ("immortal".equals(m.trait) && !m.immortalUsed) {
+                m.immortalUsed = true;
+                m.curHP = Num.mul(m.maxHP, Num.of(GameConst.TRAIT_IMMORTAL_KEEP));
+                dmgLeft = Num.sub(dmgLeft, hpNeeded);
+                pushEvent(s, "💀 不朽！怪物在致死一击下复苏，保留 30% 生命");
+                continue;
             }
             // 击杀当前这只
             dmgLeft = Num.sub(dmgLeft, hpNeeded);
@@ -640,6 +659,15 @@ public final class GameEngine {
         }
         if ("chaos_frenzy".equals(m.trait)) {
             s.stats.frenzyKills++;
+        }
+        if ("immortal".equals(m.trait)) {
+            s.stats.immortalKills++;
+        }
+        if ("devour".equals(m.trait)) {
+            s.stats.devourKills++;
+        }
+        if ("taixu".equals(m.trait)) {
+            s.stats.taixuKills++;
         }
         // 宠物经验（第九批）：出战宠物随击杀成长，升级时播报
         if (s.pet != null) {
@@ -992,6 +1020,11 @@ public final class GameEngine {
         if ("leech".equals(m.trait) && m.maxHP != null && total.signum() > 0) {
             BigDecimal heal = Num.mul(total, Num.of(GameConst.TRAIT_LEECH_MUL));
             m.curHP = Num.min(m.maxHP, Num.add(m.curHP, heal));
+        }
+        // 词条·吞噬（第十一批）：每次攻击额外吞噬玩家 2% 生命上限的真实伤害（护盾先吸，与主伤害同帧结算）
+        if ("devour".equals(m.trait) && !s.dead) {
+            BigDecimal devourDmg = Num.mul(p.maxHP(), Num.of(GameConst.TRAIT_DEVOUR_MUL));
+            s.life.curHP = Num.sub(s.life.curHP, absorbShield(s, devourDmg));
         }
         if (blocking && Num.gt(p.PATK(), Num.ZERO)) {
             // 反弹:格挡期间把承受伤害的 50% 弹回怪物(设计 §7.3 反弹 50%)

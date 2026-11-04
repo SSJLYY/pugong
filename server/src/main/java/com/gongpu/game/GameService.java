@@ -868,6 +868,58 @@ public class GameService {
         return m;
     }
 
+    /**
+     * 一键穿套装（第八批）：按成员 code 在背包里找评分最高的一件，逐件走 equip 换装
+     * （被换下的回背包，满包折现与手动换装同口径）。缺件跳过，回执带实穿件数。
+     */
+    public Map<String, Object> equipSet(PlayerState s, String setId) {
+        Sets.SetDef def = null;
+        for (Sets.SetDef d : Sets.ALL) {
+            if (d.id().equals(setId)) {
+                def = d;
+                break;
+            }
+        }
+        if (def == null) {
+            throw ApiException.badRequest("套装不存在：" + setId);
+        }
+        int equipped = 0;
+        List<String> missing = new ArrayList<>();
+        for (String code : def.members()) {
+            // 已穿着该成员则跳过（无相位栏里的也算）
+            boolean worn = s.equipped.values().stream()
+                    .anyMatch(it -> code.equals(Sets.codeOf(it)));
+            if (worn) {
+                equipped++;
+                continue;
+            }
+            int bestIdx = -1;
+            double bestScore = -1;
+            for (int i = 0; i < s.equipBag.size(); i++) {
+                PlayerState.Item it = s.equipBag.get(i);
+                if (code.equals(Sets.codeOf(it))) {
+                    double sc = equipScore(it);
+                    if (sc > bestScore) {
+                        bestScore = sc;
+                        bestIdx = i;
+                    }
+                }
+            }
+            if (bestIdx < 0) {
+                missing.add(code);
+                continue;
+            }
+            equip(s, bestIdx);
+            equipped++;
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("set", setId);
+        m.put("equipped", equipped);
+        m.put("missing", missing);
+        return m;
+    }
+
     /** 周常任务领取（第八批）：三任务全领触发全清奖励——50,000 金 + 随机宝石 ×2（每周一次）。 */
     public Map<String, Object> claimWeekly(PlayerState s, String taskId) {
         long reward = WeeklyQuests.claim(s, taskId);

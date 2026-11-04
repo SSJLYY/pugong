@@ -1120,9 +1120,19 @@
       if (!sets.length) { toast('套装数据未加载', 'err'); return; }
       const rows = sets.map(sm =>
         '<div class="trait-row"><b>' + sm.emoji + ' ' + esc(sm.name) + '</b><span>成员：' +
-        sm.members.map(esc).join('、') + '<br>2 件：' + esc(sm.bonus2) + '<br>4 件：' + esc(sm.bonus4) + '</span></div>').join('');
+        sm.members.map(esc).join('、') + '<br>2 件：' + esc(sm.bonus2) + '<br>4 件：' + esc(sm.bonus4) + '</span>' +
+        '<button class="mat-sell" data-equip-set="' + sm.id + '">👕 一键穿戴本套</button></div>').join('');
       infoModal('🧩 套装图鉴',
         '<p class="pick-intro">每个区域有一套四件套，穿同套 2 件 / 4 件激活加成（按不同成员计件，无相位栏同名重复件不刷件数）。</p>' + rows);
+      document.querySelectorAll('[data-equip-set]').forEach(b => b.addEventListener('click', async () => {
+        b.disabled = true;
+        try {
+          const r = await call(() => API.equipSet(API.state.slot, b.dataset.equipSet));
+          const res = (r && r.result) || {};
+          toast('👕 已穿上 ' + (res.equipped || 0) + ' 件套装' + ((res.missing || []).length ? '（缺 ' + res.missing.length + ' 件）' : '（全套齐活）'), 'ok');
+          if (r) applyView(r);
+        } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+      }));
     });
 
     $('btnManualSave').addEventListener('click', async () => {

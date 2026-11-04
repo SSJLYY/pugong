@@ -494,6 +494,14 @@ public class GameController {
                 s -> crafts.buy(s, reqStr(body.id(), "id"), body.count() == null ? 1 : body.count()));
     }
 
+    /** 一键穿套装（第八批）：按套装 id 把背包里的成员件逐件换上。 */
+    @PostMapping("/{slot}/equip-set")
+    public Map<String, Object> equipSet(HttpServletRequest req, @PathVariable int slot,
+                                        @RequestBody AchReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "equip-set",
+                s -> game.equipSet(s, reqStr(body.id(), "id")));
+    }
+
     /** 一键穿最强装备（按评分自动换装）。 */
     @PostMapping("/{slot}/autoequip")
     public Map<String, Object> autoEquip(HttpServletRequest req, @PathVariable int slot) {

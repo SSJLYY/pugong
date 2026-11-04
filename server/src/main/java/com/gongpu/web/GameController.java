@@ -112,8 +112,32 @@ public class GameController {
         return runLocked(uid, slot, username, null, action);
     }
 
+    // 写端点限流（第八批）：同一账号 10 秒内写动作超过 60 次返回 429。
+    // 纯轮询（action==null 的 GET /state）不计；正常游玩（含连点技能/批量按钮）远低于此线，
+    // 只挡脚本高频刷写。窗口为进程级滑动窗口，重启清零可接受。
+    private static final int WRITE_LIMIT = 60;
+    private static final long WRITE_WINDOW_MS = 10_000L;
+    private static final java.util.concurrent.ConcurrentHashMap<Long, java.util.ArrayDeque<Long>>
+            WRITE_TIMES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static void checkWriteRate(long uid, long now) {
+        java.util.ArrayDeque<Long> q = WRITE_TIMES.computeIfAbsent(uid, k -> new java.util.ArrayDeque<>());
+        synchronized (q) {
+            while (!q.isEmpty() && now - q.peekFirst() > WRITE_WINDOW_MS) {
+                q.pollFirst();
+            }
+            if (q.size() >= WRITE_LIMIT) {
+                throw com.gongpu.common.ApiException.tooManyRequests("操作太频繁，请稍后再试");
+            }
+            q.addLast(now);
+        }
+    }
+
     private Map<String, Object> runLocked(long uid, int slot, String username, String auditLabel,
                                           java.util.function.Function<PlayerState, Map<String, Object>> action) {
+        if (action != null) {
+            checkWriteRate(uid, System.currentTimeMillis());
+        }
         PlayerState s = saves.load(uid, slot);
         // 用户名优先取 JWT claim（拦截器已解析），免去每秒轮询一次账号查库；
         // 无 claim 的老令牌才回源查一次

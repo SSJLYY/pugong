@@ -2573,11 +2573,11 @@
     if (Number(st.gemsSocketed || 0) >= 10) out.push(['💎', '宝石大师', '累计镶嵌宝石 ≥ 10']);
     if (Number(st.weeklyClaims || 0) >= 3) out.push(['🗓️', '周常勤勉', '完成一整周周常全清']);
     if ((view.bossKills || []).includes('boss_star')) out.push(['🌌', '星界行者', '击杀星核主宰']);
-    // 第九批新称号：宠物/虚空/月常三条线
+    // 第九批新称号：宠物/虚空/月常三条线（顺序即顶栏速览优先级：虚空行者压轴）
+    if (Number(st.monthlyClaims || 0) >= 3) out.push(['📆', '月度达人', '领满一整月月常任务']);
     const petLevels = (view.pet && view.pet.levels) || {};
     if (Math.max(0, ...Object.values(petLevels).map(Number)) >= 50) out.push(['🐾', '驭兽宗师', '任一宠物达到 50 级满级']);
     if ((view.bossKills || []).includes('boss_void')) out.push(['🌀', '虚空行者', '击杀虚空之主·无相天魔']);
-    if (Number(st.monthlyClaims || 0) >= 3) out.push(['📆', '月度达人', '领满一整月月常任务']);
     return out;
   }
 

@@ -40,5 +40,7 @@ class TitlesBatch9Test {
         assertTrue(js.contains("月度达人"), "缺月度达人称号");
         assertTrue(js.contains("boss_void"), "虚空行者须以 boss_void 为条件");
         assertTrue(js.contains("monthlyClaims"), "月度达人须以 monthlyClaims 为条件");
+        // 顶栏速览取列表末位：虚空行者（终局 Boss）须排在月度达人之后压轴
+        assertTrue(js.indexOf("'虚空行者'") > js.indexOf("'月度达人'"), "虚空行者应压轴于月度达人");
     }
 }

@@ -500,6 +500,25 @@ public final class GameConst {
     /** 淬炼（第七批）：与强化独立的第二成长线，满 5 级，底子 +4%/级（成本属性不吃乘区，同强化口径）。 */
     public static final int TEMPER_MAX_LV = 5;
     public static final double TEMPER_STAT_BONUS = 0.04;
+
+    // ==================== 宝石镶嵌（第八批） ====================
+
+    /** 宝石定义：stats 为 flat 加成（与装备词条同区，属装备来源、不受沉默压制）。 */
+    public record GemDef(String id, String name, String emoji, Map<String, BigDecimal> stats, String desc) {
+    }
+
+    /** 每件装备的镶嵌孔上限。 */
+    public static final int GEM_SOCKET_MAX = 3;
+
+    /** 六种宝石：Boss 与精英掉落，存放在 materials 里（code 即宝石 id）。 */
+    public static final Map<String, GemDef> GEMS = Map.of(
+            "gem_ruby", new GemDef("gem_ruby", "红宝石", "🔺", Map.of("PATK", new BigDecimal("60")), "物攻 +60"),
+            "gem_sapphire", new GemDef("gem_sapphire", "蓝宝石", "🔷", Map.of("MATK", new BigDecimal("60")), "魔攻 +60"),
+            "gem_emerald", new GemDef("gem_emerald", "翡翠", "💚", Map.of("maxHP", new BigDecimal("3000")), "生命上限 +3000"),
+            "gem_topaz", new GemDef("gem_topaz", "黄玉", "💛", Map.of("CRIT", new BigDecimal("0.03")), "暴击率 +3%"),
+            "gem_amethyst", new GemDef("gem_amethyst", "紫水晶", "💜", Map.of("ASPD", new BigDecimal("0.12")), "攻速 +0.12"),
+            "gem_opal", new GemDef("gem_opal", "蛋白石", "⚪",
+                    Map.of("PDEF", new BigDecimal("40"), "MDEF", new BigDecimal("40")), "双防各 +40"));
     public static final int ENHANCE_COST_BASE = 100;
     public static final double ENHANCE_COST_MUL = 1.5;
 
@@ -575,14 +594,20 @@ public final class GameConst {
             "inferno", "scroll_fire", "bats", "scroll_thunder");
 
     /** 材料展示信息：code → [名称, emoji]。 */
-    public static final Map<String, String[]> MAT_INFO = Map.of(
-            "pelt", new String[]{"兽皮", "🟫"},
-            "wolf_fang", new String[]{"狼牙", "🦷"},
-            "ore", new String[]{"矿石", "⛏️"},
-            "toad_gland", new String[]{"毒腺", "🟢"},
-            "mana_dust", new String[]{"魔尘", "✨"},
-            "fire_crystal", new String[]{"火晶", "🔥"},
-            "abyss_crystal", new String[]{"深渊结晶", "🕳️"});
+    public static final Map<String, String[]> MAT_INFO = Map.ofEntries(
+            Map.entry("pelt", new String[]{"兽皮", "🟫"}),
+            Map.entry("wolf_fang", new String[]{"狼牙", "🦷"}),
+            Map.entry("ore", new String[]{"矿石", "⛏️"}),
+            Map.entry("toad_gland", new String[]{"毒腺", "🟢"}),
+            Map.entry("mana_dust", new String[]{"魔尘", "✨"}),
+            Map.entry("fire_crystal", new String[]{"火晶", "🔥"}),
+            Map.entry("abyss_crystal", new String[]{"深渊结晶", "🕳️"}),
+            Map.entry("gem_ruby", new String[]{"红宝石", "🔺"}),
+            Map.entry("gem_sapphire", new String[]{"蓝宝石", "🔷"}),
+            Map.entry("gem_emerald", new String[]{"翡翠", "💚"}),
+            Map.entry("gem_topaz", new String[]{"黄玉", "💛"}),
+            Map.entry("gem_amethyst", new String[]{"紫水晶", "💜"}),
+            Map.entry("gem_opal", new String[]{"蛋白石", "⚪"}));
 
     /** 材料出售单价（第七批，金币/份）：越深的区域材料越值钱；仅区域材料可售（图纸/卷轴不可）。 */
     public static final Map<String, Integer> MAT_SELL_PRICE = Map.of(

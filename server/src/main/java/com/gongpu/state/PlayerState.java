@@ -215,6 +215,8 @@ public class PlayerState {
         public String code;
         /** 淬炼等级（0..TEMPER_MAX_LV）：底子额外乘区 +4%/级，与强化独立计层；旧档默认 0。 */
         public int temper;
+        /** 已镶嵌宝石 code 列表（第八批，上限 GameConst.GEM_SOCKET_MAX）；旧档为 null，读取处兜底。 */
+        public List<String> gems = new ArrayList<>();
     }
 
     public static class AffixInst {

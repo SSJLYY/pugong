@@ -139,6 +139,15 @@ public final class PanelCalculator {
                     pct.merge(a.sideKey, a.sideVal, Num::add);
                 }
             }
+            // 镶嵌宝石（第八批）：flat 加成与词条同区（装备来源，不受沉默压制）
+            if (it.gems != null) {
+                for (String g : it.gems) {
+                    GameConst.GemDef gd = GameConst.GEMS.get(g);
+                    if (gd != null) {
+                        gd.stats().forEach((k, v) -> flat.merge(k, v, Num::add));
+                    }
+                }
+            }
         }
         BigDecimal regenHpPct = pctHp.getOrDefault("REGEN_HP", Num.ZERO);
 

@@ -1240,6 +1240,23 @@ body.theme-ink .equip-slot:hover{background:rgba(255,255,255,.85)}
 body.theme-ink .equip-slot .es-slot{margin-top:0}
 body.theme-ink .equip-slot .es-set{flex-basis:100%;font-size:11px}
 
+/* 水墨主题·扁平按钮体系（第九批，参照 Element 风描边按钮） */
+body.theme-ink .skill-btn, body.theme-ink .boss-btn, body.theme-ink .daily-btn,
+body.theme-ink .d-btn, body.theme-ink .game-tab{
+  background:rgba(255,255,255,.6);border:1px solid rgba(46,58,56,.4);color:#22271f;
+  border-radius:8px;box-shadow:none;
+}
+body.theme-ink .skill-btn:hover:not(:disabled), body.theme-ink .boss-btn:hover:not(:disabled),
+body.theme-ink .daily-btn:hover, body.theme-ink .d-btn:hover, body.theme-ink .game-tab:hover{
+  border-color:#9e2b25;color:#9e2b25;background:rgba(158,43,37,.06);
+}
+body.theme-ink .game-tab.active{
+  background:#9e2b25;border-color:#9e2b25;color:#fff;
+}
+body.theme-ink .boss-btn{
+  border-color:rgba(158,43,37,.55);color:#9e2b25;font-weight:700;
+}
+
 /* 成就筛选（第七批） */
 .ach-filters{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
 .ach-chip{background:var(--panel);border:1px solid var(--border);color:var(--txt-dim);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;min-height:26px}

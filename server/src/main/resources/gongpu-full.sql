@@ -1210,11 +1210,12 @@ INSERT INTO `cfg_skill`
   ('gem_sniffer', '宝石嗅觉', '👃', 'passive', 420, 0, 0, 0, '{"effect":"gem_sniffer","mul":1.5}', '词条怪的宝石掉率 +50%（10%→15%）', 1, 30);
 
 -- ============================================================
--- 整合完毕。验收参考（2026-11-03 第七批 100 轮收官口径）：
---   cfg_equipment_template 58 / cfg_item 药剂 36 / cfg_affix 24
---   cfg_craft 18 / cfg_quest 18 / cfg_skill 27（主动 12 + 被动 15）
---   怪物词条 14（代码 GameConst.MOB_TRAITS）/ 成就 48（代码 Achievements）
---   天赋 10 / 套装 6（代码 GameConst.TALENTS / Sets）/ 区域 8（含深渊裂隙）
+-- 整合完毕。验收参考（2026-11-04 第八批 100 轮收官口径）：
+--   cfg_equipment_template 66 / cfg_item 药剂 39 / cfg_affix 26
+--   cfg_craft 22 / cfg_quest 22 / cfg_skill 30（主动 13 + 被动 17）
+--   怪物词条 17（代码 GameConst.MOB_TRAITS）/ 成就 66（代码 Achievements）
+--   天赋 11 / 套装 7（代码 GameConst.TALENTS / Sets）/ 区域 9（含星界）
+--   宝石 12 种（代码 GameConst.GEMS）/ 图鉴 28（代码 GameConst 口径）
 --   运行时可用 /api/health 的 content 指纹交叉核对：
---   items=36,affixes=24,equipment=58,skills=27,crafts=18,traits=14
+--   items=39,affixes=26,equipment=66,skills=30,crafts=22,traits=17
 -- ============================================================

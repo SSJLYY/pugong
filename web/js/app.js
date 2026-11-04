@@ -2842,7 +2842,8 @@
       if (isActive) {
         btn = '<button class="daily-claim" disabled>⭐ 出战中 · ' + (pv.level || 1) + ' 级（' +
           Math.floor(pv.exp || 0) + '/' + (pv.expNeed || '—') + ' 经验）</button>' +
-          (pv.level < (pv.maxLevel || 50) ? ' <button class="daily-claim ready" data-pet-feed="1">🍖 喂食 150 金</button>' : '');
+          (pv.level < (pv.maxLevel || 50) ? ' <button class="daily-claim ready" data-pet-feed="1">🍖 喂食 150 金</button>' +
+          ' <button class="daily-claim ready" data-pet-feed10="1">🍖 连喂 ×10</button>' : '');
       } else if (isOwned) {
         btn = '<button class="daily-claim ready" data-pet-switch="' + esc(d.id) + '">出战</button>';
       } else {
@@ -2860,6 +2861,11 @@
     box.querySelectorAll('[data-pet-switch]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true;
       try { const r = await call(() => API.switchPet(API.state.slot, b.dataset.petSwitch)); if (r) applyView(r); }
+      catch (err) { toast(err.message, 'err'); b.disabled = false; }
+    }));
+    box.querySelectorAll('[data-pet-feed10]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try { const r = await call(() => API.feedPetBatch(API.state.slot)); const res = (r && r.result) || {}; toast('🍖 连喂 ' + (res.fed || 0) + ' 次，宠物现 ' + (res.level || 1) + ' 级', 'ok'); if (r) applyView(r); }
       catch (err) { toast(err.message, 'err'); b.disabled = false; }
     }));
     box.querySelectorAll('[data-pet-feed]').forEach(b => b.addEventListener('click', async () => {
@@ -2988,7 +2994,7 @@
     // 材料出售（第七批）：价目与库存筹码，全卖一键
     const MAT_SELL = [['pelt', '🟫 兽皮', 20], ['wolf_fang', '🦷 狼牙', 35], ['ore', '⛏️ 矿石', 60],
       ['toad_gland', '🟢 毒腺', 90], ['mana_dust', '✨ 魔尘', 140], ['fire_crystal', '🔥 火晶', 220],
-      ['abyss_crystal', '🕳️ 深渊结晶', 400], ['star_shard', '🌟 星核碎片', 650]];
+      ['abyss_crystal', '🕳️ 深渊结晶', 400], ['star_shard', '🌟 星核碎片', 650], ['void_shard', '🌀 虚空碎片', 2000]];
     const myMats = (S.view && S.view.materials) || {};
     const sellChips = MAT_SELL.map(([c, n, price]) => {
       const have = myMats[c] || 0;
@@ -3014,7 +3020,41 @@
     const gemRow = '<div class="potion-item"><div class="pi-info"><b>💎 宝石</b>' +
       '<div class="pi-desc">Boss 必掉、词条怪概率掉；背包装备点「💠 镶嵌」装上（每件 3 孔），3 颗同种可融合成璀璨（属性 ×2.5）</div>' +
       '<div class="pi-desc">' + gemChips + '</div></div></div>';
-    box.innerHTML = exchangeRow + sellRow + gemRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    const batchRow = '<div class="potion-item"><div class="pi-info"><b>🧰 批量操作</b>' +
+      '<div class="pi-desc">' +
+      '<button class="mat-sell" id="btnSellAllMats">💰 卖全部区域材料</button>' +
+      ' <button class="mat-sell" id="btnFuseAll">💎 宝石全融合</button>' +
+      ' <button class="mat-sell" id="btnUnsocketAll">💠 拆全部宝石</button>' +
+      ' <button class="mat-sell" id="btnSellExtraBp">📐 卖多余图纸（每种留 1）</button>' +
+      ' <button class="mat-sell" id="btnExchangeAll">🔄 按上方选择全部兑换</button>' +
+      '</div></div></div>';
+    box.innerHTML = batchRow + exchangeRow + sellRow + gemRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    const batchBind = (id, fn, okMsg) => {
+      const b = box.querySelector('#' + id);
+      if (b) b.addEventListener('click', async () => {
+        b.disabled = true;
+        try {
+          const r = await call(fn);
+          toast(okMsg((r && r.result) || {}), 'ok');
+          if (r) applyView(r);
+          loadCrafts();
+        } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+      });
+    };
+    batchBind('btnSellAllMats', () => API.sellAllMaterials(API.state.slot),
+      res => '💰 一键卖出 ' + (res.count || 0) + ' 份材料：+' + fmt(res.gold || 0) + ' 金币');
+    batchBind('btnFuseAll', () => API.fuseAllGems(API.state.slot),
+      res => '💎 全融合完成：得到 ' + (res.fused || 0) + ' 颗璀璨宝石');
+    batchBind('btnUnsocketAll', () => API.unsocketAll(API.state.slot),
+      res => '💠 已拆回 ' + (res.removed || 0) + ' 颗宝石');
+    batchBind('btnSellExtraBp', () => API.sellExtraBlueprints(API.state.slot),
+      res => '📐 卖出多余图纸 ' + (res.count || 0) + ' 张：+' + fmt(res.gold || 0) + ' 金币');
+    batchBind('btnExchangeAll', () => {
+      const from = box.querySelector('#matFrom').value;
+      const to = box.querySelector('#matTo').value;
+      if (from === to) throw new Error('源材料与目标材料不能相同');
+      return API.matExchangeAll(API.state.slot, from, to);
+    }, res => '🔄 全部兑换完成：共换 ' + (res.times || 0) + ' 次');
     box.querySelectorAll('[data-buy-gem]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true;
       try {

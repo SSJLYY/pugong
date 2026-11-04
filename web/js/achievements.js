@@ -66,7 +66,8 @@
     { id: 'star_lord', name: '群星主宰', emoji: '👑', desc: '击杀星核主宰·噬光之心' },
     { id: 'weekly_1', name: '周常初成', emoji: '🗓️', desc: '领取 3 个周常任务奖励（整整一周全清）' },
     { id: 'weekly_8', name: '周常老兵', emoji: '🎖️', desc: '累计领取 24 个周常任务奖励（八周全清）' },
-    { id: 'gem_collector', name: '宝石收藏家', emoji: '💠', desc: '累计直购 10 颗宝石' }
+    { id: 'gem_collector', name: '宝石收藏家', emoji: '💠', desc: '累计直购 10 颗宝石' },
+    { id: 'set_wearer', name: '套装行者', emoji: '👕', desc: '同时穿戴任意一套装的全部 4 件' }
   ];
 
   var byId = {};

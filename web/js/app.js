@@ -145,7 +145,8 @@
   const ZONE_REQ_TEXT = {
     village: '', plain: '≥500血', forest: '≥3千血/5防', mine: '≥1.2万血/攻60',
     swamp: '≥4万血/50回/攻150', snow: '≥10万血/30魔防/攻400', volcano: '≥30万血/双防80/攻1200',
-    abyss: '≥200万血/双防150/攻4000'
+    abyss: '≥200万血/双防150/攻4000',
+    star: '≥2000万血/双防400/攻12000'
   };
 
   function toast(msg, kind) {
@@ -1807,7 +1808,7 @@
           }
           if (act === 'temper') {
             // 淬炼确认：成本与服务端同公式（材料 2×下一级、金币 300×下一级×(品质+1)，材料按来源区域）
-            const ZM = { plain: ['pelt', '兽皮'], forest: ['wolf_fang', '狼牙'], mine: ['ore', '矿石'], swamp: ['toad_gland', '毒腺'], snow: ['mana_dust', '魔尘'], volcano: ['fire_crystal', '火晶'] };
+            const ZM = { plain: ['pelt', '兽皮'], forest: ['wolf_fang', '狼牙'], mine: ['ore', '矿石'], swamp: ['toad_gland', '毒腺'], snow: ['mana_dust', '魔尘'], volcano: ['fire_crystal', '火晶'], abyss: ['abyss_crystal', '深渊结晶'], star: ['star_shard', '星核碎片'] };
             const zm = ZM[it.zone || 'plain'] || ZM.plain;
             const nxt = (it.temper || 0) + 1;
             if (!confirm('淬炼「' + it.name + '」→ ' + nxt + ' 级：底子 +4%\n消耗 ' + zm[1] + '×' + (2 * nxt) + ' + 金币 ' + (300 * nxt * (it.quality + 1)) + '。确认？')) return;
@@ -2674,7 +2675,7 @@
     // 材料出售（第七批）：价目与库存筹码，全卖一键
     const MAT_SELL = [['pelt', '🟫 兽皮', 20], ['wolf_fang', '🦷 狼牙', 35], ['ore', '⛏️ 矿石', 60],
       ['toad_gland', '🟢 毒腺', 90], ['mana_dust', '✨ 魔尘', 140], ['fire_crystal', '🔥 火晶', 220],
-      ['abyss_crystal', '🕳️ 深渊结晶', 400]];
+      ['abyss_crystal', '🕳️ 深渊结晶', 400], ['star_shard', '🌟 星核碎片', 650]];
     const myMats = (S.view && S.view.materials) || {};
     const sellChips = MAT_SELL.map(([c, n, price]) => {
       const have = myMats[c] || 0;

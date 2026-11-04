@@ -2538,6 +2538,13 @@
     if (sig === renderTitles._sig) return;
     renderTitles._sig = sig;
     const list = computeTitles(view);
+    // 顶栏称号速览（第八批）：展示最后获得（最高阶）的一枚，与角色页全量列表同源
+    const tc = $('titleChip');
+    if (tc) {
+      const top = list[list.length - 1];
+      tc.hidden = !top;
+      if (top) tc.textContent = top[0] + ' ' + top[1];
+    }
     if (!list.length) {
       holder.innerHTML = '<div class="effect-none">尚未获得称号</div>';
       return;

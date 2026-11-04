@@ -161,8 +161,11 @@ public final class PanelCalculator {
         // 套装加成（第七批）：已穿套装件数达标的 flat 加成，与装备词条同区（不受沉默压制）
         Sets.activeBonus(s).forEach((k, v) -> flat.merge(k, v, Num::add));
 
-        // 宠物伙伴（第九批）：出战宠物按等级放大 flat 加成（伙伴来源，不受沉默压制）
-        petBonus(s).forEach((k, v) -> flat.merge(k, v, Num::add));
+        // 宠物伙伴（第九批）：出战宠物按等级放大 flat 加成（伙伴来源，不受沉默压制）；
+        // 被动·宠物亲和再乘 1.3（被动本身受沉默压制）
+        BigDecimal petMul = (!silenced && s.passives.contains("pet_bond"))
+                ? Num.of(GameConst.PET_BOND_MUL) : Num.of(1);
+        petBonus(s).forEach((k, v) -> flat.merge(k, Num.mul(v, petMul), Num::add));
 
         // 无限属性点天赋(statlord):自由加点并入 flat 区——全部属性走既有读法
         // (含 min(BLESS_CAP) 封顶),加点单位见 GameConst.STAT_POINT_STEP

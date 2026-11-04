@@ -417,7 +417,11 @@ public final class GameConst {
             Map.entry("bloodrage", new PassiveDef("bloodrage", "血怒", "🩸", "生命低于 30% 时物理与魔法攻击 +15%，越残越怒")),
             Map.entry("executioner", new PassiveDef("executioner", "处决者", "🪓", "Boss 生命低于 30% 时对其伤害 +25%，斩尽杀绝")),
             Map.entry("armor_pierce", new PassiveDef("armor_pierce", "破甲专精", "🏹", "攻击无视目标 20% 的物防与魔防，厚甲在你面前如薄纸")),
-            Map.entry("gem_sniffer", new PassiveDef("gem_sniffer", "宝石嗅觉", "👃", "词条怪的宝石掉率 +50%（10%→15%），宝石党的鼻子")));
+            Map.entry("gem_sniffer", new PassiveDef("gem_sniffer", "宝石嗅觉", "👃", "词条怪的宝石掉率 +50%（10%→15%），宝石党的鼻子")),
+            Map.entry("pet_bond", new PassiveDef("pet_bond", "宠物亲和", "🐾", "出战宠物的面板加成 +30%（与宠物心意相通，被沉默压制）")));
+
+    /** 被动「宠物亲和」（第九批）：宠物面板加成乘区。 */
+    public static final double PET_BOND_MUL = 1.3;
 
     public static final double COMBO_CHANCE = 0.15;
 

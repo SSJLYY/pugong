@@ -1229,6 +1229,12 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('void_heart', '无相之心', '💜', '无相天魔没有心——公会偏要你带一颗回来：于虚空界猎杀六十只魔物', 'void', '{"maxHP":200000000,"ATK":40000}', 60, 450000, 'pierce', 3, 1, 1, 24);
 
+-- 第九批第 24 轮：新被动宠物亲和
+DELETE FROM `cfg_skill` WHERE `code` IN ('pet_bond');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('pet_bond', '宠物亲和', '🐾', 'passive', 500, 0, 0, 0, '{"effect":"pet_bond","mul":1.3}', '出战宠物的面板加成 +30%', 1, 32);
+
 -- 第九批第 23 轮：新主动虚空斩
 DELETE FROM `cfg_skill` WHERE `code` IN ('void_slash');
 INSERT INTO `cfg_skill`

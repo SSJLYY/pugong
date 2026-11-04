@@ -73,6 +73,9 @@ public final class Achievements {
             new Def("gem_10", "珠光宝气", "💎", "累计镶嵌 10 颗宝石"),
             new Def("pet_first", "宠物伙伴", "🐾", "首次领养一只宠物"),
             new Def("pet_25", "宠物大师", "🐾", "任一宠物达到 25 级"),
+            new Def("pet_50", "宠物宗师", "🐾", "任一宠物达到 50 级（满级）"),
+            new Def("pet_all", "宠物收藏家", "🐾", "集齐全部 6 只宠物"),
+            new Def("pet_feed_100", "喂食达人", "🐾", "累计喂食宠物 100 次"),
             new Def("drain_10", "噬能克星", "🔋", "击杀 10 只带「噬能」词条的怪物"),
             new Def("rend_10", "裂空克星", "✴️", "击杀 10 只带「裂空」词条的怪物"),
             new Def("monthly_1", "月令初成", "📆", "领满一整月月常任务（累计领取 3 个）"),
@@ -108,9 +111,9 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5", "pet_all", "pet_feed_100" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
-                    "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord", "monthly_6" -> 5_000L;
+                    "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord", "monthly_6", "pet_50" -> 5_000L;
             default -> 500L;
         };
     }
@@ -278,6 +281,9 @@ public final class Achievements {
             case "gem_first" -> new long[]{s.stats.gemsSocketed, 1};
             case "pet_first" -> new long[]{s.petsOwned.size(), 1};
             case "pet_25" -> new long[]{s.petLevels.values().stream().mapToInt(Integer::intValue).max().orElse(0), 25};
+            case "pet_50" -> new long[]{s.petLevels.values().stream().mapToInt(Integer::intValue).max().orElse(0), 50};
+            case "pet_all" -> new long[]{s.petsOwned.size(), GameConst.PETS.size()};
+            case "pet_feed_100" -> new long[]{s.stats.petFeeds, 100};
             case "drain_10" -> new long[]{s.stats.drainKills, 10};
             case "rend_10" -> new long[]{s.stats.rendKills, 10};
             case "monthly_1" -> new long[]{s.stats.monthlyClaims, 3};
@@ -387,6 +393,11 @@ public final class Achievements {
                 case "slow_20" -> s.mastery != null
                         && s.mastery.getOrDefault("hex_slow", java.math.BigDecimal.ZERO).longValue() >= 20;
                 case "epic_affix" -> epicAffixCount(s) >= 3;
+                case "pet_first" -> !s.petsOwned.isEmpty();
+                case "pet_25" -> s.petLevels.values().stream().mapToInt(Integer::intValue).max().orElse(0) >= 25;
+                case "pet_50" -> s.petLevels.values().stream().mapToInt(Integer::intValue).max().orElse(0) >= 50;
+                case "pet_all" -> s.petsOwned.size() >= GameConst.PETS.size();
+                case "pet_feed_100" -> s.stats.petFeeds >= 100;
                 case "gem_first" -> s.stats.gemsSocketed >= 1;
                 case "gem_10" -> s.stats.gemsSocketed >= 10;
                 case "pierce_learn" -> s.passives.contains("armor_pierce");

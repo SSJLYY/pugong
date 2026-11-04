@@ -366,6 +366,11 @@ public final class GameEngine {
             perHit = Num.mul(perHit, Num.of(GameConst.CHARGE_MUL));
             s.buffs.remove("charge");
         }
+        // 主动·虚空斩（第九批）：下一击 ×4，一次性消费 buff（与冲锋/重击可叠乘）
+        if (PanelCalculator.active(s, "void_slash")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.VOID_SLASH_MUL));
+            s.buffs.remove("void_slash");
+        }
 
         BigDecimal totalDmg = Num.mul(perHit, punches);
 

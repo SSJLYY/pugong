@@ -1229,6 +1229,12 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('void_heart', '无相之心', '💜', '无相天魔没有心——公会偏要你带一颗回来：于虚空界猎杀六十只魔物', 'void', '{"maxHP":200000000,"ATK":40000}', 60, 450000, 'pierce', 3, 1, 1, 24);
 
+-- 第九批第 23 轮：新主动虚空斩
+DELETE FROM `cfg_skill` WHERE `code` IN ('void_slash');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('void_slash', '虚空斩', '🌀', 'active', 1200, 40, 45, 0, '{"id":"void_slash","mul":4}', '下一击 ×4 伤害（30 秒内有效，撕裂空间的一斩）', 1, 31);
+
 -- 第九批第 13 轮：虚空界装备 ×6（tier 4，sort 67-72）
 DELETE FROM `cfg_equipment_template` WHERE `code` IN ('void_blade','void_bow','void_hood','void_robe','void_treads','void_ring');
 INSERT INTO `cfg_equipment_template`

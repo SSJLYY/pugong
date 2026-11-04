@@ -1209,6 +1209,16 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('gem_sniffer', '宝石嗅觉', '👃', 'passive', 420, 0, 0, 0, '{"effect":"gem_sniffer","mul":1.5}', '词条怪的宝石掉率 +50%（10%→15%）', 1, 30);
 
+-- 第九批第 15 轮：虚空界配方 ×2（sort 34-35）
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_void_blade');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_void_blade', '无相之刃铸造', '📐', 'void_blade', '{"void_shard":6,"star_shard":4}', 20000, 1, 1, 34);
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_void_ring');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_void_ring', '无相指环铸造', '📐', 'void_ring', '{"void_shard":5,"star_shard":3}', 18000, 1, 1, 35);
+
 -- 第九批第 14 轮：虚空界委托 ×2（sort 23-24）
 DELETE FROM `cfg_quest` WHERE `code` IN ('void_patrol');
 INSERT INTO `cfg_quest`

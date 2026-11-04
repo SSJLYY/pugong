@@ -2704,7 +2704,8 @@
       const mats = (c.mats || []).map(m =>
         '<span class="mat-chip' + (m.have >= m.need ? '' : ' lack') + '" title="' + (m.zone ? '来源区域：' + esc(m.zone) + '（打怪/分解该区装备）' : '') + '">' + m.emoji + ' ' + esc(m.name) + ' ' + m.have + '/' + m.need + (m.zone ? ' <i class="mat-src">@' + esc(m.zone) + '</i>' : '') + '</span>').join(' ');
       const bp = c.needBlueprint
-        ? '<span class="mat-chip' + (c.blueprintHave >= 1 ? '' : ' lack') + '">📐 图纸 ' + c.blueprintHave + '/1</span>'
+        ? '<span class="mat-chip' + (c.blueprintHave >= 1 ? '' : ' lack') + '">📐 图纸 ' + c.blueprintHave + '/1</span>' +
+          (c.blueprintHave >= 2 ? ' <button class="mat-sell" data-sell-bp="' + esc(c.code) + '">卖 1 张多余图纸</button>' : '')
         : '<span class="mat-chip">🆓 无需图纸</span>';
       const btn = c.canCraft
         ? '<button data-craft="' + esc(c.code) + '">锻造</button>'
@@ -2768,6 +2769,17 @@
         const r = await call(() => API.sellMaterial(API.state.slot, b.dataset.sellMat, 0));
         const res = (r && r.result) || {};
         toast('💰 卖出 ' + (res.count || 0) + ' 份材料：+' + fmt(res.gold || 0) + ' 金币', 'ok');
+        if (r) applyView(r);
+        loadCrafts();
+      } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+    }));
+    // 卖多余图纸（第八批）：按产物区域深度定价，实价以服务端回执为准；只卖 1 张、留 1 张锻造
+    box.querySelectorAll('[data-sell-bp]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try {
+        const r = await call(() => API.sellMaterial(API.state.slot, 'bp_' + b.dataset.sellBp, 1));
+        const res = (r && r.result) || {};
+        toast('📐 卖出多余图纸：+' + fmt(res.gold || 0) + ' 金币', 'ok');
         if (r) applyView(r);
         loadCrafts();
       } catch (e) { toast(e.message, 'err'); b.disabled = false; }

@@ -152,11 +152,34 @@ public class CraftService {
      * 材料出售（第七批）：区域材料按 GameConst.MAT_SELL_PRICE 卖金币；
      * count<=0 表示全部卖出，超出库存按库存封顶；图纸/卷轴不在价目表内、不可售。
      */
+    /** 图纸售价（第八批）：按产物装备的出产区域深度计价 300 + 深度×250（平原 550 … 星界 2300）。 */
+    public static Integer blueprintPrice(String bpCode) {
+        if (bpCode == null || !bpCode.startsWith("bp_")) {
+            return null;
+        }
+        CraftTemplate craft = GameData.instance().craft(bpCode.substring(3));
+        if (craft == null) {
+            return null;
+        }
+        String zone = null;
+        for (GameData.Tpl t : GameData.instance().equipmentPool()) {
+            if (t.code().equals(craft.getProductCode())) {
+                zone = t.minZone();
+                break;
+            }
+        }
+        int depth = Math.max(1, new ArrayList<>(com.gongpu.game.GameConst.ZONES.keySet()).indexOf(zone));
+        return 300 + depth * 250;
+    }
+
     public Map<String, Object> sell(PlayerState s, String code, int count) {
-        // 区域材料走 MAT_SELL_PRICE；宝石（第八批）走 GEM_SELL_PRICE，同端点同口径
+        // 区域材料走 MAT_SELL_PRICE；宝石（第八批）走 GEM_SELL_PRICE；图纸走 blueprintPrice，同端点同口径
         Integer price = com.gongpu.game.GameConst.MAT_SELL_PRICE.get(code);
         if (price == null) {
             price = com.gongpu.game.GameConst.GEM_SELL_PRICE.get(code);
+        }
+        if (price == null) {
+            price = blueprintPrice(code);
         }
         if (price == null) {
             throw ApiException.badRequest("这种材料不能出售");

@@ -25,6 +25,29 @@ class CodecBatch9Test {
     }
 
     @Test
+    void monthlyFieldsSurviveRoundTrip() {
+        PlayerState s = NewState.create();
+        s.monthlyMonth = "2026-11";
+        s.monthlyBonusGiven = true;
+        PlayerState.DailyTask t = new PlayerState.DailyTask();
+        t.id = "hunt";
+        t.target = 8000;
+        t.rewardGold = 250000;
+        t.baseline = "999";
+        s.monthlyTasks = java.util.List.of(t);
+        s.stats.monthlyClaims = 7;
+        s.stats.drainKills = 3;
+        s.stats.rendKills = 2;
+        PlayerState back = StateCodec.decode(StateCodec.encode(s));
+        assertEquals("2026-11", back.monthlyMonth);
+        assertTrue(back.monthlyBonusGiven);
+        assertEquals(1, back.monthlyTasks.size());
+        assertEquals(8000, back.monthlyTasks.get(0).target);
+        assertEquals(7, back.stats.monthlyClaims);
+        assertEquals(3, back.stats.drainKills);
+    }
+
+    @Test
     void freshStateHasEmptyPetFields() {
         PlayerState s = NewState.create();
         assertEquals(null, s.pet);

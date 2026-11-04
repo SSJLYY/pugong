@@ -67,14 +67,14 @@ class DataParity2Test {
     @Test
     void questCountIs20() throws Exception {
         String sql = allSql();
-        assertEquals(22, countRows(insertBlocks(sql, "cfg_quest")), "委托总数应为 22（第八批终版口径）");
+        assertEquals(24, countRows(insertBlocks(sql, "cfg_quest")), "委托总数应为 24（第九批口径）");
     }
 
     @Test
     void craftRefsValid() throws Exception {
         String sql = allSql();
         String crafts = insertBlocks(sql, "cfg_craft");
-        assertEquals(22, countRows(crafts), "配方总数应为 22（第八批终版口径）");
+        assertEquals(24, countRows(crafts), "配方总数应为 24（第九批口径）");
         // 产物全集：装备 code + 药剂/物品 code（item: 前缀）
         Set<String> equipCodes = new HashSet<>();
         Matcher em = Pattern.compile("\\('([a-z0-9_]+)',\\s*'[^']*',\\s*'[^']*',\\s*'(weapon|bow|offhand|head|chest|legs|boots|ring1|ring2|necklace)',").matcher(sql);

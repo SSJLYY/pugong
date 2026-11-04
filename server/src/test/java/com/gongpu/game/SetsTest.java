@@ -77,7 +77,7 @@ class SetsTest {
 
     @Test
     void sixSetsOfFour() {
-        assertEquals(7, Sets.ALL.size());
+        assertEquals(8, Sets.ALL.size());
         for (Sets.SetDef d : Sets.ALL) {
             assertEquals(4, d.members().size(), d.id() + " 应为四件套");
         }

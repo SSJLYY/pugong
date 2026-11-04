@@ -956,6 +956,26 @@ public class GameService {
         return m;
     }
 
+    /** 成就里程碑档位（第八批）：累计已领成就数达标线与一次性奖金（每档只发一次，掩码落档）。 */
+    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60};
+    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000};
+
+    /** 领取后结算里程碑：返回本次新发的里程碑奖金（0 = 未跨新档），奖金已入账。 */
+    static long settleAchMilestone(PlayerState s) {
+        long bonus = 0;
+        int claimed = s.achClaimed.size();
+        for (int i = 0; i < ACH_MILESTONE_TIERS.length; i++) {
+            if (claimed >= ACH_MILESTONE_TIERS[i] && (s.stats.achMilestonePaid & (1 << i)) == 0) {
+                s.stats.achMilestonePaid |= (1 << i);
+                bonus += ACH_MILESTONE_BONUS[i];
+            }
+        }
+        if (bonus > 0) {
+            s.gold = Num.add(s.gold, Num.of(bonus));
+        }
+        return bonus;
+    }
+
     /** 成就奖励领取：已解锁未领取才发金币（一成就一次），金额 Achievements.rewardOf 权威。 */
     public Map<String, Object> claimAchievement(PlayerState s, String id) {
         boolean known = Achievements.ALL.stream().anyMatch(d -> d.id().equals(id));
@@ -970,10 +990,12 @@ public class GameService {
         }
         long reward = Achievements.rewardOf(id);
         s.gold = Num.add(s.gold, Num.of(reward));
+        long milestone = settleAchMilestone(s);
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("id", id);
         m.put("reward", reward);
+        m.put("milestoneBonus", milestone);
         return m;
     }
 
@@ -989,11 +1011,13 @@ public class GameService {
             }
         }
         s.gold = Num.add(s.gold, Num.of(total));
+        long milestone = settleAchMilestone(s);
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("claimedCount", claimed.size());
         m.put("claimedIds", claimed);
         m.put("totalReward", total);
+        m.put("milestoneBonus", milestone);
         return m;
     }
 

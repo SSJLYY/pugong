@@ -935,7 +935,8 @@
             try {
               const r = await call(() => API.claimAllAchievements(API.state.slot));
               const res = (r && r.result) || {};
-              toast('🎁 一键全领：' + (res.claimedCount || 0) + ' 项，+' + fmt(res.totalReward || 0) + ' 金币', 'ok');
+              toast('🎁 一键全领：' + (res.claimedCount || 0) + ' 项，+' + fmt(res.totalReward || 0) + ' 金币' +
+                (res.milestoneBonus > 0 ? '（含里程碑奖金 +' + fmt(res.milestoneBonus) + '）' : ''), 'ok');
               if (r) applyView(r);
             } catch (err) { toast(err.message, 'err'); allBtn.disabled = false; }
             return;
@@ -1135,7 +1136,7 @@
         '<div class="trait-row"><b>🎯 弱点打击</b><span>每第 10 拳必定暴击（按你的暴击伤害结算）；💀诅咒词条怪会让你回血减半，🧊寒霜会冻慢你的攻速（净化/解毒剂可清）。</span></div>',
         '<div class="trait-row"><b>💎 宝石镶嵌</b><span>Boss 必掉宝石、词条怪概率掉：背包装备可镶 3 颗（物攻/魔攻/生命/暴击/攻速/双防），锻造页可把 3 颗同种一阶融合成璀璨二阶（属性 ×2.5），拆卸 200 金完好取回。</span></div>',
         '<div class="trait-row"><b>🌿 新词条与破甲</b><span>新词条🌿再生（怪每秒回 3% 血，速杀克它）与🪨坚韧（你的暴击对它减半，平推克它）已入深区；被动「破甲专精」与破甲药剂能无视防御、乘算叠加，厚甲怪不再难啃；新招「连环掌」让接下来 30 次命中全部双击。</span></div>',
-        '<div class="trait-row"><b>🏅 成就</b><span>角色页成就带进度条与金币奖励，可按可领取/进行中筛选，解锁后记得领取（可一键全领）。</span></div>',
+        '<div class="trait-row"><b>🏅 成就</b><span>角色页成就带进度条与金币奖励，可按可领取/进行中筛选，解锁后记得领取（可一键全领）。累计领取达 15/30/45/60 项还有里程碑奖金（1 万/3 万/8 万/20 万，每档一次）。</span></div>',
         '<div class="trait-row"><b>✋ 扩展技能</b><span>战斗区第二行：治愈术（回 35% 血）/ 嗜血术 / 铁壁 / 净化（清中毒·灼烧·沉默·时滞·寒霜）/ 冲锋（下一击 ×3）/ 迟缓咒（怪攻速 -30%）。</span></div>',
         '<div class="trait-row"><b>🎨 界面偏好</b><span>顶栏可关特效（省电低配）、切换宣纸亮色主题；药剂可 📌 置顶常用款，弱网时轮询会自动降频。</span></div>',
         '<div class="trait-row"><b>🧧 聚宝与嗅觉</b><span>聚宝药剂 300s 金币 +50%；被动「材料嗅觉」让材料掉率升到 75%，配晶化词条刷材料最快。</span></div>',

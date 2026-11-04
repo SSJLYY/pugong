@@ -302,6 +302,8 @@ public class PlayerState {
         public long gemsSocketed = 0;
         /** 累计直购宝石数（第八批）。 */
         public long gemsBought = 0;
+        /** 成就里程碑已发档位掩码（第八批）：bit i 对应第 i 档（15/30/45/60 已领数）。 */
+        public int achMilestonePaid = 0;
         /** 黑市累计购买件数（第七批，终身口径）。 */
         public long marketBuys = 0;
         public long born = 0;

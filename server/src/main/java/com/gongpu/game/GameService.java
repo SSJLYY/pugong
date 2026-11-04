@@ -1197,6 +1197,7 @@ public class GameService {
             throw ApiException.badRequest("融合需要 3 颗" + def.name() + "（当前 " + have + "）");
         }
         s.materials.put(gemCode, have - 3);
+        s.stats.gemsFused++;
         String t2 = gemCode + "_2";
         s.materials.merge(t2, 1, Integer::sum);
         Map<String, Object> m = new LinkedHashMap<>();
@@ -1293,6 +1294,56 @@ public class GameService {
         s.petLevels.put(s.pet, lv);
         s.petExps.put(s.pet, cur);
         return new int[]{lv, ups};
+    }
+
+    /** 批量融合（第九批）：把所有一阶宝石按 3:1 全部融合成璀璨二阶，口径与逐颗融合一致。 */
+    public Map<String, Object> fuseAllGems(PlayerState s) {
+        int fused = 0;
+        for (String id : GameConst.gemTier1Ids()) {
+            int have = s.materials.getOrDefault(id, 0);
+            int n = have / 3;
+            if (n <= 0) {
+                continue;
+            }
+            s.materials.put(id, have - n * 3);
+            s.materials.merge(id + "_2", n, Integer::sum);
+            fused += n;
+            s.stats.gemsFused += n;
+        }
+        if (fused == 0) {
+            throw ApiException.badRequest("没有可融合的宝石（每 3 颗同种一阶融 1 颗二阶）");
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("fused", fused);
+        return m;
+    }
+
+    /** 一键拆卸全部宝石（第九批）：背包内所有装备的宝石逐颗拆回（每颗 200 金，金币不足时停在当前颗）。 */
+    public Map<String, Object> unsocketAll(PlayerState s) {
+        int removed = 0;
+        for (PlayerState.Item it : s.equipBag) {
+            if (it.gems == null) {
+                continue;
+            }
+            while (!it.gems.isEmpty()) {
+                if (Num.lt(s.gold, Num.of(UNSOCKET_GOLD))) {
+                    break;
+                }
+                s.gold = Num.sub(s.gold, Num.of(UNSOCKET_GOLD));
+                String code = it.gems.remove(it.gems.size() - 1);
+                s.materials.merge(code, 1, Integer::sum);
+                removed++;
+            }
+        }
+        if (removed == 0) {
+            throw ApiException.badRequest("没有可拆卸的宝石（或金币不足）");
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("removed", removed);
+        m.put("gold", Num.plain(s.gold));
+        return m;
     }
 
     /** 附魔（DESIGN.md §6.2/§8）：消耗卷轴给武器/弓附加魔伤词条（元素亲和被动加成）。 */

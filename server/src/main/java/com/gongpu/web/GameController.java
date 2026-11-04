@@ -431,6 +431,20 @@ public class GameController {
                 s -> game.feedPet(s));
     }
 
+    /** 批量融合宝石（第九批）。 */
+    @PostMapping("/{slot}/fuse-all-gems")
+    public Map<String, Object> fuseAllGems(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "fuse-all-gems",
+                s -> game.fuseAllGems(s));
+    }
+
+    /** 一键拆卸全部宝石（第九批）。 */
+    @PostMapping("/{slot}/unsocket-all")
+    public Map<String, Object> unsocketAll(HttpServletRequest req, @PathVariable int slot) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "unsocket-all",
+                s -> game.unsocketAll(s));
+    }
+
     @PostMapping("/{slot}/reroll")
     public Map<String, Object> reroll(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody RerollReq body) {

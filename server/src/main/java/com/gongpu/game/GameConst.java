@@ -714,7 +714,7 @@ public final class GameConst {
     public static final Map<String, String> ZONE_MAT = Map.ofEntries(
             Map.entry("plain", "pelt"), Map.entry("forest", "wolf_fang"), Map.entry("mine", "ore"),
             Map.entry("swamp", "toad_gland"), Map.entry("snow", "mana_dust"), Map.entry("volcano", "fire_crystal"),
-            Map.entry("abyss", "abyss_crystal"), Map.entry("star", "star_shard"));
+            Map.entry("abyss", "abyss_crystal"), Map.entry("star", "star_shard"), Map.entry("void", "void_shard"));
 
     /** 附魔卷轴（DESIGN.md §6.2/§8）：给武器/弓附加魔伤词条，火/冰/雷三系。 */
     public static final Map<String, Object[]> SCROLLS = Map.of(
@@ -737,6 +737,7 @@ public final class GameConst {
             Map.entry("fire_crystal", new String[]{"火晶", "🔥"}),
             Map.entry("abyss_crystal", new String[]{"深渊结晶", "🕳️"}),
             Map.entry("star_shard", new String[]{"星核碎片", "🌟"}),
+            Map.entry("void_shard", new String[]{"虚空碎片", "🌀"}),
             Map.entry("gem_ruby", new String[]{"红宝石", "🔺"}),
             Map.entry("gem_sapphire", new String[]{"蓝宝石", "🔷"}),
             Map.entry("gem_emerald", new String[]{"翡翠", "💚"}),
@@ -754,7 +755,7 @@ public final class GameConst {
     public static final Map<String, Integer> MAT_SELL_PRICE = Map.ofEntries(
             Map.entry("pelt", 20), Map.entry("wolf_fang", 35), Map.entry("ore", 60), Map.entry("toad_gland", 90),
             Map.entry("mana_dust", 140), Map.entry("fire_crystal", 220), Map.entry("abyss_crystal", 400),
-            Map.entry("star_shard", 650));
+            Map.entry("star_shard", 650), Map.entry("void_shard", 2000));
 
     /** 增益类 buff（永久存续天赋作用对象）。 */
     public static final Set<String> ETERNAL_BUFFS = Set.of(

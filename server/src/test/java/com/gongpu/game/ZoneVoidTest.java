@@ -23,6 +23,13 @@ class ZoneVoidTest {
     }
 
     @Test
+    void voidMaterialWired() {
+        assertEquals("void_shard", GameConst.ZONE_MAT.get("void"));
+        assertEquals("虚空碎片", GameConst.MAT_INFO.get("void_shard")[0]);
+        assertEquals(2000, GameConst.MAT_SELL_PRICE.get("void_shard"));
+    }
+
+    @Test
     void advanceChainEndsAtVoid() {
         assertEquals("void", GameEngine.nextZoneId("star"));
         assertNull(GameEngine.nextZoneId("void"));

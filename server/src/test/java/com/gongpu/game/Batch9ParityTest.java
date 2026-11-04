@@ -17,11 +17,15 @@ class Batch9ParityTest {
         assertEquals(10, GameConst.ZONES.size(), "区域 10");
         assertEquals(8, Sets.ALL.size(), "套装 8");
         assertEquals(72, Achievements.ALL.size(), "成就 72");
+        assertEquals(19, GameConst.MOB_TRAITS.size(), "怪物词条 19");
+        assertEquals(32, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 32");
+        assertEquals(40, GameConst.POTIONS.size(), "药剂 40");
         assertEquals(33, GameConst.codexTotal(), "图鉴 33（虚空 +5）");
         String sql = Files.readString(Path.of("src/main/resources/gongpu-full.sql"));
         for (String code : new String[]{
                 "void_blade", "void_bow", "void_hood", "void_robe", "void_treads", "void_ring",
-                "void_patrol", "void_heart", "c_void_blade", "c_void_ring"}) {
+                "void_patrol", "void_heart", "c_void_blade", "c_void_ring",
+                "void_slash", "pet_bond", "void"}) {
             assertTrue(sql.contains("'" + code + "'"), "第九批内容 " + code + " 应在 SQL 中");
         }
     }

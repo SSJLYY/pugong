@@ -486,6 +486,14 @@ public class GameController {
                 s -> crafts.sell(s, reqStr(body.id(), "id"), body.count() == null ? 0 : body.count()));
     }
 
+    /** 材料买入（第八批）：区域材料按售价 ×3 买入（急用调剂）。 */
+    @PostMapping("/{slot}/buy-material")
+    public Map<String, Object> buyMaterial(HttpServletRequest req, @PathVariable int slot,
+                                           @RequestBody SellMatReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "buy-material",
+                s -> crafts.buy(s, reqStr(body.id(), "id"), body.count() == null ? 1 : body.count()));
+    }
+
     /** 一键穿最强装备（按评分自动换装）。 */
     @PostMapping("/{slot}/autoequip")
     public Map<String, Object> autoEquip(HttpServletRequest req, @PathVariable int slot) {

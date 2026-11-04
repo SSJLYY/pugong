@@ -2733,7 +2733,8 @@
     const sellChips = MAT_SELL.map(([c, n, price]) => {
       const have = myMats[c] || 0;
       return '<span class="mat-chip' + (have > 0 ? '' : ' lack') + '">' + n + ' ×' + have + ' · ' + price + ' 金/份' +
-        (have > 0 ? ' <button class="mat-sell" data-sell-mat="' + c + '">全卖 +' + fmt(price * have) + '</button>' : '') + '</span>';
+        (have > 0 ? ' <button class="mat-sell" data-sell-mat="' + c + '">全卖 +' + fmt(price * have) + '</button>' : '') +
+        ' <button class="mat-sell" data-buy-mat="' + c + '" title="材料商店：按售价 ×3 买入（急用调剂）">买 10 · -' + fmt(price * 30) + ' 金</button></span>';
     }).join(' ');
     const sellRow = '<div class="potion-item"><div class="pi-info"><b>💰 材料出售</b>' +
       '<div class="pi-desc">' + sellChips + '</div></div></div>';
@@ -2769,6 +2770,16 @@
         const r = await call(() => API.sellMaterial(API.state.slot, b.dataset.sellMat, 0));
         const res = (r && r.result) || {};
         toast('💰 卖出 ' + (res.count || 0) + ' 份材料：+' + fmt(res.gold || 0) + ' 金币', 'ok');
+        if (r) applyView(r);
+        loadCrafts();
+      } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+    }));
+    box.querySelectorAll('[data-buy-mat]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try {
+        const r = await call(() => API.buyMaterial(API.state.slot, b.dataset.buyMat, 10));
+        const res = (r && r.result) || {};
+        toast('🛒 买入 ' + (res.count || 0) + ' 份材料：-' + fmt(res.cost || 0) + ' 金币', 'ok');
         if (r) applyView(r);
         loadCrafts();
       } catch (e) { toast(e.message, 'err'); b.disabled = false; }

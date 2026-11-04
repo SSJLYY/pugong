@@ -152,6 +152,31 @@ public class CraftService {
      * 材料出售（第七批）：区域材料按 GameConst.MAT_SELL_PRICE 卖金币；
      * count<=0 表示全部卖出，超出库存按库存封顶；图纸/卷轴不在价目表内、不可售。
      */
+    /** 材料买入倍率（第八批）：商店按售价 ×3 卖区域材料——急用调剂可以，刷金币不行。 */
+    public static final int MAT_BUY_MUL = 3;
+
+    /** 买入区域材料（第八批）：仅 ZONE_MAT 区域材料可买，单价 = 售价 ×3，单次上限 999 份。 */
+    public Map<String, Object> buy(PlayerState s, String code, int count) {
+        Integer sell = com.gongpu.game.GameConst.MAT_SELL_PRICE.get(code);
+        if (sell == null || !com.gongpu.game.GameConst.ZONE_MAT.containsValue(code)) {
+            throw ApiException.badRequest("这种材料不能购买");
+        }
+        int n = Math.max(1, Math.min(999, count));
+        long cost = (long) sell * MAT_BUY_MUL * n;
+        if (com.gongpu.common.Num.lt(s.gold, com.gongpu.common.Num.of(cost))) {
+            throw ApiException.badRequest("金币不足，需要 " + cost);
+        }
+        s.gold = com.gongpu.common.Num.sub(s.gold, com.gongpu.common.Num.of(cost));
+        s.materials.merge(code, n, Integer::sum);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("id", code);
+        m.put("count", n);
+        m.put("cost", cost);
+        m.put("have", s.materials.getOrDefault(code, 0));
+        return m;
+    }
+
     /** 图纸售价（第八批）：按产物装备的出产区域深度计价 300 + 深度×250（平原 550 … 星界 2300）。 */
     public static Integer blueprintPrice(String bpCode) {
         if (bpCode == null || !bpCode.startsWith("bp_")) {

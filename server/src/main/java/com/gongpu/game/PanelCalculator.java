@@ -143,12 +143,15 @@ public final class PanelCalculator {
                     pct.merge(a.sideKey, a.sideVal, Num::add);
                 }
             }
-            // 镶嵌宝石（第八批）：flat 加成与词条同区（装备来源，不受沉默压制）
+            // 镶嵌宝石（第八批）：flat 加成与词条同区（装备来源，不受沉默压制）；
+            // 天赋·宝石亲和再乘 1.25（天赋为先天禀赋，同不受沉默压制）
             if (it.gems != null) {
+                BigDecimal gemMul = "gem_affinity".equals(s.talent)
+                        ? Num.of(GameConst.GEM_AFFINITY_MUL) : Num.of(1);
                 for (String g : it.gems) {
                     GameConst.GemDef gd = GameConst.GEMS.get(g);
                     if (gd != null) {
-                        gd.stats().forEach((k, v) -> flat.merge(k, v, Num::add));
+                        gd.stats().forEach((k, v) -> flat.merge(k, Num.mul(v, gemMul), Num::add));
                     }
                 }
             }

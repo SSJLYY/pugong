@@ -614,17 +614,21 @@ public final class GameConst {
     }
 
     /** 觉醒天赋池（新档第一次进入游戏抽一次，转生保留）。 */
-    public static final Map<String, TalentDef> TALENTS = Map.of(
-            "eternal", new TalentDef("eternal", "被动永续", "♾️", "所有增益被动永不消逝"),
-            "baglord", new TalentDef("baglord", "无限装备栏", "🧳", "无相位装备栏无限：任何装备都能穿上，属性全部叠加"),
-            "statlord", new TalentDef("statlord", "无限属性点", "💠", "每杀一怪 +1 自由属性点：属性面板自由加点"),
-            "might", new TalentDef("might", "天生神力", "💪", "物攻 +10%"),
-            "shell", new TalentDef("shell", "铜皮铁骨", "🐢", "物防 +10%、魔防 +10%"),
-            "wind", new TalentDef("wind", "疾风之躯", "💨", "移速 +15%"),
-            "goldhand", new TalentDef("goldhand", "点金手", "🪙", "击杀金币 +20%"),
-            "master", new TalentDef("master", "武学奇才", "📕", "主动技能冷却 -15%"),
-            "lucky", new TalentDef("lucky", "幸运儿", "🍀", "装备与图纸掉落率 +15%"),
-            "iron_gut", new TalentDef("iron_gut", "铁胃", "🍲", "食物回血效果 +50%、持续时间 +50%"));
+    public static final Map<String, TalentDef> TALENTS = Map.ofEntries(
+            Map.entry("eternal", new TalentDef("eternal", "被动永续", "♾️", "所有增益被动永不消逝")),
+            Map.entry("baglord", new TalentDef("baglord", "无限装备栏", "🧳", "无相位装备栏无限：任何装备都能穿上，属性全部叠加")),
+            Map.entry("statlord", new TalentDef("statlord", "无限属性点", "💠", "每杀一怪 +1 自由属性点：属性面板自由加点")),
+            Map.entry("might", new TalentDef("might", "天生神力", "💪", "物攻 +10%")),
+            Map.entry("shell", new TalentDef("shell", "铜皮铁骨", "🐢", "物防 +10%、魔防 +10%")),
+            Map.entry("wind", new TalentDef("wind", "疾风之躯", "💨", "移速 +15%")),
+            Map.entry("goldhand", new TalentDef("goldhand", "点金手", "🪙", "击杀金币 +20%")),
+            Map.entry("master", new TalentDef("master", "武学奇才", "📕", "主动技能冷却 -15%")),
+            Map.entry("lucky", new TalentDef("lucky", "幸运儿", "🍀", "装备与图纸掉落率 +15%")),
+            Map.entry("iron_gut", new TalentDef("iron_gut", "铁胃", "🍲", "食物回血效果 +50%、持续时间 +50%")),
+            Map.entry("gem_affinity", new TalentDef("gem_affinity", "宝石亲和", "🔷", "镶嵌宝石的效果 +25%，宝石在你手里更亮")));
+
+    /** 天赋「宝石亲和」（第八批）：宝石 flat 加成乘区（天赋不受沉默压制）。 */
+    public static final double GEM_AFFINITY_MUL = 1.25;
 
     /** 天赋「幸运儿」（第七批）：掉落率乘区（与鸿运药剂/幸运星被动乘算）。 */
     public static final double LUCKY_TALENT_MUL = 1.15;

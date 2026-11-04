@@ -1313,12 +1313,12 @@ INSERT INTO `cfg_equipment_template`
   ('void_eye_charm', '无相之瞳', '👁️', 'necklace', 4, 'void', '{"MATK":"700","CRIT":"0.05","MREGEN":"12"}', 10, 4200, '戴上它，你能看见虚空在看你', 1, 74);
 
 -- ============================================================
--- 整合完毕。验收参考（2026-11-04 第八批 100 轮收官口径）：
---   cfg_equipment_template 66 / cfg_item 药剂 39 / cfg_affix 26
---   cfg_craft 22 / cfg_quest 22 / cfg_skill 30（主动 13 + 被动 17）
---   怪物词条 17（代码 GameConst.MOB_TRAITS）/ 成就 66（代码 Achievements）
---   天赋 11 / 套装 7（代码 GameConst.TALENTS / Sets）/ 区域 9（含星界）
---   宝石 12 种（代码 GameConst.GEMS）/ 图鉴 28（代码 GameConst 口径）
+-- 整合完毕。验收参考（2026-11-04 第九批 100 轮收官口径）：
+--   cfg_equipment_template 74 / cfg_item 药剂 41 / cfg_affix 28
+--   cfg_craft 26 / cfg_quest 26 / cfg_skill 33（主动 14 + 被动 19）
+--   怪物词条 20（代码 GameConst.MOB_TRAITS）/ 成就 82（代码 Achievements）
+--   天赋 12 / 套装 8（代码 GameConst.TALENTS / Sets）/ 区域 10（含虚空界）
+--   宝石 12 种（代码 GameConst.GEMS）/ 图鉴 33（代码 GameConst 口径）/ 宠物 6（代码 GameConst.PETS）
 --   运行时可用 /api/health 的 content 指纹交叉核对：
---   items=39,affixes=26,equipment=66,skills=30,crafts=22,traits=17
+--   items=41,affixes=28,equipment=74,skills=33,crafts=26,traits=20,pets=6
 -- ============================================================

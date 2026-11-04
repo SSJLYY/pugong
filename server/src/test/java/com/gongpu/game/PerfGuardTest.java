@@ -63,6 +63,24 @@ class PerfGuardTest {
         assertTrue(ms < 5000, "5000 次面板计算应 <5s，实际 " + ms + "ms（疑似数量级回归）");
     }
 
+    /** 第九批第 65 轮：极端数值帧守卫——虚空界 + 攻速拉满的深渊号，帧结算不爆不 NaN。 */
+    @Test
+    void extremeValueFrameStaysBounded() {
+        PlayerState s = richState();
+        s.zone = "void";
+        s.fixed.ASPD = new java.math.BigDecimal("100000");
+        long now = System.currentTimeMillis();
+        s.lastTickAt = now - 1000;
+        GameEngine.advance(s, now, 1.0, false); // 热身
+        s.lastTickAt = now - 1000;
+        long t0 = System.nanoTime();
+        GameEngine.advance(s, now, 60.0, true);
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        assertTrue(ms < 5000, "极端数值 60 秒帧应 <5s，实际 " + ms + "ms");
+        assertTrue(s.stats.totalDamage != null && s.stats.totalDamage.signum() >= 0,
+                "总伤害不得为负/NaN");
+    }
+
     @Test
     void longOfflineFrameStaysBounded() {
         PlayerState s = richState();

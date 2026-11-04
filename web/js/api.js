@@ -187,6 +187,7 @@
     adoptPet: (slot, id) => request('POST', '/api/game/' + slot + '/adopt-pet', { id }),
     switchPet: (slot, id) => request('POST', '/api/game/' + slot + '/switch-pet', { id }),
     feedPet: (slot) => request('POST', '/api/game/' + slot + '/feed-pet'),
+    renamePet: (slot, id, name) => request('POST', '/api/game/' + slot + '/rename-pet', { id, name }),
     marketBuy: (slot, id) => request('POST', '/api/game/' + slot + '/market-buy', { id }),
     autoSell: (slot, keep) => request('POST', '/api/game/' + slot + '/autosell', { keep: keep }),
     flee: (slot) => request('POST', '/api/game/' + slot + '/flee'),

@@ -2849,8 +2849,10 @@
       } else {
         btn = '<button class="daily-claim ready" data-pet-adopt="' + esc(d.id) + '">领养 ' + fmt(d.price) + ' 金</button>';
       }
+      const nick = (pv.names || {})[d.id];
       return '<div class="daily-card' + (isActive ? ' done' : '') + '">' +
-        '<div class="daily-head"><span>' + d.emoji + ' ' + esc(d.name) + '</span></div>' +
+        '<div class="daily-head"><span>' + d.emoji + ' ' + esc(nick || d.name) + (nick ? '（' + esc(d.name) + '）' : '') + '</span>' +
+        (isOwned ? '<button class="mat-sell" data-pet-rename="' + esc(d.id) + '">✏️ 改名</button>' : '') + '</div>' +
         '<div class="daily-desc">' + esc(d.desc) + '（随等级放大）</div>' + btn + '</div>';
     }).join('') || '<p class="empty-hint">暂无宠物</p>';
     box.querySelectorAll('[data-pet-adopt]').forEach(b => b.addEventListener('click', async () => {
@@ -2862,6 +2864,12 @@
       b.disabled = true;
       try { const r = await call(() => API.switchPet(API.state.slot, b.dataset.petSwitch)); if (r) applyView(r); }
       catch (err) { toast(err.message, 'err'); b.disabled = false; }
+    }));
+    box.querySelectorAll('[data-pet-rename]').forEach(b => b.addEventListener('click', async () => {
+      const name = prompt('给宠物起个昵称（最多 8 字，留空恢复默认名）：', '');
+      if (name === null) return;
+      try { const r = await call(() => API.renamePet(API.state.slot, b.dataset.petRename, name)); toast('🐾 改名成功', 'ok'); if (r) applyView(r); }
+      catch (err) { toast(err.message, 'err'); }
     }));
     box.querySelectorAll('[data-pet-feed10]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true;

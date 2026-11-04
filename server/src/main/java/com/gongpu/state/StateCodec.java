@@ -128,6 +128,35 @@ public final class StateCodec {
         if (s.zone == null || !GameConst.ZONES.containsKey(s.zone)) {
             s.zone = "village";
         }
+        // 第八/九批集合字段兜底：JSON 显式 null 或旧档缺失时重建，防 petView/任务 ensure 空指针
+        if (s.petsOwned == null) {
+            s.petsOwned = new java.util.ArrayList<>();
+        }
+        if (s.petLevels == null) {
+            s.petLevels = new java.util.LinkedHashMap<>();
+        }
+        if (s.petExps == null) {
+            s.petExps = new java.util.LinkedHashMap<>();
+        }
+        if (s.petNames == null) {
+            s.petNames = new java.util.LinkedHashMap<>();
+        }
+        if (s.monthlyTasks == null) {
+            s.monthlyTasks = new java.util.ArrayList<>();
+        }
+        if (s.weeklyTasks == null) {
+            s.weeklyTasks = new java.util.ArrayList<>();
+        }
+        if (s.dailyTasks == null) {
+            s.dailyTasks = new java.util.ArrayList<>();
+        }
+        // 出战宠物合法性：未拥有/图鉴不存在则下场；等级钳制到 [1, 上限]、经验不为负
+        if (s.pet != null && (!GameConst.PETS.containsKey(s.pet) || !s.petsOwned.contains(s.pet))) {
+            s.pet = null;
+        }
+        s.petLevels.replaceAll((k, v) -> v == null ? 1
+                : Math.max(1, Math.min(GameConst.PET_MAX_LEVEL, v)));
+        s.petExps.replaceAll((k, v) -> v == null ? 0.0 : Math.max(0.0, v));
         convertLegacyPctAffixes(s);
         if (s.lastTickAt <= 0) {
             s.lastTickAt = System.currentTimeMillis();

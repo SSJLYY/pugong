@@ -1814,10 +1814,13 @@
       const setSm = setOfItem(view, it);
       const setChip = setSm ? ` <span class="bi-set" title="套装成员：同套穿 2/4 件激活加成（见已装备区套装面板）">🧩${setSm.name}</span>` : '';
       const gemTxt = (it.gems || []).map(g => { const gm = GEM_META[g]; return gm ? gm[0] + gm[1] + '（' + gm[2] + '）' : g; }).join(' · ');
+      // 孔位指示（第八批）：实心=已镶、空心=空孔，一眼看清 3 孔占用
+      const gemN = (it.gems || []).length;
+      const socketPips = ` <span class="bi-sockets" title="宝石孔 ${gemN}/3">${'💠'.repeat(gemN)}${'⚪'.repeat(3 - gemN)}</span>`;
       d.innerHTML = `
         <div class="bi-head" style="color:${QUALITY_COLOR[it.quality]}">
           ${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}${it.temper ? ' 🔨' + it.temper : ''}${it.locked ? ' 🔒' : ''}
-          <span class="bi-q">${QUALITY_NAME[it.quality]}</span>${scoreChip}${setChip}
+          <span class="bi-q">${QUALITY_NAME[it.quality]}</span>${scoreChip}${setChip}${socketPips}
         </div>
         <div class="bi-affix">${(it.affixes || []).map(affixText).join(' · ') || '（无词条）'}${gemTxt ? '<br>💠 ' + gemTxt : ''}</div>
         <div class="bi-actions">

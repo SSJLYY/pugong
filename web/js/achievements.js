@@ -70,7 +70,10 @@
     { id: 'set_wearer', name: '套装行者', emoji: '👕', desc: '同时穿戴任意一套装的全部 4 件' },
     { id: 'punch_1m', name: '百万连拳', emoji: '🥊', desc: '累计出拳 100 万次' },
     { id: 'kill_100k', name: '十万斩', emoji: '⚔️', desc: '终身击杀 10 万只怪物' },
-    { id: 'gold_100m', name: '金山银海', emoji: '🏔️', desc: '持有 1 亿金币' }
+    { id: 'gold_100m', name: '金山银海', emoji: '🏔️', desc: '持有 1 亿金币' },
+    { id: 'craft_200', name: '锻造传说', emoji: '🔥', desc: '累计合成 200 次' },
+    { id: 'dismantle_1000', name: '万物分解', emoji: '♻️', desc: '累计分解 1000 件装备' },
+    { id: 'gen_30', name: '三十世轮回', emoji: '☸️', desc: '达到第 30 世' }
   ];
 
   var byId = {};

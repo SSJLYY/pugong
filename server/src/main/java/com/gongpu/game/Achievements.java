@@ -81,7 +81,10 @@ public final class Achievements {
             new Def("set_wearer", "套装行者", "👕", "同时穿戴任意一套装的全部 4 件"),
             new Def("punch_1m", "百万连拳", "🥊", "累计出拳 100 万次"),
             new Def("kill_100k", "十万斩", "⚔️", "终身击杀 10 万只怪物"),
-            new Def("gold_100m", "金山银海", "🏔️", "持有 1 亿金币")
+            new Def("gold_100m", "金山银海", "🏔️", "持有 1 亿金币"),
+            new Def("craft_200", "锻造传说", "🔥", "累计合成 200 次"),
+            new Def("dismantle_1000", "万物分解", "♻️", "累计分解 1000 件装备"),
+            new Def("gen_30", "三十世轮回", "☸️", "达到第 30 世")
     );
 
     private Achievements() {
@@ -94,9 +97,9 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
-                    "kill_100k", "gold_100m" -> 5_000L;
+                    "kill_100k", "gold_100m", "craft_200", "gen_30" -> 5_000L;
             default -> 500L;
         };
     }
@@ -207,6 +210,7 @@ public final class Achievements {
             case "equip_5" -> new long[]{s.equipBag.size()
                     + s.equipped.values().stream().filter(it -> it != null).count(), 5};
             case "gen_12" -> new long[]{s.gen, 12};
+            case "gen_30" -> new long[]{s.gen, 30};
             case "bless_3" -> new long[]{s.blessings == null ? 0 : s.blessings.size(), 3};
             case "duelist" -> new long[]{sat(s.stats.kills), 10};
             case "codex_10" -> new long[]{s.codex == null ? 0 : s.codex.size(), 10};
@@ -221,6 +225,7 @@ public final class Achievements {
             case "boss_50" -> new long[]{s.stats.bossKillCount, 50};
             case "boss_100" -> new long[]{s.stats.bossKillCount, 100};
             case "craft_50" -> new long[]{s.stats.crafts, 50};
+            case "craft_200" -> new long[]{s.stats.crafts, 200};
             case "temper_5" -> new long[]{maxTemper(s), GameConst.TEMPER_MAX_LV};
             case "reroll_50" -> new long[]{s.stats.rerolls, 50};
             case "abyss_first" -> new long[]{abyssCodexHits(s), 1};
@@ -246,6 +251,7 @@ public final class Achievements {
             case "flurry_500" -> new long[]{s.stats.flurryExtra.longValue(), 500};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
+            case "dismantle_1000" -> new long[]{s.stats.dismantles, 1000};
             case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
                     .mapToInt(Integer::intValue).max().orElse(0), 4};
             case "set_dual" -> new long[]{Sets.wornCounts(s).values().stream()
@@ -290,6 +296,7 @@ public final class Achievements {
                 case "boss_win" -> !s.bossKills.isEmpty();
                 case "gen_1" -> s.gen >= 1 || s.stats.rebirths >= 1;
                 case "gen_12" -> s.gen >= 12;
+                case "gen_30" -> s.gen >= 30;
                 case "talent" -> s.talent != null && !s.talent.isBlank();
                 case "bless_3" -> s.blessings.size() >= 3;
                 case "duelist" -> s.talent != null && !s.talent.isBlank() && kills >= 10;
@@ -306,10 +313,12 @@ public final class Achievements {
                 case "boss_10" -> s.stats.bossKillCount >= 10;
                 case "best_hit_1m" -> sat(s.stats.bestHit) >= 1_000_000;
                 case "dismantle_100" -> s.stats.dismantles >= 100;
+                case "dismantle_1000" -> s.stats.dismantles >= 1000;
                 case "craft_25" -> s.stats.crafts >= 25;
                 case "boss_50" -> s.stats.bossKillCount >= 50;
                 case "boss_100" -> s.stats.bossKillCount >= 100;
                 case "craft_50" -> s.stats.crafts >= 50;
+                case "craft_200" -> s.stats.crafts >= 200;
                 case "potion_25" -> s.usedPotions.size() >= 25;
                 case "set_4" -> setCounts.values().stream().anyMatch(n -> n >= 4);
                 case "set_dual" -> setCounts.values().stream().filter(n -> n >= 2).count() >= 2;

@@ -68,7 +68,7 @@ class ZoneAbyssTest {
             }
         }
         String sql = sb.toString();
-        for (String code : List.of("abyss_blade", "void_bow", "rift_helm", "chaos_plate", "abyss_greaves", "void_ring")) {
+        for (String code : List.of("abyss_blade", "abyss_bow", "rift_helm", "chaos_plate", "abyss_greaves", "abyss_ring")) {
             java.util.regex.Matcher m = java.util.regex.Pattern.compile(
                     "\\('" + code + "',\\s*'[^']*',\\s*'[^']*',\\s*'[a-z0-9]+',\\s*\\d+,\\s*'([a-z]+)'").matcher(sql);
             assertTrue(m.find(), "深渊装备应在 SQL 模板中：" + code);

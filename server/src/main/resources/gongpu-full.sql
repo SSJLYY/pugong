@@ -967,15 +967,16 @@ INSERT INTO `cfg_equipment_template`
   ('lava_greaves', '熔岩护腿', '🌋', 'legs', 4, 'volcano', '{"PDEF":"22","MDEF":"12","REGEN":"2"}', 10, 80, '熔岩冷却后的岩甲护腿', 1, 52);
 
 -- 第七批第 23 轮：深渊裂隙装备 ×6（跨世毕业装，min_zone=abyss，tier 4）
-DELETE FROM `cfg_equipment_template` WHERE `code` IN ('abyss_blade','void_bow','rift_helm','chaos_plate','abyss_greaves','void_ring');
+-- 第九批第 95 轮订正：原 void_bow/void_ring 与第九批虚空界同名装备 code 冲突（后段 DELETE 覆盖），改名 abyss_bow/abyss_ring，两区各 6 件互不覆盖。
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('abyss_blade','abyss_bow','rift_helm','chaos_plate','abyss_greaves','abyss_ring');
 INSERT INTO `cfg_equipment_template`
   (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
   ('abyss_blade', '渊噬之刃', '🗡️', 'weapon', 4, 'abyss', '{"PATK":"260","CRITD":"0.3"}', 10, 900, '裂隙深处凝成的噬光之刃', 1, 53),
-  ('void_bow', '虚空长弓', '🏹', 'bow', 4, 'abyss', '{"PATK":"210","RNG":"2","ASPD":"0.15"}', 10, 900, '弦是凝固的虚空', 1, 54),
+  ('abyss_bow', '深渊长弓', '🏹', 'bow', 4, 'abyss', '{"PATK":"210","RNG":"2","ASPD":"0.15"}', 10, 900, '弦是凝固的深渊', 1, 54),
   ('rift_helm', '裂隙兜鍪', '⛑️', 'head', 4, 'abyss', '{"maxHP":"4000","PDEF":"35","MDEF":"60"}', 10, 700, '戴上它能听见裂隙的低语', 1, 55),
   ('chaos_plate', '混沌重铠', '🛡️', 'chest', 4, 'abyss', '{"maxHP":"6000","PDEF":"70","MDEF":"50"}', 10, 800, '混沌魔胎的甲壳所铸', 1, 56),
   ('abyss_greaves', '渊行胫甲', '🦿', 'legs', 4, 'abyss', '{"maxHP":"3500","PDEF":"45","SPD":"15"}', 10, 700, '行于渊上如履平地', 1, 57),
-  ('void_ring', '虚空指环', '💍', 'ring1', 4, 'abyss', '{"MATK":"150","MREGEN":"5","EVA":"0.02"}', 10, 850, '指环内侧刻着无光君王的名字', 1, 58);
+  ('abyss_ring', '深渊指环', '💍', 'ring1', 4, 'abyss', '{"MATK":"150","MREGEN":"5","EVA":"0.02"}', 10, 850, '指环内侧刻着无光君王的名字', 1, 58);
 
 -- 第六批第 83 轮：新委托 ×2（火山终局长线 + 平原高计数挂机委托；奖励用第六批新药剂）
 DELETE FROM `cfg_quest` WHERE `code` IN ('volcano_heart');
@@ -1020,10 +1021,11 @@ DELETE FROM `cfg_craft` WHERE `code` IN ('c_abyss_blade');
 INSERT INTO `cfg_craft`
   (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
   ('c_abyss_blade', '渊噬之刃铸造', '📐', 'abyss_blade', '{"abyss_crystal":6,"fire_crystal":4}', 5000, 1, 1, 28);
-DELETE FROM `cfg_craft` WHERE `code` IN ('c_void_ring');
+-- 第九批第 95 轮订正：原 c_void_ring 与第九批虚空版同名冲突（后段 DELETE 覆盖），改名 c_abyss_ring 产深渊指环。
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_abyss_ring');
 INSERT INTO `cfg_craft`
   (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
-  ('c_void_ring', '虚空指环铸造', '📐', 'void_ring', '{"abyss_crystal":4,"mana_dust":6}', 4000, 1, 1, 29);
+  ('c_abyss_ring', '深渊指环铸造', '📐', 'abyss_ring', '{"abyss_crystal":4,"mana_dust":6}', 4000, 1, 1, 29);
 
 -- 第六批第 87 轮：新怪物词条「时滞」的状态行（攻速 -20%，沼泽起入池，词条总数 12）
 DELETE FROM `cfg_buff` WHERE `code` IN ('slow');

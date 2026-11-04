@@ -35,8 +35,8 @@ class Batch7ParityTest {
                 Path.of("src/main/resources/gongpu-full.sql"), StandardCharsets.UTF_8);
         String[] codes = {
                 // 深渊装备/委托/配方
-                "abyss_blade", "void_bow", "rift_helm", "chaos_plate", "abyss_greaves", "void_ring",
-                "abyss_probe", "abyss_lord", "c_abyss_blade", "c_void_ring",
+                "abyss_blade", "abyss_bow", "rift_helm", "chaos_plate", "abyss_greaves", "abyss_ring",
+                "abyss_probe", "abyss_lord", "c_abyss_blade", "c_abyss_ring",
                 // 技能（血怒/冲锋/处决者/迟缓咒）
                 "bloodrage", "charge", "executioner", "hex_slow",
                 // 药剂（狂怒/时之砂）

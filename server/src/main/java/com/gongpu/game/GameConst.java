@@ -509,6 +509,8 @@ public final class GameConst {
 
     /** 每件装备的镶嵌孔上限。 */
     public static final int GEM_SOCKET_MAX = 3;
+    /** 词条怪掉落宝石概率（Boss 必掉，见 GameEngine 击杀漏斗）。 */
+    public static final double GEM_TRAIT_DROP_RATE = 0.10;
 
     /** 六种宝石：Boss 与精英掉落，存放在 materials 里（code 即宝石 id）。 */
     public static final Map<String, GemDef> GEMS = Map.of(

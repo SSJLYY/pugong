@@ -554,6 +554,15 @@ public final class GameEngine {
         if (scroll != null && Math.random() < 0.4) {
             s.materials.merge(scroll, 1, Integer::sum);
         }
+        // 宝石掉落（第八批）：Boss 必掉 1 颗随机宝石、词条怪 10%——宝石是镶嵌系统的唯一产出源
+        if (m.boss || (m.trait != null && Math.random() < GameConst.GEM_TRAIT_DROP_RATE)) {
+            String gem = randomGem();
+            if (gem != null) {
+                s.materials.merge(gem, 1, Integer::sum);
+                GameConst.GemDef gd = GameConst.GEMS.get(gem);
+                pushEvent(s, "💎 掉落" + (gd == null ? "宝石" : gd.name()) + "（锻造页镶嵌）");
+            }
+        }
         // 图纸掉落（DESIGN §9：Boss 30% / 普通怪 4%，幸运药剂同吃加成）：按区域深度池随机一张，存材料键 bp_<配方>
         if (Math.random() < (m.boss ? 0.30 : 0.04) * dropLuckMul(s)) {
             String bp = com.gongpu.cfg.GameData.instance().randomCraftBlueprint(s.zone);
@@ -615,6 +624,12 @@ public final class GameEngine {
     }
 
     /** 战斗日志：追加一条事件，环形保留最近 20 条（旧档 events 为 null 时懒建）。 */
+    /** 随机宝石（第八批）：六种等权。 */
+    static String randomGem() {
+        java.util.List<String> ids = new java.util.ArrayList<>(GameConst.GEMS.keySet());
+        return ids.isEmpty() ? null : ids.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(ids.size()));
+    }
+
     static void pushEvent(PlayerState s, String text) {
         if (s.events == null) {
             s.events = new java.util.ArrayList<>();

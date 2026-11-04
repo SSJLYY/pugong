@@ -741,6 +741,15 @@
     });
     $('blessRow').textContent = '🧬 赋能: ' + (parts.join(' · ') || 'HP+1/拳');
 
+    // 顶栏 DPS 速览（第八批）：面板理论值，(PATK+MATK)×ASPD×(1+CRIT×(CRITD−1))
+    const dpsEl = $('dpsChip');
+    if (dpsEl) {
+      try {
+        const atk = new Decimal(p.PATK || 0).add(p.MATK || 0);
+        const critMul = 1 + Number(p.CRIT || 0) * Math.max(0, Number(p.CRITD || 1.5) - 1);
+        dpsEl.textContent = '⚔️ DPS ' + fmt(atk.mul(p.ASPD || 1).mul(critMul));
+      } catch (e) { /* 估算失败不冒泡 */ }
+    }
     $('stPATK').textContent = fmt(p.PATK);
     $('stMATK').textContent = fmt(p.MATK);
     $('stPDEF').textContent = fmt(p.PDEF);

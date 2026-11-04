@@ -1062,6 +1062,9 @@
 }
 .zone-btn[data-zone="star"]:hover:not(:disabled){ border-color:#fbbf24; box-shadow:0 0 10px rgba(251,191,36,.35); }
 
+/* 顶栏 DPS 速览（第八批） */
+.dps-chip{font-size:12px;color:var(--gold,#ffd54a);border:1px solid var(--line,#39415a);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
 /* 周常任务卡片（第八批）：与每日卡同构，金色描边区分长线任务 */
 .weekly-card{border-color:rgba(251,191,36,.45)}
 .weekly-card.done{border-color:#fbbf24}

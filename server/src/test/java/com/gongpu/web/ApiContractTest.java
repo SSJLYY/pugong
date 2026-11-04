@@ -45,6 +45,17 @@ class ApiContractTest {
         return out;
     }
 
+    /** 第九批第 67 轮：本批新端点显式在册——自动派生只查「前端调了后端要有」，这里反查「后端新端点前端必须接」。 */
+    @Test
+    void batch9EndpointsWiredInFrontend() throws Exception {
+        String js = read(Path.of("../web/js/api.js"));
+        for (String ep : new String[]{"adopt-pet", "switch-pet", "feed-pet", "feed-pet-batch",
+                "rename-pet", "monthly-claim", "sell-all-materials", "fuse-all-gems",
+                "unsocket-all", "sell-extra-blueprints", "mat-exchange-all"}) {
+            assertTrue(js.contains(ep), "api.js 须接入端点 " + ep);
+        }
+    }
+
     @Test
     void frontendEndpointsExistInControllers() throws Exception {
         Path serverDir = Path.of("").toAbsolutePath();

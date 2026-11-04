@@ -87,6 +87,9 @@ public final class PanelCalculator {
         // 虚空精华（第九批）：暴伤 +30%（与狂怒同加区）
         BigDecimal voidCritd = (active(s, "void_pot") && !silenced) ? Num.of(0.30) : Num.ZERO;
         BigDecimal voidAcc = (active(s, "void_pot") && !silenced) ? Num.of(0.05) : Num.ZERO;
+        // 星尘甘露（第九批）：暴击 +6%（锐眼同加区）、攻速平直 +1.5（时之砂同口径，进乘区前）
+        BigDecimal stardustCrit = (active(s, "stardust_pot") && !silenced) ? Num.of(0.06) : Num.ZERO;
+        BigDecimal stardustAspd = (active(s, "stardust_pot") && !silenced) ? Num.of(1.5) : Num.ZERO;
         // 时之砂（第七批）：平直攻速加算（进乘区之前，与词条平直攻速同口径）
         BigDecimal sandAspd = (active(s, "sand_pot") && !silenced) ? Num.of(0.2) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -204,11 +207,11 @@ public final class PanelCalculator {
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
                 Num.mul(Num.add(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), vigorPot), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
-                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(Num.add(aspdWithBonus(s.fixed.ASPD, flat, pct), sandAspd), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
+                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(Num.add(Num.add(aspdWithBonus(s.fixed.ASPD, flat, pct), sandAspd), stardustAspd), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
                 Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),
-                Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit)),
+                Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit), stardustCrit)),
                 Num.add(Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd), voidCritd),
                 Num.min(GameConst.BLESS_CAP.get("ACC"),
                         Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot), focusPot), voidAcc)),

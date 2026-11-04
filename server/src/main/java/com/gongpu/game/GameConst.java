@@ -513,7 +513,9 @@ public final class GameConst {
             java.util.Map.entry("focus", new PotionDef("focus", "鹰目药剂", "🎯", "90s 内命中 +12%", 0, 0, "focus_pot", 0.12, 90, 500)),
             java.util.Map.entry("vigor", new PotionDef("vigor", "生机药剂", "🌿", "60s 内每秒回复 +150", 0, 0, "vigor_pot", 150, 60, 550)),
             // ---- 第九批扩充：虚空精华（暴伤+命中） ----
-            java.util.Map.entry("void", new PotionDef("void", "虚空精华", "🌀", "60s 内暴击伤害 +30%、命中 +5%", 0, 0, "void_pot", 0.30, 60, 900)));
+            java.util.Map.entry("void", new PotionDef("void", "虚空精华", "🌀", "60s 内暴击伤害 +30%、命中 +5%", 0, 0, "void_pot", 0.30, 60, 900)),
+            // ---- 第九批集群九扩充：星尘甘露（暴击+平直攻速） ----
+            java.util.Map.entry("stardust", new PotionDef("stardust", "星尘甘露", "✨", "90s 内暴击 +6%、攻速 +1.5", 0, 0, "stardust_pot", 0.06, 90, 1200)));
 
     /** 破甲药剂（第八批）：无视防御比例（与破甲专精被动在 effDef 内乘算叠加）。 */
     public static final double PIERCE_POT_RATIO = 0.20;

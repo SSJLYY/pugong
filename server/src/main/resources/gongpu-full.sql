@@ -1245,6 +1245,16 @@ INSERT INTO `cfg_buff`
   (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('void_pot', '虚空精华', '🌀', 'good', 'passive', '{"critdAdd":0.30,"accAdd":0.05}', '60s 内暴击伤害 +30%、命中 +5%', 1, 57);
 
+-- 第九批第 81 轮：新药剂星尘甘露
+DELETE FROM `cfg_item` WHERE `code` IN ('stardust');
+INSERT INTO `cfg_item`
+  (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('stardust', '星尘甘露', '✨', 'potion', 1200, '{"buff":"stardust_pot","buffVal":0.06,"buffDur":90}', '90s 内暴击 +6%、攻速 +1.5', 1, 58);
+DELETE FROM `cfg_buff` WHERE `code` IN ('stardust_pot');
+INSERT INTO `cfg_buff`
+  (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('stardust_pot', '星尘甘露', '✨', 'good', 'passive', '{"critAdd":0.06,"aspdAdd":1.5}', '90s 内暴击 +6%、攻速 +1.5', 1, 58);
+
 -- 第九批第 23 轮：新主动虚空斩
 DELETE FROM `cfg_skill` WHERE `code` IN ('void_slash');
 INSERT INTO `cfg_skill`

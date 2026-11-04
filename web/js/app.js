@@ -1033,7 +1033,8 @@
         pierce_pot: ['🏹', '破甲药剂', true], giant_pot: ['🦍', '巨人', true],
         fortune_pot: ['🧧', '聚宝', true], stone_pot: ['🗿', '石肤', true], thorn_pot: ['🌵', '荆棘药剂', true],
         focus_pot: ['🎯', '鹰目', true], vigor_pot: ['🌿', '生机', true],
-        charge: ['🐎', '冲锋·下一击×3', true], void_slash: ['🌀', '虚空斩·下一击×4', true], void_pot: ['🌀', '虚空精华', true]
+        charge: ['🐎', '冲锋·下一击×3', true], void_slash: ['🌀', '虚空斩·下一击×4', true], void_pot: ['🌀', '虚空精华', true],
+        stardust_pot: ['✨', '星尘甘露', true]
       };
       const isEt = view.talent === 'eternal';
       let html = '';

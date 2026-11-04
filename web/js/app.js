@@ -1321,6 +1321,15 @@
   const bagFilter = { slot: 'all', quality: 'all', sort: 'orig' };
   const QUALITY_COLOR = ['#aaa', '#5cb85c', '#4a9eff', '#b366ff'];
   const QUALITY_NAME = ['普通', '精良', '稀有', '史诗'];
+  // 宝石图鉴（第八批，与后端 GameConst.GEMS 镜像）：id → [emoji, 名称, 效果]
+  const GEM_META = {
+    gem_ruby: ['🔺', '红宝石', '物攻 +60'], gem_sapphire: ['🔷', '蓝宝石', '魔攻 +60'],
+    gem_emerald: ['💚', '翡翠', '生命上限 +3000'], gem_topaz: ['💛', '黄玉', '暴击率 +3%'],
+    gem_amethyst: ['💜', '紫水晶', '攻速 +0.12'], gem_opal: ['⚪', '蛋白石', '双防各 +40'],
+    gem_ruby_2: ['💎', '璀璨红宝石', '物攻 +150'], gem_sapphire_2: ['💎', '璀璨蓝宝石', '魔攻 +150'],
+    gem_emerald_2: ['💎', '璀璨翡翠', '生命上限 +7500'], gem_topaz_2: ['💎', '璀璨黄玉', '暴击率 +7.5%'],
+    gem_amethyst_2: ['💎', '璀璨紫水晶', '攻速 +0.3'], gem_opal_2: ['💎', '璀璨蛋白石', '双防各 +100']
+  };
 
   function affixText(a) {
     // 每秒回复 X% 生命上限类(回春戒「生命泉涌」)——刻意保留百分比语义
@@ -1681,12 +1690,13 @@
         ? ` <b style="color:#4caf50">⬆${Math.round(sc - eqSc)}</b>` : ` <b style="color:#999">⬇${Math.round(eqSc - sc)}</b>`}</span>`;
       const setSm = setOfItem(view, it);
       const setChip = setSm ? ` <span class="bi-set" title="套装成员：同套穿 2/4 件激活加成（见已装备区套装面板）">🧩${setSm.name}</span>` : '';
+      const gemTxt = (it.gems || []).map(g => { const gm = GEM_META[g]; return gm ? gm[0] + gm[1] + '（' + gm[2] + '）' : g; }).join(' · ');
       d.innerHTML = `
         <div class="bi-head" style="color:${QUALITY_COLOR[it.quality]}">
           ${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}${it.temper ? ' 🔨' + it.temper : ''}${it.locked ? ' 🔒' : ''}
           <span class="bi-q">${QUALITY_NAME[it.quality]}</span>${scoreChip}${setChip}
         </div>
-        <div class="bi-affix">${(it.affixes || []).map(affixText).join(' · ') || '（无词条）'}</div>
+        <div class="bi-affix">${(it.affixes || []).map(affixText).join(' · ') || '（无词条）'}${gemTxt ? '<br>💠 ' + gemTxt : ''}</div>
         <div class="bi-actions">
           <button data-act="lock" title="锁定后不被一键卖出/丢弃/自动管护处置">${it.locked ? '🔓 解锁' : '🔒 锁定'}</button>
           <button data-act="equip">装备</button>
@@ -1694,6 +1704,8 @@
           <button data-act="enhance">强化</button>
           <button data-act="temper" title="淬炼：底子 +4%/级（满 5 级，与强化独立），耗来源区域材料 + 金币" ${it.temper >= 5 ? 'disabled' : ''}>${it.temper >= 5 ? '淬炼 MAX' : '淬炼'}</button>
           <button data-act="reroll">洗炼</button>
+          <button data-act="socket" title="镶嵌宝石（最多 3 孔）：宝石由 Boss 必掉、词条怪概率掉" ${(it.gems || []).length >= 3 ? 'disabled' : ''}>${(it.gems || []).length >= 3 ? '💠 孔满' : '💠 镶嵌'}</button>
+          ${(it.gems || []).length ? '<button data-act="unsocket" title="拆卸一颗宝石回材料仓（200 金）">拆卸</button>' : ''}
           ${((it.slot === 'weapon' || it.slot === 'bow') && !(it.affixes || []).some(a => a.sideKey === 'ENCHANT')) ? '<button data-act="enchant">附魔</button>' : ''}
           <button data-act="sell">卖出 +${fmt(Math.round(20 * (it.quality + 1) * (1 + (it.enhance || 0) * 0.5)))} 金</button>
           <button data-act="dismantle" title="分解为来源区域的材料（喂锻造合成）">分解</button>
@@ -1747,6 +1759,32 @@
               const r = await call(() => API.enchantItem(API.state.slot, code, idx));
               const res = r.result || {};
               toast('🔥 附魔成功：' + (res.enchanted || '') + '（魔攻+' + (res.matkBonus || 0) + '）', 'ok');
+              applyView(r);
+            } catch (e) { toast(e.message, 'err'); }
+            return;
+          }
+          if (act === 'socket') {
+            const mats = (view && view.materials) || {};
+            const owned = Object.keys(GEM_META).filter(g => (mats[g] || 0) > 0);
+            if (!owned.length) { toast('暂无宝石：挑战 Boss 必掉、词条怪概率掉', 'err'); return; }
+            const pick = await pickModal('💠 镶嵌宝石 · ' + it.name,
+              '已镶 ' + (it.gems || []).length + '/3 孔，选一颗镶入（立即生效）',
+              owned.map(g => ({ label: GEM_META[g][0] + ' ' + GEM_META[g][1] + '（' + GEM_META[g][2] + '）×' + mats[g], value: g })));
+            if (!pick) return;
+            try {
+              const r = await call(() => API.socketGem(API.state.slot, idx, pick), '镶嵌成功');
+              applyView(r);
+            } catch (e) { toast(e.message, 'err'); }
+            return;
+          }
+          if (act === 'unsocket') {
+            const gems = it.gems || [];
+            const pick = await pickModal('🧲 拆卸宝石 · ' + it.name,
+              '拆下一颗回材料仓，手工费 200 金',
+              gems.map((g, gi) => ({ label: (GEM_META[g] ? GEM_META[g][0] + ' ' + GEM_META[g][1] : g), value: gi })));
+            if (pick === null || pick === undefined) return;
+            try {
+              const r = await call(() => API.unsocketGem(API.state.slot, idx, pick), '已拆卸');
               applyView(r);
             } catch (e) { toast(e.message, 'err'); }
             return;
@@ -2629,7 +2667,32 @@
     }).join(' ');
     const sellRow = '<div class="potion-item"><div class="pi-info"><b>💰 材料出售</b>' +
       '<div class="pi-desc">' + sellChips + '</div></div></div>';
-    box.innerHTML = exchangeRow + sellRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    // 宝石融合（第八批）：3 颗同种一阶 → 璀璨二阶；宝石出售与材料同口径（data-sell-mat 共用处理）
+    const GEM_SELL = [['gem_ruby', 500], ['gem_sapphire', 500], ['gem_emerald', 600], ['gem_opal', 700],
+      ['gem_topaz', 800], ['gem_amethyst', 800], ['gem_ruby_2', 1500], ['gem_sapphire_2', 1500],
+      ['gem_emerald_2', 1800], ['gem_opal_2', 2100], ['gem_topaz_2', 2400], ['gem_amethyst_2', 2400]];
+    const gemChips = GEM_SELL.map(([c, price]) => {
+      const gm = GEM_META[c];
+      const have = myMats[c] || 0;
+      const t1 = !c.endsWith('_2');
+      return '<span class="mat-chip' + (have > 0 ? '' : ' lack') + '">' + gm[0] + ' ' + gm[1] + ' ×' + have + ' · ' + price + ' 金' +
+        (have > 0 ? ' <button class="mat-sell" data-sell-mat="' + c + '">全卖 +' + fmt(price * have) + '</button>' : '') +
+        (t1 && have >= 3 ? ' <button class="mat-sell" data-fuse-gem="' + c + '">融合 3→璀璨</button>' : '') + '</span>';
+    }).join(' ');
+    const gemRow = '<div class="potion-item"><div class="pi-info"><b>💎 宝石</b>' +
+      '<div class="pi-desc">Boss 必掉、词条怪概率掉；背包装备点「💠 镶嵌」装上（每件 3 孔），3 颗同种可融合成璀璨（属性 ×2.5）</div>' +
+      '<div class="pi-desc">' + gemChips + '</div></div></div>';
+    box.innerHTML = exchangeRow + sellRow + gemRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    box.querySelectorAll('[data-fuse-gem]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try {
+        const r = await call(() => API.fuseGem(API.state.slot, b.dataset.fuseGem));
+        const res = (r && r.result) || {};
+        toast('💎 融合成功：得到' + (GEM_META[res.gem] ? GEM_META[res.gem][1] : res.gem), 'ok');
+        if (r) applyView(r);
+        loadCrafts();
+      } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+    }));
     box.querySelectorAll('[data-sell-mat]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true;
       try {

@@ -584,6 +584,14 @@ public final class GameEngine {
         if ("star_eclipse".equals(m.trait)) {
             s.stats.eclipseKills++;
         }
+        // 宠物经验（第九批）：出战宠物随击杀成长，升级时播报
+        if (s.pet != null) {
+            int[] petR = GameService.gainPetExp(s, GameConst.PET_EXP_PER_KILL);
+            if (petR[1] > 0) {
+                GameConst.PetDef pd = GameConst.PETS.get(s.pet);
+                pushEvent(s, "🐾 " + (pd == null ? "宠物" : pd.name()) + "升到了 " + petR[0] + " 级！");
+            }
+        }
         // 无限属性点天赋:每杀一怪 +1 自由属性点
         if ("statlord".equals(s.talent)) {
             s.freePoints = Num.add(s.freePoints, Num.of(1));

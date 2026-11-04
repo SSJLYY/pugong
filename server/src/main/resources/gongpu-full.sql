@@ -1166,6 +1166,13 @@ INSERT INTO `cfg_equipment_template`
   ('meteor_greaves', '流星胫甲', '🦿', 'legs', 4, 'star', '{"maxHP":"8000","PDEF":"100","SPD":"18"}', 10, 1800, '踏步即是坠落的流星', 1, 63),
   ('quasar_ring', '类星指环', '💍', 'ring1', 4, 'star', '{"MATK":"330","MREGEN":"8","EVA":"0.03"}', 10, 2200, '指环中央是一颗微缩的类星体', 1, 64);
 
+-- 第八批第 86 轮：星界装备补缺 ×2（项链/战靴，星界此前无此二部位）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('pulsar_necklace','comet_boots');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('pulsar_necklace', '脉冲星项链', '📿', 'necklace', 4, 'star', '{"MATK":"260","CRIT":"0.05","MREGEN":"5"}', 10, 2300, '每一次脉冲都与你的心跳同步', 1, 65),
+  ('comet_boots', '彗尾战靴', '🥾', 'boots', 4, 'star', '{"maxHP":"6000","PDEF":"70","SPD":"25","EVA":"0.03"}', 10, 1900, '鞋底拖着一条不熄的彗尾', 1, 66);
+
 -- 第八批第 15 轮：新药剂破甲药剂
 DELETE FROM `cfg_item` WHERE `code` IN ('pierce');
 INSERT INTO `cfg_item`

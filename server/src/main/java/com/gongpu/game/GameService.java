@@ -1186,7 +1186,12 @@ public class GameService {
      * 无限属性点天赋(statlord 专属):自由属性点加点。
      * 加点值 = STAT_POINT_STEP[stat] × count,累计进 statPoints,PanelCalculator 并入面板 flat 区。
      */
-    public Map<String, Object> allocateStatPoint(PlayerState s, String stat, int count) {
+    /**
+     * 加点（大数口径）：count 为任意大整数（字符串传参，无单次上限——
+     * 旧 int 口径把「全部」卡在 20 亿，玩家余额更高时梭哈不完，2026-11-04 按反馈改）。
+     * 小数部分向下取整（自由点只有整数来源），取整后 <1 拒绝。
+     */
+    public Map<String, Object> allocateStatPoint(PlayerState s, String stat, java.math.BigDecimal count) {
         if (!"statlord".equals(s.talent)) {
             throw ApiException.badRequest("未觉醒「无限属性点」天赋，无法加点");
         }
@@ -1194,18 +1199,22 @@ public class GameService {
         if (step == null) {
             throw ApiException.badRequest("该属性不可加点：" + stat);
         }
-        if (count < 1) {
+        if (count == null) {
             throw ApiException.badRequest("加点数量至少 1");
         }
-        if (Num.lt(s.freePoints, Num.of(count))) {
+        java.math.BigDecimal n = count.setScale(0, java.math.RoundingMode.FLOOR);
+        if (n.signum() < 1) {
+            throw ApiException.badRequest("加点数量至少 1");
+        }
+        if (Num.lt(s.freePoints, n)) {
             throw ApiException.badRequest("自由属性点不足（当前 " + Num.plain(s.freePoints) + "）");
         }
-        s.statPoints.merge(stat, step.multiply(java.math.BigDecimal.valueOf(count)), java.math.BigDecimal::add);
-        s.freePoints = Num.sub(s.freePoints, Num.of(count));
+        s.statPoints.merge(stat, step.multiply(n), java.math.BigDecimal::add);
+        s.freePoints = Num.sub(s.freePoints, n);
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("stat", stat);
-        m.put("count", count);
+        m.put("count", Num.plain(n));
         m.put("freePoints", Num.plain(s.freePoints));
         return m;
     }

@@ -37,13 +37,13 @@ class StatPointTest {
         PlayerState s = statlord();
         s.freePoints = Num.of(386_000_000L);
         PanelCalculator.Panel base = PanelCalculator.of(s);
-        game.allocateStatPoint(s, "PATK", 100_000_000);
+        game.allocateStatPoint(s, "PATK", BigDecimal.valueOf(100_000_000));
         assertEquals(0, s.freePoints.compareTo(Num.of(286_000_000L)), "扣点应精确");
         PanelCalculator.Panel p = PanelCalculator.of(s);
         assertEquals(0, p.PATK().compareTo(Num.add(base.PATK(), Num.of(100_000_000L))),
                 "物攻应 +1 亿（每点 +1）");
         // 剩余全部一次加完
-        game.allocateStatPoint(s, "PATK", 286_000_000);
+        game.allocateStatPoint(s, "PATK", BigDecimal.valueOf(286_000_000));
         assertEquals(0, s.freePoints.compareTo(Num.ZERO), "全部梭哈后余额清零");
     }
 
@@ -92,14 +92,14 @@ class StatPointTest {
         s.freePoints = Num.of(10);
         BigDecimal patkBefore = PanelCalculator.of(s).PATK();
 
-        game.allocateStatPoint(s, "PATK", 5);
+        game.allocateStatPoint(s, "PATK", BigDecimal.valueOf(5));
 
         assertEquals(0, s.freePoints.compareTo(Num.of(5)), "消耗 5 点");
         assertEquals(0, PanelCalculator.of(s).PATK().compareTo(patkBefore.add(Num.of(5))),
                 "PATK 加点 = 每点 +1,直接进面板");
         // 面板小数步长属性:CRIT 每点 +0.5%
         s.freePoints = Num.of(4);
-        game.allocateStatPoint(s, "CRIT", 4);
+        game.allocateStatPoint(s, "CRIT", BigDecimal.valueOf(4));
         assertTrue(Num.gt(PanelCalculator.of(s).CRIT(), Num.of(0.019)), "CRIT 每点 +0.5%,4 点 ≥ +2%");
     }
 
@@ -107,19 +107,43 @@ class StatPointTest {
     void allocateRejectsInsufficientOrInvalid() {
         PlayerState s = statlord();
         s.freePoints = Num.of(2);
-        assertThrows(com.gongpu.common.ApiException.class, () -> game.allocateStatPoint(s, "PATK", 3),
+        assertThrows(com.gongpu.common.ApiException.class, () -> game.allocateStatPoint(s, "PATK", BigDecimal.valueOf(3)),
                 "点数不足应拒绝");
-        assertThrows(com.gongpu.common.ApiException.class, () -> game.allocateStatPoint(s, "GOLD", 1),
+        assertThrows(com.gongpu.common.ApiException.class, () -> game.allocateStatPoint(s, "GOLD", BigDecimal.ONE),
                 "不可加点属性应拒绝(金币不是属性)");
-        assertThrows(com.gongpu.common.ApiException.class, () -> game.allocateStatPoint(s, "PATK", 0),
+        assertThrows(com.gongpu.common.ApiException.class, () -> game.allocateStatPoint(s, "PATK", BigDecimal.ZERO),
                 "数量至少 1");
     }
 
     @Test
     void allocateRejectsWithoutTalent() {
         PlayerState s = NewState.create();
-        assertThrows(com.gongpu.common.ApiException.class, () -> game.allocateStatPoint(s, "PATK", 1),
+        assertThrows(com.gongpu.common.ApiException.class, () -> game.allocateStatPoint(s, "PATK", BigDecimal.ONE),
                 "未觉醒 statlord 应拒绝加点");
+    }
+
+    /** 超 int 上限一次加完（2026-11-04 反馈：旧「全部」被前端/int 卡在 20 亿，不是真全部）。 */
+    @Test
+    void allocateBeyondIntRangeAtOnce() {
+        PlayerState s = statlord();
+        s.freePoints = new BigDecimal("5000000000");
+        PanelCalculator.Panel base = PanelCalculator.of(s);
+        game.allocateStatPoint(s, "PATK", new BigDecimal("3000000000"));
+        assertEquals(0, s.freePoints.compareTo(new BigDecimal("2000000000")), "30 亿一次扣应精确");
+        assertEquals(0, PanelCalculator.of(s).PATK()
+                        .compareTo(Num.add(base.PATK(), new BigDecimal("3000000000"))),
+                "物攻应 +30 亿整");
+    }
+
+    /** 天文数字余额一次梭哈（击杀垓级玩家的自由点远超 long/JS 安全整数，字符串口径全程精确）。 */
+    @Test
+    void allocateAstronomicalAllIn() {
+        PlayerState s = statlord();
+        BigDecimal all = new BigDecimal("689000000000000000000000");
+        s.freePoints = all;
+        game.allocateStatPoint(s, "PATK", all);
+        assertEquals(0, s.freePoints.compareTo(BigDecimal.ZERO), "全部梭哈后应清零");
+        assertEquals(0, s.statPoints.get("PATK").compareTo(all), "累计加点应与余额逐位相等");
     }
 
     @Test

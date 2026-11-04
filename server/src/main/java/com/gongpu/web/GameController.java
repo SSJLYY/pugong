@@ -44,7 +44,8 @@ public class GameController {
     public record QuestReq(String code) {
     }
 
-    public record StatPointReq(String stat, Integer count) {
+    /** count 用字符串收大数：Jackson 对 String 字段兼容 JSON 数字与字符串两种写法（旧前端发数字不破）。 */
+    public record StatPointReq(String stat, String count) {
     }
 
     public record EnchantReq(String scroll, Integer index) {
@@ -233,6 +234,18 @@ public class GameController {
         return v;
     }
 
+    /** 大数参数解析（加点 count 专用）：任意精度十进制字符串，格式不对回 400。 */
+    private static java.math.BigDecimal reqCount(String v, String field) {
+        if (v == null || v.isBlank()) {
+            throw com.gongpu.common.ApiException.badRequest("参数缺失: " + field);
+        }
+        try {
+            return new java.math.BigDecimal(v.trim());
+        } catch (NumberFormatException e) {
+            throw com.gongpu.common.ApiException.badRequest("参数格式不正确: " + field);
+        }
+    }
+
     private static int reqIdx(Integer v, String field) {
         if (v == null) {
             throw com.gongpu.common.ApiException.badRequest("参数缺失: " + field);
@@ -378,7 +391,7 @@ public class GameController {
     public Map<String, Object> statPoint(HttpServletRequest req, @PathVariable int slot,
                                          @RequestBody StatPointReq body) {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req),
-                s -> game.allocateStatPoint(s, reqStr(body.stat(), "stat"), reqIdx(body.count(), "count")));
+                s -> game.allocateStatPoint(s, reqStr(body.stat(), "stat"), reqCount(body.count(), "count")));
     }
 
     /** 委托：查看公会委托板（含资格与进度）。 */

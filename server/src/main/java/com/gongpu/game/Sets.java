@@ -55,7 +55,11 @@ public final class Sets {
             // 星辰战装（第八批，星界 4 件套：深渊当年未配套装，星界补上第七套）
             new SetDef("starset", "星辰战装", "🌌",
                     List.of("star_blade", "nebula_helm", "galaxy_plate", "meteor_greaves"),
-                    b("PATK", "120", "MATK", "120"), b("PATK", "300", "MATK", "300", "CRITD", "0.25")));
+                    b("PATK", "120", "MATK", "120"), b("PATK", "300", "MATK", "300", "CRITD", "0.25")),
+            // 无相战装（第九批，虚空界 4 件套：第八套）
+            new SetDef("voidset", "无相战装", "🌀",
+                    List.of("void_blade", "void_hood", "void_robe", "void_treads"),
+                    b("PATK", "220", "MATK", "220"), b("PATK", "550", "MATK", "550", "CRITD", "0.30")));
 
     private static final Map<String, SetDef> BY_MEMBER = buildByMember();
     private static final Map<String, SetDef> BY_ID = buildById();

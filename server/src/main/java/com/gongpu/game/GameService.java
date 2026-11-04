@@ -829,6 +829,12 @@ public class GameService {
                 score += v.doubleValue();
             }
         }
+        // 镶嵌宝石计分（第八批）：一阶 +80/颗、二阶 +200/颗——自动换装/整理/管护不再把镶钻装备当裸装换掉
+        if (it.gems != null) {
+            for (String g : it.gems) {
+                score += g != null && g.endsWith("_2") ? 200 : 80;
+            }
+        }
         return score * (1 + it.enhance * 0.05) * (1 + it.temper * 0.04);
     }
 

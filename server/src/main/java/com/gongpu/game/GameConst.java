@@ -602,6 +602,37 @@ public final class GameConst {
     public static java.util.List<String> gemTier1Ids() {
         return GEMS.keySet().stream().filter(id -> !id.endsWith("_2")).toList();
     }
+    // ==================== 宠物伙伴（第九批） ====================
+
+    /** 宠物定义：stats 为 1 级 flat 加成，随等级线性放大（伙伴来源、不受沉默压制）。 */
+    public record PetDef(String id, String name, String emoji, Map<String, BigDecimal> stats, String desc, int price) {
+    }
+
+    /** 宠物等级上限。 */
+    public static final int PET_MAX_LEVEL = 50;
+    /** 每级属性放大系数：实际加成 = 基础 × (1 + 0.15 × (等级 − 1))。 */
+    public static final double PET_LEVEL_MUL = 0.15;
+    /** 击杀一只怪宠物获得的经验。 */
+    public static final int PET_EXP_PER_KILL = 1;
+    /** 喂食一次获得的经验与金币成本。 */
+    public static final int PET_FEED_EXP = 10;
+    public static final int PET_FEED_COST = 150;
+
+    /** 升到下一级所需经验：20 + (当前等级 − 1) × 10。 */
+    public static int petExpNeed(int level) {
+        return 20 + (level - 1) * 10;
+    }
+
+    /** 宠物全表（6 只）：金币领养，领养后可切换出战，出战宠物按等级放大面板加成。 */
+    public static final Map<String, PetDef> PETS = Map.ofEntries(
+            Map.entry("pet_cat", new PetDef("pet_cat", "招财猫", "🐱", Map.of("PATK", new BigDecimal("30")), "物攻 +30", 2000)),
+            Map.entry("pet_dog", new PetDef("pet_dog", "忠犬", "🐶", Map.of("maxHP", new BigDecimal("1500")), "生命上限 +1500", 2000)),
+            Map.entry("pet_fox", new PetDef("pet_fox", "灵狐", "🦊", Map.of("MATK", new BigDecimal("30")), "魔攻 +30", 3000)),
+            Map.entry("pet_turtle", new PetDef("pet_turtle", "玄龟", "🐢",
+                    Map.of("PDEF", new BigDecimal("25"), "MDEF", new BigDecimal("25")), "双防各 +25", 4000)),
+            Map.entry("pet_hawk", new PetDef("pet_hawk", "苍鹰", "🦅", Map.of("CRIT", new BigDecimal("0.02")), "暴击率 +2%", 6000)),
+            Map.entry("pet_deer", new PetDef("pet_deer", "森鹿", "🦌", Map.of("REGEN", new BigDecimal("20")), "生命回复 +20", 5000)));
+
     public static final int ENHANCE_COST_BASE = 100;
     public static final double ENHANCE_COST_MUL = 1.5;
 

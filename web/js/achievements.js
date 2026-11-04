@@ -57,7 +57,9 @@
     { id: 'market_1', name: '黑市客', emoji: '🌑', desc: '首次在每日黑市购买药剂' },
     { id: 'merchant', name: '商贾之道', emoji: '🧮', desc: '卖材料累计收入 50,000 金币' },
     { id: 'slow_20', name: '迟缓大师', emoji: '🐌', desc: '迟缓咒熟练度达到 20' },
-    { id: 'epic_affix', name: '史诗词条', emoji: '🟣', desc: '拥有 3 条史诗词条（已装备与背包合计）' }
+    { id: 'epic_affix', name: '史诗词条', emoji: '🟣', desc: '拥有 3 条史诗词条（已装备与背包合计）' },
+    { id: 'gem_first', name: '镶嵌初体验', emoji: '💠', desc: '首次把宝石镶嵌到装备上' },
+    { id: 'gem_10', name: '珠光宝气', emoji: '💎', desc: '累计镶嵌 10 颗宝石' }
   ];
 
   var byId = {};

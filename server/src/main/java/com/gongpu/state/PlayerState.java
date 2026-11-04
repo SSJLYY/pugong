@@ -143,6 +143,13 @@ public class PlayerState {
     /** 本周全清奖励是否已发（第八批）。 */
     public boolean weeklyBonusGiven = false;
 
+    /** 月常任务签发月（第九批，yyyy-MM）；跨月由 MonthlyQuests.ensure 重签。 */
+    public String monthlyMonth;
+    /** 本月月常任务（与每日任务共用 DailyTask 结构：基线快照口径相同）。 */
+    public List<DailyTask> monthlyTasks = new ArrayList<>();
+    /** 本月全清奖励是否已发（第九批）。 */
+    public boolean monthlyBonusGiven = false;
+
     /** 出战宠物 code（第九批，根字段跨世保留）；null 表示未领养/未出战。 */
     public String pet;
     /** 已领养宠物 code 列表（第九批）。 */
@@ -298,6 +305,8 @@ public class PlayerState {
         public long rerolls = 0;
         public long potionsUsed = 0;
         public long dailyClaims = 0;
+        /** 累计领取的月常任务数（第九批）。 */
+        public long monthlyClaims = 0;
         /** 累计领取的周常任务数（第八批）。 */
         public long weeklyClaims = 0;
         /** 累计击杀带「星蚀」词条的怪物数（第八批，星蚀猎手成就口径）。 */

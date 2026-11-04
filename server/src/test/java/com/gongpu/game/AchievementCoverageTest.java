@@ -42,6 +42,6 @@ class AchievementCoverageTest {
             }
             assertTrue(Achievements.rewardOf(d.id()) > 0, "成就 " + d.id() + " 奖励应为正");
         }
-        assertEquals(64, Achievements.ALL.size(), "成就总数应为 64");
+        assertEquals(66, Achievements.ALL.size(), "成就总数应为 66");
     }
 }

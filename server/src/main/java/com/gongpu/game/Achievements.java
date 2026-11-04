@@ -84,7 +84,9 @@ public final class Achievements {
             new Def("gold_100m", "金山银海", "🏔️", "持有 1 亿金币"),
             new Def("craft_200", "锻造传说", "🔥", "累计合成 200 次"),
             new Def("dismantle_1000", "万物分解", "♻️", "累计分解 1000 件装备"),
-            new Def("gen_30", "三十世轮回", "☸️", "达到第 30 世")
+            new Def("gen_30", "三十世轮回", "☸️", "达到第 30 世"),
+            new Def("eclipse_hunter", "星蚀猎手", "🌑", "击杀 10 只带「星蚀」词条的怪物"),
+            new Def("new_meds", "尝新者", "🧪", "喝过鹰目药剂与生机药剂各至少一次")
     );
 
     private Achievements() {
@@ -97,7 +99,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
                     "kill_100k", "gold_100m", "craft_200", "gen_30" -> 5_000L;
             default -> 500L;
@@ -236,6 +238,9 @@ public final class Achievements {
             case "weekly_8" -> new long[]{s.stats.weeklyClaims, 24};
             case "gem_collector" -> new long[]{s.stats.gemsBought, 10};
             case "set_wearer" -> new long[]{maxSetWorn(s), 4};
+            case "eclipse_hunter" -> new long[]{s.stats.eclipseKills, 10};
+            case "new_meds" -> new long[]{
+                    (s.usedPotions.contains("focus") ? 1 : 0) + (s.usedPotions.contains("vigor") ? 1 : 0), 2};
             case "daily_1" -> new long[]{s.stats.dailyClaims, 1};
             case "daily_30" -> new long[]{s.stats.dailyClaims, 30};
             case "phase_breaker" -> new long[]{s.stats.bossPhaseKills, 1};
@@ -332,6 +337,8 @@ public final class Achievements {
                 case "weekly_8" -> s.stats.weeklyClaims >= 24;
                 case "gem_collector" -> s.stats.gemsBought >= 10;
                 case "set_wearer" -> maxSetWorn(s) >= 4;
+                case "eclipse_hunter" -> s.stats.eclipseKills >= 10;
+                case "new_meds" -> s.usedPotions.contains("focus") && s.usedPotions.contains("vigor");
                 case "daily_1" -> s.stats.dailyClaims >= 1;
                 case "daily_30" -> s.stats.dailyClaims >= 30;
                 case "phase_breaker" -> s.stats.bossPhaseKills >= 1;

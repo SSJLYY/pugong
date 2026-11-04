@@ -133,6 +133,14 @@ public final class GameEngine {
             autoPotion(s);
         }
 
+        // 词条·再生（第八批）：交战帧每秒回复上限 3%（在反击前结算，封顶不超上限；
+        // 置于 advance 主流程而非 mobAttack 内——怪没打中玩家时也应回复）
+        if (!s.dead && s.mob != null && "regen".equals(s.mob.trait)
+                && s.mob.curHP != null && s.mob.maxHP != null) {
+            BigDecimal heal = Num.mul(s.mob.maxHP, Num.of(GameConst.TRAIT_REGEN_PCT * effective));
+            s.mob.curHP = Num.min(s.mob.maxHP, Num.add(s.mob.curHP, heal));
+        }
+
         // —— 怪物反击 ——
         if (!s.dead && s.mob != null) {
             mobAttack(s, p, effective);

@@ -35,6 +35,6 @@ class SlowTraitTest {
         assertTrue(GameConst.traitPool(4).contains("slow"), "沼泽池应含时滞");
         assertTrue(GameConst.traitPool(5).contains("slow"), "深区池应含时滞");
         assertTrue(!GameConst.traitPool(3).contains("slow"), "矿洞池不应含时滞");
-        assertEquals(14, GameConst.MOB_TRAITS.size(), "词条总数应为 14（+ 第七批诅咒/寒霜）");
+        assertEquals(15, GameConst.MOB_TRAITS.size(), "词条总数应为 15（+ 第八批再生）");
     }
 }

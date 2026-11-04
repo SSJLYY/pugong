@@ -21,7 +21,9 @@ class TraitPoolTest {
         assertTrue(GameConst.traitPool(3).contains("venom"), "矿洞起解锁剧毒");
         assertTrue(GameConst.traitPool(4).contains("stealth"), "沼泽起解锁潜行");
         assertTrue(GameConst.traitPool(4).contains("leech"), "沼泽起解锁嗜血");
-        assertEquals(14, GameConst.traitPool(5).size(), "雪山/火山全池 14 条");
+        assertEquals(15, GameConst.traitPool(5).size(), "雪山/火山全池 15 条");
+        assertTrue(GameConst.traitPool(4).contains("regen"), "沼泽起解锁再生");
+        assertFalse(GameConst.traitPool(3).contains("regen"), "矿洞池不应含再生");
         assertTrue(GameConst.traitPool(5).contains("bulwark"), "深区解锁堡垒");
         assertTrue(GameConst.traitPool(4).contains("curse"), "沼泽起解锁诅咒");
         assertFalse(GameConst.traitPool(3).contains("curse"), "矿洞池不应含诅咒");

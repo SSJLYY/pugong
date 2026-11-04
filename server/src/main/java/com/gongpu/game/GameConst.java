@@ -144,7 +144,11 @@ public final class GameConst {
             Map.entry("stealth", new TraitDef("stealth", "潜行", "🌫️", "身形飘忽：你的攻击屡屡落空，对它的伤害 -10%，堆命中克它")),
             Map.entry("slow", new TraitDef("slow", "时滞", "🐌", "黏液缠身：命中可能让你陷入时滞 4 秒，出拳速度 -20%，速战速决或备好净化")),
             Map.entry("curse", new TraitDef("curse", "诅咒", "💀", "阴气蚀体：与它交战时你的一切回血（回复/吸血/喝药）减半，先解决它再续航")),
-            Map.entry("frost", new TraitDef("frost", "寒霜", "🧊", "寒气侵体：命中让你寒霜附体 5 秒、出拳速度 -15%，解毒剂与净化可解")));
+            Map.entry("frost", new TraitDef("frost", "寒霜", "🧊", "寒气侵体：命中让你寒霜附体 5 秒、出拳速度 -15%，解毒剂与净化可解")),
+            Map.entry("regen", new TraitDef("regen", "再生", "🌿", "生机旺盛：交战中每秒回复 3% 生命上限，拖得越久越难杀，爆发速杀克它")));
+
+    /** 词条「再生」（第八批）：怪物每秒回复上限的比例。 */
+    public static final double TRAIT_REGEN_PCT = 0.03;
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -216,8 +220,8 @@ public final class GameConst {
                         : zoneIdx == 3
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : zoneIdx == 4
-                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow", "curse")
-                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost");
+                                        ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow", "curse", "regen")
+                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen");
     }
 
     private static Map<String, ZoneDef> buildZones() {

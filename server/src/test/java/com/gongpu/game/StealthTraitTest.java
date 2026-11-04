@@ -59,6 +59,6 @@ class StealthTraitTest {
         }
         assertFalse(mine.contains("stealth"), "矿洞池不应有潜行");
         assertTrue(swamp.contains("stealth"), "沼泽池应能掷出潜行");
-        assertEquals(14, GameConst.MOB_TRAITS.size(), "怪物词条总数应达 14（12 + 第七批诅咒/寒霜）");
+        assertEquals(15, GameConst.MOB_TRAITS.size(), "怪物词条总数应达 15（14 + 第八批再生）");
     }
 }

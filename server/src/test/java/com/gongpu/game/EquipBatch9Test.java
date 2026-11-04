@@ -50,6 +50,6 @@ class EquipBatch9Test {
         while (m.find()) {
             rows += (int) Pattern.compile("^\\s*\\('", Pattern.MULTILINE).matcher(m.group(1)).results().count();
         }
-        assertEquals(64, rows, "装备模板总数应为 64（58 + 第八批星界 6 件）");
+        assertEquals(66, rows, "装备模板总数应为 66（第八批终版口径）");
     }
 }

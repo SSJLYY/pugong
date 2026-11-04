@@ -52,6 +52,6 @@ class IronGutTalentTest {
     @Test
     void talentRegistered() {
         assertNotNull(GameConst.TALENTS.get("iron_gut"));
-        assertEquals(10, GameConst.TALENTS.size(), "天赋总数应达 10");
+        assertEquals(11, GameConst.TALENTS.size(), "天赋总数应达 11（第八批终版口径）");
     }
 }

@@ -61,20 +61,20 @@ class DataParity2Test {
         }
         // 主动技能总数 = 13（+ 第八批连环掌）；被动 16（+ 第八批破甲专精）
         assertEquals(13, GameConst.ACTIVE_SKILLS.size());
-        assertEquals(16, GameConst.PASSIVE_SKILLS.size());
+        assertEquals(17, GameConst.PASSIVE_SKILLS.size());
     }
 
     @Test
     void questCountIs20() throws Exception {
         String sql = allSql();
-        assertEquals(20, countRows(insertBlocks(sql, "cfg_quest")), "委托总数应为 20（18 + 第八批星界 2）");
+        assertEquals(22, countRows(insertBlocks(sql, "cfg_quest")), "委托总数应为 22（第八批终版口径）");
     }
 
     @Test
     void craftRefsValid() throws Exception {
         String sql = allSql();
         String crafts = insertBlocks(sql, "cfg_craft");
-        assertEquals(20, countRows(crafts), "配方总数应为 20（18 + 第八批星界 2）");
+        assertEquals(22, countRows(crafts), "配方总数应为 22（第八批终版口径）");
         // 产物全集：装备 code + 药剂/物品 code（item: 前缀）
         Set<String> equipCodes = new HashSet<>();
         Matcher em = Pattern.compile("\\('([a-z0-9_]+)',\\s*'[^']*',\\s*'[^']*',\\s*'(weapon|bow|offhand|head|chest|legs|boots|ring1|ring2|necklace)',").matcher(sql);

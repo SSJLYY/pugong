@@ -48,6 +48,20 @@ class CodecBatch9Test {
     }
 
     @Test
+    void petNamesAndCountersSurviveRoundTrip() {
+        PlayerState s = NewState.create();
+        s.petNames.put("pet_cat", "小金");
+        s.petNames.put("pet_fox", "阿狸");
+        s.stats.petFeeds = 42;
+        s.stats.gemsFused = 5;
+        PlayerState back = StateCodec.decode(StateCodec.encode(s));
+        assertEquals("小金", back.petNames.get("pet_cat"));
+        assertEquals("阿狸", back.petNames.get("pet_fox"));
+        assertEquals(42, back.stats.petFeeds);
+        assertEquals(5, back.stats.gemsFused);
+    }
+
+    @Test
     void freshStateHasEmptyPetFields() {
         PlayerState s = NewState.create();
         assertEquals(null, s.pet);

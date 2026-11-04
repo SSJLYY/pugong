@@ -1470,9 +1470,11 @@
       if (it) {
         d.style.borderColor = QUALITY_COLOR[it.quality];
         const sm = setOfItem(view, it);
+        const gemLine = (it.gems || []).map(g => (GEM_META[g] ? GEM_META[g][0] : '💠')).join('');
         d.innerHTML = `<div class="es-name" style="color:${QUALITY_COLOR[it.quality]}">${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}</div>
-                       <div class="es-slot">${SLOT_NAME[slot]}</div>${sm ? `<div class="es-set">🧩 ${sm.name} ${sm.worn}/${sm.total}</div>` : ''}`;
-        d.title = (it.affixes || []).map(affixText).join('\n');
+                       <div class="es-slot">${SLOT_NAME[slot]}</div>${sm ? `<div class="es-set">🧩 ${sm.name} ${sm.worn}/${sm.total}</div>` : ''}${gemLine ? `<div class="es-set">💠 ${gemLine}</div>` : ''}`;
+        d.title = (it.affixes || []).map(affixText).join('\n')
+          + (it.gems || []).map(g => '\n💠 ' + (GEM_META[g] ? GEM_META[g][1] + '（' + GEM_META[g][2] + '）' : g)).join('');
         d.addEventListener('click', async () => {
           // 触屏:hover title 失效,点击先弹词条小卡,卸下走卡内按钮
           if (!CAN_HOVER) {
@@ -1508,9 +1510,12 @@
       d.className = 'equip-slot extra-slot' + (it ? '' : ' empty');
       if (it) {
         d.style.borderColor = QUALITY_COLOR[it.quality];
+        const gemLineX = (it.gems || []).map(g => (GEM_META[g] ? GEM_META[g][0] : '💠')).join('');
         d.innerHTML = `<div class="es-name" style="color:${QUALITY_COLOR[it.quality]}">${it.emoji} ${it.name}${it.enhance ? ' +' + it.enhance : ''}</div>
-                       <div class="es-slot">🧳 无相位 ${i + 1}</div>`;
-        d.title = (it.affixes || []).map(affixText).join('\n') + '\n(点击卸下;卸下后才能强化/洗炼/卖出)';
+                       <div class="es-slot">🧳 无相位 ${i + 1}</div>${gemLineX ? `<div class="es-set">💠 ${gemLineX}</div>` : ''}`;
+        d.title = (it.affixes || []).map(affixText).join('\n')
+          + (it.gems || []).map(g => '\n💠 ' + (GEM_META[g] ? GEM_META[g][1] + '（' + GEM_META[g][2] + '）' : g)).join('')
+          + '\n(点击卸下;卸下后才能强化/洗炼/卖出)';
         d.addEventListener('click', async () => {
           if (!CAN_HOVER) {
             showItemPop(it, async () => {

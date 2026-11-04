@@ -152,6 +152,29 @@ public class CraftService {
      * 材料出售（第七批）：区域材料按 GameConst.MAT_SELL_PRICE 卖金币；
      * count<=0 表示全部卖出，超出库存按库存封顶；图纸/卷轴不在价目表内、不可售。
      */
+    /** 宝石直购倍率（第八批）：一阶宝石按售价 ×4 直购；二阶只能融合，不卖成品。 */
+    public static final int GEM_BUY_MUL = 4;
+
+    /** 直购一阶宝石（第八批）：cost = 售价 ×4，进材料仓。 */
+    public Map<String, Object> buyGem(PlayerState s, String code) {
+        Integer sell = com.gongpu.game.GameConst.GEM_SELL_PRICE.get(code);
+        if (sell == null || code.endsWith("_2")) {
+            throw ApiException.badRequest("这种宝石不能直购（二阶请用三颗一阶融合）");
+        }
+        long cost = (long) sell * GEM_BUY_MUL;
+        if (com.gongpu.common.Num.lt(s.gold, com.gongpu.common.Num.of(cost))) {
+            throw ApiException.badRequest("金币不足，需要 " + cost);
+        }
+        s.gold = com.gongpu.common.Num.sub(s.gold, com.gongpu.common.Num.of(cost));
+        s.materials.merge(code, 1, Integer::sum);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("id", code);
+        m.put("cost", cost);
+        m.put("have", s.materials.getOrDefault(code, 0));
+        return m;
+    }
+
     /** 材料买入倍率（第八批）：商店按售价 ×3 卖区域材料——急用调剂可以，刷金币不行。 */
     public static final int MAT_BUY_MUL = 3;
 

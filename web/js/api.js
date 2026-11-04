@@ -188,6 +188,7 @@
     sellMaterial: (slot, id, count) => request('POST', '/api/game/' + slot + '/sell-material', { id, count }),
     buyMaterial: (slot, id, count) => request('POST', '/api/game/' + slot + '/buy-material', { id, count }),
     equipSet: (slot, id) => request('POST', '/api/game/' + slot + '/equip-set', { id }),
+    buyGem: (slot, id) => request('POST', '/api/game/' + slot + '/buy-gem', { id }),
     buyFill: (slot, id, target) => request('POST', '/api/game/' + slot + '/buyfill', { id, target }),
     buyFillKit: (slot) => request('POST', '/api/game/' + slot + '/buyfill-kit', {}),
     questAccept: (slot, code) => request('POST', '/api/game/' + slot + '/quest/accept', { code }),

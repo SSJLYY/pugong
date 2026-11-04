@@ -2758,12 +2758,23 @@
       const t1 = !c.endsWith('_2');
       return '<span class="mat-chip' + (have > 0 ? '' : ' lack') + '">' + gm[0] + ' ' + gm[1] + ' ×' + have + ' · ' + price + ' 金' +
         (have > 0 ? ' <button class="mat-sell" data-sell-mat="' + c + '">全卖 +' + fmt(price * have) + '</button>' : '') +
+        (t1 ? ' <button class="mat-sell" data-buy-gem="' + c + '" title="直购价 = 售价 ×4">买 1 · -' + fmt(price * 4) + ' 金</button>' : '') +
         (t1 && have >= 3 ? ' <button class="mat-sell" data-fuse-gem="' + c + '">融合 3→璀璨</button>' : '') + '</span>';
     }).join(' ');
     const gemRow = '<div class="potion-item"><div class="pi-info"><b>💎 宝石</b>' +
       '<div class="pi-desc">Boss 必掉、词条怪概率掉；背包装备点「💠 镶嵌」装上（每件 3 孔），3 颗同种可融合成璀璨（属性 ×2.5）</div>' +
       '<div class="pi-desc">' + gemChips + '</div></div></div>';
     box.innerHTML = exchangeRow + sellRow + gemRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    box.querySelectorAll('[data-buy-gem]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true;
+      try {
+        const r = await call(() => API.buyGem(API.state.slot, b.dataset.buyGem));
+        const res = (r && r.result) || {};
+        toast('💎 直购宝石：-' + fmt(res.cost || 0) + ' 金币，现持有 ' + (res.have || 0) + ' 颗', 'ok');
+        if (r) applyView(r);
+        loadCrafts();
+      } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+    }));
     box.querySelectorAll('[data-fuse-gem]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true;
       try {

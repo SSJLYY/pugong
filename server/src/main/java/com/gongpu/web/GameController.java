@@ -486,6 +486,14 @@ public class GameController {
                 s -> crafts.sell(s, reqStr(body.id(), "id"), body.count() == null ? 0 : body.count()));
     }
 
+    /** 宝石直购（第八批）：一阶宝石按售价 ×4 买入；二阶只能融合。 */
+    @PostMapping("/{slot}/buy-gem")
+    public Map<String, Object> buyGem(HttpServletRequest req, @PathVariable int slot,
+                                      @RequestBody GemReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "buy-gem",
+                s -> crafts.buyGem(s, reqStr(body.id(), "id")));
+    }
+
     /** 材料买入（第八批）：区域材料按售价 ×3 买入（急用调剂）。 */
     @PostMapping("/{slot}/buy-material")
     public Map<String, Object> buyMaterial(HttpServletRequest req, @PathVariable int slot,

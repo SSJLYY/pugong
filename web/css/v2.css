@@ -933,6 +933,11 @@
 
 /* 战斗日志（第六批：Boss 击杀/图纸/史诗掉落，最近 6 条） */
 .event-log{margin-top:6px;font-size:12px;color:#d8c98a}
+body.theme-light .event-log{color:#7c6a2a}
+body.theme-ink .event-log{
+  color:#4c5245;font-family:"Noto Serif SC","Songti SC","STSong",serif;font-size:12.5px;
+}
+body.theme-ink .event-log .event-line{border-top-color:rgba(46,58,56,.15)}
 .event-log .event-line{padding:1px 0;border-top:1px dashed rgba(255,255,255,.07)}
 .event-log .event-line:first-child{border-top:none}
 .mat-src{font-style:normal;opacity:.65;font-size:11px}

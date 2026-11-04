@@ -1162,3 +1162,5 @@ body.theme-light .zone-btn.ready::after{color:#3d7a34}
 .ach-filters{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
 .ach-chip{background:var(--panel);border:1px solid var(--border);color:var(--txt-dim);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;min-height:26px}
 .ach-chip.on{border-color:var(--gold);color:var(--gold-bright)}
+.monthly-card{border-color:rgba(167,139,250,.5)}
+.monthly-card.done{border-color:#a78bfa}

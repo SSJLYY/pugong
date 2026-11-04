@@ -1061,6 +1061,10 @@
 }
 .zone-btn[data-zone="star"]:hover:not(:disabled){ border-color:#fbbf24; box-shadow:0 0 10px rgba(251,191,36,.35); }
 
+/* 周常任务卡片（第八批）：与每日卡同构，金色描边区分长线任务 */
+.weekly-card{border-color:rgba(251,191,36,.45)}
+.weekly-card.done{border-color:#fbbf24}
+
 /* 每日任务卡片（第七批） */
 .daily-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 @media (max-width:900px){.daily-list{grid-template-columns:1fr}}

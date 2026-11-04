@@ -337,7 +337,11 @@ public final class GameConst {
             Map.entry("iron_wall", new SkillDef("iron_wall", "铁壁", "🧱", 35, 40, 8, "8s 内受击减半")),
             Map.entry("cleanse", new SkillDef("cleanse", "净化", "🕊️", 20, 30, 0, "清除中毒/灼烧/沉默/时滞/寒霜全部负面状态")),
             Map.entry("charge", new SkillDef("charge", "冲锋", "🐎", 15, 20, 0, "下一击 ×3 伤害")),
-            Map.entry("hex_slow", new SkillDef("hex_slow", "迟缓咒", "🐌", 20, 25, 8, "当前怪物攻速 -30%，持续 8 秒")));
+            Map.entry("hex_slow", new SkillDef("hex_slow", "迟缓咒", "🐌", 20, 25, 8, "当前怪物攻速 -30%，持续 8 秒")),
+            Map.entry("flurry", new SkillDef("flurry", "连环掌", "🤲", 25, 30, 0, "接下来 30 次命中各追加一次同额命中（双击）")));
+
+    /** 主动「连环掌」（第八批）：每次施放赋予的双击次数。 */
+    public static final int FLURRY_HITS = 30;
 
     /** 主动「迟缓咒」（第七批）：怪物攻速乘区（MobState.slowT 计时）。 */
     public static final double HEX_SLOW_ASPD_MUL = 0.7;

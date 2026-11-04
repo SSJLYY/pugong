@@ -1110,6 +1110,12 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('snow_throne', '雪原王座', '👑', '雪狼王盘踞王座已久：于雪原猎杀五十只魔物，向公会证明你的实力', 'snow', '{"maxHP":200000,"ATK":1500}', 50, 22000, 'fortune', 1, 1, 1, 18);
 
+-- 第八批第 14 轮：新主动连环掌
+DELETE FROM `cfg_skill` WHERE `code` IN ('flurry');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('flurry', '连环掌', '🤲', 'active', 380, 25, 30, 0, '{"id":"flurry","hits":30}', '接下来 30 次命中各追加一次同额命中', 1, 29);
+
 -- 第八批第 13 轮：新被动破甲专精
 DELETE FROM `cfg_skill` WHERE `code` IN ('armor_pierce');
 INSERT INTO `cfg_skill`

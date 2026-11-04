@@ -347,6 +347,17 @@ public final class GameEngine {
             }
         }
 
+        // 主动·连环掌（第八批）：计数型双击——flurryHits 剩余次数内，每次命中追加一次同额命中
+        // （置于弱点打击之后：追加命中不参与弱点节拍；与总伤害统计同进退）
+        if (s.flurryHits > 0 && punches.signum() > 0) {
+            double extra = Math.min(punches.doubleValue(), s.flurryHits);
+            if (extra > 0) {
+                totalDmg = Num.add(totalDmg, Num.mul(perHit, Num.of(extra)));
+                s.flurryHits -= extra;
+                s.stats.flurryExtra = Num.add(s.stats.flurryExtra, Num.of(extra));
+            }
+        }
+
         // 战绩统计（终身口径）：总伤害按帧累加，最高单击取代表拳伤（木桩陪练同样计入）
         s.stats.totalDamage = Num.add(s.stats.totalDamage, totalDmg);
         if (Num.gt(perHit, s.stats.bestHit)) {

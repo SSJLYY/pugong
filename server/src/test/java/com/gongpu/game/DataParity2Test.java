@@ -59,8 +59,8 @@ class DataParity2Test {
         for (String id : GameConst.ACTIVE_SKILLS.keySet()) {
             assertTrue(sql.contains("'" + id + "'"), "主动技能 " + id + " 应在 SQL 技能表里");
         }
-        // 主动技能总数 = 12（+ 第七批迟缓咒）；被动 16（+ 第八批破甲专精）
-        assertEquals(12, GameConst.ACTIVE_SKILLS.size());
+        // 主动技能总数 = 13（+ 第八批连环掌）；被动 16（+ 第八批破甲专精）
+        assertEquals(13, GameConst.ACTIVE_SKILLS.size());
         assertEquals(16, GameConst.PASSIVE_SKILLS.size());
     }
 

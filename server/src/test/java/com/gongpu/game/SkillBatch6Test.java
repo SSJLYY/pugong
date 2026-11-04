@@ -102,7 +102,7 @@ class SkillBatch6Test {
         GameService.castSkill(s, "iron_wall");
         GameEngine.mobAttack(s, PanelCalculator.of(s), 1.0);
         assertEquals(0, s.life.curHP.compareTo(Num.of(9950)), "铁壁应把 100 伤减半为 50，实际余血=" + s.life.curHP);
-        assertEquals(28, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(),
-                "技能总数应达 28（27 + 第八批破甲专精）");
+        assertEquals(29, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(),
+                "技能总数应达 29（28 + 第八批连环掌）");
     }
 }

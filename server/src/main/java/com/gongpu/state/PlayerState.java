@@ -50,6 +50,8 @@ public class PlayerState {
     public BigDecimal shield = BigDecimal.ZERO;
     /** 弱点打击节拍累加器（第七批）：累计出拳数的小数余量，每满 10 拳触发一次必暴并扣回。 */
     public BigDecimal punchAcc = BigDecimal.ZERO;
+    /** 连环掌剩余双击次数（第八批，计数型 buff 不走秒表 buffs；跨世保留同 punchAcc）。 */
+    public double flurryHits = 0;
     /** 每日首祭日期（第七批，Asia/Shanghai）：当日已用掉「首祭免费」时等于今日日期串。 */
     public String tributeDay;
 
@@ -278,6 +280,8 @@ public class PlayerState {
         public long dailyClaims = 0;
         /** 弱点打击触发次数（第七批，终身口径）。 */
         public long weakCrits = 0;
+        /** 连环掌累计追加命中数（第八批）。 */
+        public BigDecimal flurryExtra = BigDecimal.ZERO;
         /** 材料出售累计（第七批，终身口径）：份数与金币收入（商贾成就口径）。 */
         public long matSold = 0;
         public long matSoldGold = 0;

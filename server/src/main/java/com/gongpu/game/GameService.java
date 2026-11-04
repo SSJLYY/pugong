@@ -117,6 +117,7 @@ public class GameService {
             }
             case "heavy" -> s.buffs.put("heavy", 30.0);
             case "charge" -> s.buffs.put("charge", 30.0);
+            case "flurry" -> s.flurryHits += GameConst.FLURRY_HITS;
             case "hex_slow" -> {
                 // 迟缓咒（第七批）：作用于当前怪物（无目标时空放，仅进 CD 不报错——与怒吼的强校验不同，容错优先）
                 if (s.mob != null) {

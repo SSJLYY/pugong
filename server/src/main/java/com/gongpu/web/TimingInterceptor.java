@@ -39,6 +39,38 @@ public class TimingInterceptor implements HandlerInterceptor {
         return slow;
     }
 
+    // advance 帧耗时（第八批）：帧是每秒轮询的主成本，单独成列——慢帧阈值 50ms
+    private static final java.util.concurrent.atomic.AtomicLong FRAME_TOTAL =
+            new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong FRAME_SUM_MS =
+            new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong FRAME_SLOW =
+            new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong FRAME_MAX_MS =
+            new java.util.concurrent.atomic.AtomicLong();
+    public static final long FRAME_SLOW_MS = 50;
+
+    /** 记录一次 advance 帧耗时。 */
+    public static void recordFrame(long costMs) {
+        FRAME_TOTAL.incrementAndGet();
+        FRAME_SUM_MS.addAndGet(costMs);
+        FRAME_MAX_MS.accumulateAndGet(costMs, Math::max);
+        if (costMs >= FRAME_SLOW_MS) {
+            FRAME_SLOW.incrementAndGet();
+        }
+    }
+
+    /** 帧指标快照（health 用）。 */
+    public static java.util.Map<String, Object> frameStats() {
+        long n = FRAME_TOTAL.get();
+        java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+        m.put("frames", n);
+        m.put("avgMs", n == 0 ? 0 : Math.round(10.0 * FRAME_SUM_MS.get() / n) / 10.0);
+        m.put("slowFrames", FRAME_SLOW.get());
+        m.put("maxMs", FRAME_MAX_MS.get());
+        return m;
+    }
+
     /** 指标快照（health 用）。 */
     public static java.util.Map<String, Object> stats(long slowMs) {
         java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();

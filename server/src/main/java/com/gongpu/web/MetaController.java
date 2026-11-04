@@ -64,6 +64,8 @@ public class MetaController {
         m.put("perf", TimingInterceptor.stats(500));
         // 状态缓存观测（第八批）：命中/未命中/写入与命中率
         m.put("cache", StateCache.stats());
+        // advance 帧耗时（第八批）：帧数/平均/慢帧（≥50ms）/最大
+        m.put("frames", TimingInterceptor.frameStats());
         addDiskWarn(m);
         // 内容版本指纹：部署后核对新内容是否生效（数字与库内 cfg 行数一致才算部署到位）；
         // 探测失败不加字段，绝不拖垮健康检查

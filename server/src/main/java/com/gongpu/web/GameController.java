@@ -119,7 +119,9 @@ public class GameController {
         // 无 claim 的老令牌才回源查一次
         String name = username != null ? username : accounts.require(uid).getUsername();
         s.bulletinName = name;
+        long frameT0 = System.nanoTime();
         com.gongpu.game.GameEngine.AdvanceResult advanceResult = saves.advanceNow(uid, slot, s);
+        TimingInterceptor.recordFrame((System.nanoTime() - frameT0) / 1_000_000);
         // 自动飞升(legacy autobot autoRebirth):通关线达成且管家开关开启 → 立即转生
         // (必须在 persist 之前改状态,否则转生不落库)
         if (advanceResult.cleared() && s.autoRebirth && !s.dead) {

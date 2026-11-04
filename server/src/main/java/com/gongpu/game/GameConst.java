@@ -511,6 +511,10 @@ public final class GameConst {
     public static final int GEM_SOCKET_MAX = 3;
     /** 词条怪掉落宝石概率（Boss 必掉，见 GameEngine 击杀漏斗）。 */
     public static final double GEM_TRAIT_DROP_RATE = 0.10;
+    /** 宝石出售单价（第八批，金币/颗）：率型宝石（暴击/攻速）最贵。 */
+    public static final Map<String, Integer> GEM_SELL_PRICE = Map.of(
+            "gem_ruby", 500, "gem_sapphire", 500, "gem_emerald", 600,
+            "gem_opal", 700, "gem_topaz", 800, "gem_amethyst", 800);
 
     /** 六种宝石：Boss 与精英掉落，存放在 materials 里（code 即宝石 id）。 */
     public static final Map<String, GemDef> GEMS = Map.of(

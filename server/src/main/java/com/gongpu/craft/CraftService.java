@@ -153,7 +153,11 @@ public class CraftService {
      * count<=0 表示全部卖出，超出库存按库存封顶；图纸/卷轴不在价目表内、不可售。
      */
     public Map<String, Object> sell(PlayerState s, String code, int count) {
+        // 区域材料走 MAT_SELL_PRICE；宝石（第八批）走 GEM_SELL_PRICE，同端点同口径
         Integer price = com.gongpu.game.GameConst.MAT_SELL_PRICE.get(code);
+        if (price == null) {
+            price = com.gongpu.game.GameConst.GEM_SELL_PRICE.get(code);
+        }
         if (price == null) {
             throw ApiException.badRequest("这种材料不能出售");
         }

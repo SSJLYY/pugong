@@ -1226,6 +1226,16 @@ INSERT INTO `cfg_craft`
   (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
   ('c_void_ring', '无相指环铸造', '📐', 'void_ring', '{"void_shard":5,"star_shard":3}', 18000, 1, 1, 35);
 
+-- 第九批第 85 轮：虚空套装余件配方 ×2（兜帽/法袍）
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_void_hood');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_void_hood', '无相兜帽铸造', '📐', 'void_hood', '{"void_shard":5,"star_shard":3}', 16000, 1, 1, 36);
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_void_robe');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_void_robe', '虚空法袍铸造', '📐', 'void_robe', '{"void_shard":6,"star_shard":4}', 19000, 1, 1, 37);
+
 -- 第九批第 14 轮：虚空界委托 ×2（sort 23-24）
 DELETE FROM `cfg_quest` WHERE `code` IN ('void_patrol');
 INSERT INTO `cfg_quest`

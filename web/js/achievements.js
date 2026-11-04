@@ -67,7 +67,10 @@
     { id: 'weekly_1', name: '周常初成', emoji: '🗓️', desc: '领取 3 个周常任务奖励（整整一周全清）' },
     { id: 'weekly_8', name: '周常老兵', emoji: '🎖️', desc: '累计领取 24 个周常任务奖励（八周全清）' },
     { id: 'gem_collector', name: '宝石收藏家', emoji: '💠', desc: '累计直购 10 颗宝石' },
-    { id: 'set_wearer', name: '套装行者', emoji: '👕', desc: '同时穿戴任意一套装的全部 4 件' }
+    { id: 'set_wearer', name: '套装行者', emoji: '👕', desc: '同时穿戴任意一套装的全部 4 件' },
+    { id: 'punch_1m', name: '百万连拳', emoji: '🥊', desc: '累计出拳 100 万次' },
+    { id: 'kill_100k', name: '十万斩', emoji: '⚔️', desc: '终身击杀 10 万只怪物' },
+    { id: 'gold_100m', name: '金山银海', emoji: '🏔️', desc: '持有 1 亿金币' }
   ];
 
   var byId = {};

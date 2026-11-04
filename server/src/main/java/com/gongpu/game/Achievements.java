@@ -78,7 +78,10 @@ public final class Achievements {
             new Def("weekly_1", "周常初成", "🗓️", "领取 3 个周常任务奖励（整整一周全清）"),
             new Def("weekly_8", "周常老兵", "🎖️", "累计领取 24 个周常任务奖励（八周全清）"),
             new Def("gem_collector", "宝石收藏家", "💠", "累计直购 10 颗宝石"),
-            new Def("set_wearer", "套装行者", "👕", "同时穿戴任意一套装的全部 4 件")
+            new Def("set_wearer", "套装行者", "👕", "同时穿戴任意一套装的全部 4 件"),
+            new Def("punch_1m", "百万连拳", "🥊", "累计出拳 100 万次"),
+            new Def("kill_100k", "十万斩", "⚔️", "终身击杀 10 万只怪物"),
+            new Def("gold_100m", "金山银海", "🏔️", "持有 1 亿金币")
     );
 
     private Achievements() {
@@ -91,8 +94,9 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer" -> 2_000L;
-            case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8" -> 5_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m" -> 2_000L;
+            case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
+                    "kill_100k", "gold_100m" -> 5_000L;
             default -> 500L;
         };
     }
@@ -190,6 +194,9 @@ public final class Achievements {
         }
         return switch (id) {
             case "punch_10k" -> new long[]{sat(s.stats.lifetimePunches), 10_000};
+            case "punch_1m" -> new long[]{sat(s.stats.lifetimePunches), 1_000_000};
+            case "kill_100k" -> new long[]{sat(s.stats.lifetimeKills), 100_000};
+            case "gold_100m" -> new long[]{sat(s.gold), 100_000_000};
             case "kill_100" -> new long[]{sat(s.stats.kills), 100};
             case "kill_10k" -> new long[]{sat(s.stats.lifetimeKills), 10_000};
             case "hp_5000" -> new long[]{sat((panel == null ? PanelCalculator.of(s) : panel).maxHP()), 5_000};
@@ -269,6 +276,7 @@ public final class Achievements {
             boolean ok = switch (d.id()) {
                 case "first_punch" -> punches >= 1;
                 case "punch_10k" -> punches >= 10_000;
+                case "punch_1m" -> punches >= 1_000_000;
                 case "first_kill" -> kills >= 1;
                 case "kill_100" -> kills >= 100;
                 case "hp_5000" -> maxHp >= 5_000;
@@ -292,7 +300,9 @@ public final class Achievements {
                 case "potion_5" -> s.usedPotions.size() >= 5;
                 case "potion_15" -> s.usedPotions.size() >= 15;
                 case "kill_10k" -> sat(s.stats.lifetimeKills) >= 10_000;
+                case "kill_100k" -> sat(s.stats.lifetimeKills) >= 100_000;
                 case "gold_1m" -> gold >= 1_000_000;
+                case "gold_100m" -> gold >= 100_000_000;
                 case "boss_10" -> s.stats.bossKillCount >= 10;
                 case "best_hit_1m" -> sat(s.stats.bestHit) >= 1_000_000;
                 case "dismantle_100" -> s.stats.dismantles >= 100;

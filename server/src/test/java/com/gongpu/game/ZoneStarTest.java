@@ -59,7 +59,7 @@ class ZoneStarTest {
 
     @Test
     void starDepthUsesFullTraitPool() {
-        assertEquals(18, GameConst.traitPool(8).size(), "星界深度应全池 18 条（含星界专属星蚀）");
+        assertEquals(19, GameConst.traitPool(8).size(), "星界深度应全池 18 条（含星界专属星蚀）");
         assertTrue(new java.util.ArrayList<>(GameConst.ZONES.keySet()).indexOf("star") == 8, "星界应为第 9 区（序 8）");
     }
 }

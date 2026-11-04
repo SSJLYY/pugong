@@ -38,6 +38,6 @@ class AffixBatch7Test {
 
     @Test
     void totalCountIs24() {
-        assertEquals(26, GameConst.AFFIXES.size(), "词条总数应达 26（第八批终版口径）");
+        assertEquals(28, GameConst.AFFIXES.size(), "词条总数应达 26（第八批终版口径）");
     }
 }

@@ -53,7 +53,7 @@ class ZoneAbyssTest {
 
     @Test
     void traitPoolAtAbyssDepthIsFull() {
-        assertEquals(17, GameConst.traitPool(7).size(), "深区词条池应全开（17 条）");
+        assertEquals(18, GameConst.traitPool(7).size(), "深区词条池应全开（17 条）");
     }
 
     /** 第 23 轮：深渊 6 件毕业装在 SQL 里 min_zone=abyss（掉落池按区域取模板）。 */

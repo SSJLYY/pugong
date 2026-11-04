@@ -1209,6 +1209,17 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('gem_sniffer', '宝石嗅觉', '👃', 'passive', 420, 0, 0, 0, '{"effect":"gem_sniffer","mul":1.5}', '词条怪的宝石掉率 +50%（10%→15%）', 1, 30);
 
+-- 第九批第 13 轮：虚空界装备 ×6（tier 4，sort 67-72）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('void_blade','void_bow','void_hood','void_robe','void_treads','void_ring');
+INSERT INTO `cfg_equipment_template`
+  (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('void_blade', '无相之刃', '🌀', 'weapon', 4, 'void', '{"PATK":"1050","CRITD":"0.4"}', 10, 4200, '没有形状的刃，斩断的是存在本身', 1, 67),
+  ('void_bow', '噬空长弓', '🏹', 'bow', 4, 'void', '{"PATK":"860","RNG":"2","ASPD":"0.22"}', 10, 4200, '箭矢在离弦前就已经消失', 1, 68),
+  ('void_hood', '无相兜帽', '🎩', 'head', 4, 'void', '{"maxHP":"16000","PDEF":"140","MDEF":"230"}', 10, 3200, '戴上它的人，脸也成了虚空', 1, 69),
+  ('void_robe', '虚空法袍', '🥋', 'chest', 4, 'void', '{"maxHP":"23000","PDEF":"260","MDEF":"200"}', 10, 3600, '把一片无穿在身上', 1, 70),
+  ('void_treads', '踏虚胫甲', '🦿', 'legs', 4, 'void', '{"maxHP":"14000","PDEF":"180","SPD":"22"}', 10, 3200, '每一步都踩在不存在的地面上', 1, 71),
+  ('void_ring', '无相指环', '💍', 'ring1', 4, 'void', '{"MATK":"600","MREGEN":"10","EVA":"0.04"}', 10, 3800, '指环内侧刻着一个不存在的名字', 1, 72);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-04 第八批 100 轮收官口径）：
 --   cfg_equipment_template 66 / cfg_item 药剂 39 / cfg_affix 26

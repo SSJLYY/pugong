@@ -30,6 +30,15 @@ class ZoneVoidTest {
     }
 
     @Test
+    void voidEquipmentInSql() throws Exception {
+        String sql = new String(java.nio.file.Files.readAllBytes(
+                java.nio.file.Path.of("src/main/resources/gongpu-full.sql")), java.nio.charset.StandardCharsets.UTF_8);
+        for (String code : new String[]{"void_blade", "void_bow", "void_hood", "void_robe", "void_treads", "void_ring"}) {
+            org.junit.jupiter.api.Assertions.assertTrue(sql.contains("'" + code + "'"), "虚空装备应写入 SQL：" + code);
+        }
+    }
+
+    @Test
     void advanceChainEndsAtVoid() {
         assertEquals("void", GameEngine.nextZoneId("star"));
         assertNull(GameEngine.nextZoneId("void"));

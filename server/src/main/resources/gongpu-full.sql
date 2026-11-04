@@ -1110,6 +1110,24 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('snow_throne', '雪原王座', '👑', '雪狼王盘踞王座已久：于雪原猎杀五十只魔物，向公会证明你的实力', 'snow', '{"maxHP":200000,"ATK":1500}', 50, 22000, 'fortune', 1, 1, 1, 18);
 
+-- 第八批第 23 轮：星界委托 ×2 + 星界配方 ×2
+DELETE FROM `cfg_quest` WHERE `code` IN ('star_patrol');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('star_patrol', '回廊巡星', '🌌', '群星回廊的秩序需要维护：于星界猎杀四十只魔物', 'star', '{"maxHP":20000000,"ATK":12000}', 40, 80000, 'rage', 2, 1, 1, 19);
+DELETE FROM `cfg_quest` WHERE `code` IN ('star_heart');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('star_heart', '噬光之心', '💜', '星核主宰的心跳震得回廊发颤：于星界猎杀六十只魔物，向公会证明群星为你让路', 'star', '{"maxHP":20000000,"ATK":12000}', 60, 120000, 'pierce', 2, 1, 1, 20);
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_star_blade');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_star_blade', '星陨之刃铸造', '📐', 'star_blade', '{"star_shard":6,"abyss_crystal":4}', 12000, 1, 1, 30);
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_quasar_ring');
+INSERT INTO `cfg_craft`
+  (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_quasar_ring', '类星指环铸造', '📐', 'quasar_ring', '{"star_shard":4,"mana_dust":8}', 10000, 1, 1, 31);
+
 -- 第八批第 22 轮：星界毕业装 ×6（tier 4，min_zone=star，底子约为深渊装 2.2 倍）
 DELETE FROM `cfg_equipment_template` WHERE `code` IN ('star_blade','comet_bow','nebula_helm','galaxy_plate','meteor_greaves','quasar_ring');
 INSERT INTO `cfg_equipment_template`

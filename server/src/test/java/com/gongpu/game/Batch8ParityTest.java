@@ -16,10 +16,10 @@ class Batch8ParityTest {
 
     @Test
     void batch8CountsAndCodes() throws Exception {
-        assertEquals(39, GameConst.POTIONS.size(), "药剂 39");
+        assertEquals(40, GameConst.POTIONS.size(), "药剂 40");
         assertEquals(26, GameConst.AFFIXES.size(), "词条 26");
-        assertEquals(30, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 30");
-        assertEquals(17, GameConst.MOB_TRAITS.size(), "怪物词条 17");
+        assertEquals(32, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 32");
+        assertEquals(19, GameConst.MOB_TRAITS.size(), "怪物词条 19");
         assertEquals(11, GameConst.TALENTS.size(), "天赋 11");
         assertEquals(72, Achievements.ALL.size(), "成就 72");
         assertEquals(8, Sets.ALL.size(), "套装 8");

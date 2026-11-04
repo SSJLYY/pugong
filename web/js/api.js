@@ -176,6 +176,7 @@
     unsocketGem: (slot, index, gemIndex) => request('POST', '/api/game/' + slot + '/unsocket', { index, gemIndex }),
     fuseGem: (slot, id) => request('POST', '/api/game/' + slot + '/fuse-gem', { id }),
     claimDaily: (slot, id) => request('POST', '/api/game/' + slot + '/daily-claim', { id }),
+    claimWeekly: (slot, id) => request('POST', '/api/game/' + slot + '/weekly-claim', { id }),
     marketBuy: (slot, id) => request('POST', '/api/game/' + slot + '/market-buy', { id }),
     autoSell: (slot, keep) => request('POST', '/api/game/' + slot + '/autosell', { keep: keep }),
     flee: (slot) => request('POST', '/api/game/' + slot + '/flee'),

@@ -568,16 +568,20 @@
     const mpPct = Math.max(0, Math.min(100, new Decimal(p.curMP).div(new Decimal(p.MP).max(1)).toNumber() * 100));
     const pot = view.potions || {};
     const mats = view.materials || {};
-    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥']];
+    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥'], ['abyss_crystal', '🕳️'], ['star_shard', '🌟']];
     const bpCount = Object.keys(mats).filter(k => k.startsWith('bp_')).reduce((t, k) => t + (mats[k] || 0), 0);
     const daily = view.dailyTasks || [];
     const dailyClaimed = daily.filter(t => t.claimed).length;
     const dailyReady = daily.filter(t => t.done && !t.claimed).length;
+    const weekly = view.weeklyTasks || [];
+    const weeklyClaimed = weekly.filter(t => t.claimed).length;
+    const weeklyReady = weekly.filter(t => t.done && !t.claimed).length;
     const sig = [Math.round(hpPct / 5), Math.round(mpPct / 5), view.zone, view.mob ? view.mob.name : '',
       view.autoEquipBest ? 1 : 0, view.autoSellKeep || 0, view.autoSmeltKeep || 0,
       pot.hp_s || 0, pot.hp_l || 0, pot.mp || 0, pot.food || 0, view.dead ? 1 : 0,
       MAT6.map(([c]) => mats[c] || 0).join(','), bpCount,
-      dailyClaimed, dailyReady, daily.map(t => t.progress).join(',')].join('|');
+      dailyClaimed, dailyReady, daily.map(t => t.progress).join(','),
+      weeklyClaimed, weeklyReady, weekly.map(t => t.progress).join(',')].join('|');
     if (renderButlerPanel._sig === sig) return;
     renderButlerPanel._sig = sig;
     $('bpHp').style.width = hpPct.toFixed(0) + '%';
@@ -595,7 +599,9 @@
     if (bm) bm.textContent = MAT6.map(([c, e]) => e + (mats[c] || 0)).join(' ') + ' · 📐' + bpCount;
     const bd = $('bpDaily');
     if (bd) bd.textContent = '📅 每日 ' + dailyClaimed + '/' + daily.length + ' 已领' +
-      (dailyReady > 0 ? ' · 🎁 ' + dailyReady + ' 个可领取' : '');
+      (dailyReady > 0 ? ' · 🎁 ' + dailyReady + ' 个可领取' : '') +
+      ' · 🗓️ 周常 ' + weeklyClaimed + '/' + weekly.length +
+      (weeklyReady > 0 ? ' · 🎁 ' + weeklyReady + ' 个可领取' : '');
     $('bpDrinkHp').textContent = '🧪 血药 ×' + ((pot.hp_s || 0) + (pot.hp_l || 0));
     $('bpDrinkMp').textContent = '🔵 蓝药 ×' + (pot.mp || 0);
     $('bpEat').textContent = '🍖 吃食 ×' + (pot.food || 0);
@@ -913,6 +919,7 @@
     renderBag(view);
     renderSets(view);
     renderDaily(view);
+    renderWeekly(view);
     renderMarket(view);
     renderEvents(view);
     renderPotions(view);
@@ -2552,6 +2559,48 @@
           toast('📅 每日任务奖励：+' + fmt(res.reward || 0) + ' 金币', 'ok');
           if (res.allClearBonus > 0) {
             toast('🎉 每日任务全清！额外奖励 +' + fmt(res.allClearBonus) + ' 金币', 'ok');
+          }
+          if (r) applyView(r);
+        } catch (err) { toast(err.message, 'err'); btn.disabled = false; }
+      });
+    });
+  }
+
+  // ================= 周常任务（第八批，与每日任务同构） =================
+  function renderWeekly(view) {
+    const box = $('weeklyList');
+    if (!box) return;
+    const tasks = view.weeklyTasks || [];
+    const sig = JSON.stringify(tasks);
+    if (sig === renderWeekly._sig) return;
+    renderWeekly._sig = sig;
+    if (!tasks.length) {
+      box.innerHTML = '<p class="empty-hint">本周暂无任务</p>';
+      return;
+    }
+    box.innerHTML = tasks.map(t => {
+      const pct = t.target > 0 ? Math.min(100, Math.floor(100 * t.progress / t.target)) : 0;
+      const btn = t.claimed
+        ? '<button class="daily-claim" disabled>✅ 已领取</button>'
+        : t.done
+          ? '<button class="daily-claim ready" data-weekly-claim="' + esc(t.id) + '">🎁 领取 +' + fmt(t.rewardGold) + ' 金</button>'
+          : '<button class="daily-claim" disabled>未完成</button>';
+      return '<div class="daily-card weekly-card' + (t.claimed ? ' claimed' : t.done ? ' done' : '') + '">' +
+        '<div class="daily-head"><span>' + t.emoji + ' ' + esc(t.name) + '</span><span class="daily-reward">+' + fmt(t.rewardGold) + ' 金</span></div>' +
+        '<div class="daily-desc">' + esc(t.desc) + '</div>' +
+        '<div class="daily-prog"><span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
+        fmt(t.progress) + '/' + fmt(t.target) + '</div>' + btn + '</div>';
+    }).join('') + (tasks.every(t => t.claimed)
+      ? '<p class="daily-allclear">🎉 本周任务已全清，全清奖励也到手了——下周见！</p>' : '');
+    box.querySelectorAll('[data-weekly-claim]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          const r = await call(() => API.claimWeekly(API.state.slot, btn.dataset.weeklyClaim));
+          const res = (r && r.result) || {};
+          toast('🗓️ 周常任务奖励：+' + fmt(res.reward || 0) + ' 金币', 'ok');
+          if (res.allClearBonus > 0) {
+            toast('🎉 周常全清！额外 +' + fmt(res.allClearBonus) + ' 金币与宝石 ×' + (res.allClearGems || []).length, 'ok');
           }
           if (r) applyView(r);
         } catch (err) { toast(err.message, 'err'); btn.disabled = false; }

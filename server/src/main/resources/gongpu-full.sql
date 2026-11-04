@@ -1209,6 +1209,16 @@ INSERT INTO `cfg_skill`
   (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('gem_sniffer', '宝石嗅觉', '👃', 'passive', 420, 0, 0, 0, '{"effect":"gem_sniffer","mul":1.5}', '词条怪的宝石掉率 +50%（10%→15%）', 1, 30);
 
+-- 第九批第 14 轮：虚空界委托 ×2（sort 23-24）
+DELETE FROM `cfg_quest` WHERE `code` IN ('void_patrol');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('void_patrol', '无光巡守', '🌀', '虚空界没有秩序可言——你的拳头就是秩序：于虚空界猎杀四十只魔物', 'void', '{"maxHP":200000000,"ATK":40000}', 40, 300000, 'rage', 3, 1, 1, 23);
+DELETE FROM `cfg_quest` WHERE `code` IN ('void_heart');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('void_heart', '无相之心', '💜', '无相天魔没有心——公会偏要你带一颗回来：于虚空界猎杀六十只魔物', 'void', '{"maxHP":200000000,"ATK":40000}', 60, 450000, 'pierce', 3, 1, 1, 24);
+
 -- 第九批第 13 轮：虚空界装备 ×6（tier 4，sort 67-72）
 DELETE FROM `cfg_equipment_template` WHERE `code` IN ('void_blade','void_bow','void_hood','void_robe','void_treads','void_ring');
 INSERT INTO `cfg_equipment_template`

@@ -1095,6 +1095,13 @@ INSERT INTO `cfg_affix`
   ('wuying', '无影', 'EVA', 'flat', 0.10, 0.18, 'epic', NULL, NULL, 1, 25),
   ('buxi', '不息', 'REGEN', 'flat', 5, 12, 'epic', NULL, NULL, 1, 26);
 
+-- 第九批第 82 轮：高阶词条「裂帛/灵泉」（魔攻/魔回上位版，魔力 4~16 → 16~40、回魔 1~4 → 5~12）
+DELETE FROM `cfg_affix` WHERE `code` IN ('liebo','lingquan');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('liebo', '裂帛', 'MATK', 'flat', 16, 40, 'epic', NULL, NULL, 1, 27),
+  ('lingquan', '灵泉', 'MREGEN', 'flat', 5, 12, 'epic', NULL, NULL, 1, 28);
+
 -- 第七批第 85 轮：新被动「处决者」（Boss 生命低于 30% 时对其伤害 +25%）
 DELETE FROM `cfg_skill` WHERE `code` IN ('executioner');
 INSERT INTO `cfg_skill`

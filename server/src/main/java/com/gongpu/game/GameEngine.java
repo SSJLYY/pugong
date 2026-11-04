@@ -233,7 +233,7 @@ public final class GameEngine {
      * 不含蓄力重击等一次性 buff）。供 mobView 的击杀预估展示，改伤害公式必须同步这里。
      */
     static BigDecimal expectedPerHit(PlayerState s, PanelCalculator.Panel p, PlayerState.MobState m) {
-        BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(p.CRITD(), Num.of(1))));
+        BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(effCritD(p, m), Num.of(1))));
         BigDecimal pd = Num.max(Num.of(1),
                 Num.sub(Num.mul(p.PATK(), critMul), Num.mul(effDef(s, m.PDEF), Num.of(GameConst.DMG_DEF_FACTOR))));
         BigDecimal md = Num.gt(p.MATK(), Num.ZERO)
@@ -288,6 +288,15 @@ public final class GameEngine {
         return p.CRIT();
     }
 
+    /** 有效暴伤（第八批）：星蚀词条吞噬暴击威力——暴伤的超额部分（CRITD−1）减半，与坚韧（减暴击率）分工。 */
+    static BigDecimal effCritD(PanelCalculator.Panel p, PlayerState.MobState m) {
+        if (m != null && "star_eclipse".equals(m.trait)) {
+            return Num.add(Num.of(1), Num.mul(Num.sub(p.CRITD(), Num.of(1)),
+                    Num.of(GameConst.TRAIT_ECLIPSE_CRITD_MUL)));
+        }
+        return p.CRITD();
+    }
+
     /** Boss 是否残血（处决者触发口径：当前/上限 < EXECUTIONER_HP_LINE；上限非正不触发）。 */
     static boolean bossLowHp(PlayerState.MobState m) {
         return m.maxHP != null && m.maxHP.signum() > 0
@@ -309,7 +318,7 @@ public final class GameEngine {
         }
 
         // 有效每拳伤害（含暴击期望）
-        BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(p.CRITD(), Num.of(1))));
+        BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(effCritD(p, m), Num.of(1))));
         BigDecimal pd = Num.max(Num.of(1),
                 Num.sub(Num.mul(p.PATK(), critMul), Num.mul(effDef(s, m.PDEF), Num.of(GameConst.DMG_DEF_FACTOR))));
         BigDecimal md = Num.gt(p.MATK(), Num.ZERO)
@@ -571,6 +580,10 @@ public final class GameEngine {
     private static void onMobKilled(PlayerState s, PlayerState.MobState m) {
         s.stats.kills = Num.add(s.stats.kills, Num.of(1));
         s.stats.lifetimeKills = Num.add(s.stats.lifetimeKills, Num.of(1));
+        // 星蚀猎手口径（第八批）：击杀带星蚀词条的怪计数
+        if ("star_eclipse".equals(m.trait)) {
+            s.stats.eclipseKills++;
+        }
         // 无限属性点天赋:每杀一怪 +1 自由属性点
         if ("statlord".equals(s.talent)) {
             s.freePoints = Num.add(s.freePoints, Num.of(1));

@@ -146,12 +146,15 @@ public final class GameConst {
             Map.entry("curse", new TraitDef("curse", "诅咒", "💀", "阴气蚀体：与它交战时你的一切回血（回复/吸血/喝药）减半，先解决它再续航")),
             Map.entry("frost", new TraitDef("frost", "寒霜", "🧊", "寒气侵体：命中让你寒霜附体 5 秒、出拳速度 -15%，解毒剂与净化可解")),
             Map.entry("regen", new TraitDef("regen", "再生", "🌿", "生机旺盛：交战中每秒回复 3% 生命上限，拖得越久越难杀，爆发速杀克它")),
-            Map.entry("tenacity", new TraitDef("tenacity", "坚韧", "🪨", "心志如磐：你的暴击很难撼动它，暴击率对它减半，堆面板平推克它")));
+            Map.entry("tenacity", new TraitDef("tenacity", "坚韧", "🪨", "心志如磐：你的暴击很难撼动它，暴击率对它减半，堆面板平推克它")),
+            Map.entry("star_eclipse", new TraitDef("star_eclipse", "星蚀", "🌑", "星光被吞噬：你的暴击威力大减（暴伤超额部分减半），只在星界出现，靠平推与攻速克它")));
 
     /** 词条「再生」（第八批）：怪物每秒回复上限的比例。 */
     public static final double TRAIT_REGEN_PCT = 0.03;
     /** 词条「坚韧」（第八批）：玩家暴击率对它乘区。 */
     public static final double TRAIT_TENACITY_CRIT_MUL = 0.5;
+    /** 词条「星蚀」（第八批，星界专属）：玩家暴伤超额部分（CRITD−1）乘区。 */
+    public static final double TRAIT_ECLIPSE_CRITD_MUL = 0.5;
 
     /** 狂暴触发血线 / 攻速倍率。 */
     public static final double TRAIT_FRENZY_HP_LINE = 0.30;
@@ -224,7 +227,10 @@ public final class GameConst {
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : zoneIdx == 4
                                         ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow", "curse", "regen")
-                                        : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity");
+                                        : zoneIdx >= 8
+                                                // 星界专属池：全词条 + 星蚀（仅此一池，别的区域刷不出）
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "star_eclipse")
+                                                : List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity");
     }
 
     private static Map<String, ZoneDef> buildZones() {

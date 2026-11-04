@@ -291,6 +291,8 @@ public class PlayerState {
         public long dailyClaims = 0;
         /** 累计领取的周常任务数（第八批）。 */
         public long weeklyClaims = 0;
+        /** 累计击杀带「星蚀」词条的怪物数（第八批，星蚀猎手成就口径）。 */
+        public long eclipseKills = 0;
         /** 弱点打击触发次数（第七批，终身口径）。 */
         public long weakCrits = 0;
         /** 连环掌累计追加命中数（第八批）。 */

@@ -360,7 +360,8 @@ public final class GameConst {
             Map.entry("eagle_bone", new PassiveDef("eagle_bone", "鹰骨", "🦴", "射程 +1")),
             Map.entry("material_sense", new PassiveDef("material_sense", "材料嗅觉", "👃", "击杀材料掉率 +25 个百分点（50%→75%），锻造党的鼻子")),
             Map.entry("bloodrage", new PassiveDef("bloodrage", "血怒", "🩸", "生命低于 30% 时物理与魔法攻击 +15%，越残越怒")),
-            Map.entry("executioner", new PassiveDef("executioner", "处决者", "🪓", "Boss 生命低于 30% 时对其伤害 +25%，斩尽杀绝")));
+            Map.entry("executioner", new PassiveDef("executioner", "处决者", "🪓", "Boss 生命低于 30% 时对其伤害 +25%，斩尽杀绝")),
+            Map.entry("armor_pierce", new PassiveDef("armor_pierce", "破甲专精", "🏹", "攻击无视目标 20% 的物防与魔防，厚甲在你面前如薄纸")));
 
     public static final double COMBO_CHANCE = 0.15;
 
@@ -371,6 +372,8 @@ public final class GameConst {
     /** 被动「处决者」（第七批）：Boss 血线（当前/上限）低于此值触发，伤害乘区。 */
     public static final double EXECUTIONER_HP_LINE = 0.30;
     public static final double EXECUTIONER_MUL = 1.25;
+    /** 被动「破甲专精」（第八批）：无视目标防御的比例（防御项 ×(1−此值)）。 */
+    public static final double ARMOR_PIERCE_RATIO = 0.20;
     /** 被动「血怒」（第七批）：触发血线（当前生命/上限）与双攻乘区。 */
     public static final double BLOODRAGE_HP_LINE = 0.30;
     public static final double BLOODRAGE_ATK_MUL = 1.15;

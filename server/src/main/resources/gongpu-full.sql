@@ -1110,6 +1110,12 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('snow_throne', '雪原王座', '👑', '雪狼王盘踞王座已久：于雪原猎杀五十只魔物，向公会证明你的实力', 'snow', '{"maxHP":200000,"ATK":1500}', 50, 22000, 'fortune', 1, 1, 1, 18);
 
+-- 第八批第 13 轮：新被动破甲专精
+DELETE FROM `cfg_skill` WHERE `code` IN ('armor_pierce');
+INSERT INTO `cfg_skill`
+  (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('armor_pierce', '破甲专精', '🏹', 'passive', 450, 0, 0, 0, '{"effect":"armor_pierce","ignore":0.2}', '攻击无视目标 20% 的物防与魔防', 1, 28);
+
 -- ============================================================
 -- 整合完毕。验收参考（2026-11-03 第七批 100 轮收官口径）：
 --   cfg_equipment_template 58 / cfg_item 药剂 36 / cfg_affix 24

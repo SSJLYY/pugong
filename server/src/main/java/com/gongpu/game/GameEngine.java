@@ -235,9 +235,9 @@ public final class GameEngine {
     static BigDecimal expectedPerHit(PlayerState s, PanelCalculator.Panel p, PlayerState.MobState m) {
         BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(p.CRITD(), Num.of(1))));
         BigDecimal pd = Num.max(Num.of(1),
-                Num.sub(Num.mul(p.PATK(), critMul), Num.mul(m.PDEF, Num.of(GameConst.DMG_DEF_FACTOR))));
+                Num.sub(Num.mul(p.PATK(), critMul), Num.mul(effDef(s, m.PDEF), Num.of(GameConst.DMG_DEF_FACTOR))));
         BigDecimal md = Num.gt(p.MATK(), Num.ZERO)
-                ? Num.max(Num.of(1), Num.sub(Num.mul(p.MATK(), critMul), Num.mul(m.MDEF, Num.of(GameConst.DMG_DEF_FACTOR))))
+                ? Num.max(Num.of(1), Num.sub(Num.mul(p.MATK(), critMul), Num.mul(effDef(s, m.MDEF), Num.of(GameConst.DMG_DEF_FACTOR))))
                 : Num.ZERO;
         BigDecimal perHit = Num.add(pd, md);
         if ("disarm".equals(m.trait)) {
@@ -260,6 +260,14 @@ public final class GameEngine {
             perHit = Num.mul(perHit, Num.of(GameConst.GIANT_POT_MUL));
         }
         return perHit;
+    }
+
+    /** 目标有效防御（被动·破甲专精第八批：无视 20% 双防，受沉默压制；dealDamage 与 expectedPerHit 同口径）。 */
+    static BigDecimal effDef(PlayerState s, BigDecimal rawDef) {
+        if (s.passives.contains("armor_pierce") && !PanelCalculator.isSilenced(s)) {
+            return Num.mul(rawDef, Num.of(1 - GameConst.ARMOR_PIERCE_RATIO));
+        }
+        return rawDef;
     }
 
     /** 对当前目标的有效暴击率（词条·坚韧第八批：暴击率减半；dealDamage 与 expectedPerHit 同口径）。 */
@@ -285,9 +293,9 @@ public final class GameEngine {
         // 有效每拳伤害（含暴击期望）
         BigDecimal critMul = Num.add(Num.of(1), Num.mul(effCrit(p, m), Num.sub(p.CRITD(), Num.of(1))));
         BigDecimal pd = Num.max(Num.of(1),
-                Num.sub(Num.mul(p.PATK(), critMul), Num.mul(m.PDEF, Num.of(GameConst.DMG_DEF_FACTOR))));
+                Num.sub(Num.mul(p.PATK(), critMul), Num.mul(effDef(s, m.PDEF), Num.of(GameConst.DMG_DEF_FACTOR))));
         BigDecimal md = Num.gt(p.MATK(), Num.ZERO)
-                ? Num.max(Num.of(1), Num.sub(Num.mul(p.MATK(), critMul), Num.mul(m.MDEF, Num.of(GameConst.DMG_DEF_FACTOR))))
+                ? Num.max(Num.of(1), Num.sub(Num.mul(p.MATK(), critMul), Num.mul(effDef(s, m.MDEF), Num.of(GameConst.DMG_DEF_FACTOR))))
                 : Num.ZERO;
         BigDecimal perHit = Num.add(pd, md);
         // 词条·缴械：武器被压制，普攻伤害打折（与蓄力重击同为乘区，先后不影响结果）

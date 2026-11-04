@@ -24,7 +24,7 @@ class Batch7ParityTest {
         assertEquals(18, GameConst.PASSIVE_SKILLS.size(), "被动技能 18（第九批口径）");
         assertEquals(11, GameConst.TALENTS.size(), "天赋 11（第八批终版口径）");
         assertEquals(19, GameConst.MOB_TRAITS.size(), "怪物词条 19（第九批口径）");
-        assertEquals(75, Achievements.ALL.size(), "成就 75");
+        assertEquals(80, Achievements.ALL.size(), "成就 80");
         assertEquals(8, Sets.ALL.size(), "套装 8");
         assertEquals(10, GameConst.ZONES.size(), "区域 10");
     }

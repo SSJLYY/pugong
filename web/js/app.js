@@ -2878,7 +2878,8 @@
       }
       const nick = (pv.names || {})[d.id];
       return '<div class="daily-card' + (isActive ? ' done' : '') + '">' +
-        '<div class="daily-head"><span>' + d.emoji + ' ' + esc(nick || d.name) + (nick ? '（' + esc(d.name) + '）' : '') + '</span>' +
+        '<div class="daily-head"><span>' + d.emoji + ' ' + esc(nick || d.name) + (nick ? '（' + esc(d.name) + '）' : '') +
+        (isOwned ? ' <span class="panel-tip">' + (((pv.levels || {})[d.id]) || 1) + ' 级</span>' : '') + '</span>' +
         (isOwned ? '<button class="mat-sell" data-pet-rename="' + esc(d.id) + '">✏️ 改名</button>' : '') + '</div>' +
         '<div class="daily-desc">' + esc(d.desc) + '（随等级放大）</div>' + btn + '</div>';
     }).join('') || '<p class="empty-hint">暂无宠物</p>';

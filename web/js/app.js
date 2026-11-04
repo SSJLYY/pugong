@@ -794,6 +794,14 @@
         const atk = new Decimal(p.PATK || 0).add(p.MATK || 0);
         const critMul = 1 + Number(p.CRIT || 0) * Math.max(0, Number(p.CRITD || 1.5) - 1);
         dpsEl.textContent = '⚔️ DPS ' + fmt(atk.mul(p.ASPD || 1).mul(critMul));
+        // 综合战力（第九批，参照「总体实力」）：DPS × 生存系数 × 防御系数
+        const pwEl = $('powerChip');
+        if (pwEl) {
+          const dps = atk.mul(p.ASPD || 1).mul(critMul);
+          const hpFac = atk.gt(0) ? new Decimal(p.maxHP || 0).div(atk.mul(10)).add(1) : new Decimal(1);
+          const defFac = new Decimal(Number(p.PDEF || 0) + Number(p.MDEF || 0)).div(2000).add(1);
+          pwEl.textContent = '💪 战力 ' + fmt(dps.mul(hpFac).mul(defFac));
+        }
       } catch (e) { /* 估算失败不冒泡 */ }
     }
     $('stPATK').textContent = fmt(p.PATK);

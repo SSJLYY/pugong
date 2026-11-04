@@ -55,4 +55,17 @@ class ArmorPierceTest {
         assertEquals(0, GameEngine.effDef(pierce, new BigDecimal("400")).compareTo(new BigDecimal("400")),
                 "沉默应压制破甲专精");
     }
+
+    /** 第八批第 15 轮：破甲药剂与被动乘算叠加（400 → 400×0.8×0.8 = 256），单药剂亦生效。 */
+    @Test
+    void piercePotionStacksMultiplicatively() {
+        PlayerState s = fighter(true);
+        s.buffs.put("pierce_pot", 60.0);
+        assertEquals(0, GameEngine.effDef(s, new BigDecimal("400")).compareTo(new BigDecimal("256")),
+                "被动+药剂应乘算至 256");
+        PlayerState potOnly = fighter(false);
+        potOnly.buffs.put("pierce_pot", 60.0);
+        assertEquals(0, GameEngine.effDef(potOnly, new BigDecimal("400")).compareTo(new BigDecimal("320")),
+                "单药剂应至 320");
+    }
 }

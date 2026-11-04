@@ -10,7 +10,7 @@ class EconomySanityTest {
 
     @Test
     void potionsSane() {
-        assertEquals(36, GameConst.POTIONS.size(), "药剂总数应为 36");
+        assertEquals(37, GameConst.POTIONS.size(), "药剂总数应为 37");
         for (GameConst.PotionDef p : GameConst.POTIONS.values()) {
             assertTrue(p.price() > 0, p.id() + " 价格应为正");
             assertTrue(p.price() <= 100_000, p.id() + " 价格不应离谱：" + p.price());

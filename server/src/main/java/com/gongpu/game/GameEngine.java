@@ -262,12 +262,22 @@ public final class GameEngine {
         return perHit;
     }
 
-    /** 目标有效防御（被动·破甲专精第八批：无视 20% 双防，受沉默压制；dealDamage 与 expectedPerHit 同口径）。 */
+    /**
+     * 目标有效防御（第八批：被动·破甲专精与药剂·破甲各无视 20% 双防、乘算叠加，
+     * 均受沉默压制；dealDamage 与 expectedPerHit 同口径）。
+     */
     static BigDecimal effDef(PlayerState s, BigDecimal rawDef) {
-        if (s.passives.contains("armor_pierce") && !PanelCalculator.isSilenced(s)) {
-            return Num.mul(rawDef, Num.of(1 - GameConst.ARMOR_PIERCE_RATIO));
+        if (PanelCalculator.isSilenced(s)) {
+            return rawDef;
         }
-        return rawDef;
+        BigDecimal def = rawDef;
+        if (s.passives.contains("armor_pierce")) {
+            def = Num.mul(def, Num.of(1 - GameConst.ARMOR_PIERCE_RATIO));
+        }
+        if (PanelCalculator.active(s, "pierce_pot")) {
+            def = Num.mul(def, Num.of(1 - GameConst.PIERCE_POT_RATIO));
+        }
+        return def;
     }
 
     /** 对当前目标的有效暴击率（词条·坚韧第八批：暴击率减半；dealDamage 与 expectedPerHit 同口径）。 */

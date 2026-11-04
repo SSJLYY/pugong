@@ -451,7 +451,12 @@ public final class GameConst {
             java.util.Map.entry("fortune", new PotionDef("fortune", "聚宝药剂", "🧧", "300s 内击杀金币 +50%", 0, 0, "fortune_pot", 1.5, 300, 800)),
             // ---- 第七批扩充：复合暴击（狂怒）/ 平直攻速（时之砂） ----
             java.util.Map.entry("rage", new PotionDef("rage", "狂怒药剂", "😤", "90s 内暴击率 +10%、暴击伤害 +30%", 0, 0, "rage_pot", 0.10, 90, 750)),
-            java.util.Map.entry("timesand", new PotionDef("timesand", "时之砂", "⌛", "120s 内攻速 +0.2（平直加算，吃攻速乘区）", 0, 0, "sand_pot", 0.2, 120, 800)));
+            java.util.Map.entry("timesand", new PotionDef("timesand", "时之砂", "⌛", "120s 内攻速 +0.2（平直加算，吃攻速乘区）", 0, 0, "sand_pot", 0.2, 120, 800)),
+            // ---- 第八批扩充：破甲（与破甲专精被动乘算） ----
+            java.util.Map.entry("pierce", new PotionDef("pierce", "破甲药剂", "🏹", "60s 内攻击无视目标 20% 防御", 0, 0, "pierce_pot", 0.2, 60, 600)));
+
+    /** 破甲药剂（第八批）：无视防御比例（与破甲专精被动在 effDef 内乘算叠加）。 */
+    public static final double PIERCE_POT_RATIO = 0.20;
 
     /** 聚宝药剂的金币倍率（与点金手天赋乘算）。 */
     public static final double FORTUNE_POT_MUL = 1.5;

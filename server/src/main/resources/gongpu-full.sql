@@ -1110,6 +1110,12 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('snow_throne', '雪原王座', '👑', '雪狼王盘踞王座已久：于雪原猎杀五十只魔物，向公会证明你的实力', 'snow', '{"maxHP":200000,"ATK":1500}', 50, 22000, 'fortune', 1, 1, 1, 18);
 
+-- 第八批第 15 轮：新药剂破甲药剂
+DELETE FROM `cfg_item` WHERE `code` IN ('pierce');
+INSERT INTO `cfg_item`
+  (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('pierce', '破甲药剂', '🏹', 'potion', 600, '{"buff":"pierce_pot","buffVal":0.2,"buffDur":60}', '60s 内攻击无视目标 20% 防御', 1, 54);
+
 -- 第八批第 14 轮：新主动连环掌
 DELETE FROM `cfg_skill` WHERE `code` IN ('flurry');
 INSERT INTO `cfg_skill`

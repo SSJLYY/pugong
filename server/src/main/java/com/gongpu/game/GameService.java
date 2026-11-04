@@ -997,6 +997,7 @@ public class GameService {
         m.put("autoAdvance", s.autoAdvance);
         m.put("autoBoss", s.autoBoss);
         m.put("rerollPity", s.rerollPity);
+        m.put("flurryHits", s.flurryHits);
         m.put("dailyTasks", DailyQuests.viewOf(s));
         m.put("blackMarket", BlackMarket.viewOf(s));
         return m;

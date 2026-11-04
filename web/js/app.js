@@ -944,7 +944,10 @@
         lifesteal_pot: ['🦇', '嗜血', true], atk_pot: ['⚔️', '狂暴', true],
         def_pot: ['🪨', '磐石', true], aspd_pot: ['🌪️', '疾风', true],
         acc_pot: ['🎯', '明察', true], eva_pot: ['🌫️', '幻影', true],
-        mregen_pot: ['🧿', '凝神', true], shield_pot: ['🛡', '护盾', true]
+        mregen_pot: ['🧿', '凝神', true], shield_pot: ['🛡', '护盾', true],
+        rage_pot: ['😤', '狂怒', true], sand_pot: ['⌛', '时之砂', true],
+        pierce_pot: ['🏹', '破甲药剂', true], giant_pot: ['🦍', '巨人', true],
+        fortune_pot: ['🧧', '聚宝', true], stone_pot: ['🗿', '石肤', true], thorn_pot: ['🌵', '荆棘药剂', true]
       };
       const isEt = view.talent === 'eternal';
       let html = '';
@@ -965,9 +968,15 @@
           '<span class="buff-time">' + fmtDur(v) + '</span>' +
           '</span>';
       });
+      // 连环掌（第八批）：计数型 buff 不在 buffs 秒表里，单独出芯片（次数进签名，变化即重建）
+      const flurryLeft = Math.floor(Number(view.flurryHits || 0));
+      if (flurryLeft > 0) {
+        html += '<span class="buff-chip good" title="连环掌：每次命中追加一次同额命中">' +
+          '<span>🤲 连环掌</span><span class="buff-time">剩 ' + flurryLeft + ' 次</span></span>';
+      }
       // 签名守卫(范式同 renderPotions):chip 集合不变只更新倒计时文本,
       // 不整条 innerHTML 重建——autoSkill/autoBurn 常驻时此前每秒销毁重建整条
-      const sig = JSON.stringify([html ? html.replace(/buff-time">[^<]*/g, 'buff-time">') : '', bulletMp, mpCap]);
+      const sig = JSON.stringify([html ? html.replace(/buff-time">[^<]*/g, 'buff-time">') : '', bulletMp, mpCap, flurryLeft]);
       if (sig === applyView._buffSig) {
         // 只同步倒计时:chip 数量/种类未变,剩余时长文本逐个更新
         const times = buffBar.querySelectorAll('.buff-time');

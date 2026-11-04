@@ -72,7 +72,9 @@ public final class Achievements {
             new Def("gem_first", "镶嵌初体验", "💠", "首次把宝石镶嵌到装备上"),
             new Def("gem_10", "珠光宝气", "💎", "累计镶嵌 10 颗宝石"),
             new Def("pierce_learn", "破甲之道", "🏹", "学会被动「破甲专精」"),
-            new Def("flurry_500", "连环如雨", "🤲", "连环掌累计追加命中 500 次")
+            new Def("flurry_500", "连环如雨", "🤲", "连环掌累计追加命中 500 次"),
+            new Def("star_first", "星瞳初开", "🌌", "首次击杀星界的怪物"),
+            new Def("star_lord", "群星主宰", "👑", "击杀星核主宰·噬光之心")
     );
 
     private Achievements() {
@@ -86,7 +88,7 @@ public final class Achievements {
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
                     "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500" -> 2_000L;
-            case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord" -> 5_000L;
+            case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord" -> 5_000L;
             default -> 500L;
         };
     }
@@ -103,6 +105,20 @@ public final class Achievements {
         }
         int n = 0;
         for (String id : new String[]{"abyss_wisp", "rift_hound", "void_knight", "chaos_spawn"}) {
+            if (s.codex.contains(id)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /** 图鉴中已收集的星界怪种数（star_first 成就口径，第八批）。 */
+    static int starCodexHits(PlayerState s) {
+        if (s.codex == null) {
+            return 0;
+        }
+        int n = 0;
+        for (String id : new String[]{"star_sprite", "void_walker", "star_guard", "star_eater"}) {
             if (s.codex.contains(id)) {
                 n++;
             }
@@ -189,6 +205,8 @@ public final class Achievements {
             case "reroll_50" -> new long[]{s.stats.rerolls, 50};
             case "abyss_first" -> new long[]{abyssCodexHits(s), 1};
             case "abyss_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_abyss") ? 1 : 0, 1};
+            case "star_first" -> new long[]{starCodexHits(s), 1};
+            case "star_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_star") ? 1 : 0, 1};
             case "daily_1" -> new long[]{s.stats.dailyClaims, 1};
             case "daily_30" -> new long[]{s.stats.dailyClaims, 30};
             case "phase_breaker" -> new long[]{s.stats.bossPhaseKills, 1};
@@ -272,6 +290,8 @@ public final class Achievements {
                 case "reroll_50" -> s.stats.rerolls >= 50;
                 case "abyss_first" -> abyssCodexHits(s) >= 1;
                 case "abyss_lord" -> s.bossKills != null && s.bossKills.contains("boss_abyss");
+                case "star_first" -> starCodexHits(s) >= 1;
+                case "star_lord" -> s.bossKills != null && s.bossKills.contains("boss_star");
                 case "daily_1" -> s.stats.dailyClaims >= 1;
                 case "daily_30" -> s.stats.dailyClaims >= 30;
                 case "phase_breaker" -> s.stats.bossPhaseKills >= 1;

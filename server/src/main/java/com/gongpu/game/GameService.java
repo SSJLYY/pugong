@@ -1933,6 +1933,7 @@ public class GameService {
         v.put("active", s.pet);
         v.put("owned", new ArrayList<>(s.petsOwned));
         v.put("names", new LinkedHashMap<>(s.petNames));
+        v.put("levels", new LinkedHashMap<>(s.petLevels));
         if (s.pet != null && GameConst.PETS.containsKey(s.pet)) {
             int lv = s.petLevels.getOrDefault(s.pet, 1);
             v.put("level", lv);

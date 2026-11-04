@@ -2665,7 +2665,8 @@
         '<div class="pi-btns">' + btn + '</div></div>';
     }).join('');
     const MATS6 = [['pelt', '🟫 兽皮'], ['wolf_fang', '🦷 狼牙'], ['ore', '⛏️ 矿石'],
-      ['toad_gland', '🟢 毒腺'], ['mana_dust', '✨ 魔尘'], ['fire_crystal', '🔥 火晶']];
+      ['toad_gland', '🟢 毒腺'], ['mana_dust', '✨ 魔尘'], ['fire_crystal', '🔥 火晶'],
+      ['abyss_crystal', '🕳️ 深渊结晶'], ['star_shard', '🌟 星核碎片']];
     const opts = MATS6.map(([c, n]) => '<option value="' + c + '">' + n + '</option>').join('');
     const exchangeRow = '<div class="potion-item"><div class="pi-info"><b>🔄 材料兑换</b>' +
       '<div class="pi-desc">3 份任意区域材料 → 1 份目标材料（跨区锻造调剂）</div></div>' +

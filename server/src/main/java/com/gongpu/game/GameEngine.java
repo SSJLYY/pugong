@@ -288,6 +288,14 @@ public final class GameEngine {
         return p.CRIT();
     }
 
+    /** 有效闪避（第九批）：裂空词条撕裂空间——玩家闪避减半（单点口径，mobAttack 命中结算用）。 */
+    static BigDecimal effEva(PanelCalculator.Panel p, PlayerState.MobState m) {
+        if (m != null && "void_rend".equals(m.trait)) {
+            return Num.mul(p.EVA(), Num.of(GameConst.TRAIT_REND_EVA_MUL));
+        }
+        return p.EVA();
+    }
+
     /** 有效暴伤（第八批）：星蚀词条吞噬暴击威力——暴伤的超额部分（CRITD−1）减半，与坚韧（减暴击率）分工。 */
     static BigDecimal effCritD(PanelCalculator.Panel p, PlayerState.MobState m) {
         if (m != null && "star_eclipse".equals(m.trait)) {
@@ -852,7 +860,7 @@ public final class GameEngine {
             return;
         }
         // 先手：射程长者先打；若玩家射程不足且怪射程更远，怪先够到
-        double hits = m.ASPD * seconds * (1 - p.EVA().min(Num.of(0.95)).doubleValue());
+        double hits = m.ASPD * seconds * (1 - effEva(p, m).min(Num.of(0.95)).doubleValue());
         if (hits <= 0) {
             return;
         }

@@ -63,7 +63,9 @@
     { id: 'pierce_learn', name: '破甲之道', emoji: '🏹', desc: '学会被动「破甲专精」' },
     { id: 'flurry_500', name: '连环如雨', emoji: '🤲', desc: '连环掌累计追加命中 500 次' },
     { id: 'star_first', name: '星瞳初开', emoji: '🌌', desc: '首次击杀星界的怪物' },
-    { id: 'star_lord', name: '群星主宰', emoji: '👑', desc: '击杀星核主宰·噬光之心' }
+    { id: 'star_lord', name: '群星主宰', emoji: '👑', desc: '击杀星核主宰·噬光之心' },
+    { id: 'weekly_1', name: '周常初成', emoji: '🗓️', desc: '领取 3 个周常任务奖励（整整一周全清）' },
+    { id: 'weekly_8', name: '周常老兵', emoji: '🎖️', desc: '累计领取 24 个周常任务奖励（八周全清）' }
   ];
 
   var byId = {};

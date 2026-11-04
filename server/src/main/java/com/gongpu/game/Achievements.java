@@ -74,7 +74,9 @@ public final class Achievements {
             new Def("pierce_learn", "破甲之道", "🏹", "学会被动「破甲专精」"),
             new Def("flurry_500", "连环如雨", "🤲", "连环掌累计追加命中 500 次"),
             new Def("star_first", "星瞳初开", "🌌", "首次击杀星界的怪物"),
-            new Def("star_lord", "群星主宰", "👑", "击杀星核主宰·噬光之心")
+            new Def("star_lord", "群星主宰", "👑", "击杀星核主宰·噬光之心"),
+            new Def("weekly_1", "周常初成", "🗓️", "领取 3 个周常任务奖励（整整一周全清）"),
+            new Def("weekly_8", "周常老兵", "🎖️", "累计领取 24 个周常任务奖励（八周全清）")
     );
 
     private Achievements() {
@@ -87,8 +89,8 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500" -> 2_000L;
-            case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord" -> 5_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1" -> 2_000L;
+            case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8" -> 5_000L;
             default -> 500L;
         };
     }
@@ -207,6 +209,8 @@ public final class Achievements {
             case "abyss_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_abyss") ? 1 : 0, 1};
             case "star_first" -> new long[]{starCodexHits(s), 1};
             case "star_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_star") ? 1 : 0, 1};
+            case "weekly_1" -> new long[]{s.stats.weeklyClaims, 3};
+            case "weekly_8" -> new long[]{s.stats.weeklyClaims, 24};
             case "daily_1" -> new long[]{s.stats.dailyClaims, 1};
             case "daily_30" -> new long[]{s.stats.dailyClaims, 30};
             case "phase_breaker" -> new long[]{s.stats.bossPhaseKills, 1};
@@ -292,6 +296,8 @@ public final class Achievements {
                 case "abyss_lord" -> s.bossKills != null && s.bossKills.contains("boss_abyss");
                 case "star_first" -> starCodexHits(s) >= 1;
                 case "star_lord" -> s.bossKills != null && s.bossKills.contains("boss_star");
+                case "weekly_1" -> s.stats.weeklyClaims >= 3;
+                case "weekly_8" -> s.stats.weeklyClaims >= 24;
                 case "daily_1" -> s.stats.dailyClaims >= 1;
                 case "daily_30" -> s.stats.dailyClaims >= 30;
                 case "phase_breaker" -> s.stats.bossPhaseKills >= 1;

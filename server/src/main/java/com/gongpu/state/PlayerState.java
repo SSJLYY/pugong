@@ -52,6 +52,8 @@ public class PlayerState {
     public BigDecimal punchAcc = BigDecimal.ZERO;
     /** 连环掌剩余双击次数（第八批，计数型 buff 不走秒表 buffs；跨世保留同 punchAcc）。 */
     public double flurryHits = 0;
+    /** 金币里程碑已播报到的指数（第八批）：gold ≥ 10^k 且 k 大于此值时播报一次并抬升；默认 3（万金起播）。 */
+    public int goldMilestone = 3;
     /** 每日首祭日期（第七批，Asia/Shanghai）：当日已用掉「首祭免费」时等于今日日期串。 */
     public String tributeDay;
 

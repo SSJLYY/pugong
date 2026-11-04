@@ -172,6 +172,8 @@ public class GameController {
         } catch (RuntimeException ignored) {
             // 榜单不影响游戏
         }
+        // 金币里程碑播报（第八批）：动作结算后、视图构建前检查，事件随本帧下发
+        com.gongpu.game.GameEngine.checkGoldMilestone(s);
         Map<String, Object> out = game.fullView(s);
         if (extra != null) {
             out.put("result", extra);

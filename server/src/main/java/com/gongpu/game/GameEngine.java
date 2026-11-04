@@ -683,6 +683,25 @@ public final class GameEngine {
         return ids.isEmpty() ? null : ids.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(ids.size()));
     }
 
+    /**
+     * 金币里程碑播报（第八批）：金币跨过 10^k（k=4..15）时播报一次。
+     * 由 GameController 在动作后、构建视图前调用——事件随本帧 events 下发。
+     */
+    public static void checkGoldMilestone(PlayerState s) {
+        if (s.gold == null) {
+            return;
+        }
+        for (int k = s.goldMilestone + 1; k <= 15; k++) {
+            java.math.BigDecimal threshold = java.math.BigDecimal.TEN.pow(k);
+            if (s.gold.compareTo(threshold) >= 0) {
+                s.goldMilestone = k;
+                pushEvent(s, "💰 金币里程碑：身家突破 " + threshold.toPlainString() + " 金！");
+            } else {
+                break;
+            }
+        }
+    }
+
     static void pushEvent(PlayerState s, String text) {
         if (s.events == null) {
             s.events = new java.util.ArrayList<>();

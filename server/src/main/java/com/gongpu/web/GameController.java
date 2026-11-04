@@ -424,6 +424,17 @@ public class GameController {
                 s -> game.switchPet(s, reqStr(body.id(), "id")));
     }
 
+    public record PetRenameReq(String id, String name) {
+    }
+
+    /** 宠物改名（第九批）。 */
+    @PostMapping("/{slot}/rename-pet")
+    public Map<String, Object> renamePet(HttpServletRequest req, @PathVariable int slot,
+                                         @RequestBody PetRenameReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "rename-pet",
+                s -> game.renamePet(s, reqStr(body.id(), "id"), body.name()));
+    }
+
     /** 喂食出战宠物（第九批）。 */
     @PostMapping("/{slot}/feed-pet")
     public Map<String, Object> feedPet(HttpServletRequest req, @PathVariable int slot) {

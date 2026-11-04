@@ -1301,6 +1301,37 @@ public class GameService {
         return m;
     }
 
+    /** 宠物改名（第九批）：给已领养宠物起昵称（≤8 字，清空恢复默认名）。 */
+    public Map<String, Object> renamePet(PlayerState s, String petCode, String name) {
+        if (!s.petsOwned.contains(petCode)) {
+            throw ApiException.badRequest("尚未领养这只宠物");
+        }
+        String n = name == null ? "" : name.trim();
+        if (n.length() > 8) {
+            throw ApiException.badRequest("昵称最多 8 个字");
+        }
+        if (n.isEmpty()) {
+            s.petNames.remove(petCode);
+        } else {
+            s.petNames.put(petCode, n);
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("pet", petCode);
+        m.put("name", n);
+        return m;
+    }
+
+    /** 宠物展示名（第九批）：昵称优先，其次默认名。 */
+    public static String petDisplayName(PlayerState s, String petCode) {
+        String nick = s.petNames.get(petCode);
+        if (nick != null && !nick.isBlank()) {
+            return nick;
+        }
+        GameConst.PetDef def = GameConst.PETS.get(petCode);
+        return def == null ? petCode : def.name();
+    }
+
     /** 宠物获得经验并连升（第九批）：返回 {新等级, 本次升了几级}；满级经验不再累积。 */
     public static int[] gainPetExp(PlayerState s, double exp) {
         if (s.pet == null || exp <= 0) {
@@ -1901,6 +1932,7 @@ public class GameService {
         Map<String, Object> v = new LinkedHashMap<>();
         v.put("active", s.pet);
         v.put("owned", new ArrayList<>(s.petsOwned));
+        v.put("names", new LinkedHashMap<>(s.petNames));
         if (s.pet != null && GameConst.PETS.containsKey(s.pet)) {
             int lv = s.petLevels.getOrDefault(s.pet, 1);
             v.put("level", lv);

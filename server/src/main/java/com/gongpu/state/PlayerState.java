@@ -157,6 +157,8 @@ public class PlayerState {
     /** 各宠物等级（第九批，code → 等级，缺省 1）。 */
     public Map<String, Integer> petLevels = new LinkedHashMap<>();
     /** 各宠物当前经验（第九批，code → 经验，升级时扣减当级所需）。 */
+    /** 宠物自定义昵称（第九批，code → 昵称，空则用默认名）。 */
+    public Map<String, String> petNames = new LinkedHashMap<>();
     public Map<String, Double> petExps = new LinkedHashMap<>();
 
     /** 每日黑市刷新日期（第七批，Asia/Shanghai）；跨日由 BlackMarket.ensure 重刷。 */

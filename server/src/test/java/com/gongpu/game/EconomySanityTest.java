@@ -27,7 +27,7 @@ class EconomySanityTest {
 
     @Test
     void affixesSane() {
-        assertEquals(24, GameConst.AFFIXES.size(), "词条总数应为 24");
+        assertEquals(26, GameConst.AFFIXES.size(), "词条总数应为 26");
         for (GameConst.Affix a : GameConst.AFFIXES) {
             assertTrue(a.min() <= a.max(), a.name() + " 区间下限不应大于上限");
             assertTrue(a.max() > 0, a.name() + " 区间上限应为正");

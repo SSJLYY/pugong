@@ -517,7 +517,10 @@ public final class GameConst {
             new Affix("疾雷", "ASPD", "flat", 0.10, 0.20, "epic", null, null),
             // ---- 第七批：攻击维度上位（锋利/致命的史诗版） ----
             new Affix("破军", "PATK", "flat", 16, 40, "epic", null, null),
-            new Affix("绝杀", "CRIT", "flat", 0.15, 0.25, "epic", null, null));
+            new Affix("绝杀", "CRIT", "flat", 0.15, 0.25, "epic", null, null),
+            // ---- 第八批：生存维度上位（轻盈/坚韧的史诗版） ----
+            new Affix("无影", "EVA", "flat", 0.10, 0.18, "epic", null, null),
+            new Affix("不息", "REGEN", "flat", 5, 12, "epic", null, null));
 
     /** 掉落概率（按区域）。 */
     public static final Map<String, Double> DROP_RATE = Map.of(

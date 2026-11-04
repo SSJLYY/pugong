@@ -72,7 +72,11 @@ class DataParityTest {
         for (String code : new String[]{"mine_deep", "swamp_venom", "snow_alpha"}) {
             assertTrue(sql.contains("'" + code + "'"), "新委托 " + code + " 应在 SQL 中");
         }
-        assertEquals(24, GameConst.AFFIXES.size());
+        // 第八批高阶词条：无影/不息必须在 SQL 里（镜像守恒）
+        for (String code : new String[]{"wuying", "buxi"}) {
+            assertTrue(sql.contains("'" + code + "'"), "第八批词条 " + code + " 应在 SQL 中");
+        }
+        assertEquals(26, GameConst.AFFIXES.size());
     }
 
     @Test

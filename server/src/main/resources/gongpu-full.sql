@@ -1088,6 +1088,13 @@ INSERT INTO `cfg_affix`
   (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
   ('juesha', '绝杀', 'CRIT', 'flat', 0.15, 0.25, 'epic', NULL, NULL, 1, 24);
 
+-- 第八批第 82 轮：高阶词条「无影/不息」（闪避/回复上位版，轻盈 0.02~0.10 → 0.10~0.18、坚韧 1~4 → 5~12）
+DELETE FROM `cfg_affix` WHERE `code` IN ('wuying','buxi');
+INSERT INTO `cfg_affix`
+  (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('wuying', '无影', 'EVA', 'flat', 0.10, 0.18, 'epic', NULL, NULL, 1, 25),
+  ('buxi', '不息', 'REGEN', 'flat', 5, 12, 'epic', NULL, NULL, 1, 26);
+
 -- 第七批第 85 轮：新被动「处决者」（Boss 生命低于 30% 时对其伤害 +25%）
 DELETE FROM `cfg_skill` WHERE `code` IN ('executioner');
 INSERT INTO `cfg_skill`

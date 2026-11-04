@@ -31,6 +31,24 @@ class BackupRingTest {
         assertEquals(5, s.gen);
     }
 
+    /** 第九批第 66 轮：备份环里的存档须完整保留第九批字段（宠物/月常），恢复不丢新系统进度。 */
+    @Test
+    void ringPreservesBatch9Fields() {
+        PlayerState s = NewState.create();
+        s.pet = "pet_hawk";
+        s.petsOwned.add("pet_hawk");
+        s.petLevels.put("pet_hawk", 27);
+        s.petNames.put("pet_hawk", "小天");
+        s.monthlyMonth = "2026-11";
+        String ring = SaveService.rotateBackupRing(null, StateCodec.encode(s), 3_000_000L);
+        PlayerState back = SaveService.decodeFromRing(ring);
+        assertNotNull(back);
+        assertEquals("pet_hawk", back.pet);
+        assertEquals(27, back.petLevels.get("pet_hawk"));
+        assertEquals("小天", back.petNames.get("pet_hawk"));
+        assertEquals("2026-11", back.monthlyMonth);
+    }
+
     @Test
     void withinIntervalIsNoOp() {
         long t0 = 5_000_000L;

@@ -1185,6 +1185,21 @@ body.theme-ink h2{
   font-family:"Noto Serif SC","Songti SC","STSong",serif; letter-spacing:1px;
 }
 
+/* 水墨主题·属性标签网格（第九批，参照文字修仙的属性 tag 网格） */
+body.theme-ink .stat-hover-card table.stats{display:block}
+body.theme-ink .stat-hover-card table.stats tbody{display:flex;flex-wrap:wrap;gap:6px}
+body.theme-ink .stat-hover-card table.stats tr{
+  display:inline-flex;gap:7px;align-items:center;
+  background:rgba(255,255,255,.65);border:1px solid rgba(46,58,56,.3);
+  border-radius:999px;padding:3px 11px;
+}
+body.theme-ink .stat-hover-card table.stats td{border:none!important;padding:0;background:none!important}
+body.theme-ink .stat-hover-card table.stats td:last-child{font-weight:700;color:#9e2b25}
+body.theme-ink .stat-hover-card.statlord table.stats tr[data-stat]{cursor:pointer}
+body.theme-ink .stat-hover-card.statlord table.stats tr[data-stat]:hover{
+  border-color:#9e2b25;background:rgba(158,43,37,.08);
+}
+
 /* 移动端布局打磨（第七批） */
 @media (max-width: 768px){
   .topbar{flex-wrap:wrap;row-gap:6px}

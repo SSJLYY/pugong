@@ -1231,6 +1231,15 @@ body.theme-light .zone-btn.ready::after{color:#3d7a34}
 }
 body.theme-ink .story-line{color:#7c4a3a;border-bottom-color:rgba(158,43,37,.35)}
 
+/* 水墨主题·已装备标签化（第九批，参照文字修仙的装备品质标签行） */
+body.theme-ink .equip-slot{
+  background:rgba(255,255,255,.62);border-radius:999px;min-height:0;
+  padding:6px 13px;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;
+}
+body.theme-ink .equip-slot:hover{background:rgba(255,255,255,.85)}
+body.theme-ink .equip-slot .es-slot{margin-top:0}
+body.theme-ink .equip-slot .es-set{flex-basis:100%;font-size:11px}
+
 /* 成就筛选（第七批） */
 .ach-filters{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
 .ach-chip{background:var(--panel);border:1px solid var(--border);color:var(--txt-dim);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;min-height:26px}

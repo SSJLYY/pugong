@@ -48,6 +48,16 @@ class ZoneStarTest {
     }
 
     @Test
+    void starSetDefined() {
+        java.util.Optional<com.gongpu.game.Sets.SetDef> set = Sets.ALL.stream()
+                .filter(d -> d.id().equals("starset")).findFirst();
+        assertTrue(set.isPresent(), "星辰战装应存在");
+        assertEquals(4, set.get().members().size());
+        assertTrue(set.get().members().contains("star_blade"));
+        assertEquals(7, Sets.ALL.size(), "套装应达 7 套");
+    }
+
+    @Test
     void starDepthUsesFullTraitPool() {
         assertEquals(16, GameConst.traitPool(8).size(), "星界深度应全池 16 条");
         assertTrue(new java.util.ArrayList<>(GameConst.ZONES.keySet()).indexOf("star") == 8, "星界应为第 9 区（序 8）");

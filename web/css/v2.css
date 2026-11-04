@@ -1097,6 +1097,17 @@
 /* 低特效模式（第七批）：停用全部动画与过渡（飘字由 JS 侧同步停用） */
 body.fx-off *, body.fx-off *::before, body.fx-off *::after{animation:none!important;transition:none!important}
 
+/* 星空主题（第八批）：深空蓝紫 + 星辉金，呼应第九区域星界 */
+body.theme-star{
+  --bg0:#070a1e; --bg1:#0b1030; --bg2:#141b45;
+  --panel:rgba(120,140,255,.07); --panel-2:rgba(120,140,255,.12);
+  --border:rgba(130,150,255,.35); --border-strong:rgba(150,170,255,.55);
+  --gold:#c9a7ff; --gold-bright:#e3ccff; --gold-dim:#9a86d6;
+  --txt:#e6e9ff; --txt-dim:#aab3e8; --txt-faint:#7783b8;
+  --shadow:0 4px 22px rgba(30,40,120,.45);
+}
+body.theme-star .zone-btn[data-zone="star"]{box-shadow:0 0 12px rgba(160,140,255,.55)}
+
 /* 宣纸主题（第七批）：变量层换色 + 少量硬编码深色元素适配 */
 body.theme-light{
   --bg0:#f3ecd9; --bg1:#eee3c6; --bg2:#e7d9b4;

@@ -69,14 +69,20 @@
     if (b) b.textContent = fxOff() ? '🚫 特效' : '✨ 特效';
   }
 
-  // ---------------- 主题切换（第七批）：玄夜/宣纸，存 localStorage ----------------
-  function lightTheme() {
-    try { return localStorage.getItem('gongpu_theme') === 'light'; } catch (e) { return false; }
+  // ---------------- 主题切换（第七批玄夜/宣纸；第八批加星空三循环），存 localStorage ----------------
+  function themeName() {
+    try { return localStorage.getItem('gongpu_theme') || 'dark'; } catch (e) { return 'dark'; }
   }
+  function lightTheme() {
+    return themeName() === 'light';
+  }
+  const THEME_LABEL = { dark: '🌗 主题', light: '☀️ 宣纸', star: '🌌 星空' };
   function applyThemePref() {
-    document.body.classList.toggle('theme-light', lightTheme());
+    const t = themeName();
+    document.body.classList.toggle('theme-light', t === 'light');
+    document.body.classList.toggle('theme-star', t === 'star');
     const b = $('btnTheme');
-    if (b) b.textContent = lightTheme() ? '☀️ 宣纸' : '🌗 主题';
+    if (b) b.textContent = THEME_LABEL[t] || THEME_LABEL.dark;
   }
 
   // ---------------- 战斗飘字（预算节流防爆屏） ----------------
@@ -1193,9 +1199,11 @@
     });
     applyThemePref();
     $('btnTheme').addEventListener('click', () => {
-      try { localStorage.setItem('gongpu_theme', lightTheme() ? 'dark' : 'light'); } catch (e) { /* 忽略 */ }
+      const order = ['dark', 'light', 'star'];
+      const next = order[(order.indexOf(themeName()) + 1) % order.length];
+      try { localStorage.setItem('gongpu_theme', next); } catch (e) { /* 忽略 */ }
       applyThemePref();
-      toast(lightTheme() ? '☀️ 已切换宣纸主题' : '🌙 已切换玄夜主题', 'ok');
+      toast({ dark: '🌙 已切换玄夜主题', light: '☀️ 已切换宣纸主题', star: '🌌 已切换星空主题' }[next], 'ok');
     });
 
     $('btnDaily').addEventListener('click', async () => {

@@ -1350,7 +1350,7 @@
     chest: '胸', legs: '腿', boots: '鞋', ring1: '戒指1', ring2: '戒指2', necklace: '项链'
   };
   // 背包筛选状态（纯前端展示层：部位/品质过滤 + 排序方式，操作仍走原始下标）
-  const bagFilter = { slot: 'all', quality: 'all', sort: 'orig' };
+  const bagFilter = { slot: 'all', quality: 'all', sort: 'orig', q: '' };
   const QUALITY_COLOR = ['#aaa', '#5cb85c', '#4a9eff', '#b366ff'];
   const QUALITY_NAME = ['普通', '精良', '稀有', '史诗'];
   // 宝石图鉴（第八批，与后端 GameConst.GEMS 镜像）：id → [emoji, 名称, 效果]
@@ -1672,12 +1672,23 @@
         '<span class="bf-sep"></span>' +
         '<select id="bagSortSel" title="背包排序（仅显示顺序，不改动服务端背包）">' +
         '<option value="orig">↕️ 默认顺序</option><option value="score">⚖ 评分优先</option>' +
-        '<option value="quality">🎨 品质优先</option><option value="price">💰 售价优先</option></select>';
+        '<option value="quality">🎨 品质优先</option><option value="price">💰 售价优先</option></select>' +
+        '<span class="bf-sep"></span>' +
+        '<input id="bagSearch" type="search" placeholder="🔍 按名称搜索装备" autocomplete="off">';
       bar.addEventListener('change', (e) => {
         if (e.target.id !== 'bagSortSel') return;
         bagFilter.sort = e.target.value;
         renderBag._sig = null;
         if (S.view) renderBag(S.view);
+      });
+      bar.addEventListener('input', (e) => {
+        if (e.target.id !== 'bagSearch') return;
+        bagFilter.q = e.target.value.trim();
+        renderBag._sig = null;
+        if (S.view) renderBag(S.view);
+        // 重绘会重建筛选条并丢失焦点：把光标找回来（搜索是连续输入场景）
+        const inp = $('bagSearch');
+        if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
       });
       bar.addEventListener('click', (e) => {
         const b = e.target.closest('.bf-chip');
@@ -1698,7 +1709,8 @@
     const entries = view.bag.map((it, idx) => ({ it, idx })).filter(en =>
       (bagFilter.slot === 'all' || en.it.slot === bagFilter.slot
         || (bagFilter.slot === 'ring' && (en.it.slot === 'ring1' || en.it.slot === 'ring2')))
-      && (bagFilter.quality === 'all' || en.it.quality === bagFilter.quality));
+      && (bagFilter.quality === 'all' || en.it.quality === bagFilter.quality)
+      && (!bagFilter.q || (en.it.name || '').includes(bagFilter.q)));
     // 显示排序（不改动服务端背包顺序，操作仍走原始下标）：评分/品质/售价降序
     const sortSel = $('bagSortSel');
     if (sortSel && sortSel.value !== bagFilter.sort) sortSel.value = bagFilter.sort;

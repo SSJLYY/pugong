@@ -941,6 +941,7 @@
 
 /* 背包筛选条（第六批：部位/品质筹码） */
 .bag-filter-bar{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+#bagSearch{flex:1;min-width:120px;background:var(--panel2,#1e2433);border:1px solid var(--line,#39415a);border-radius:6px;color:inherit;padding:2px 8px;font-size:12px}
 .bf-chip{font-size:12px;padding:2px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#bbb;cursor:pointer}
 .bf-chip.on{background:#c9a227;color:#1a1503;border-color:#c9a227;font-weight:700}
 .bf-sep{width:10px}

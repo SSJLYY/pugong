@@ -283,7 +283,7 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 - **稳健性能（61~70）**：水墨主题接线锁、Codec 往返补昵称/计数、health 指纹加 pets、Batch9OrderTest 源码序锁、写限流接线锁、normalize 兜底第九批字段（集合重建/出战合法性/等级钳制）——实修一处坏档 NPE 隐患。
 - **成就称号（71~80）**：成就 75→82（宠物三线 + 拳倾天下/材料大亨 + 招财/燃血），里程碑奖金扩 75 档（+50 万），称号 +3（驭兽宗师/虚空行者/月度达人，虚空行者顶栏压轴）；实修 pet_first/pet_25 曾因 evaluate 缺判定永不解锁的 bug，并加 evaluate 全覆盖锁防复发。
 - **内容扩充（81~90）**：药剂星尘甘露、词条裂帛/灵泉、被动「招财手」（击杀金币 +15%）、委托/配方/装备各 +2、天赋「兽语者」（宠物经验翻倍）、怪词条「燃血」（残血攻击 +60%）。
-- **收尾（91~100）**：SQL 验收注释、deploy.sh 口径、GONGPU-SKILL、README 同步第九批；内网整表重导与 health 指纹实测；全量回归（656 项）与最终推送。前端 v202。
+- **收尾（91~100）**：SQL 验收注释、deploy.sh 口径、GONGPU-SKILL、README 同步第九批；内网整表重导与 health 指纹实测；全量回归与最终推送。前端 v202。收官总口径锁（Batch9FinalCountsTest，按 code 去重计有效条目）抓修一处同名覆盖：第七批深渊装备 void_bow/void_ring 与其配方 c_void_ring 自第九批虚空界上线起被同名虚空版 DELETE 覆盖（深渊实际少 2 件装备 1 配方），已改名 abyss_bow/abyss_ring/c_abyss_ring，两区各 6 件互不覆盖，有效计数回归装备 74/配方 26。
 
 ## 变更记录（2026-11-04 · 第八批一百轮增强）
 

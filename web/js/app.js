@@ -834,6 +834,15 @@
     const zones = S.meta ? S.meta.zones : [];
     const z = zones.find(x => x.id === view.zone);
     $('zoneName').textContent = z ? (z.emoji + ' ' + z.name) : '🏡 村口';
+    // 叙事条（第九批，参照文字修仙顶部剧情文本）：随区域/目标/Boss 变化
+    const storyEl = $('storyLine');
+    if (storyEl) {
+      const line = !view.mob ? '你在' + (z ? z.name : '村口') + '休整，静候出拳。'
+        : view.mob.boss ? '⚠ ' + view.mob.name + ' 现身于' + (z ? z.name : '此地') + '，天地为之变色！'
+        : view.mob.id === 'dummy' || view.zone === 'village' ? '你在村口对着木桩出拳，每一拳都是修行。'
+        : '你踏入' + (z ? z.name : '此地') + '，' + view.mob.name + '拦住了去路。';
+      if (storyEl.textContent !== line) storyEl.textContent = line;
+    }
 
     if (view.mob) {
       $('mobEmoji').textContent = view.mob.emoji;

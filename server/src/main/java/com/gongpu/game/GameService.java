@@ -947,6 +947,32 @@ public class GameService {
         return m;
     }
 
+    /** 月常任务领取（第九批）：与周常同构，全清叠加 +300,000 金与随机宝石 ×3。 */
+    public Map<String, Object> claimMonthly(PlayerState s, String taskId) {
+        long reward = MonthlyQuests.claim(s, taskId);
+        long bonus = 0;
+        List<String> bonusGems = new ArrayList<>();
+        if (!s.monthlyBonusGiven && s.monthlyTasks.stream().allMatch(t -> t.claimed)) {
+            bonus = MonthlyQuests.ALL_CLEAR_BONUS;
+            s.monthlyBonusGiven = true;
+            s.gold = Num.add(s.gold, Num.of(bonus));
+            for (int i = 0; i < MonthlyQuests.ALL_CLEAR_GEMS; i++) {
+                String gem = GameEngine.randomGem();
+                if (gem != null) {
+                    s.materials.merge(gem, 1, Integer::sum);
+                    bonusGems.add(gem);
+                }
+            }
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", true);
+        m.put("id", taskId);
+        m.put("reward", reward);
+        m.put("allClearBonus", bonus);
+        m.put("allClearGems", bonusGems);
+        return m;
+    }
+
     /** 每日黑市购买（第七批）：货单/限购/折扣价规则在 BlackMarket，返回小回执。 */
     public Map<String, Object> buyBlackMarket(PlayerState s, String id) {
         long paid = BlackMarket.buy(s, id);
@@ -1874,6 +1900,7 @@ public class GameService {
         WeeklyQuests.ensure(s);
         m.put("dailyTasks", DailyQuests.viewOf(s));
         m.put("weeklyTasks", WeeklyQuests.viewOf(s));
+        m.put("monthlyTasks", MonthlyQuests.viewOf(s));
         // 连环掌剩余次数（第八批收官实测修复）：此前误挂在 setAutoLines 回执上，
         // fullView 没有——前端 buff 条的 🤲 计数芯片永远读不到（与第七批 dailyTasks 同类事故）
         m.put("flurryHits", s.flurryHits);

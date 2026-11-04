@@ -430,6 +430,13 @@
   async function tick() {
     if (S.busy || !API.state.slot) return;
     if (!S.auto) return;
+    // 页面隐藏(后台标签/锁屏)时 5 次才发 1 次轮询:移动端省电省流量,服务端少一半空转。
+    // 第八批加固：隐藏判定提到最前——旧顺序下隐藏标签每 10 分钟仍会全量重拉元数据，
+    // 后台挂机的省电目标被旁路请求抵消；现在被跳过的帧连元数据重拉一并跳过。
+    if (document.hidden) {
+      S._hiddenSkip = ((S._hiddenSkip || 0) + 1) % 5;
+      if (S._hiddenSkip !== 0) return;
+    }
     // 元数据每 10 分钟静默重拉:管理端改了药剂/被动/区域配置后,在线玩家不必重登才能看到
     if (Date.now() - (S._metaAt || 0) > 600000) {
       S._metaAt = Date.now();
@@ -444,11 +451,6 @@
     if (S.view && S.view.dead) {
       S._deadSkip = ((S._deadSkip || 0) + 1) % 5;
       if (S._deadSkip !== 0) return;
-    }
-    // 页面隐藏(后台标签/锁屏)时 5 次才发 1 次轮询:移动端省电省流量,服务端少一半空转
-    if (document.hidden) {
-      S._hiddenSkip = ((S._hiddenSkip || 0) + 1) % 5;
-      if (S._hiddenSkip !== 0) return;
     }
     // 弱网自适应（第七批）：往返耗时 EMA >800ms 或系统省流量模式时降为 2 秒一帧，
     // 避免慢网下请求排队堆积；网络恢复（EMA 回落）自动回到 1 秒

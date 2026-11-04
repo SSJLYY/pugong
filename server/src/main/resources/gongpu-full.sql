@@ -1236,6 +1236,16 @@ INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('void_heart', '无相之心', '💜', '无相天魔没有心——公会偏要你带一颗回来：于虚空界猎杀六十只魔物', 'void', '{"maxHP":200000000,"ATK":40000}', 60, 450000, 'pierce', 3, 1, 1, 24);
 
+-- 第九批第 84 轮：高阶委托 ×2（星界长猎/虚空拾尘）
+DELETE FROM `cfg_quest` WHERE `code` IN ('star_longhunt');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('star_longhunt', '星尘长猎', '🌠', '回廊深处的星尘兽群泛滥成灾：于星界猎杀一百二十只魔物', 'star', '{"maxHP":20000000,"ATK":12000}', 120, 200000, 'stardust', 2, 1, 1, 25);
+DELETE FROM `cfg_quest` WHERE `code` IN ('void_dust');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('void_dust', '虚空拾尘', '🧹', '虚空尘埃里藏着凝固的星光：于虚空界猎杀八十只魔物', 'void', '{"maxHP":200000000,"ATK":40000}', 80, 600000, 'stardust', 3, 1, 1, 26);
+
 -- 第九批第 83 轮：新被动点金手
 DELETE FROM `cfg_skill` WHERE `code` IN ('goldtouch');
 INSERT INTO `cfg_skill`

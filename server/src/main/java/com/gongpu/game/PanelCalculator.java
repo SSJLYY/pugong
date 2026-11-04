@@ -89,6 +89,10 @@ public final class PanelCalculator {
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal bloodlustBuff = (active(s, "bloodlust") && !silenced) ? Num.of(0.20) : Num.ZERO;
         BigDecimal accPot = (active(s, "acc_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
+        // 凝神药剂（第八批）：命中平直加算，与鹰眼药剂同区叠加
+        BigDecimal focusPot = (active(s, "focus_pot") && !silenced) ? Num.of(0.12) : Num.ZERO;
+        // 生机药剂（第八批）：持续回复平直加算，与回春药剂同区叠加
+        BigDecimal vigorPot = (active(s, "vigor_pot") && !silenced) ? Num.of(150) : Num.ZERO;
         BigDecimal evaPot = (active(s, "eva_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         BigDecimal mregenPot = (active(s, "mregen_pot") && !silenced) ? Num.of(10) : Num.ZERO;
         // 第四批新维度药剂：持续回复/射程/移速（同受沉默压制）
@@ -186,7 +190,7 @@ public final class PanelCalculator {
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MATK, flat, pct, "MATK"), pmul.getOrDefault("MATK", Num.of(1))), burnMul), atkPotMul), mightPot),
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.PDEF, flat, pct, "PDEF"), pmul.getOrDefault("PDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
-                Num.mul(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), pmul.getOrDefault("REGEN", Num.of(1))),
+                Num.mul(Num.add(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), vigorPot), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
                 Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(Num.add(aspdWithBonus(s.fixed.ASPD, flat, pct), sandAspd), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
                 Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
@@ -195,7 +199,7 @@ public final class PanelCalculator {
                 Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit)),
                 Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd),
                 Num.min(GameConst.BLESS_CAP.get("ACC"),
-                        Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot)),
+                        Num.add(Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot), focusPot)),
                 Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot)),
                 Num.add(Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot), bloodlustBuff),
                 // 枪械：纯魔法弹每发耗蓝标记（BULLET_MP，来自武器 base_stats；非枪/物理弹武器为 0）

@@ -1145,6 +1145,18 @@ INSERT INTO `cfg_item`
   (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
   ('pierce', '破甲药剂', '🏹', 'potion', 600, '{"buff":"pierce_pot","buffVal":0.2,"buffDur":60}', '60s 内攻击无视目标 20% 防御', 1, 54);
 
+-- 第八批第 81 轮：新药剂鹰目/生机（命中与持续回复维度补强）
+DELETE FROM `cfg_item` WHERE `code` IN ('focus','vigor');
+INSERT INTO `cfg_item`
+  (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('focus', '鹰目药剂', '🎯', 'potion', 500, '{"buff":"focus_pot","buffVal":0.12,"buffDur":90}', '90s 内命中 +12%', 1, 55),
+  ('vigor', '生机药剂', '🌿', 'potion', 550, '{"buff":"vigor_pot","buffVal":150,"buffDur":60}', '60s 内每秒回复 +150', 1, 56);
+DELETE FROM `cfg_buff` WHERE `code` IN ('focus_pot','vigor_pot');
+INSERT INTO `cfg_buff`
+  (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('focus_pot', '鹰目', '🎯', 'good', 'passive', '{"accAdd":0.12}', '90s 内命中 +12%', 1, 55),
+  ('vigor_pot', '生机', '🌿', 'good', 'passive', '{"regenAdd":150}', '60s 内每秒回复 +150', 1, 56);
+
 -- 第八批第 14 轮：新主动连环掌
 DELETE FROM `cfg_skill` WHERE `code` IN ('flurry');
 INSERT INTO `cfg_skill`

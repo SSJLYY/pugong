@@ -143,6 +143,15 @@ public class PlayerState {
     /** 本周全清奖励是否已发（第八批）。 */
     public boolean weeklyBonusGiven = false;
 
+    /** 出战宠物 code（第九批，根字段跨世保留）；null 表示未领养/未出战。 */
+    public String pet;
+    /** 已领养宠物 code 列表（第九批）。 */
+    public List<String> petsOwned = new ArrayList<>();
+    /** 各宠物等级（第九批，code → 等级，缺省 1）。 */
+    public Map<String, Integer> petLevels = new LinkedHashMap<>();
+    /** 各宠物当前经验（第九批，code → 经验，升级时扣减当级所需）。 */
+    public Map<String, Double> petExps = new LinkedHashMap<>();
+
     /** 每日黑市刷新日期（第七批，Asia/Shanghai）；跨日由 BlackMarket.ensure 重刷。 */
     public String marketDay;
     /** 当日黑市货单（生成时快照折扣价，整日不变）。 */

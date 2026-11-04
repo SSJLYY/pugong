@@ -1126,6 +1126,16 @@ DELETE FROM `cfg_quest` WHERE `code` IN ('star_heart');
 INSERT INTO `cfg_quest`
   (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
   ('star_heart', '噬光之心', '💜', '星核主宰的心跳震得回廊发颤：于星界猎杀六十只魔物，向公会证明群星为你让路', 'star', '{"maxHP":20000000,"ATK":12000}', 60, 120000, 'pierce', 2, 1, 1, 20);
+
+-- 第八批第 84 轮：星界委托补强 ×2（奖励接新药剂鹰目/生机）
+DELETE FROM `cfg_quest` WHERE `code` IN ('star_dust');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('star_dust', '星尘拾遗', '✨', '坠落的星尘撒满回廊：于星界猎杀三十只魔物，替公会把它们拾回来', 'star', '{"maxHP":20000000,"ATK":12000}', 30, 60000, 'focus', 2, 1, 1, 21);
+DELETE FROM `cfg_quest` WHERE `code` IN ('void_feast');
+INSERT INTO `cfg_quest`
+  (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('void_feast', '虚空盛宴', '🕳️', '虚空行者成群结队地赴宴：于星界猎杀八十只魔物，让这场盛宴散场', 'star', '{"maxHP":20000000,"ATK":12000}', 80, 160000, 'vigor', 2, 1, 1, 22);
 DELETE FROM `cfg_craft` WHERE `code` IN ('c_star_blade');
 INSERT INTO `cfg_craft`
   (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES

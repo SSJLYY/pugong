@@ -1098,6 +1098,7 @@
 body.fx-off *, body.fx-off *::before, body.fx-off *::after{animation:none!important;transition:none!important}
 
 .ev-filter-bar{display:flex;gap:4px;margin:4px 0}
+.tab-badge{display:inline-block;min-width:16px;margin-left:5px;padding:0 4px;border-radius:999px;background:#e5484d;color:#fff;font-size:11px;line-height:16px;text-align:center;vertical-align:2px}
 
 /* 字号档位（第八批）：根字号缩放，rem 布局整体跟随 */
 body.fs-l{font-size:17.5px}

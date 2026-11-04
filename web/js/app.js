@@ -633,6 +633,14 @@
     }
     S.view = view;
     renderButlerPanel(view);
+    // 委托页签徽标（第八批）：每日+周常可领取数，>0 才显示
+    const qb = $('questBadge');
+    if (qb) {
+      const ready = (view.dailyTasks || []).filter(t => t.done && !t.claimed).length
+        + (view.weeklyTasks || []).filter(t => t.done && !t.claimed).length;
+      qb.hidden = ready <= 0;
+      qb.textContent = ready > 0 ? String(ready) : '';
+    }
     const p = view.panel;
 
     refreshActiveDataTabs();

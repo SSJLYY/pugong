@@ -542,6 +542,7 @@
         '<div class="bp-row bp-mob" id="bpMob"></div>' +
         '<div class="bp-row bp-mats" id="bpMats" title="材料库存（锻造原料，详情见锻造页）"></div>' +
         '<div class="bp-row bp-daily" id="bpDaily" title="每日任务进度（详情见任务页）"></div>' +
+        '<div class="bp-row bp-pet" id="bpPet" title="出战宠物（详情见任务页宠物伙伴）"></div>' +
         '<div class="bp-bar"><div class="bp-fill hp" id="bpHp"></div><span id="bpHpTx"></span></div>' +
         '<div class="bp-bar"><div class="bp-fill mp" id="bpMp"></div><span id="bpMpTx"></span></div>' +
         '<label class="bp-row"><input type="checkbox" id="bpMaintain"> 自动管护（卖/吞噬/穿最强）</label>' +
@@ -621,6 +622,12 @@
       (dailyReady > 0 ? ' · 🎁 ' + dailyReady + ' 个可领取' : '') +
       ' · 🗓️ 周常 ' + weeklyClaimed + '/' + weekly.length +
       (weeklyReady > 0 ? ' · 🎁 ' + weeklyReady + ' 个可领取' : '');
+    const bp = $('bpPet');
+    if (bp) {
+      const pv = view.pet || {};
+      const def = pv.active && (S.meta.pets || []).find(d => d.id === pv.active);
+      bp.textContent = def ? '🐾 ' + def.emoji + def.name + ' ' + (pv.level || 1) + ' 级' : '🐾 暂无出战宠物';
+    }
     $('bpDrinkHp').textContent = '🧪 血药 ×' + ((pot.hp_s || 0) + (pot.hp_l || 0));
     $('bpDrinkMp').textContent = '🔵 蓝药 ×' + (pot.mp || 0);
     $('bpEat').textContent = '🍖 吃食 ×' + (pot.food || 0);

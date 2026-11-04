@@ -70,7 +70,9 @@ public final class Achievements {
             new Def("slow_20", "迟缓大师", "🐌", "迟缓咒熟练度达到 20"),
             new Def("epic_affix", "史诗词条", "🟣", "拥有 3 条史诗词条（已装备与背包合计）"),
             new Def("gem_first", "镶嵌初体验", "💠", "首次把宝石镶嵌到装备上"),
-            new Def("gem_10", "珠光宝气", "💎", "累计镶嵌 10 颗宝石")
+            new Def("gem_10", "珠光宝气", "💎", "累计镶嵌 10 颗宝石"),
+            new Def("pierce_learn", "破甲之道", "🏹", "学会被动「破甲专精」"),
+            new Def("flurry_500", "连环如雨", "🤲", "连环掌累计追加命中 500 次")
     );
 
     private Achievements() {
@@ -83,7 +85,7 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord" -> 5_000L;
             default -> 500L;
         };
@@ -198,6 +200,8 @@ public final class Achievements {
             case "epic_affix" -> new long[]{epicAffixCount(s), 3};
             case "gem_first" -> new long[]{s.stats.gemsSocketed, 1};
             case "gem_10" -> new long[]{s.stats.gemsSocketed, 10};
+            case "pierce_learn" -> new long[]{s.passives.contains("armor_pierce") ? 1 : 0, 1};
+            case "flurry_500" -> new long[]{s.stats.flurryExtra.longValue(), 500};
             case "best_hit_1m" -> new long[]{sat(s.stats.bestHit), 1_000_000};
             case "dismantle_100" -> new long[]{s.stats.dismantles, 100};
             case "set_4" -> new long[]{Sets.wornCounts(s).values().stream()
@@ -279,6 +283,8 @@ public final class Achievements {
                 case "epic_affix" -> epicAffixCount(s) >= 3;
                 case "gem_first" -> s.stats.gemsSocketed >= 1;
                 case "gem_10" -> s.stats.gemsSocketed >= 10;
+                case "pierce_learn" -> s.passives.contains("armor_pierce");
+                case "flurry_500" -> s.stats.flurryExtra.compareTo(java.math.BigDecimal.valueOf(500)) >= 0;
                 default -> false;
             };
             if (ok) {

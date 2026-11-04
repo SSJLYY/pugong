@@ -59,7 +59,9 @@
     { id: 'slow_20', name: '迟缓大师', emoji: '🐌', desc: '迟缓咒熟练度达到 20' },
     { id: 'epic_affix', name: '史诗词条', emoji: '🟣', desc: '拥有 3 条史诗词条（已装备与背包合计）' },
     { id: 'gem_first', name: '镶嵌初体验', emoji: '💠', desc: '首次把宝石镶嵌到装备上' },
-    { id: 'gem_10', name: '珠光宝气', emoji: '💎', desc: '累计镶嵌 10 颗宝石' }
+    { id: 'gem_10', name: '珠光宝气', emoji: '💎', desc: '累计镶嵌 10 颗宝石' },
+    { id: 'pierce_learn', name: '破甲之道', emoji: '🏹', desc: '学会被动「破甲专精」' },
+    { id: 'flurry_500', name: '连环如雨', emoji: '🤲', desc: '连环掌累计追加命中 500 次' }
   ];
 
   var byId = {};

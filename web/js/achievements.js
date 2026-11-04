@@ -151,6 +151,13 @@
       html.push('<div class="effect-item"><span>🎁</span><b>待领奖励 ' + claimable.length + ' 项</b>' +
         '<i><button class="ach-claim" data-ach-claim-all="1">一键全领 +' + sum + ' 金</button></i></div>');
     }
+    // 里程碑进度（第八批）：与服务端档位镜像——累计已领 15/30/45/60 项各发一次奖金
+    var claimedN = ACH.filter(function (a) { return claimed[a.id]; }).length;
+    var TIERS = [[15, 10000], [30, 30000], [45, 80000], [60, 200000]];
+    var nextTier = TIERS.filter(function (t) { return claimedN < t[0]; })[0];
+    html.push('<div class="effect-item"><span>🏆</span><b>成就里程碑：已领 ' + claimedN + ' 项</b><i>' +
+      (nextTier ? '下一档 ' + nextTier[0] + ' 项（奖金 +' + nextTier[1] + ' 金）' : '全部里程碑奖金已达成 🎉') +
+      '</i></div>');
     // 排序与筛选（第七批）：可领取置顶 → 进行中（进度高优先）→ 未解锁 → 已领奖垫底；筛选只影响列表子集
     function achState(a) {
       if (unlocked[a.id] && !claimed[a.id]) return 0;

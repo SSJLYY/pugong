@@ -76,7 +76,7 @@
   function lightTheme() {
     return themeName() === 'light';
   }
-  const THEME_LABEL = { dark: '🌗 主题', light: '☀️ 宣纸', star: '🌌 星空' };
+  const THEME_LABEL = { dark: '🌗 主题', light: '☀️ 宣纸', star: '🌌 星空', ink: '🖌 水墨' };
   // 字号切换（第八批）：标准/大/特大三档，body 类驱动根字号，存 localStorage
   function fontSizeName() {
     try { return localStorage.getItem('gongpu_font') || 'm'; } catch (e) { return 'm'; }
@@ -92,6 +92,7 @@
     const t = themeName();
     document.body.classList.toggle('theme-light', t === 'light');
     document.body.classList.toggle('theme-star', t === 'star');
+    document.body.classList.toggle('theme-ink', t === 'ink');
     const b = $('btnTheme');
     if (b) b.textContent = THEME_LABEL[t] || THEME_LABEL.dark;
   }
@@ -1258,11 +1259,11 @@
       toast({ m: '🔠 字号：标准', l: '🔠 字号：大', xl: '🔠 字号：特大' }[next], 'ok');
     });
     $('btnTheme').addEventListener('click', () => {
-      const order = ['dark', 'light', 'star'];
+      const order = ['dark', 'light', 'star', 'ink'];
       const next = order[(order.indexOf(themeName()) + 1) % order.length];
       try { localStorage.setItem('gongpu_theme', next); } catch (e) { /* 忽略 */ }
       applyThemePref();
-      toast({ dark: '🌙 已切换玄夜主题', light: '☀️ 已切换宣纸主题', star: '🌌 已切换星空主题' }[next], 'ok');
+      toast({ dark: '🌙 已切换玄夜主题', light: '☀️ 已切换宣纸主题', star: '🌌 已切换星空主题', ink: '🖌 已切换水墨主题' }[next], 'ok');
     });
 
     $('btnDaily').addEventListener('click', async () => {

@@ -1135,6 +1135,33 @@ body.theme-light .trait-row span{color:#4a4433}
 body.theme-light .float-dmg{text-shadow:0 1px 3px rgba(255,252,240,.9)}
 body.theme-light .zone-btn.req{color:#7a6c46}
 
+/* 水墨主题（第九批，参照文字修仙类布局：纸面居中卡 + 水墨远山底 + 朱砂点缀） */
+body.theme-ink{
+  --bg0:#ece7db; --bg1:#e3dcc9; --bg2:#d8cfb6;
+  --panel:rgba(255,255,255,.55); --panel-2:rgba(255,255,255,.75);
+  --border:rgba(46,58,56,.35); --border-strong:rgba(46,58,56,.6);
+  --gold:#9e2b25; --gold-bright:#b03a2e; --gold-dim:#7c4a3a;
+  --txt:#22271f; --txt-dim:#4c5245; --txt-faint:#7d8272;
+  --shadow:0 4px 18px rgba(46,58,56,.16);
+  background:
+    radial-gradient(1100px 340px at 12% 108%, rgba(46,74,79,.20), transparent 62%),
+    radial-gradient(900px 300px at 88% 112%, rgba(46,74,79,.16), transparent 60%),
+    radial-gradient(620px 200px at 55% 104%, rgba(34,39,31,.12), transparent 65%),
+    linear-gradient(180deg, #f2eee3 0%, #ece7db 55%, #e0d8c2 100%);
+  background-attachment:fixed;
+}
+body.theme-ink input, body.theme-ink select, body.theme-ink textarea{
+  background:rgba(255,255,255,.8); color:#22271f; border-color:rgba(46,58,56,.4);
+}
+body.theme-ink .panel-tip{color:#6a705f}
+body.theme-ink .daily-desc{color:#4c5245}
+body.theme-ink .codex-item{color:#333a30}
+body.theme-ink .pi-desc, body.theme-ink .gi-meta{color:#4c5245}
+body.theme-ink .trait-row span{color:#333a30}
+body.theme-ink .float-dmg{text-shadow:0 1px 3px rgba(255,255,255,.9)}
+body.theme-ink .zone-btn.req{color:#7c6a4a}
+body.theme-ink .zone-btn.ready::after{color:#2e7d32}
+
 /* 移动端布局打磨（第七批） */
 @media (max-width: 768px){
   .topbar{flex-wrap:wrap;row-gap:6px}

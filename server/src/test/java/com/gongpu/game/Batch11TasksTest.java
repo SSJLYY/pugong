@@ -14,9 +14,9 @@ class Batch11TasksTest {
 
     @Test
     void templateCounts() {
-        assertEquals(9, WeeklyQuests.TEMPLATES.size(), "周常模板 9");
-        assertEquals(11, MonthlyQuests.TEMPLATES.size(), "月常模板 11");
-        assertEquals(28, BlackMarket.POOL.size(), "黑市池 28");
+        assertEquals(11, WeeklyQuests.TEMPLATES.size(), "周常模板 9");
+        assertEquals(13, MonthlyQuests.TEMPLATES.size(), "月常模板 11");
+        assertEquals(32, BlackMarket.POOL.size(), "黑市池 28");
         assertTrue(BlackMarket.POOL.contains("hongmeng"), "黑市应含鸿蒙灵液");
         assertTrue(BlackMarket.POOL.contains("phoenix"), "黑市应含凤凰之血");
     }
@@ -34,7 +34,7 @@ class Batch11TasksTest {
 
     @Test
     void milestoneSeventhTier() {
-        assertEquals(8, GameService.ACH_MILESTONE_TIERS.length, "里程碑八档（第十二批扩 120 档）");
+        assertEquals(9, GameService.ACH_MILESTONE_TIERS.length, "里程碑八档（第十二批扩 120 档）");
         assertEquals(105, GameService.ACH_MILESTONE_TIERS[6]);
         assertEquals(3_000_000, GameService.ACH_MILESTONE_BONUS[6], "105 档奖金 300 万");
     }
@@ -47,6 +47,6 @@ class Batch11TasksTest {
         var got = Achievements.evaluate(s);
         assertTrue(got.contains("star_100"), "升星 100 应解锁");
         assertTrue(got.contains("treat_200"), "零食 200 应解锁");
-        assertEquals(128, Achievements.ALL.size(), "成就 128");
+        assertEquals(143, Achievements.ALL.size(), "成就 128");
     }
 }

@@ -37,7 +37,7 @@ class LuckyTalentTest {
     @Test
     void talentRegisteredAndRollable() {
         assertNotNull(GameConst.TALENTS.get("lucky"));
-        assertEquals(15, GameConst.TALENTS.size(), "天赋总数应达 11（第八批终版口径）");
+        assertEquals(16, GameConst.TALENTS.size(), "天赋总数应达 11（第八批终版口径）");
         int hits = 0;
         for (int i = 0; i < 20000; i++) {
             if ("lucky".equals(GameService.rollTalent())) {

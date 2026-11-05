@@ -127,6 +127,6 @@ class Batch11CombatTest {
     void deepPoolsIncludeImmortalAndDevour() {
         assertTrue(GameConst.traitPool(10).contains("immortal"), "混沌池应含不朽");
         assertTrue(GameConst.traitPool(11).contains("devour"), "鸿蒙池应含吞噬");
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 25");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "怪物词条 25");
     }
 }

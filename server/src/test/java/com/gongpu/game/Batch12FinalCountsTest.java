@@ -37,29 +37,29 @@ class Batch12FinalCountsTest {
 
     @Test
     void codeSideCounts() {
-        assertEquals(47, GameConst.POTIONS.size(), "药剂 47");
-        assertEquals(34, GameConst.AFFIXES.size(), "词条 34");
-        assertEquals(42, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 42");
-        assertEquals(17, GameConst.ACTIVE_SKILLS.size(), "主动 17");
-        assertEquals(25, GameConst.PASSIVE_SKILLS.size(), "被动 25");
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 29");
-        assertEquals(128, Achievements.ALL.size(), "成就 128");
-        assertEquals(15, GameConst.TALENTS.size(), "天赋 15");
-        assertEquals(11, Sets.ALL.size(), "套装 11");
-        assertEquals(13, GameConst.ZONES.size(), "区域 13");
-        assertEquals(48, GameConst.codexTotal(), "图鉴 48");
-        assertEquals(9, GameConst.PETS.size(), "宠物 9");
+        assertEquals(48, GameConst.POTIONS.size(), "药剂 47");
+        assertEquals(36, GameConst.AFFIXES.size(), "词条 34");
+        assertEquals(45, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 42");
+        assertEquals(18, GameConst.ACTIVE_SKILLS.size(), "主动 17");
+        assertEquals(27, GameConst.PASSIVE_SKILLS.size(), "被动 25");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "怪物词条 29");
+        assertEquals(143, Achievements.ALL.size(), "成就 128");
+        assertEquals(16, GameConst.TALENTS.size(), "天赋 15");
+        assertEquals(12, Sets.ALL.size(), "套装 11");
+        assertEquals(14, GameConst.ZONES.size(), "区域 13");
+        assertEquals(53, GameConst.codexTotal(), "图鉴 48");
+        assertEquals(10, GameConst.PETS.size(), "宠物 9");
         assertEquals(18, GameConst.GEMS.size(), "宝石 18");
     }
 
     @Test
     void sqlSideCounts() throws Exception {
         String sql = sql();
-        assertEquals(98, distinctCodes(sql, "cfg_equipment_template"), "SQL 装备 98");
-        assertEquals(47, distinctCodes(sql, "cfg_item"), "SQL 药剂 47");
-        assertEquals(34, distinctCodes(sql, "cfg_affix"), "SQL 词条 34");
-        assertEquals(42, distinctCodes(sql, "cfg_skill"), "SQL 技能 42");
-        assertEquals(38, distinctCodes(sql, "cfg_quest"), "SQL 委托 38");
-        assertEquals(38, distinctCodes(sql, "cfg_craft"), "SQL 配方 38");
+        assertEquals(106, distinctCodes(sql, "cfg_equipment_template"), "SQL 装备 98");
+        assertEquals(48, distinctCodes(sql, "cfg_item"), "SQL 药剂 47");
+        assertEquals(36, distinctCodes(sql, "cfg_affix"), "SQL 词条 34");
+        assertEquals(45, distinctCodes(sql, "cfg_skill"), "SQL 技能 42");
+        assertEquals(42, distinctCodes(sql, "cfg_quest"), "SQL 委托 38");
+        assertEquals(42, distinctCodes(sql, "cfg_craft"), "SQL 配方 38");
     }
 }

@@ -23,6 +23,6 @@ class PetWhisperTest {
         // 翻倍后共 30 经验：升到 2 级（耗 20）余 10——无翻倍则只有 20 刚好升级余 0
         assertEquals(2, s.petLevels.get("pet_cat"), "兽语者翻倍后应升到 2 级");
         assertEquals(10.0, s.petExps.get("pet_cat"), "升级余 10 经验证明入账 30");
-        assertEquals(15, GameConst.TALENTS.size(), "天赋 12");
+        assertEquals(16, GameConst.TALENTS.size(), "天赋 12");
     }
 }

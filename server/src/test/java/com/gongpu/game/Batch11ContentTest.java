@@ -40,7 +40,7 @@ class Batch11ContentTest {
         assertEquals(4.95, GameConst.petBondMul(250, true, true), 1e-9, "混沌+鸿蒙之心叠乘 ×2.25");
         assertEquals(1.875, GameConst.petBondMul(30, false, true), 1e-9, "鸿蒙之心一段羁绊 ×1.5");
         assertTrue(GameConst.TALENTS.containsKey("hongmeng_heart"));
-        assertEquals(15, GameConst.TALENTS.size(), "天赋 14");
+        assertEquals(16, GameConst.TALENTS.size(), "天赋 14");
     }
 
     @Test
@@ -77,9 +77,9 @@ class Batch11ContentTest {
     void newAffixesAndCounts() {
         assertTrue(GameConst.AFFIXES.stream().anyMatch(a -> "鸿蒙".equals(a.name()) && a.max() == 120));
         assertTrue(GameConst.AFFIXES.stream().anyMatch(a -> "太初".equals(a.name()) && a.max() == 50000));
-        assertEquals(34, GameConst.AFFIXES.size(), "词条 32");
-        assertEquals(47, GameConst.POTIONS.size(), "药剂 46");
-        assertEquals(25, GameConst.PASSIVE_SKILLS.size(), "被动 23");
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 26");
+        assertEquals(36, GameConst.AFFIXES.size(), "词条 32");
+        assertEquals(48, GameConst.POTIONS.size(), "药剂 46");
+        assertEquals(27, GameConst.PASSIVE_SKILLS.size(), "被动 23");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "怪物词条 26");
     }
 }

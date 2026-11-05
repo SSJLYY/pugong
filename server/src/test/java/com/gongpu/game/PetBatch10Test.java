@@ -20,7 +20,7 @@ class PetBatch10Test {
 
     @Test
     void eightPetsRegistered() {
-        assertEquals(9, GameConst.PETS.size(), "宠物 9 只");
+        assertEquals(10, GameConst.PETS.size(), "宠物 9 只");
         assertTrue(GameConst.PETS.containsKey("pet_panda"));
         assertTrue(GameConst.PETS.containsKey("pet_ferret"));
     }

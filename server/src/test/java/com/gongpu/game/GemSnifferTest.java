@@ -26,7 +26,7 @@ class GemSnifferTest {
         assertEquals(0.15, GameEngine.gemDropRate(s), 1e-9, "学宝石嗅觉后掉率应 ×1.5");
         s.buffs.put("silence", 5.0);
         assertEquals(0.10, GameEngine.gemDropRate(s), 1e-9, "沉默应压制被动回落基础率");
-        assertEquals(42, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(),
+        assertEquals(45, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(),
                 "技能总数 38");
     }
 }

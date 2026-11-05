@@ -389,6 +389,28 @@ public class GameController {
         return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "awaken", s -> game.awaken(s, reqIdx(body.index(), "index")));
     }
 
+    public record InheritReq(Integer from, Integer to) {
+    }
+
+    /** 装备传承（第十三批）：from/to 均为背包下标，四维成长整表转移。 */
+    @PostMapping("/{slot}/inherit")
+    public Map<String, Object> inherit(HttpServletRequest req, @PathVariable int slot,
+                                       @RequestBody InheritReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "inherit",
+                s -> game.inherit(s, reqIdx(body.from(), "from"), reqIdx(body.to(), "to")));
+    }
+
+    public record SweepReq(Integer count) {
+    }
+
+    /** 区域扫荡（第十三批）：花金币买当前区域击杀口径（精通/猎杀任务），不出掉落。 */
+    @PostMapping("/{slot}/sweep")
+    public Map<String, Object> sweep(HttpServletRequest req, @PathVariable int slot,
+                                     @RequestBody SweepReq body) {
+        return run(AuthInterceptor.userId(req), slot, AuthInterceptor.username(req), "sweep",
+                s -> game.sweep(s, reqIdx(body.count(), "count")));
+    }
+
     public record SocketReq(Integer index, String gem, Integer gemIndex) {
     }
 

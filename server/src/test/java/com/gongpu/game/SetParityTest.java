@@ -57,7 +57,7 @@ class SetParityTest {
             Map.entry("snowwolf", "snow"),
             Map.entry("molten", "volcano"),
             Map.entry("starset", "star"), Map.entry("voidset", "void"), Map.entry("chaossuit", "chaos"),
-            Map.entry("hongmengsuit", "hongmeng"), Map.entry("guixusuit", "guixu"));
+            Map.entry("hongmengsuit", "hongmeng"), Map.entry("guixusuit", "guixu"), Map.entry("taichusuit", "taichu"));
 
     @Test
     void everySetMemberExistsInSqlWithMatchingZone() throws Exception {

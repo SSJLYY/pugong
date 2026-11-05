@@ -35,14 +35,14 @@ class ZoneAbyssTest {
         assertNotNull(z.boss());
         assertEquals("boss_abyss", z.boss().id());
         List<String> order = new ArrayList<>(GameConst.ZONES.keySet());
-        assertEquals("hongmeng", order.get(order.size() - 2), "鸿蒙界应为次深区域（第十二批归墟界在其后）");
+        assertEquals("guixu", order.get(order.size() - 2), "归墟界应为次深区域（第十三批太初界在其后）");
         assertEquals("abyss", GameEngine.nextZoneId("volcano"), "火山之后应推进到深渊");
         assertEquals("star", GameEngine.nextZoneId("abyss"), "第八批：深渊之后推进星界");
     }
 
     @Test
     void codexTotalGrowsTo23() {
-        assertEquals(48, GameConst.codexTotal(), "图鉴总数 48");
+        assertEquals(53, GameConst.codexTotal(), "图鉴总数 53");
     }
 
     @Test

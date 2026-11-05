@@ -124,8 +124,8 @@ class Batch12CombatTest {
         assertEquals(1, s.stats.corrodeKills);
         assertTrue(GameConst.traitPool(12).contains("golden_bell"));
         assertTrue(GameConst.traitPool(10).contains("corrode"));
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 28");
-        assertEquals(42, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 42");
-        assertEquals(47, GameConst.POTIONS.size(), "药剂 47");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "怪物词条 28");
+        assertEquals(45, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 42");
+        assertEquals(48, GameConst.POTIONS.size(), "药剂 47");
     }
 }

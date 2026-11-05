@@ -16,13 +16,13 @@ class Batch8ParityTest {
 
     @Test
     void batch8CountsAndCodes() throws Exception {
-        assertEquals(47, GameConst.POTIONS.size(), "药剂 45");
-        assertEquals(34, GameConst.AFFIXES.size(), "词条 26");
-        assertEquals(42, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 38");
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 25");
-        assertEquals(15, GameConst.TALENTS.size(), "天赋 12");
-        assertEquals(128, Achievements.ALL.size(), "成就 128");
-        assertEquals(11, Sets.ALL.size(), "套装 10");
+        assertEquals(48, GameConst.POTIONS.size(), "药剂 45");
+        assertEquals(36, GameConst.AFFIXES.size(), "词条 26");
+        assertEquals(45, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 38");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "怪物词条 25");
+        assertEquals(16, GameConst.TALENTS.size(), "天赋 12");
+        assertEquals(143, Achievements.ALL.size(), "成就 128");
+        assertEquals(12, Sets.ALL.size(), "套装 10");
         String sql = Files.readString(Path.of("src/main/resources/gongpu-full.sql"));
         for (String code : new String[]{
                 // 药剂/被动（81/83）

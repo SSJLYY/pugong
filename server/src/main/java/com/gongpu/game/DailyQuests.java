@@ -46,7 +46,11 @@ public final class DailyQuests {
             new Template("feed", "喂宠令", "🐾", "喂食宠物", "次",
                     new long[]{5, 10, 20}, new long[]{900, 1500, 2400}),
             new Template("fuse", "融晶令", "💎", "融合宝石", "次",
-                    new long[]{1, 2, 3}, new long[]{1200, 2400, 4000}));
+                    new long[]{1, 2, 3}, new long[]{1200, 2400, 4000}),
+            new Template("inherit", "传承令", "🔥", "装备传承", "次",
+                    new long[]{1, 2, 3}, new long[]{1500, 3000, 4500}),
+            new Template("sweep", "扫荡令", "🧹", "扫荡击杀", "只",
+                    new long[]{50, 120, 250}, new long[]{1200, 2400, 4000}));
 
     /** 每日全清奖励：3 个任务全领后额外发放（每日一次）。 */
     public static final long ALL_CLEAR_BONUS = 5000;
@@ -78,6 +82,8 @@ public final class DailyQuests {
             case "treat" -> BigDecimal.valueOf(s.stats.petTreats);
             case "awaken" -> BigDecimal.valueOf(s.stats.awakens);
             case "evolve" -> BigDecimal.valueOf(s.stats.petEvolves);
+            case "inherit" -> BigDecimal.valueOf(s.stats.inherits);
+            case "sweep" -> BigDecimal.valueOf(s.stats.sweeps);
             default -> BigDecimal.ZERO;
         };
     }

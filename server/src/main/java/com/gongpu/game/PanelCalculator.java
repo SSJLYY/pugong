@@ -113,6 +113,11 @@ public final class PanelCalculator {
         // 归墟琼浆（第十二批）：暴伤 +80%、吸血 +8%（同加区）
         BigDecimal guixuCritd = (active(s, "guixu_pot") && !silenced) ? Num.of(0.80) : Num.ZERO;
         BigDecimal guixuSteal = (active(s, "guixu_pot") && !silenced) ? Num.of(0.08) : Num.ZERO;
+        // 被动·太初体（第十三批）：暴伤 +30%（同加区，被动受沉默压制）
+        BigDecimal taichuBodyCritd = (s.passives.contains("taichu_body") && !silenced) ? Num.of(0.30) : Num.ZERO;
+        // 太初源液（第十三批）：攻速平直 +0.25、暴击率 +8%（同加区）
+        BigDecimal taichuAspd = (active(s, "taichu_pot") && !silenced) ? Num.of(0.25) : Num.ZERO;
+        BigDecimal taichuCrit = (active(s, "taichu_pot") && !silenced) ? Num.of(0.08) : Num.ZERO;
         // 时之砂（第七批）：平直攻速加算（进乘区之前，与词条平直攻速同口径）
         BigDecimal sandAspd = (active(s, "sand_pot") && !silenced) ? Num.of(0.2) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -120,6 +125,8 @@ public final class PanelCalculator {
         BigDecimal accPot = (active(s, "acc_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
         // 凝神药剂（第八批）：命中平直加算，与鹰眼药剂同区叠加
         BigDecimal focusPot = (active(s, "focus_pot") && !silenced) ? Num.of(0.12) : Num.ZERO;
+        // 被动·源流之瞳（第十三批）：命中 +8%（同加区，被动受沉默压制）
+        BigDecimal yuanliuAcc = (s.passives.contains("yuanliu_eye") && !silenced) ? Num.of(0.08) : Num.ZERO;
         // 生机药剂（第八批）：持续回复平直加算，与回春药剂同区叠加
         BigDecimal vigorPot = (active(s, "vigor_pot") && !silenced) ? Num.of(150) : Num.ZERO;
         BigDecimal evaPot = (active(s, "eva_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -238,14 +245,14 @@ public final class PanelCalculator {
                 Num.add(Num.mul(Num.mul(Num.mul(pctApply(L.MDEF, flat, pct, "MDEF"), pmul.getOrDefault("MDEF", Num.of(1))), ironPotMul), defPotMul), guardPot),
                 Num.mul(Num.add(Num.add(Num.add(Num.add(pctApply(L.REGEN, flat, pct, "REGEN"), regenFood), regenPot), regenPotL), vigorPot), pmul.getOrDefault("REGEN", Num.of(1))),
                 Num.add(pctApply(L.MREGEN, flat, pct, "MREGEN"), mregenPot),
-                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(Num.add(Num.add(Num.add(Num.add(aspdWithBonus(s.fixed.ASPD, flat, pct), sandAspd), stardustAspd), chronoAspd), hongmengAspd), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
+                Num.mul(Num.mul(Num.mul(Num.mul(Num.mul(Num.add(Num.add(Num.add(Num.add(Num.add(aspdWithBonus(s.fixed.ASPD, flat, pct), sandAspd), stardustAspd), chronoAspd), hongmengAspd), taichuAspd), rapidMul), spdPotMul), aspdPotMul), slowMul), frostMul),
                 Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),
-                Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit), stardustCrit), taixuCrit), guixuCrit)),
-                Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd), voidCritd), chaosCritd), phoenixCritd), hongmengCritd), taixuCritd), taixuSwordCritd), guixuCritd),
+                Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit), stardustCrit), taixuCrit), guixuCrit), taichuCrit)),
+                Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd), voidCritd), chaosCritd), phoenixCritd), hongmengCritd), taixuCritd), taixuSwordCritd), guixuCritd), taichuBodyCritd),
                 Num.min(GameConst.BLESS_CAP.get("ACC"),
-                        Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot), focusPot), voidAcc)),
+                        Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot), focusPot), voidAcc), yuanliuAcc)),
                 Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot), chaosEva), tideEva)),
                 Num.add(Num.add(Num.add(Num.add(Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot), bloodlustBuff), phoenixSteal), hongmengSteal), guixuSteal),
                 // 枪械：纯魔法弹每发耗蓝标记（BULLET_MP，来自武器 base_stats；非枪/物理弹武器为 0）

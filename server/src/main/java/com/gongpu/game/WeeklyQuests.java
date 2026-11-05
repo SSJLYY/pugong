@@ -47,7 +47,11 @@ public final class WeeklyQuests {
             new Template("awaken", "周觉令", "🌟", "装备觉醒", "次",
                     new long[]{1, 3, 6}, new long[]{25000, 50000, 90000}),
             new Template("evolve", "周化令", "🦋", "宠物进化", "次",
-                    new long[]{1, 2, 3}, new long[]{25000, 50000, 90000}));
+                    new long[]{1, 2, 3}, new long[]{25000, 50000, 90000}),
+            new Template("inherit", "周传令", "🔥", "装备传承", "次",
+                    new long[]{1, 2, 4}, new long[]{25000, 50000, 90000}),
+            new Template("sweep", "周扫令", "🧹", "扫荡击杀", "只",
+                    new long[]{200, 600, 1500}, new long[]{25000, 50000, 90000}));
 
     /** 每周全清奖励：金币部分（另加随机宝石 ×2，见 GameService.claimWeekly）。 */
     public static final long ALL_CLEAR_BONUS = 50_000;

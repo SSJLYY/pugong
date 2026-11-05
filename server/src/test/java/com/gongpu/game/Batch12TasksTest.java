@@ -19,8 +19,8 @@ class Batch12TasksTest {
         s.stats.petEvolves = 2;
         assertEquals(0, DailyQuests.counterOf(s, "awaken").compareTo(BigDecimal.valueOf(7)));
         assertEquals(0, DailyQuests.counterOf(s, "evolve").compareTo(BigDecimal.valueOf(2)));
-        assertEquals(9, WeeklyQuests.TEMPLATES.size(), "周常模板 9");
-        assertEquals(11, MonthlyQuests.TEMPLATES.size(), "月常模板 11");
+        assertEquals(11, WeeklyQuests.TEMPLATES.size(), "周常模板 9");
+        assertEquals(13, MonthlyQuests.TEMPLATES.size(), "月常模板 11");
         assertTrue(WeeklyQuests.templateOf("awaken") != null && WeeklyQuests.templateOf("evolve") != null);
         assertTrue(MonthlyQuests.templateOf("awaken") != null && MonthlyQuests.templateOf("evolve") != null);
     }
@@ -28,7 +28,7 @@ class Batch12TasksTest {
     @Test
     void blackMarketPool28AllResolvable() {
         new com.gongpu.cfg.GameData(null, null, null, null, null, null, null);
-        assertEquals(28, BlackMarket.POOL.size(), "黑市池 28");
+        assertEquals(32, BlackMarket.POOL.size(), "黑市池 28");
         for (String id : BlackMarket.POOL) {
             assertTrue(GameConst.POTIONS.containsKey(id), "池条目必须是 POTIONS 可解析 id：" + id);
         }
@@ -36,7 +36,7 @@ class Batch12TasksTest {
 
     @Test
     void milestoneEightTiers() {
-        assertEquals(8, GameService.ACH_MILESTONE_TIERS.length);
+        assertEquals(9, GameService.ACH_MILESTONE_TIERS.length);
         assertEquals(120, GameService.ACH_MILESTONE_TIERS[7]);
         assertEquals(5_000_000, GameService.ACH_MILESTONE_BONUS[7]);
         // 已领满 120 个成就时第八档应发奖（用掩码直查结算）

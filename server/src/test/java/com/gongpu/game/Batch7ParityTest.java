@@ -18,15 +18,15 @@ class Batch7ParityTest {
 
     @Test
     void batch7ContentCounts() {
-        assertEquals(47, GameConst.POTIONS.size(), "药剂 45");
-        assertEquals(34, GameConst.AFFIXES.size(), "词条 26（第八批终版口径）");
-        assertEquals(17, GameConst.ACTIVE_SKILLS.size(), "主动技能 16");
-        assertEquals(25, GameConst.PASSIVE_SKILLS.size(), "被动技能 22");
-        assertEquals(15, GameConst.TALENTS.size(), "天赋 12（第九批口径）");
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 20（第九批口径）");
-        assertEquals(128, Achievements.ALL.size(), "成就 128");
-        assertEquals(11, Sets.ALL.size(), "套装 10");
-        assertEquals(13, GameConst.ZONES.size(), "区域 12");
+        assertEquals(48, GameConst.POTIONS.size(), "药剂 45");
+        assertEquals(36, GameConst.AFFIXES.size(), "词条 26（第八批终版口径）");
+        assertEquals(18, GameConst.ACTIVE_SKILLS.size(), "主动技能 16");
+        assertEquals(27, GameConst.PASSIVE_SKILLS.size(), "被动技能 22");
+        assertEquals(16, GameConst.TALENTS.size(), "天赋 12（第九批口径）");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "怪物词条 20（第九批口径）");
+        assertEquals(143, Achievements.ALL.size(), "成就 128");
+        assertEquals(12, Sets.ALL.size(), "套装 10");
+        assertEquals(14, GameConst.ZONES.size(), "区域 12");
     }
 
     @Test

@@ -1565,3 +1565,74 @@ INSERT INTO `cfg_equipment_template` (`code`, `name`, `emoji`, `slot`, `tier`, `
 -- cfg_affix 34 / cfg_skill 42 / cfg_quest 38 / cfg_craft 38（均按 code 去重、enabled 计）
 -- 代码侧：区域 13 / 套装 11 / 成就 128 / 天赋 15 / 怪物词条 29 / 宝石 18 / 图鉴 48
 -- ============================================================
+
+-- 第十三批集群二：太初界装备 +6（sort 99~104）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('taichu_sword','taichu_bow','taichu_cap','taichu_armor','taichu_boots','taichu_ring');
+INSERT INTO `cfg_equipment_template` (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('taichu_sword', '太初源剑', '⚔️', 'weapon', 4, 'taichu', '{"PATK":"40000","CRIT":"0.05"}', 10, 190000, '第一缕光被锻成剑形，挥动时能听见时间开裂', 1, 99),
+  ('taichu_bow', '源初长弓', '🏹', 'bow', 4, 'taichu', '{"MATK":"38000","RNG":"1"}', 10, 185000, '弓弦是凝固的星河，箭是还没发生的未来', 1, 100),
+  ('taichu_cap', '太初冠', '👑', 'head', 4, 'taichu', '{"maxHP":"1000000","MDEF":"9000"}', 10, 180000, '冠上悬着一颗未爆的星，沉得像整个纪元', 1, 101),
+  ('taichu_armor', '太初铠', '🛡️', 'chest', 4, 'taichu', '{"PDEF":"15000","MDEF":"15000","maxHP":"800000"}', 10, 195000, '铠面是凝固的创世之火，万钧压来也只是又一朵浪花', 1, 102),
+  ('taichu_boots', '太初履', '👢', 'boots', 4, 'taichu', '{"SPD":"2600","EVA":"0.05"}', 10, 175000, '踏过的地方，时间会慢半拍', 1, 103),
+  ('taichu_ring', '太初指环', '💍', 'ring1', 4, 'taichu', '{"PATK":"15000","MATK":"15000"}', 10, 188000, '环内刻着第一个字，读出来的人都会沉默', 1, 104);
+
+-- 第十三批集群二：太初委托 +2（sort 39/40；req_json 为太初门槛，列 NOT NULL 勿写 NULL）
+DELETE FROM `cfg_quest` WHERE `code` IN ('taichu_patrol','taichu_heart');
+INSERT INTO `cfg_quest` (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('taichu_patrol', '太初巡狩', '🌠', '源初凶影横行：于太初界猎杀一百只魔物', 'taichu', '{"maxHP":5000000000000,"ATK":2500000}', 100, 50000000, 'guixu_pearl', 2, 1, 1, 39),
+  ('taichu_heart', '源祖之心', '🖤', '深入太初：于太初界猎杀六十只鸿蒙胎与星骸巨像', 'taichu', '{"maxHP":5000000000000,"ATK":2500000}', 60, 100000000, 'taichu_crystal', 3, 1, 1, 40);
+
+-- 第十三批集群二：太初配方 +2（sort 50/51）
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_taichu_sword','c_taichu_ring');
+INSERT INTO `cfg_craft` (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_taichu_sword', '锻造太初源剑', '🗡️', 'taichu_sword', '{"taichu_crystal":6,"chaos_core":4}', 300000, 0, 1, 50),
+  ('c_taichu_ring', '锻造太初指环', '💍', 'taichu_ring', '{"taichu_crystal":4,"guixu_pearl":4}', 260000, 0, 1, 51);
+
+-- 第十三批集群四：主动源初斩 + 被动太初体（cfg_skill sort 42/43）
+DELETE FROM `cfg_skill` WHERE `code` IN ('origin_slash','taichu_body');
+INSERT INTO `cfg_skill` (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('origin_slash', '源初斩', '🌠', 'active', 5000, 120, 180, 0, '{"id":"origin_slash"}', '下一击 ×7 伤害（回到一切开始之前，再斩开一次）', 1, 42),
+  ('taichu_body', '太初体', '🌠', 'passive', 0, 0, 0, 0, '{"kind":"critd","val":0.30}', '暴击伤害 +30%（源初淬体）', 1, 43);
+
+-- 第十三批集群四：药剂太初源液（cfg_item sort 65 + cfg_buff sort 48）
+DELETE FROM `cfg_item` WHERE `code` IN ('taichu');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('taichu', '太初源液', '🌠', 'potion', 40000, '{"gold":0,"hp":0,"mp":0,"buff":"taichu_pot","buffVal":0.25,"duration":60}', '60s 内攻速 +0.25、暴击率 +8%', 1, 65);
+DELETE FROM `cfg_buff` WHERE `code` IN ('taichu_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('taichu_pot', '太初', '🌠', 'atk', 'potion', '{"kind":"taichu"}', '太初源液：攻速 +0.25、暴击率 +8%', 1, 48);
+
+-- 第十三批集群九：词条 +2（cfg_affix sort 35/36）
+DELETE FROM `cfg_affix` WHERE `code` IN ('yuanchu_aff','xingyuan_aff');
+INSERT INTO `cfg_affix` (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('yuanchu_aff', '源初', 'MATK', 'flat', 120, 240, 'epic', NULL, NULL, 1, 35),
+  ('xingyuan_aff', '星源', 'REGEN', 'flat', 800, 2000, 'epic', NULL, NULL, 1, 36);
+
+-- 第十三批集群九：被动源流之瞳（cfg_skill sort 44）
+DELETE FROM `cfg_skill` WHERE `code` IN ('yuanliu_eye');
+INSERT INTO `cfg_skill` (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('yuanliu_eye', '源流之瞳', '👁️', 'passive', 0, 0, 0, 0, '{"kind":"acc","val":0.08}', '命中率 +8%（看穿万物流转）', 1, 44);
+
+-- 第十三批集群九：太初装备 +2（sort 105/106）
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('taichu_aegis','taichu_amulet');
+INSERT INTO `cfg_equipment_template` (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('taichu_aegis', '太初神盾', '🛡️', 'offhand', 4, 'taichu', '{"PDEF":"18000","MDEF":"18000","maxHP":"1000000"}', 10, 196000, '盾面是凝固的创世之光，万钧压来也只是又一朵浪花', 1, 105),
+  ('taichu_amulet', '太初之瞳', '🧿', 'necklace', 4, 'taichu', '{"MATK":"30000","CRIT":"0.06","MREGEN":"450"}', 10, 192000, '瞳孔深处是太初的漩涡，看久了会听见时间开裂', 1, 106);
+
+-- 第十三批集群九：太初委托 +2（sort 41/42）
+DELETE FROM `cfg_quest` WHERE `code` IN ('taichu_longhunt','taichu_deep');
+INSERT INTO `cfg_quest` (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('taichu_longhunt', '源初长猎', '🏹', '太初凶兽成群：于太初界猎杀二百只魔物', 'taichu', '{"maxHP":5000000000000,"ATK":2500000}', 200, 120000000, 'taichu_crystal', 2, 1, 1, 41),
+  ('taichu_deep', '太初深潜', '🌌', '深入源初：于太初界猎杀一百二十只守源者与源初兽', 'taichu', '{"maxHP":5000000000000,"ATK":2500000}', 120, 200000000, 'taichu_crystal', 5, 1, 1, 42);
+
+-- 第十三批集群九：太初配方 +2（sort 52/53，太初套四件至此全可锻造）
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_taichu_cap','c_taichu_armor');
+INSERT INTO `cfg_craft` (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_taichu_cap', '锻造太初冠', '👑', 'taichu_cap', '{"taichu_crystal":5,"hongmeng_qi":4}', 280000, 0, 1, 52),
+  ('c_taichu_armor', '锻造太初铠', '🛡️', 'taichu_armor', '{"taichu_crystal":7,"chaos_core":3}', 320000, 0, 1, 53);
+
+-- ============================================================
+-- 第十三批验收口径（2026-11-05）：cfg_equipment_template 106 / cfg_item 48 /
+-- cfg_affix 36 / cfg_skill 45 / cfg_quest 42 / cfg_craft 42（均按 code 去重、enabled 计）
+-- 代码侧：区域 14 / 套装 12 / 成就 143 / 天赋 16 / 怪物词条 32 / 宝石 18 / 图鉴 53 / 宠物 10
+-- ============================================================

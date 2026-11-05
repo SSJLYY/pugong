@@ -155,6 +155,8 @@
     // ---------- 游戏 ----------
     gameState: (slot) => request('GET', '/api/game/' + slot + '/state'),
     setZone: (slot, zone) => request('POST', '/api/game/' + slot + '/zone', { zone }),
+    sweep: (slot, count) => request('POST', '/api/game/' + slot + '/sweep', { count }),
+    inherit: (slot, from, to) => request('POST', '/api/game/' + slot + '/inherit', { from, to }),
     castSkill: (slot, id) => request('POST', '/api/game/' + slot + '/skill', { id }),
     usePotion: (slot, id) => request('POST', '/api/game/' + slot + '/potion', { id }),
     buyPotion: (slot, id, count) => request('POST', '/api/game/' + slot + '/buy', { id, count }),

@@ -15,9 +15,9 @@ class Batch10TasksTest {
 
     @Test
     void templatesExpanded() {
-        assertEquals(11, MonthlyQuests.TEMPLATES.size(), "月常模板 9");
-        assertEquals(9, DailyQuests.TEMPLATES.size(), "每日模板 9");
-        assertEquals(28, BlackMarket.POOL.size(), "黑市池 28");
+        assertEquals(13, MonthlyQuests.TEMPLATES.size(), "月常模板 9");
+        assertEquals(11, DailyQuests.TEMPLATES.size(), "每日模板 9");
+        assertEquals(32, BlackMarket.POOL.size(), "黑市池 28");
         assertTrue(BlackMarket.POOL.contains("chaos"));
         assertTrue(BlackMarket.POOL.contains("pet_treat"));
     }
@@ -37,7 +37,7 @@ class Batch10TasksTest {
 
     @Test
     void milestoneHas90Tier() {
-        assertEquals(8, GameService.ACH_MILESTONE_TIERS.length, "里程碑七档");
+        assertEquals(9, GameService.ACH_MILESTONE_TIERS.length, "里程碑七档");
         assertEquals(105, GameService.ACH_MILESTONE_TIERS[6]);
         assertEquals(3_000_000, GameService.ACH_MILESTONE_BONUS[6]);
     }

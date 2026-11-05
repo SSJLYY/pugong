@@ -14,15 +14,15 @@ class Batch12ContentTest {
 
     @Test
     void finalContentCounts() {
-        assertEquals(34, GameConst.AFFIXES.size(), "词条 34");
-        assertEquals(42, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 42");
-        assertEquals(17, GameConst.ACTIVE_SKILLS.size(), "主动 17");
-        assertEquals(25, GameConst.PASSIVE_SKILLS.size(), "被动 25");
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 29");
-        assertEquals(15, GameConst.TALENTS.size(), "天赋 15");
-        assertEquals(128, Achievements.ALL.size(), "成就 128");
-        assertEquals(28, GameConst.traitPool(12).size(), "归墟池 28（鸿蒙 27 + 雷霆）");
-        assertEquals(27, GameConst.traitPool(11).size(), "鸿蒙池 27");
+        assertEquals(36, GameConst.AFFIXES.size(), "词条 34");
+        assertEquals(45, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 42");
+        assertEquals(18, GameConst.ACTIVE_SKILLS.size(), "主动 17");
+        assertEquals(27, GameConst.PASSIVE_SKILLS.size(), "被动 25");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "怪物词条 29");
+        assertEquals(16, GameConst.TALENTS.size(), "天赋 15");
+        assertEquals(143, Achievements.ALL.size(), "成就 128");
+        assertEquals(30, GameConst.traitPool(12).size(), "归墟池 28（鸿蒙 27 + 雷霆）");
+        assertEquals(29, GameConst.traitPool(11).size(), "鸿蒙池 27");
         assertTrue(GameConst.traitPool(12).contains("thunder"));
         assertTrue(!GameConst.traitPool(11).contains("thunder"), "雷霆仅归墟");
     }

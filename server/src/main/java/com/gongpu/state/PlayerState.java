@@ -294,6 +294,8 @@ public class PlayerState {
         public boolean bellUsed;
         /** 词条「腐蚀」当前层数（第十二批，命中叠层、本场战斗内有效）。 */
         public int corrodeStacks;
+        /** 词条「幻影」已受击帧数（第十三批，每第 4 帧整帧闪避、本场战斗内有效）。 */
+        public int phantomCount;
     }
 
     public static class Stats {
@@ -355,6 +357,14 @@ public class PlayerState {
         public long taixuKills = 0;
         /** 累计装备觉醒次数（第十一批）。 */
         public long awakens = 0;
+        /** 装备传承次数（第十三批）：四维成长整表转移计数。 */
+        public long inherits = 0;
+        /** 累计扫荡击杀数（第十三批）。 */
+        public long sweeps = 0;
+        /** 韧皮/幻影/汲血词条怪击杀数（第十三批；注意 drainKills 是第九批噬能的计数，勿混）。 */
+        public long toughKills = 0;
+        public long phantomKills = 0;
+        public long eaterKills = 0;
         /** 镜像词条怪击杀数（第十批）。 */
         public long mirrorKills = 0;
         /** 虚弱词条怪击杀数（第十批）。 */

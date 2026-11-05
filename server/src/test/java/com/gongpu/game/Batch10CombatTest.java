@@ -105,17 +105,17 @@ class Batch10CombatTest {
 
     @Test
     void poolsIncludeNewTraits() {
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 25");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "怪物词条 25");
         assertTrue(GameConst.traitPool(10).contains("mirror"), "混沌池含镜像");
         assertTrue(GameConst.traitPool(10).contains("weaken"), "混沌池含虚弱");
         assertTrue(GameConst.traitPool(5).contains("mirror"), "深区池含镜像");
-        assertEquals(26, GameConst.traitPool(10).size(), "混沌池 26 条");
+        assertEquals(28, GameConst.traitPool(10).size(), "混沌池 26 条");
         assertEquals(20, GameConst.traitPool(5).size(), "深区池 20 条");
     }
 
     @Test
     void newSkillsRegistered() {
-        assertEquals(42, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 38");
+        assertEquals(45, GameConst.ACTIVE_SKILLS.size() + GameConst.PASSIVE_SKILLS.size(), "技能 38");
         assertTrue(GameConst.ACTIVE_SKILLS.containsKey("time_stop"));
         assertTrue(GameConst.PASSIVE_SKILLS.containsKey("chrono_body"));
     }

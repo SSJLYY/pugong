@@ -29,7 +29,7 @@ class PetBatch11Test {
 
     @Test
     void qilinIsNinthPet() {
-        assertEquals(9, GameConst.PETS.size(), "宠物 9 只");
+        assertEquals(10, GameConst.PETS.size(), "宠物 9 只");
         GameConst.PetDef q = GameConst.PETS.get("pet_qilin");
         assertEquals(50000, q.price());
         assertEquals(new BigDecimal("400"), q.stats().get("PATK"));

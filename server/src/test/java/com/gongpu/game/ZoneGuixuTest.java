@@ -12,7 +12,7 @@ class ZoneGuixuTest {
 
     @Test
     void guixuZoneShape() {
-        assertEquals(13, GameConst.ZONES.size(), "区域 13");
+        assertEquals(14, GameConst.ZONES.size(), "区域 13");
         GameConst.ZoneDef z = GameConst.ZONES.get("guixu");
         assertEquals("归墟界", z.name());
         assertEquals("500000000000", z.req().get("maxHP"));
@@ -22,16 +22,16 @@ class ZoneGuixuTest {
         assertEquals("boss_guixu", z.boss().id());
         assertEquals("50000000000000", z.boss().maxHP(), "归墟之主 5e13 血");
         assertEquals("guixu", GameEngine.nextZoneId("hongmeng"));
-        assertEquals(null, GameEngine.nextZoneId("guixu"), "归墟界为最深区域");
+        assertEquals("taichu", GameEngine.nextZoneId("guixu"), "归墟的下一站是太初（第十三批）");
     }
 
     @Test
     void guixuMaterialAndSet() {
         assertEquals("guixu_pearl", GameConst.ZONE_MAT.get("guixu"));
         assertEquals(60000, GameConst.MAT_SELL_PRICE.get("guixu_pearl"));
-        assertEquals(11, Sets.ALL.size(), "套装 11");
+        assertEquals(12, Sets.ALL.size(), "套装 11");
         assertTrue(Sets.byId("guixusuit") != null);
-        assertEquals(48, GameConst.codexTotal(), "图鉴 48");
+        assertEquals(53, GameConst.codexTotal(), "图鉴 48");
     }
 
     @Test

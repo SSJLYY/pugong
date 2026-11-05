@@ -32,7 +32,8 @@ public final class BlackMarket {
             "luck", "might", "guard", "stone", "thorn", "spirit", "vital", "elixir",
             "stardust", "void", "chaos", "pet_treat",
             "phoenix", "hongmeng", "timesand", "fleet",
-            "guixu", "taixu", "rage", "pierce");
+            "guixu", "taixu", "rage", "pierce",
+            "taichu", "focus", "vigor", "shield");
 
     static String today() {
         return LocalDate.now(GameConst.DAILY_ZONE).toString();

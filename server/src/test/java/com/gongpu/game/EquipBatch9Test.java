@@ -50,6 +50,6 @@ class EquipBatch9Test {
         while (m.find()) {
             rows += (int) Pattern.compile("^\\s*\\('", Pattern.MULTILINE).matcher(m.group(1)).results().count();
         }
-        assertEquals(98, rows, "装备模板总数 98");
+        assertEquals(106, rows, "装备模板总数 98");
     }
 }

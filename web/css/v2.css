@@ -1193,6 +1193,28 @@ body.theme-tide .trait-row span{color:#d8f7ff}
 body.theme-tide .event-log{color:#6fe3d4}
 body.theme-tide .float-dmg{text-shadow:0 0 8px rgba(53,196,181,.6),0 1px 3px rgba(0,0,0,.85)}
 
+/* 熔火主题（第十三批）：深炭红熔岩打底 + 熔火橙 accent，面板带熔光辉光 */
+body.theme-ember{
+  --bg0:#1c0603; --bg1:#2a0d06; --bg2:#38150a;
+  --panel:rgba(255,122,51,.05); --panel-2:rgba(255,90,40,.09);
+  --border:rgba(255,122,51,.38); --border-strong:rgba(255,122,51,.6);
+  --gold:#ff7a33; --gold-bright:#ffb37a; --gold-dim:#b5501f;
+  --txt:#fdf3e7; --txt-dim:#e8c4a8; --txt-faint:#a87c5f;
+  --shadow:0 4px 22px rgba(255,122,51,.16);
+}
+body.theme-ember .game-title{text-shadow:0 0 14px rgba(255,122,51,.75),0 0 34px rgba(255,64,20,.5)}
+body.theme-ember .panel{box-shadow:0 0 14px rgba(255,122,51,.1),var(--shadow)}
+body.theme-ember input, body.theme-ember select, body.theme-ember textarea{
+  background:#33110a; color:#fdf3e7; border-color:rgba(255,122,51,.45);
+}
+body.theme-ember .panel-tip{color:#d99a76}
+body.theme-ember .daily-desc{color:#ebc9ae}
+body.theme-ember .codex-item{color:#ffeedd}
+body.theme-ember .pi-desc, body.theme-ember .gi-meta{color:#ebc9ae}
+body.theme-ember .trait-row span{color:#ffeedd}
+body.theme-ember .event-log{color:#ffa26b}
+body.theme-ember .float-dmg{text-shadow:0 0 8px rgba(255,122,51,.6),0 1px 3px rgba(0,0,0,.85)}
+
 /* 日志搜索框（第十一批）：位于过滤筹码行上方，与筹码过滤叠加 */
 .log-search{display:block;width:100%;box-sizing:border-box;font-size:12px;padding:3px 8px;margin-top:6px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit}
 

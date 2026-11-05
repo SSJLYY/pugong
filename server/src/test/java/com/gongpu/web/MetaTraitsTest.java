@@ -12,7 +12,7 @@ class MetaTraitsTest {
 
     @Test
     void traitCountMatchesLegendSource() {
-        assertEquals(29, GameConst.MOB_TRAITS.size(), "词条总数 25");
+        assertEquals(32, GameConst.MOB_TRAITS.size(), "词条总数 25");
         for (Map.Entry<String, GameConst.TraitDef> e : GameConst.MOB_TRAITS.entrySet()) {
             assertEquals(e.getKey(), e.getValue().id(), "词条 id 与键一致：" + e.getKey());
             org.junit.jupiter.api.Assertions.assertFalse(e.getValue().desc().isBlank(),

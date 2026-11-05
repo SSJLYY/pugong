@@ -255,6 +255,9 @@ public final class GameEngine {
         if ("stealth".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_STEALTH_MUL));
         }
+        if ("tough_hide".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_TOUGH_MUL));
+        }
         if (m.boss && s.passives.contains("boss_hunter")) {
             perHit = Num.mul(perHit, Num.of(GameConst.BOSS_HUNTER_MUL));
         }
@@ -285,7 +288,12 @@ public final class GameEngine {
         }
         int kills = s.stats.zoneKills.getOrDefault(s.zone, 0);
         int tiers = kills / GameConst.MASTERY_KILLS_PER_TIER;
-        return 1 + Math.min(GameConst.MASTERY_BONUS_CAP, tiers * GameConst.MASTERY_BONUS_PER_TIER);
+        double bonus = Math.min(GameConst.MASTERY_BONUS_CAP, tiers * GameConst.MASTERY_BONUS_PER_TIER);
+        // 天赋·太初之心（第十三批）：精通加成 ×1.5（封顶后乘，最高 +30%；天赋不受沉默压制）
+        if ("taichu_heart".equals(s.talent)) {
+            bonus *= GameConst.TAICHU_HEART_MASTERY_MUL;
+        }
+        return 1 + bonus;
     }
 
     /**
@@ -349,6 +357,14 @@ public final class GameEngine {
             pushEvent(s, "🔔 金钟罩震响——你这一轮的攻击被尽数挡下！");
             return 0;
         }
+        // 词条·幻影（第十三批）：每第 4 帧整帧闪避（计数型、确定性；同样挡在一次性增益消费之前，不吞蓄力）
+        if ("phantom".equals(m.trait) && punches != null && punches.signum() > 0) {
+            m.phantomCount++;
+            if (m.phantomCount % 4 == 0) {
+                pushEvent(s, "👻 幻影闪烁——你这一轮的攻击穿过了它的身体！");
+                return 0;
+            }
+        }
         // 词条预警（第八批）：带词条的怪首次交手时播报其词条与克制提示（每只怪仅一次）
         if (m.trait != null && !m.traitWarned) {
             m.traitWarned = true;
@@ -384,6 +400,10 @@ public final class GameEngine {
         // 词条·潜行：身形飘忽攻击屡屡落空，你对它造成的伤害打折（同乘区；成长按实际挥拳另算不受影响）
         if ("stealth".equals(m.trait)) {
             perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_STEALTH_MUL));
+        }
+        // 词条·韧皮（第十三批）：皮糙肉厚到离谱，你对它造成的伤害打折（同乘区）
+        if ("tough_hide".equals(m.trait)) {
+            perHit = Num.mul(perHit, Num.of(GameConst.TRAIT_TOUGH_MUL));
         }
         // 被动·巨人杀手：对 Boss 专伤乘区
         if (m.boss && s.passives.contains("boss_hunter")) {
@@ -430,6 +450,11 @@ public final class GameEngine {
         if (PanelCalculator.active(s, "heaven_wrath")) {
             perHit = Num.mul(perHit, Num.of(GameConst.HEAVEN_WRATH_MUL));
             s.buffs.remove("heaven_wrath");
+        }
+        // 主动·源初斩（第十三批）：下一击 ×7，一次性消费 buff（与天罚可叠乘）
+        if (PanelCalculator.active(s, "origin_slash")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.ORIGIN_SLASH_MUL));
+            s.buffs.remove("origin_slash");
         }
 
         BigDecimal totalDmg = Num.mul(perHit, punches);
@@ -603,6 +628,10 @@ public final class GameEngine {
     }
 
     private static void healByLifesteal(PlayerState s, PanelCalculator.Panel p, BigDecimal dmg) {
+        // 词条·噬生（第十三批）：对手带噬生时吸血完全无效（与诅咒的减半不同口径，这是归零）
+        if (s.mob != null && "life_eater".equals(s.mob.trait)) {
+            return;
+        }
         if (Num.gt(p.LIFESTEAL(), Num.ZERO)) {
             BigDecimal heal = Num.mul(Num.mul(dmg, p.LIFESTEAL()), healMul(s));
             s.life.curHP = Num.min(Num.add(s.life.curHP, heal), s.life.maxHP);
@@ -709,6 +738,15 @@ public final class GameEngine {
         }
         if ("thunder".equals(m.trait)) {
             s.stats.thunderKills++;
+        }
+        if ("tough_hide".equals(m.trait)) {
+            s.stats.toughKills++;
+        }
+        if ("phantom".equals(m.trait)) {
+            s.stats.phantomKills++;
+        }
+        if ("life_eater".equals(m.trait)) {
+            s.stats.eaterKills++;
         }
         // 宠物经验（第九批）：出战宠物随击杀成长，升级时播报
         if (s.pet != null) {

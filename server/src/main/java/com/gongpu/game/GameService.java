@@ -120,6 +120,7 @@ public class GameService {
             case "void_slash" -> s.buffs.put("void_slash", 30.0);
             case "sword_rain" -> s.buffs.put("sword_rain", 30.0);
             case "heaven_wrath" -> s.buffs.put("heaven_wrath", 30.0);
+            case "origin_slash" -> s.buffs.put("origin_slash", 30.0);
             case "time_stop" -> s.buffs.put("time_stop", (double) def.dur());
             case "flurry" -> s.flurryHits += GameConst.FLURRY_HITS;
             case "hex_slow" -> {
@@ -707,6 +708,89 @@ public class GameService {
         return m;
     }
 
+    /** 传承成本（第十三批）：按源装备四维成长计价，服务端权威（前端同式预估）。 */
+    static java.math.BigDecimal inheritCost(PlayerState.Item src) {
+        return Num.of(5000L + 2000L * (src.enhance + src.temper) + 20000L * src.star + 50000L * src.awaken);
+    }
+
+    /**
+     * 装备传承（第十三批）：把源装备的四维成长（强化/淬炼/升星/觉醒）整表转移到同槽位的目标装备——
+     * 目标被覆盖（不叠加）、源清零。与吞噬的取 max 合并语义不同：传承是玩家显式指定的覆盖转移。
+     * 仅限背包内装备（已穿戴件先卸下），词条/宝石不随传承走。
+     */
+    public Map<String, Object> inherit(PlayerState s, int fromIdx, int toIdx) {
+        if (fromIdx < 0 || fromIdx >= s.equipBag.size() || toIdx < 0 || toIdx >= s.equipBag.size()) {
+            throw ApiException.badRequest("背包索引越界");
+        }
+        if (fromIdx == toIdx) {
+            throw ApiException.badRequest("不能把装备传承给它自己");
+        }
+        PlayerState.Item src = s.equipBag.get(fromIdx);
+        PlayerState.Item dst = s.equipBag.get(toIdx);
+        if (!java.util.Objects.equals(src.slot, dst.slot)) {
+            throw ApiException.badRequest("只能在同槽位装备之间传承（源 " + src.slot + " → 目标 " + dst.slot + "）");
+        }
+        if (src.enhance + src.temper + src.star + src.awaken <= 0) {
+            throw ApiException.badRequest("源装备没有任何成长（强化/淬炼/升星/觉醒均为 0），无可传承");
+        }
+        java.math.BigDecimal goldCost = inheritCost(src);
+        if (Num.lt(s.gold, goldCost)) {
+            throw ApiException.badRequest("金币不足，传承需要 " + Num.cn(goldCost));
+        }
+        s.gold = Num.sub(s.gold, goldCost);
+        dst.enhance = src.enhance;
+        dst.temper = src.temper;
+        dst.star = src.star;
+        dst.awaken = src.awaken;
+        src.enhance = 0;
+        src.temper = 0;
+        src.star = 0;
+        src.awaken = 0;
+        s.stats.inherits++;
+        Map<String, Object> m = inventoryView(s);
+        m.put("inherited", Map.of("enhance", dst.enhance, "temper", dst.temper, "star", dst.star, "awaken", dst.awaken));
+        m.put("goldCost", Num.plain(goldCost));
+        return m;
+    }
+
+    /** 单次扫荡上限（第十三批）。 */
+    static final int SWEEP_MAX_PER_CALL = 200;
+
+    /**
+     * 区域扫荡（第十三批）：花金币直接买当前区域的击杀口径——只涨击杀/终身击杀/分区域击杀（精通与猎杀类任务受益），
+     * 不出掉落、不给金币经验、不计 Boss。单杀成本 = 50 + 深度×50 金；余额不足时按可负担数截断并回执实际数。
+     */
+    public Map<String, Object> sweep(PlayerState s, int count) {
+        GameConst.ZoneDef z = GameConst.ZONES.get(s.zone);
+        if (z == null || z.safe()) {
+            throw ApiException.badRequest("安全区没有可扫荡的怪物");
+        }
+        if (count < 1) {
+            throw ApiException.badRequest("扫荡数量至少为 1");
+        }
+        int want = Math.min(count, SWEEP_MAX_PER_CALL);
+        long per = 50L + 50L * Math.max(0, GameConst.zoneDepth(s.zone));
+        long affordable = s.gold.divide(java.math.BigDecimal.valueOf(per), 0, java.math.RoundingMode.FLOOR).longValue();
+        long actual = Math.min(want, affordable);
+        if (actual <= 0) {
+            throw ApiException.badRequest("金币不足，扫荡一只需要 " + per + " 金");
+        }
+        java.math.BigDecimal cost = Num.of(per * actual);
+        s.gold = Num.sub(s.gold, cost);
+        s.stats.kills = Num.add(s.stats.kills, Num.of(actual));
+        if (s.stats.lifetimeKills == null) {
+            s.stats.lifetimeKills = java.math.BigDecimal.ZERO;
+        }
+        s.stats.lifetimeKills = s.stats.lifetimeKills.add(Num.of(actual));
+        s.stats.zoneKills.merge(s.zone, (int) actual, Integer::sum);
+        s.stats.sweeps += actual;
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("swept", actual);
+        m.put("goldCost", Num.plain(cost));
+        m.put("zoneKills", s.stats.zoneKills.getOrDefault(s.zone, 0));
+        return m;
+    }
+
     /** 一键卖出：把背包里品质低于 keepQuality 的全部卖掉（1=白及以下…4=紫及以下即全卖）。 */
     public Map<String, Object> autoSell(PlayerState s, int keepQuality) {
         if (keepQuality < 0 || keepQuality > 4) {
@@ -1066,8 +1150,8 @@ public class GameService {
     }
 
     /** 成就里程碑档位（第八批）：累计已领成就数达标线与一次性奖金（每档只发一次，掩码落档）。 */
-    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75, 90, 105, 120};
-    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000, 1_000_000, 3_000_000, 5_000_000};
+    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75, 90, 105, 120, 135};
+    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000, 1_000_000, 3_000_000, 5_000_000, 10_000_000};
 
     /** 领取后结算里程碑：返回本次新发的里程碑奖金（0 = 未跨新档），奖金已入账。 */
     static long settleAchMilestone(PlayerState s) {

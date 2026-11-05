@@ -86,7 +86,7 @@
   function lightTheme() {
     return themeName() === 'light';
   }
-  const THEME_LABEL = { dark: '🌗 主题', light: '☀️ 宣纸', star: '🌌 星空', ink: '🖌 水墨', neon: '🌆 霓虹', aurora: '🌌 极光', tide: '🌊 深海' };
+  const THEME_LABEL = { dark: '🌗 主题', light: '☀️ 宣纸', star: '🌌 星空', ink: '🖌 水墨', neon: '🌆 霓虹', aurora: '🌌 极光', tide: '🌊 深海', ember: '🔥 熔火' };
   // 字号切换（第八批）：标准/大/特大三档，body 类驱动根字号，存 localStorage
   function fontSizeName() {
     try { return localStorage.getItem('gongpu_font') || 'm'; } catch (e) { return 'm'; }
@@ -106,6 +106,7 @@
     document.body.classList.toggle('theme-neon', t === 'neon');
     document.body.classList.toggle('theme-aurora', t === 'aurora');
     document.body.classList.toggle('theme-tide', t === 'tide');
+    document.body.classList.toggle('theme-ember', t === 'ember');
     const b = $('btnTheme');
     if (b) b.textContent = THEME_LABEL[t] || THEME_LABEL.dark;
   }
@@ -181,7 +182,8 @@
     void: '≥2亿血/双防1200/攻40000',
     chaos: '≥20亿血/双防3000/攻150000',
     hongmeng: '≥500亿血/双防8000/攻400000',
-    guixu: '≥5000亿血/双防20000/攻1000000'
+    guixu: '≥5000亿血/双防20000/攻1000000',
+    taichu: '≥5万亿血/双防50000/攻2500000'
   };
 
   function toast(msg, kind) {
@@ -606,7 +608,7 @@
     const mpPct = Math.max(0, Math.min(100, new Decimal(p.curMP).div(new Decimal(p.MP).max(1)).toNumber() * 100));
     const pot = view.potions || {};
     const mats = view.materials || {};
-    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥'], ['abyss_crystal', '🕳️'], ['star_shard', '🌟'], ['void_shard', '🌀'], ['chaos_core', '🌪️'], ['hongmeng_qi', '🌌'], ['guixu_pearl', '🌊']];
+    const MAT6 = [['pelt', '🟫'], ['wolf_fang', '🦷'], ['ore', '⛏️'], ['toad_gland', '🟢'], ['mana_dust', '✨'], ['fire_crystal', '🔥'], ['abyss_crystal', '🕳️'], ['star_shard', '🌟'], ['void_shard', '🌀'], ['chaos_core', '🌪️'], ['hongmeng_qi', '🌌'], ['guixu_pearl', '🌊'], ['taichu_crystal', '🌠']];
     const bpCount = Object.keys(mats).filter(k => k.startsWith('bp_')).reduce((t, k) => t + (mats[k] || 0), 0);
     const daily = view.dailyTasks || [];
     const dailyClaimed = daily.filter(t => t.claimed).length;
@@ -805,7 +807,8 @@
       pet_whisper: ['🐾 兽语者', '宠物经验 +100%', ''],
       chaos_heart: ['🌪️ 混沌之心', '宠物羁绊倍率 ×1.5', ''],
       hongmeng_heart: ['🌌 鸿蒙之心', '宠物羁绊倍率 ×1.5（与混沌之心叠乘）', ''],
-      star_heart: ['⭐ 星辰之心', '镶嵌宝石效果 ×1.5（与宝石亲和叠乘）', '']
+      star_heart: ['⭐ 星辰之心', '镶嵌宝石效果 ×1.5（与宝石亲和叠乘）', ''],
+      taichu_heart: ['🌠 太初之心', '区域精通加成 ×1.5（满档 +20% → +30%）', '']
     };
     const badge = $('talentBadge');
     if (badge) {
@@ -1109,7 +1112,8 @@
         stardust_pot: ['✨', '星尘甘露', true],
         sword_rain: ['🗡️', '万剑归宗·下一击×5', true], hongmeng_pot: ['🌌', '鸿蒙灵液', true],
         taixu_pot: ['🕳️', '太虚神液', true], phoenix_pot: ['🦅', '凤凰之血', true],
-        heaven_wrath: ['⚡', '天罚·下一击×6', true], guixu_pot: ['🌊', '归墟琼浆', true]
+        heaven_wrath: ['⚡', '天罚·下一击×6', true], guixu_pot: ['🌊', '归墟琼浆', true],
+        origin_slash: ['🌠', '源初斩·下一击×7', true], taichu_pot: ['🌠', '太初源液', true]
       };
       const isEt = view.talent === 'eternal';
       let html = '';
@@ -1173,7 +1177,8 @@
     abyss: '🕳️ 深渊结晶（售 400）', star: '🌟 星核碎片（售 650）', void: '🌀 虚空碎片（售 2000）',
     chaos: '🌪️ 混沌核心（售 6000）',
     hongmeng: '🌌 鸿蒙紫气（售 20000）',
-    guixu: '🌊 归墟珠（售 60000）'
+    guixu: '🌊 归墟珠（售 60000）',
+    taichu: '🌠 太初源晶（售 200000）'
   };
 
   function renderZoneButtons() {
@@ -1263,6 +1268,22 @@
       toast('已前往' + z.name, 'ok');
     });
 
+    // 扫荡（第十三批）：花金币买当前区域击杀口径（涨精通/猎杀任务，不出掉落）
+    [['btnSweep10', 10], ['btnSweep100', 100]].forEach(([id, n]) => {
+      const btn = $(id);
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const r = await call(() => API.sweep(API.state.slot, n));
+        applyView(r);
+        const res = (r && r.result) || {};
+        if (res.swept != null && res.goldCost != null) {
+          toast('🧹 已扫荡 ' + res.swept + ' 次，花费 ' + res.goldCost + ' 金', 'ok');
+        } else {
+          toast('🧹 扫荡完成', 'ok');
+        }
+      });
+    });
+
     $('btnAuto').addEventListener('click', () => {
       S.auto = !S.auto;
       $('btnAuto').textContent = S.auto ? '🤖 自动挂机（开）' : '⏸️ 自动挂机（关）';
@@ -1297,10 +1318,11 @@
         '<div class="trait-row"><b>⭐ 升星与宠物羁绊</b><span>装备可升星（背包按钮，底子 +3%/星、耗星核碎片）；宠物新增熊猫/雪貂与「羁绊」（总等级 30/100/250 档放大出战加成）、宠物零食（+60 经验）、板凳宠物分享 25% 经验、喂到满级按钮；新技能「时停」（怪攻速减半）与被动「时之体」。</span></div>',
         '<div class="trait-row"><b>🌌 鸿蒙与觉醒</b><span>第十二区域「鸿蒙界」（500 亿血门槛）与鸿蒙战装；满级宠物可进化（属性 ×2，耗 20 万金 + 混沌核心 ×3）；满 5 星装备可觉醒（底子 +5%/级、满 3 级）；新怪词条不朽/吞噬/太虚、新技能万剑归宗（下一击 ×5）、新天赋鸿蒙之心。</span></div>',
         '<div class="trait-row"><b>🌊 归墟与精通</b><span>第十三区域「归墟界」（5000 亿血门槛）与归墟战装；区域精通：每个区域的终身击杀每满 500 +2% 地利伤害（5000 封顶 +20%），区域按钮上有计数角标；宝石可三阶融合（3 颗二阶 → 曜三阶，属性 ×5.5）；新怪词条金钟（挡第一帧）/腐蚀（叠层锈蚀双防）/雷霆（额外天雷），新技能天罚（下一击 ×6），新天赋星辰之心（宝石 ×1.5）；顶栏 🚀 可一键前往最深可进区域，成就页可按名搜索。</span></div>',
+        '<div class="trait-row"><b>🌠 太初与传承</b><span>第十四区域「太初界」（5 万亿血门槛）与太初战装；装备传承：把一件装备的强化/淬炼/升星/觉醒整表转移给同槽位装备（目标被覆盖、源清零，背包件点 🔥 传承）；区域扫荡：地图区 🧹 按钮花金币买当前区击杀数（只涨精通与击杀类任务，不出掉落）；新怪词条韧皮（承伤 -20%）/幻影（每第 4 帧闪避）/噬生（你的吸血无效），新技能源初斩（下一击 ×7），新天赋太初之心（精通加成 ×1.5），新宠物鲲鹏。</span></div>',
         '<div class="trait-row"><b>🌿 新词条与破甲</b><span>新词条🌿再生（怪每秒回 3% 血，速杀克它）与🪨坚韧（你的暴击对它减半，平推克它）已入深区；被动「破甲专精」与破甲药剂能无视防御、乘算叠加，厚甲怪不再难啃；新招「连环掌」让接下来 30 次命中全部双击。</span></div>',
         '<div class="trait-row"><b>🏅 成就</b><span>角色页成就带进度条与金币奖励，可按可领取/进行中筛选，解锁后记得领取（可一键全领）。累计领取达 15/30/45/60/75 项还有里程碑奖金（1 万/3 万/8 万/20 万/50 万，每档一次）。</span></div>',
         '<div class="trait-row"><b>✋ 扩展技能</b><span>战斗区第二行：治愈术（回 35% 血）/ 嗜血术 / 铁壁 / 净化（清中毒·灼烧·沉默·时滞·寒霜）/ 冲锋（下一击 ×3）/ 迟缓咒（怪攻速 -30%）。</span></div>',
-        '<div class="trait-row"><b>🎨 界面偏好</b><span>顶栏可关特效（省电低配）、循环切换玄夜/宣纸/星空/水墨/霓虹/极光/深海七种主题；药剂可 📌 置顶常用款，弱网时轮询会自动降频。</span></div>',
+        '<div class="trait-row"><b>🎨 界面偏好</b><span>顶栏可关特效（省电低配）、循环切换玄夜/宣纸/星空/水墨/霓虹/极光/深海/熔火八种主题；药剂可 📌 置顶常用款，弱网时轮询会自动降频。</span></div>',
         '<div class="trait-row"><b>🌌 极光与日志搜索</b><span>第六种主题「🌌 极光」：深蓝夜幕打底，青绿与蓝紫极光辉光描边，标题自带流光。战斗日志上方新增 🔍 搜索框：输入关键词即按文本过滤日志（与 👑 Boss/🧺 掉落/📌 系统分类筹码叠加生效，清空恢复）；页签标题也会带上 ⚔️ DPS 历史峰值，切去别的标签页也能瞄见战力。</span></div>',
         '<div class="trait-row"><b>🌆 霓虹与静态模式</b><span>新主题「🌆 霓虹」：深紫夜幕打底、青与品红霓虹描边，标题自带辉光；顶栏「🧘 静态模式」是与特效开关独立的偏好，一键停用全站动画与过渡，晕动敏感或想更省电时开启。另：顶栏 ⚔️ DPS 筹码会记住你的历史峰值（悬浮可见），委托页出战宠物卡带经验进度条。</span></div>',
         '<div class="trait-row"><b>🖌 水墨主题</b><span>参照文字修仙类游戏的纸面居中卡布局：水墨远山底、朱砂点缀、属性改标签网格、已装备改品质标签、战斗区顶部有随场景变化的叙事条；顶栏另有 💪 综合战力（DPS×生存×防御）供横向比较。布局灵感致谢开源项目《我的文字修仙全靠刷》（vue-XiuXianGame，CC BY-NC 4.0），本作实现为原创代码。</span></div>',
@@ -1402,11 +1424,11 @@
       toast({ m: '🔠 字号：标准', l: '🔠 字号：大', xl: '🔠 字号：特大' }[next], 'ok');
     });
     $('btnTheme').addEventListener('click', () => {
-      const order = ['dark', 'light', 'star', 'ink', 'neon', 'aurora', 'tide'];
+      const order = ['dark', 'light', 'star', 'ink', 'neon', 'aurora', 'tide', 'ember'];
       const next = order[(order.indexOf(themeName()) + 1) % order.length];
       try { localStorage.setItem('gongpu_theme', next); } catch (e) { /* 忽略 */ }
       applyThemePref();
-      toast({ dark: '🌙 已切换玄夜主题', light: '☀️ 已切换宣纸主题', star: '🌌 已切换星空主题', ink: '🖌 已切换水墨主题', neon: '🌆 已切换霓虹主题', aurora: '🌌 已切换极光主题', tide: '🌊 已切换深海主题' }[next], 'ok');
+      toast({ dark: '🌙 已切换玄夜主题', light: '☀️ 已切换宣纸主题', star: '🌌 已切换星空主题', ink: '🖌 已切换水墨主题', neon: '🌆 已切换霓虹主题', aurora: '🌌 已切换极光主题', tide: '🌊 已切换深海主题', ember: '🔥 已切换熔火主题' }[next], 'ok');
     });
 
     $('btnDaily').addEventListener('click', async () => {
@@ -1526,7 +1548,8 @@
       pet_whisper: ['🐾', '兽语者', '宠物经验 +100%'],
       chaos_heart: ['🌪️', '混沌之心', '宠物羁绊倍率 ×1.5'],
       hongmeng_heart: ['🌌', '鸿蒙之心', '宠物羁绊倍率 ×1.5（与混沌之心叠乘）'],
-      star_heart: ['⭐', '星辰之心', '镶嵌宝石效果 ×1.5（与宝石亲和叠乘）']
+      star_heart: ['⭐', '星辰之心', '镶嵌宝石效果 ×1.5（与宝石亲和叠乘）'],
+      taichu_heart: ['🌠', '太初之心', '区域精通加成 ×1.5（满档 +20% → +30%）']
     };
 
     const talent = view.talent && talentMeta[view.talent];
@@ -2049,6 +2072,7 @@
           <button data-act="temper" title="淬炼：底子 +4%/级（满 5 级，与强化独立），耗来源区域材料 + 金币" ${it.temper >= 5 ? 'disabled' : ''}>${it.temper >= 5 ? '淬炼 MAX' : '淬炼'}</button>
           <button data-act="star" title="升星：底子 +3%/星（满 5 星，与强化/淬炼独立），耗星核碎片×(星+1) + 金币 5000×(星+1)" ${it.star >= 5 ? 'disabled' : ''}>${it.star >= 5 ? '⭐ MAX' : '⭐ 升星' + (it.star ? ' ·' + it.star : '')}</button>
           ${(it.star || 0) >= 5 ? '<button data-act="awaken" title="觉醒：底子 +5%/级（满 3 级，需满 5 星），耗混沌核心×(级+1) + 金币 100000×(级+1)" ' + ((it.awaken || 0) >= 3 ? 'disabled' : '') + '>' + ((it.awaken || 0) >= 3 ? '☀️ 觉醒 MAX' : '☀️ 觉醒' + (it.awaken ? ' ·' + it.awaken : '')) + '</button>' : ''}
+          ${((it.enhance || 0) + (it.temper || 0) + (it.star || 0) + (it.awaken || 0)) > 0 ? '<button data-act="inherit" title="传承：把这件装备的强化/淬炼/升星/觉醒整表转移给另一件同槽位装备（目标被覆盖、源清零）；词条与宝石不随传承">🔥 传承</button>' : ''}
           <button data-act="reroll">洗炼</button>
           <button data-act="socket" title="镶嵌宝石（最多 3 孔）：宝石由 Boss 必掉、词条怪概率掉" ${(it.gems || []).length >= 3 ? 'disabled' : ''}>${(it.gems || []).length >= 3 ? '💠 孔满' : '💠 镶嵌'}</button>
           ${(it.gems || []).length ? '<button data-act="unsocket" title="拆卸一颗宝石回材料仓（200 金）">拆卸</button>' : ''}
@@ -2131,6 +2155,21 @@
             if (pick === null || pick === undefined) return;
             try {
               const r = await call(() => API.unsocketGem(API.state.slot, idx, pick), '已拆卸');
+              applyView(r);
+            } catch (e) { toast(e.message, 'err'); }
+            return;
+          }
+          if (act === 'inherit') {
+            const bag = (view && view.bag) || [];
+            const targets = bag.map((t, ti) => ({ t, ti })).filter(x => x.ti !== idx && x.t.slot === it.slot);
+            if (!targets.length) { toast('背包里没有同槽位的目标装备', 'err'); return; }
+            const cost = 5000 + 2000 * ((it.enhance || 0) + (it.temper || 0)) + 20000 * (it.star || 0) + 50000 * (it.awaken || 0);
+            const pick = await pickModal('🔥 装备传承 · ' + it.name,
+              '把 强化' + (it.enhance || 0) + '/淬炼' + (it.temper || 0) + '/升星' + (it.star || 0) + '/觉醒' + (it.awaken || 0) + ' 整表转移给目标（目标原成长被覆盖、源清零；词条与宝石不随传承），费用 ' + cost + ' 金。选择目标：',
+              targets.map(x => ({ label: x.t.emoji + ' ' + x.t.name + '（现成长 强' + (x.t.enhance || 0) + '/淬' + (x.t.temper || 0) + '/星' + (x.t.star || 0) + '/觉' + (x.t.awaken || 0) + '）', value: x.ti })));
+            if (pick === null || pick === undefined) return;
+            try {
+              const r = await call(() => API.inherit(API.state.slot, idx, pick), '传承成功');
               applyView(r);
             } catch (e) { toast(e.message, 'err'); }
             return;
@@ -2759,6 +2798,9 @@
     const maxZoneKills = Math.max(0, ...Object.values(view.zoneKills || {}).map(Number));
     if (maxZoneKills >= 5000) out.push(['🗺️', '精通大师', '任一区域终身击杀 ≥ 5000（精通满级）']);
     if ((view.bossKills || []).includes('boss_guixu')) out.push(['🌊', '归墟主宰', '击杀归墟之主·无量']);
+    // 第十三批新称号：传承宗师（传承 25 次）与太初主宰（终局 Boss，新压轴）
+    if (((view.stats || {}).inherits || 0) >= 25) out.push(['🔥', '传承宗师', '累计装备传承 ≥ 25 次']);
+    if ((view.bossKills || []).includes('boss_taichu')) out.push(['🌠', '太初主宰', '击杀太初源祖']);
     return out;
   }
 
@@ -2777,6 +2819,8 @@
       (view.bossKills || []).includes('boss_chaos'),
       (view.bossKills || []).includes('boss_hongmeng'),
       (view.bossKills || []).includes('boss_guixu'),
+      (view.bossKills || []).includes('boss_taichu'),
+      ((view.stats || {}).inherits || 0) >= 25,
       Math.max(0, ...Object.values(view.zoneKills || {}).map(Number)) >= 5000,
       ((view.pet && view.pet.evolved) || []).length,
       st.monthlyClaims || 0,
@@ -3026,7 +3070,7 @@
   function renderExtSkills() {
     const row = $('extSkillRow');
     if (!row || renderExtSkills._built) return;
-    const want = ['charge', 'hex_slow', 'flurry', 'void_slash', 'time_stop', 'sword_rain', 'heaven_wrath'];
+    const want = ['charge', 'hex_slow', 'flurry', 'void_slash', 'time_stop', 'sword_rain', 'heaven_wrath', 'origin_slash'];
     const defs = ((S.meta && S.meta.skills) || []).filter(d => want.includes(d.id));
     if (!defs.length) return;
     renderExtSkills._built = true;
@@ -3243,7 +3287,7 @@
     // 材料出售（第七批）：价目与库存筹码，全卖一键
     const MAT_SELL = [['pelt', '🟫 兽皮', 20], ['wolf_fang', '🦷 狼牙', 35], ['ore', '⛏️ 矿石', 60],
       ['toad_gland', '🟢 毒腺', 90], ['mana_dust', '✨ 魔尘', 140], ['fire_crystal', '🔥 火晶', 220],
-      ['abyss_crystal', '🕳️ 深渊结晶', 400], ['star_shard', '🌟 星核碎片', 650], ['void_shard', '🌀 虚空碎片', 2000], ['chaos_core', '🌪️ 混沌核心', 6000], ['hongmeng_qi', '🌌 鸿蒙紫气', 20000], ['guixu_pearl', '🌊 归墟珠', 60000]];
+      ['abyss_crystal', '🕳️ 深渊结晶', 400], ['star_shard', '🌟 星核碎片', 650], ['void_shard', '🌀 虚空碎片', 2000], ['chaos_core', '🌪️ 混沌核心', 6000], ['hongmeng_qi', '🌌 鸿蒙紫气', 20000], ['guixu_pearl', '🌊 归墟珠', 60000], ['taichu_crystal', '🌠 太初源晶', 200000]];
     const myMats = (S.view && S.view.materials) || {};
     const sellChips = MAT_SELL.map(([c, n, price]) => {
       const have = myMats[c] || 0;

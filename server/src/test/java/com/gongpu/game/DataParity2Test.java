@@ -60,21 +60,21 @@ class DataParity2Test {
             assertTrue(sql.contains("'" + id + "'"), "主动技能 " + id + " 应在 SQL 技能表里");
         }
         // 主动技能总数 = 13（+ 第八批连环掌）；被动 16（+ 第八批破甲专精）
-        assertEquals(17, GameConst.ACTIVE_SKILLS.size());
-        assertEquals(25, GameConst.PASSIVE_SKILLS.size());
+        assertEquals(18, GameConst.ACTIVE_SKILLS.size());
+        assertEquals(27, GameConst.PASSIVE_SKILLS.size());
     }
 
     @Test
     void questCountIs20() throws Exception {
         String sql = allSql();
-        assertEquals(38, countRows(insertBlocks(sql, "cfg_quest")), "委托总数 38");
+        assertEquals(42, countRows(insertBlocks(sql, "cfg_quest")), "委托总数 38");
     }
 
     @Test
     void craftRefsValid() throws Exception {
         String sql = allSql();
         String crafts = insertBlocks(sql, "cfg_craft");
-        assertEquals(38, countRows(crafts), "配方总数 38");
+        assertEquals(42, countRows(crafts), "配方总数 38");
         // 产物全集：装备 code + 药剂/物品 code（item: 前缀）
         Set<String> equipCodes = new HashSet<>();
         Matcher em = Pattern.compile("\\('([a-z0-9_]+)',\\s*'[^']*',\\s*'[^']*',\\s*'(weapon|bow|offhand|head|chest|legs|boots|ring1|ring2|necklace)',").matcher(sql);

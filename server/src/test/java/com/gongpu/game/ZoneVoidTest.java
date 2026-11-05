@@ -19,7 +19,7 @@ class ZoneVoidTest {
         assertEquals(4, z.mobs().size());
         assertEquals("boss_void", z.boss().id());
         assertEquals("3000000000", z.boss().maxHP());
-        assertEquals(12, GameConst.ZONES.size());
+        assertEquals(13, GameConst.ZONES.size());
     }
 
     @Test

@@ -49,14 +49,15 @@ class SetParityTest {
         return out;
     }
 
-    private static final Map<String, String> SET_ZONE = Map.of(
-            "farwalker", "plain",
-            "vinetalk", "forest",
-            "ironwall", "mine",
-            "marshwalk", "swamp",
-            "snowwolf", "snow",
-            "molten", "volcano",
-            "starset", "star", "voidset", "void", "chaossuit", "chaos", "hongmengsuit", "hongmeng");
+    private static final Map<String, String> SET_ZONE = Map.ofEntries(
+            Map.entry("farwalker", "plain"),
+            Map.entry("vinetalk", "forest"),
+            Map.entry("ironwall", "mine"),
+            Map.entry("marshwalk", "swamp"),
+            Map.entry("snowwolf", "snow"),
+            Map.entry("molten", "volcano"),
+            Map.entry("starset", "star"), Map.entry("voidset", "void"), Map.entry("chaossuit", "chaos"),
+            Map.entry("hongmengsuit", "hongmeng"), Map.entry("guixusuit", "guixu"));
 
     @Test
     void everySetMemberExistsInSqlWithMatchingZone() throws Exception {

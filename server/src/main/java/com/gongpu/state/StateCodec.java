@@ -146,6 +146,12 @@ public final class StateCodec {
             s.petEvolved = new java.util.LinkedHashSet<>();
         }
         s.petEvolved.removeIf(id -> !GameConst.PETS.containsKey(id) || !s.petsOwned.contains(id));
+        // 区域精通击杀表（第十二批）：null 兜底、剔除未知区域键、负数钳 0
+        if (s.stats.zoneKills == null) {
+            s.stats.zoneKills = new java.util.LinkedHashMap<>();
+        }
+        s.stats.zoneKills.keySet().removeIf(z -> !GameConst.ZONES.containsKey(z));
+        s.stats.zoneKills.replaceAll((z, n) -> n == null || n < 0 ? 0 : n);
         if (s.monthlyTasks == null) {
             s.monthlyTasks = new java.util.ArrayList<>();
         }

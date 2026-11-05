@@ -270,7 +270,22 @@ public final class GameEngine {
                 && !PanelCalculator.isSilenced(s)) {
             perHit = Num.mul(perHit, Num.of(GameConst.CHAOS_AFFINITY_MUL));
         }
+        // 区域精通（第十二批）：本区域终身击杀的地利加成（与实打同口径，地利不受沉默压制）
+        double masteryMulE = zoneMasteryMul(s);
+        if (masteryMulE > 1) {
+            perHit = Num.mul(perHit, Num.of(masteryMulE));
+        }
         return perHit;
+    }
+
+    /** 区域精通倍率（第十二批）：当前区域每满 500 杀 +2% 伤害，5000 杀封顶 +20%。 */
+    static double zoneMasteryMul(PlayerState s) {
+        if (s.stats == null || s.stats.zoneKills == null || s.zone == null) {
+            return 1;
+        }
+        int kills = s.stats.zoneKills.getOrDefault(s.zone, 0);
+        int tiers = kills / GameConst.MASTERY_KILLS_PER_TIER;
+        return 1 + Math.min(GameConst.MASTERY_BONUS_CAP, tiers * GameConst.MASTERY_BONUS_PER_TIER);
     }
 
     /**
@@ -327,6 +342,13 @@ public final class GameEngine {
         if (m == null) {
             return 0;
         }
+        // 词条·金钟（第十二批）：金钟罩抵挡第一帧全部攻击（只挡一次；
+        // 挡在一次性增益消费之前——冲锋/虚空斩/万剑/天罚不会被金钟白白吃掉）
+        if ("golden_bell".equals(m.trait) && !m.bellUsed && punches != null && punches.signum() > 0) {
+            m.bellUsed = true;
+            pushEvent(s, "🔔 金钟罩震响——你这一轮的攻击被尽数挡下！");
+            return 0;
+        }
         // 词条预警（第八批）：带词条的怪首次交手时播报其词条与克制提示（每只怪仅一次）
         if (m.trait != null && !m.traitWarned) {
             m.traitWarned = true;
@@ -380,6 +402,11 @@ public final class GameEngine {
                 && !PanelCalculator.isSilenced(s)) {
             perHit = Num.mul(perHit, Num.of(GameConst.CHAOS_AFFINITY_MUL));
         }
+        // 区域精通（第十二批）：与 expectedPerHit 同口径
+        double masteryMulD = zoneMasteryMul(s);
+        if (masteryMulD > 1) {
+            perHit = Num.mul(perHit, Num.of(masteryMulD));
+        }
         if (PanelCalculator.active(s, "heavy")) {
             perHit = Num.mul(perHit, Num.of(5));
             s.buffs.remove("heavy");
@@ -398,6 +425,11 @@ public final class GameEngine {
         if (PanelCalculator.active(s, "sword_rain")) {
             perHit = Num.mul(perHit, Num.of(GameConst.SWORD_RAIN_MUL));
             s.buffs.remove("sword_rain");
+        }
+        // 主动·天罚（第十二批）：下一击 ×6，一次性消费 buff（与万剑归宗可叠乘）
+        if (PanelCalculator.active(s, "heaven_wrath")) {
+            perHit = Num.mul(perHit, Num.of(GameConst.HEAVEN_WRATH_MUL));
+            s.buffs.remove("heaven_wrath");
         }
 
         BigDecimal totalDmg = Num.mul(perHit, punches);
@@ -669,6 +701,15 @@ public final class GameEngine {
         if ("taixu".equals(m.trait)) {
             s.stats.taixuKills++;
         }
+        if ("golden_bell".equals(m.trait)) {
+            s.stats.bellKills++;
+        }
+        if ("corrode".equals(m.trait)) {
+            s.stats.corrodeKills++;
+        }
+        if ("thunder".equals(m.trait)) {
+            s.stats.thunderKills++;
+        }
         // 宠物经验（第九批）：出战宠物随击杀成长，升级时播报
         if (s.pet != null) {
             int[] petR = GameService.gainPetExp(s, GameConst.PET_EXP_PER_KILL);
@@ -692,6 +733,13 @@ public final class GameEngine {
         }
         // 新手保底(legacy 迁移):非村口击杀计数,每世重新保底
         grantNewbieDrops(s);
+        // 区域精通（第十二批）：按当前区域累加终身击杀（Boss 同样计入）
+        if (s.zone != null) {
+            if (s.stats.zoneKills == null) {
+                s.stats.zoneKills = new java.util.LinkedHashMap<>();
+            }
+            s.stats.zoneKills.merge(s.zone, 1, Integer::sum);
+        }
         // 图鉴：记录已击杀的怪物（Boss 记 boss_区域 id）
         if (m.boss) {
             s.codex.add("boss_" + s.zone);
@@ -963,9 +1011,12 @@ public final class GameEngine {
             hits *= GameConst.TIME_STOP_ASPD_MUL;
         }
         // 词条·破甲：结算时玩家的双防按比例打折
+        // 词条·腐蚀（第十二批）：按当前层数锈蚀双防（与破甲同为 defMul 单点，两词条不同怪不共存）
         BigDecimal defMul = "sunder".equals(m.trait)
                 ? Num.of(1 - GameConst.TRAIT_SUNDER_IGNORE)
-                : Num.of(1);
+                : "corrode".equals(m.trait)
+                        ? Num.of(1 - GameConst.TRAIT_CORRODE_PER_STACK * Math.min(GameConst.TRAIT_CORRODE_MAX_STACKS, m.corrodeStacks))
+                        : Num.of(1);
         BigDecimal phys = Num.max(Num.of(0),
                 Num.sub(m.PATK, Num.mul(Num.mul(p.PDEF(), defMul), Num.of(GameConst.DMG_DEF_FACTOR))));
         BigDecimal mag = Num.gt(m.MATK, Num.ZERO)
@@ -1020,6 +1071,16 @@ public final class GameEngine {
         if ("leech".equals(m.trait) && m.maxHP != null && total.signum() > 0) {
             BigDecimal heal = Num.mul(total, Num.of(GameConst.TRAIT_LEECH_MUL));
             m.curHP = Num.min(m.maxHP, Num.add(m.curHP, heal));
+        }
+        // 词条·腐蚀（第十二批）：攻击落地后叠一层锈蚀（本场有效，封顶 10 层）
+        if ("corrode".equals(m.trait) && total.signum() > 0
+                && m.corrodeStacks < GameConst.TRAIT_CORRODE_MAX_STACKS) {
+            m.corrodeStacks++;
+        }
+        // 词条·雷霆（第十二批）：每次攻击额外引一记天雷（怪 PATK×30% 真伤，护盾先吸，与吞噬同段结算）
+        if ("thunder".equals(m.trait) && !s.dead) {
+            BigDecimal thunderDmg = Num.mul(m.PATK, Num.of(GameConst.TRAIT_THUNDER_MUL));
+            s.life.curHP = Num.sub(s.life.curHP, absorbShield(s, thunderDmg));
         }
         // 词条·吞噬（第十一批）：每次攻击额外吞噬玩家 2% 生命上限的真实伤害（护盾先吸，与主伤害同帧结算）
         if ("devour".equals(m.trait) && !s.dead) {

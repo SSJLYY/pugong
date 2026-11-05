@@ -76,6 +76,8 @@ public final class DailyQuests {
             case "fuse" -> BigDecimal.valueOf(s.stats.gemsFused);
             case "star" -> BigDecimal.valueOf(s.stats.starsDone);
             case "treat" -> BigDecimal.valueOf(s.stats.petTreats);
+            case "awaken" -> BigDecimal.valueOf(s.stats.awakens);
+            case "evolve" -> BigDecimal.valueOf(s.stats.petEvolves);
             default -> BigDecimal.ZERO;
         };
     }

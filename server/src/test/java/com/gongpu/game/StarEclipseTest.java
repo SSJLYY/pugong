@@ -42,7 +42,7 @@ class StarEclipseTest {
         assertTrue(GameConst.traitPool(8).contains("star_eclipse"), "星界池应含星蚀");
         assertFalse(GameConst.traitPool(7).contains("star_eclipse"), "深渊池不应含星蚀");
         assertFalse(GameConst.traitPool(5).contains("star_eclipse"), "中层池不应含星蚀");
-        assertEquals(26, GameConst.MOB_TRAITS.size(), "怪物词条总数 25");
+        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条总数 25");
         assertEquals(21, GameConst.traitPool(8).size(), "星界池应为全 21 条");
     }
 }

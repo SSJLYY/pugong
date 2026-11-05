@@ -23,7 +23,7 @@ class VoidSetTest {
 
     @Test
     void eightSetsAndVoidMembers() {
-        assertEquals(10, Sets.ALL.size());
+        assertEquals(11, Sets.ALL.size());
         Sets.SetDef d = Sets.ALL.stream().filter(x -> x.id().equals("voidset")).findFirst().orElseThrow();
         assertEquals(4, d.members().size());
         assertTrue(d.members().contains("void_blade"));

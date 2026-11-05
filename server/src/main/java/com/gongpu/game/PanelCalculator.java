@@ -108,6 +108,11 @@ public final class PanelCalculator {
         BigDecimal taixuCritd = (active(s, "taixu_pot") && !silenced) ? Num.of(0.30) : Num.ZERO;
         // 被动·太虚剑意（第十一批）：暴伤 +20%（同加区，被动受沉默压制）
         BigDecimal taixuSwordCritd = (s.passives.contains("taixu_sword") && !silenced) ? Num.of(0.20) : Num.ZERO;
+        // 被动·归墟体（第十二批）：暴击率 +5%（同加区，被动受沉默压制）
+        BigDecimal guixuCrit = (s.passives.contains("guixu_body") && !silenced) ? Num.of(0.05) : Num.ZERO;
+        // 归墟琼浆（第十二批）：暴伤 +80%、吸血 +8%（同加区）
+        BigDecimal guixuCritd = (active(s, "guixu_pot") && !silenced) ? Num.of(0.80) : Num.ZERO;
+        BigDecimal guixuSteal = (active(s, "guixu_pot") && !silenced) ? Num.of(0.08) : Num.ZERO;
         // 时之砂（第七批）：平直攻速加算（进乘区之前，与词条平直攻速同口径）
         BigDecimal sandAspd = (active(s, "sand_pot") && !silenced) ? Num.of(0.2) : Num.ZERO;
         BigDecimal lifestealPot = (active(s, "lifesteal_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
@@ -118,6 +123,8 @@ public final class PanelCalculator {
         // 生机药剂（第八批）：持续回复平直加算，与回春药剂同区叠加
         BigDecimal vigorPot = (active(s, "vigor_pot") && !silenced) ? Num.of(150) : Num.ZERO;
         BigDecimal evaPot = (active(s, "eva_pot") && !silenced) ? Num.of(0.10) : Num.ZERO;
+        // 被动·潮汐之体（第十二批）：闪避 +0.06（同加区，被动受沉默压制）
+        BigDecimal tideEva = (s.passives.contains("tide_body") && !silenced) ? Num.of(0.06) : Num.ZERO;
         BigDecimal mregenPot = (active(s, "mregen_pot") && !silenced) ? Num.of(10) : Num.ZERO;
         // 第四批新维度药剂：持续回复/射程/移速（同受沉默压制）
         BigDecimal regenPot = (active(s, "regen_pot") && !silenced) ? Num.of(25) : Num.ZERO;
@@ -170,10 +177,12 @@ public final class PanelCalculator {
                 }
             }
             // 镶嵌宝石（第八批）：flat 加成与词条同区（装备来源，不受沉默压制）；
-            // 天赋·宝石亲和再乘 1.25（天赋为先天禀赋，同不受沉默压制）
+            // 天赋·宝石亲和再乘 1.25、天赋·星辰之心再乘 1.5（第十二批，两天赋乘区叠乘；
+            // 天赋为先天禀赋，同不受沉默压制）
             if (it.gems != null) {
-                BigDecimal gemMul = "gem_affinity".equals(s.talent)
-                        ? Num.of(GameConst.GEM_AFFINITY_MUL) : Num.of(1);
+                BigDecimal gemMul = Num.mul(
+                        "gem_affinity".equals(s.talent) ? Num.of(GameConst.GEM_AFFINITY_MUL) : Num.of(1),
+                        "star_heart".equals(s.talent) ? Num.of(GameConst.STAR_HEART_GEM_MUL) : Num.of(1));
                 for (String g : it.gems) {
                     GameConst.GemDef gd = GameConst.GEMS.get(g);
                     if (gd != null) {
@@ -233,12 +242,12 @@ public final class PanelCalculator {
                 Num.add(Num.add(Num.add(s.fixed.RNG, flat.getOrDefault("RNG", Num.ZERO)), rngPot), rngPassive),
                 Num.mul(Num.add(Num.add(s.fixed.SPD, Num.add(flat.getOrDefault("SPD", Num.ZERO), fleetPot)),
                         Num.mul(s.fixed.SPD, pct.getOrDefault("SPD", Num.ZERO))), pmul.getOrDefault("SPD", Num.of(1))),
-                Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit), stardustCrit), taixuCrit)),
-                Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd), voidCritd), chaosCritd), phoenixCritd), hongmengCritd), taixuCritd), taixuSwordCritd),
+                Num.min(GameConst.BLESS_CAP.get("CRIT"), Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRIT, flat.getOrDefault("CRIT", Num.ZERO)), critPot), rageCrit), stardustCrit), taixuCrit), guixuCrit)),
+                Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.CRITD, flat.getOrDefault("CRITD", Num.ZERO)), critdPot), rageCritd), voidCritd), chaosCritd), phoenixCritd), hongmengCritd), taixuCritd), taixuSwordCritd), guixuCritd),
                 Num.min(GameConst.BLESS_CAP.get("ACC"),
                         Num.add(Num.add(Num.add(Num.add(Num.add(s.fixed.ACC, flat.getOrDefault("ACC", Num.ZERO)), padd.getOrDefault("ACC", Num.ZERO)), accPot), focusPot), voidAcc)),
-                Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot), chaosEva)),
-                Num.add(Num.add(Num.add(Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot), bloodlustBuff), phoenixSteal), hongmengSteal),
+                Num.min(GameConst.BLESS_CAP.get("EVA"), Num.add(Num.add(Num.add(Num.add(s.fixed.EVA, flat.getOrDefault("EVA", Num.ZERO)), evaPot), chaosEva), tideEva)),
+                Num.add(Num.add(Num.add(Num.add(Num.add(flat.getOrDefault("LIFESTEAL", Num.ZERO), lifestealPot), bloodlustBuff), phoenixSteal), hongmengSteal), guixuSteal),
                 // 枪械：纯魔法弹每发耗蓝标记（BULLET_MP，来自武器 base_stats；非枪/物理弹武器为 0）
                 flat.getOrDefault("BULLET_MP", Num.ZERO),
                 silenced,

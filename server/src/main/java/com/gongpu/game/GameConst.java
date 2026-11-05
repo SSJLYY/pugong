@@ -156,7 +156,10 @@ public final class GameConst {
             Map.entry("chaos_frenzy", new TraitDef("chaos_frenzy", "狂乱", "🌀", "无序狂乱：攻速 +40%、攻击 +20% 常驻，只在混沌界出现，时停与迟缓咒叠加压制克它")),
             Map.entry("immortal", new TraitDef("immortal", "不朽", "💀", "不朽之躯：首次受到致死伤害时不死，保留 30% 生命复苏（每只仅一次），留爆发二段收尾克它")),
             Map.entry("devour", new TraitDef("devour", "吞噬", "👹", "吞噬血肉：攻击时额外吞噬你 2% 生命上限的真实伤害（护盾可挡），血越厚它吃得越香，速杀克它")),
-            Map.entry("taixu", new TraitDef("taixu", "太虚", "🕳️", "身在太虚：它自带 25% 闪避（等效你的普攻伤害 -25%，与潜行同口径），只在鸿蒙界出现，堆面板硬碾克它")));
+            Map.entry("taixu", new TraitDef("taixu", "太虚", "🕳️", "身在太虚：它自带 25% 闪避（等效你的普攻伤害 -25%，与潜行同口径），只在鸿蒙界出现，堆面板硬碾克它")),
+            Map.entry("golden_bell", new TraitDef("golden_bell", "金钟", "🔔", "金钟罩：抵挡你对它的第一帧全部攻击（只挡一次），开局别把大招砸在钟上")),
+            Map.entry("corrode", new TraitDef("corrode", "腐蚀", "🧪", "腐蚀之触：它的攻击会叠层锈蚀你的双防（每层 -3%、上限 10 层，本场有效），速杀或堆血克它")),
+            Map.entry("thunder", new TraitDef("thunder", "雷霆", "⛈️", "雷霆万钧：它的每次攻击额外引一记天雷（其物攻 ×30% 的真实伤害，护盾可吸），只在归墟界出现，堆血与护盾克它")));
 
     /** 词条「再生」（第八批）：怪物每秒回复上限的比例。 */
     public static final double TRAIT_REGEN_PCT = 0.03;
@@ -194,8 +197,18 @@ public final class GameConst {
     public static final double TRAIT_DEVOUR_MUL = 0.02;
     /** 词条「太虚」（第十一批）：怪自带 25% 闪避——玩家普攻伤害乘区（与潜行同口径）。 */
     public static final double TRAIT_TAIXU_MUL = 0.75;
+    /** 词条「腐蚀」（第十二批）：每层锈蚀玩家双防的比例与层数上限。 */
+    public static final double TRAIT_CORRODE_PER_STACK = 0.03;
+    public static final int TRAIT_CORRODE_MAX_STACKS = 10;
+    /** 区域精通（第十二批）：每满此击杀数升一档地利伤害加成。 */
+    public static final int MASTERY_KILLS_PER_TIER = 500;
+    /** 区域精通（第十二批）：每档加成与总上限（+20% 于 5000 杀封顶）。 */
+    public static final double MASTERY_BONUS_PER_TIER = 0.02;
+    public static final double MASTERY_BONUS_CAP = 0.20;
     /** 主动「万剑归宗」（第十一批）：下一击伤害倍率。 */
     public static final double SWORD_RAIN_MUL = 5;
+    /** 主动技能「天罚」倍率（第十二批）：下一击伤害 ×6。 */
+    public static final double HEAVEN_WRATH_MUL = 6;
     /** 被动·混沌亲和（第十批）：对混沌界怪物的伤害乘区。 */
     public static final double CHAOS_AFFINITY_MUL = 1.25;
     /** 嗜血的吸血比例（对玩家实际掉血量）。 */
@@ -233,7 +246,7 @@ public final class GameConst {
 
     /** 区域由浅到深的顺序（与 buildZones 的插入顺序一致）。 */
     private static final List<String> ZONE_ORDER =
-            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star", "void", "chaos", "hongmeng");
+            List.of("village", "plain", "forest", "mine", "swamp", "snow", "volcano", "abyss", "star", "void", "chaos", "hongmeng", "guixu");
 
     /**
      * 出生掷词条：村口不出；平原 10% 起、每深一层 +3%。
@@ -262,12 +275,15 @@ public final class GameConst {
                                 ? List.of("frenzy", "sunder", "disarm", "rich", "swift", "venom", "crystal")
                                 : zoneIdx == 4
                                         ? List.of("frenzy", "sunder", "disarm", "leech", "rich", "swift", "venom", "crystal", "stealth", "slow", "curse", "regen")
-                                        : zoneIdx >= 11
+                                        : zoneIdx >= 12
+                                                // 归墟界专属池（第十二批）：先与鸿蒙池同源，第三/九集群再加嗜血/金钟/雷霆
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury", "mirror", "weaken", "chaos_frenzy", "immortal", "devour", "taixu", "golden_bell", "corrode", "thunder")
+                                                : zoneIdx >= 11
                                                 // 鸿蒙界专属池（第十一批）：混沌池 + 不朽/吞噬 + 太虚（专属）
-                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury", "mirror", "weaken", "chaos_frenzy", "immortal", "devour", "taixu")
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury", "mirror", "weaken", "chaos_frenzy", "immortal", "devour", "taixu", "golden_bell", "corrode")
                                                 : zoneIdx >= 10
                                                 // 混沌界专属池：虚空池 + 镜像 + 虚弱 + 狂乱（第十批）
-                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury", "mirror", "weaken", "chaos_frenzy", "immortal", "devour")
+                                                ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury", "mirror", "weaken", "chaos_frenzy", "immortal", "devour", "golden_bell", "corrode")
                                                 : zoneIdx == 9
                                                 // 虚空界专属池：全词条 + 噬能 + 裂空（无星蚀，星蚀只属星界）
                                                 ? List.of("frenzy", "sunder", "disarm", "leech", "thorns", "rich", "swift", "bulwark", "venom", "crystal", "stealth", "slow", "curse", "frost", "regen", "tenacity", "mana_drain", "void_rend", "blood_fury", "mirror", "weaken")
@@ -427,6 +443,22 @@ public final class GameConst {
                 mob("boss_hongmeng", "鸿蒙道祖·太初", "🌌", "500000000000", "75000", "88000", "15000", "15000", 1.2, 5, 100, 100000000,
                         "它在一切开始之前就坐在那里，看你把拳头举起来", List.of())));
 
+        // 归墟界（第十二批）：鸿蒙之外的万水之渊——一切终将沉入归墟
+        m.put("guixu", new ZoneDef("guixu", "归墟界", "🌊", false,
+                "建议生命 ≥ 5000亿 / 双防 ≥ 20000 / 攻击 ≥ 1000000（归墟之主）",
+                Map.of("maxHP", "500000000000", "PDEF", "20000", "MDEF", "20000", "ATK", "1000000"),
+                List.of(
+                        mob("guixu_wraith", "归墟游魂", "🌊", "1500000000000", "20000", "60000", "8000", "20000", 1.1, 6, 100, 450000,
+                                "沉入归墟的亡魂凝成的水影，掉落归墟珠", List.of()),
+                        mob("guixu_whale", "沉渊巨鲸", "🐋", "3000000000000", "110000", "0", "18000", "9000", 1.5, 2, 148, 600000,
+                                "在归墟里游了亿万年的鲸，背上驮着沉没的大陆", List.of()),
+                        mob("guixu_warden", "归墟守卫", "🛡️", "5000000000000", "85000", "65000", "25000", "25000", 0.8, 3, 88, 840000,
+                                "双防如海沟之壁，无量门前的执锚者", List.of()),
+                        mob("guixu_turtle", "灭世玄龟", "🐢", "9000000000000", "65000", "130000", "15000", "30000", 1.0, 7, 92, 1200000,
+                                "龟甲上刻着上一个纪元的墓志铭", List.of())),
+                mob("boss_guixu", "归墟之主·无量", "🌊", "50000000000000", "190000", "220000", "38000", "38000", 1.2, 5, 100, 300000000,
+                        "它不在海底，它就是海底——万水归墟，无量无边", List.of())));
+
         return java.util.Collections.unmodifiableMap(m);
     }
 
@@ -455,7 +487,8 @@ public final class GameConst {
             Map.entry("flurry", new SkillDef("flurry", "连环掌", "🤲", 25, 30, 0, "接下来 30 次命中各追加一次同额命中（双击）")),
             Map.entry("void_slash", new SkillDef("void_slash", "虚空斩", "🌀", 40, 45, 0, "下一击 ×4 伤害（撕裂空间的一斩）")),
             Map.entry("time_stop", new SkillDef("time_stop", "时停", "⌛", 60, 90, 10, "10s 内怪物攻速减半（时间在你这边冻结）")),
-            Map.entry("sword_rain", new SkillDef("sword_rain", "万剑归宗", "🗡️", 80, 120, 0, "下一击 ×5 伤害（万剑齐发，归于一击）")));
+            Map.entry("sword_rain", new SkillDef("sword_rain", "万剑归宗", "🗡️", 80, 120, 0, "下一击 ×5 伤害（万剑齐发，归于一击）")),
+            Map.entry("heaven_wrath", new SkillDef("heaven_wrath", "天罚", "⚡", 100, 150, 0, "下一击 ×6 伤害（天雷代罚，一击定罪）")));
 
     /** 主动「虚空斩」（第九批）：下一击伤害倍率（冲锋 ×3 的上位）。 */
     public static final double VOID_SLASH_MUL = 4;
@@ -492,7 +525,9 @@ public final class GameConst {
             Map.entry("chrono_body", new PassiveDef("chrono_body", "时之体", "⌛", "攻速 +0.08（时间在你皮肤上流速不同，被沉默压制）")),
             Map.entry("chaos_affinity", new PassiveDef("chaos_affinity", "混沌亲和", "🌪️", "对混沌界怪物伤害 +25%（与无序共鸣，被沉默压制）")),
             Map.entry("hongmeng_body", new PassiveDef("hongmeng_body", "鸿蒙体", "🌌", "攻速 +0.10（紫气淬体，出手如太初之风，被沉默压制）")),
-            Map.entry("taixu_sword", new PassiveDef("taixu_sword", "太虚剑意", "🗡️", "暴击伤害 +20%（剑意自太虚来，被沉默压制）")));
+            Map.entry("taixu_sword", new PassiveDef("taixu_sword", "太虚剑意", "🗡️", "暴击伤害 +20%（剑意自太虚来，被沉默压制）")),
+            Map.entry("guixu_body", new PassiveDef("guixu_body", "归墟体", "🌊", "暴击率 +5%（沉渊淬体，出手带万钧水势，被沉默压制）")),
+            Map.entry("tide_body", new PassiveDef("tide_body", "潮汐之体", "🌊", "闪避率 +6%（身随潮汐，敌攻总差一线，被沉默压制）")));
 
     /** 被动「宠物亲和」（第九批）：宠物面板加成乘区。 */
     public static final double PET_BOND_MUL = 1.3;
@@ -594,7 +629,8 @@ public final class GameConst {
             java.util.Map.entry("chaos", new PotionDef("chaos", "混沌精华", "🌪️", "60s 内暴击伤害 +40%、闪避 +5%", 0, 0, "chaos_pot", 0.40, 60, 1500)),
             java.util.Map.entry("phoenix", new PotionDef("phoenix", "凤凰之血", "🦅", "60s 内暴击伤害 +50%、吸血 +5%", 0, 0, "phoenix_pot", 0.50, 60, 2000)),
             java.util.Map.entry("hongmeng", new PotionDef("hongmeng", "鸿蒙灵液", "🌌", "60s 内暴击伤害 +60%、吸血 +6%", 0, 0, "hongmeng_pot", 0.60, 60, 5000)),
-            java.util.Map.entry("taixu", new PotionDef("taixu", "太虚神液", "🕳️", "60s 内暴击率 +10%、暴击伤害 +30%", 0, 0, "taixu_pot", 0.30, 60, 8000)));
+            java.util.Map.entry("taixu", new PotionDef("taixu", "太虚神液", "🕳️", "60s 内暴击率 +10%、暴击伤害 +30%", 0, 0, "taixu_pot", 0.30, 60, 8000)),
+            java.util.Map.entry("guixu", new PotionDef("guixu", "归墟琼浆", "🌊", "60s 内暴击伤害 +80%、吸血 +8%", 0, 0, "guixu_pot", 0.80, 60, 15000)));
 
     /** 破甲药剂（第八批）：无视防御比例（与破甲专精被动在 effDef 内乘算叠加）。 */
     public static final double PIERCE_POT_RATIO = 0.20;
@@ -655,7 +691,10 @@ public final class GameConst {
             new Affix("永恒", "maxHP", "flat", 8000, 20000, "epic", null, null),
             // ---- 第十一批：鸿蒙维度上位（魔攻/生命的太初版） ----
             new Affix("鸿蒙", "MATK", "flat", 60, 120, "epic", null, null),
-            new Affix("太初", "maxHP", "flat", 20000, 50000, "epic", null, null));
+            new Affix("太初", "maxHP", "flat", 20000, 50000, "epic", null, null),
+            // ---- 第十二批：归墟维度上位（物攻/生命的无量版） ----
+            new Affix("归墟", "PATK", "flat", 90, 180, "epic", null, null),
+            new Affix("瀚海", "maxHP", "flat", 50000, 120000, "epic", null, null));
 
     /** 掉落概率（按区域）。 */
     public static final Map<String, Double> DROP_RATE = Map.of(
@@ -698,16 +737,19 @@ public final class GameConst {
     public static final double GEM_TRAIT_DROP_RATE = 0.10;
     /** 被动·宝石嗅觉（第八批）：词条怪宝石掉率倍率。 */
     public static final double GEM_SNIFFER_MUL = 1.5;
-    /** 宝石出售单价（第八批，金币/颗）：率型宝石（暴击/攻速）最贵；二阶为一阶 ×3。 */
+    /** 宝石出售单价（第八批，金币/颗）：率型宝石（暴击/攻速）最贵；二阶为一阶 ×3、三阶为一阶 ×9（第十二批）。 */
     public static final Map<String, Integer> GEM_SELL_PRICE = Map.ofEntries(
             Map.entry("gem_ruby", 500), Map.entry("gem_sapphire", 500), Map.entry("gem_emerald", 600),
             Map.entry("gem_opal", 700), Map.entry("gem_topaz", 800), Map.entry("gem_amethyst", 800),
             Map.entry("gem_ruby_2", 1500), Map.entry("gem_sapphire_2", 1500), Map.entry("gem_emerald_2", 1800),
-            Map.entry("gem_opal_2", 2100), Map.entry("gem_topaz_2", 2400), Map.entry("gem_amethyst_2", 2400));
+            Map.entry("gem_opal_2", 2100), Map.entry("gem_topaz_2", 2400), Map.entry("gem_amethyst_2", 2400),
+            Map.entry("gem_ruby_3", 4500), Map.entry("gem_sapphire_3", 4500), Map.entry("gem_emerald_3", 5400),
+            Map.entry("gem_opal_3", 6300), Map.entry("gem_topaz_3", 7200), Map.entry("gem_amethyst_3", 7200));
 
     /**
-     * 宝石全表（一阶 6 种 + 璀璨二阶 6 种）：一阶由 Boss/词条怪掉落；
-     * 二阶由 3 颗同种一阶融合（属性 ×2.5），code 为一阶 code + "_2"，不进掉落池。
+     * 宝石全表（一阶 6 种 + 璀璨二阶 6 种 + 曜三阶 6 种）：一阶由 Boss/词条怪掉落；
+     * 二阶由 3 颗同种一阶融合（属性 ×2.5），三阶由 3 颗同种二阶融合（二阶再 ×2.2，合计 ×5.5），
+     * code 为一阶 code + "_2"/"_3"，二三阶均不进掉落池。
      */
     public static final Map<String, GemDef> GEMS = buildGems();
 
@@ -732,13 +774,30 @@ public final class GameConst {
             });
             m.put(t1.id() + "_2", new GemDef(t1.id() + "_2", "璀璨" + t1.name(), "💎", Map.copyOf(stats),
                     "融合宝石：" + sb));
+            // 三阶（第十二批）：二阶再 ×2.2（对一阶合计 ×5.5），只能融合得到
+            Map<String, BigDecimal> stats3 = new java.util.LinkedHashMap<>();
+            t1.stats().forEach((k, v) -> stats3.put(k, v.multiply(new BigDecimal("5.5"))));
+            StringBuilder sb3 = new StringBuilder();
+            stats3.forEach((k, v) -> {
+                if (sb3.length() > 0) {
+                    sb3.append("、");
+                }
+                sb3.append(k).append(" +").append(v.stripTrailingZeros().toPlainString());
+            });
+            m.put(t1.id() + "_3", new GemDef(t1.id() + "_3", "曜·" + t1.name(), "💠", Map.copyOf(stats3),
+                    "三阶融合宝石：" + sb3));
         }
         return java.util.Collections.unmodifiableMap(m);
     }
 
-    /** 一阶宝石 id 列表（掉落池口径，二阶不进池）。 */
+    /** 一阶宝石 id 列表（掉落池口径，二三阶不进池）。 */
     public static java.util.List<String> gemTier1Ids() {
-        return GEMS.keySet().stream().filter(id -> !id.endsWith("_2")).toList();
+        return GEMS.keySet().stream().filter(id -> !id.endsWith("_2") && !id.endsWith("_3")).toList();
+    }
+
+    /** 二阶宝石 id 列表（第十二批：三阶融合的原料口径）。 */
+    public static java.util.List<String> gemTier2Ids() {
+        return GEMS.keySet().stream().filter(id -> id.endsWith("_2")).toList();
     }
     // ==================== 宠物伙伴（第九批） ====================
 
@@ -847,10 +906,15 @@ public final class GameConst {
             Map.entry("gem_affinity", new TalentDef("gem_affinity", "宝石亲和", "🔷", "镶嵌宝石的效果 +25%，宝石在你手里更亮")),
             Map.entry("pet_whisper", new TalentDef("pet_whisper", "兽语者", "🐾", "宠物经验 +100%：击杀与喂食所得经验翻倍")),
             Map.entry("chaos_heart", new TalentDef("chaos_heart", "混沌之心", "🌪️", "宠物羁绊倍率 ×1.5：无序之心与万兽共鸣")),
-            Map.entry("hongmeng_heart", new TalentDef("hongmeng_heart", "鸿蒙之心", "🌌", "宠物羁绊倍率 ×1.5：紫气之心与万兽共鸣，与混沌之心叠乘")));
+            Map.entry("hongmeng_heart", new TalentDef("hongmeng_heart", "鸿蒙之心", "🌌", "宠物羁绊倍率 ×1.5：紫气之心与万兽共鸣，与混沌之心叠乘")),
+            Map.entry("star_heart", new TalentDef("star_heart", "星辰之心", "⭐", "镶嵌宝石效果 ×1.5：星辰为眸，宝石在你手中如星辰运转，与宝石亲和叠乘")));
 
     /** 天赋「宝石亲和」（第八批）：宝石 flat 加成乘区（天赋不受沉默压制）。 */
     public static final double GEM_AFFINITY_MUL = 1.25;
+    /** 天赋「星辰之心」（第十二批）：镶嵌宝石效果乘数（与宝石亲和叠乘）。 */
+    public static final double STAR_HEART_GEM_MUL = 1.5;
+    /** 词条「雷霆」（第十二批）：怪攻击额外一记雷击 = 其物攻 × 此比例。 */
+    public static final double TRAIT_THUNDER_MUL = 0.3;
 
     /** 天赋「兽语者」（第九批）：宠物经验乘区（gainPetExp 单点，击杀/喂食同享）。 */
     public static final double PET_WHISPER_MUL = 2.0;
@@ -887,7 +951,8 @@ public final class GameConst {
             Map.entry("plain", "pelt"), Map.entry("forest", "wolf_fang"), Map.entry("mine", "ore"),
             Map.entry("swamp", "toad_gland"), Map.entry("snow", "mana_dust"), Map.entry("volcano", "fire_crystal"),
             Map.entry("abyss", "abyss_crystal"), Map.entry("star", "star_shard"), Map.entry("void", "void_shard"),
-            Map.entry("chaos", "chaos_core"), Map.entry("hongmeng", "hongmeng_qi"));
+            Map.entry("chaos", "chaos_core"), Map.entry("hongmeng", "hongmeng_qi"),
+            Map.entry("guixu", "guixu_pearl"));
 
     /** 附魔卷轴（DESIGN.md §6.2/§8）：给武器/弓附加魔伤词条，火/冰/雷三系。 */
     public static final Map<String, Object[]> SCROLLS = Map.of(
@@ -913,6 +978,7 @@ public final class GameConst {
             Map.entry("void_shard", new String[]{"虚空碎片", "🌀"}),
             Map.entry("chaos_core", new String[]{"混沌核心", "🌪️"}),
             Map.entry("hongmeng_qi", new String[]{"鸿蒙紫气", "🌌"}),
+            Map.entry("guixu_pearl", new String[]{"归墟珠", "🌊"}),
             Map.entry("gem_ruby", new String[]{"红宝石", "🔺"}),
             Map.entry("gem_sapphire", new String[]{"蓝宝石", "🔷"}),
             Map.entry("gem_emerald", new String[]{"翡翠", "💚"}),
@@ -924,14 +990,20 @@ public final class GameConst {
             Map.entry("gem_emerald_2", new String[]{"璀璨翡翠", "💎"}),
             Map.entry("gem_topaz_2", new String[]{"璀璨黄玉", "💎"}),
             Map.entry("gem_amethyst_2", new String[]{"璀璨紫水晶", "💎"}),
-            Map.entry("gem_opal_2", new String[]{"璀璨蛋白石", "💎"}));
+            Map.entry("gem_opal_2", new String[]{"璀璨蛋白石", "💎"}),
+            Map.entry("gem_ruby_3", new String[]{"曜·红宝石", "💠"}),
+            Map.entry("gem_sapphire_3", new String[]{"曜·蓝宝石", "💠"}),
+            Map.entry("gem_emerald_3", new String[]{"曜·翡翠", "💠"}),
+            Map.entry("gem_topaz_3", new String[]{"曜·黄玉", "💠"}),
+            Map.entry("gem_amethyst_3", new String[]{"曜·紫水晶", "💠"}),
+            Map.entry("gem_opal_3", new String[]{"曜·蛋白石", "💠"}));
 
     /** 材料出售单价（第七批，金币/份）：越深的区域材料越值钱；仅区域材料可售（图纸/卷轴不可）。 */
     public static final Map<String, Integer> MAT_SELL_PRICE = Map.ofEntries(
             Map.entry("pelt", 20), Map.entry("wolf_fang", 35), Map.entry("ore", 60), Map.entry("toad_gland", 90),
             Map.entry("mana_dust", 140), Map.entry("fire_crystal", 220), Map.entry("abyss_crystal", 400),
             Map.entry("star_shard", 650), Map.entry("void_shard", 2000), Map.entry("chaos_core", 6000),
-            Map.entry("hongmeng_qi", 20000));
+            Map.entry("hongmeng_qi", 20000), Map.entry("guixu_pearl", 60000));
 
     /** 增益类 buff（永久存续天赋作用对象）。 */
     public static final Set<String> ETERNAL_BUFFS = Set.of(

@@ -67,7 +67,11 @@ public final class Sets {
             // 鸿蒙战装（第十一批，鸿蒙界 4 件套：第十套）
             new SetDef("hongmengsuit", "鸿蒙战装", "🌌",
                     List.of("hongmeng_blade", "hongmeng_hood", "hongmeng_robe", "hongmeng_treads"),
-                    b("PATK", "1600", "MATK", "1600"), b("PATK", "4000", "MATK", "4000", "CRITD", "0.40")));
+                    b("PATK", "1600", "MATK", "1600"), b("PATK", "4000", "MATK", "4000", "CRITD", "0.40")),
+            // 归墟战装（第十二批，归墟界 4 件套：第十一套）
+            new SetDef("guixusuit", "归墟战装", "🌊",
+                    List.of("guixu_sword", "guixu_cap", "guixu_armor", "guixu_boots"),
+                    b("PATK", "3200", "MATK", "3200"), b("PATK", "8000", "MATK", "8000", "CRITD", "0.45")));
 
     private static final Map<String, SetDef> BY_MEMBER = buildByMember();
     private static final Map<String, SetDef> BY_ID = buildById();

@@ -46,7 +46,11 @@ public final class MonthlyQuests {
             new Template("star", "月星令", "⭐", "装备升星", "次",
                     new long[]{20, 40, 80}, new long[]{120000, 240000, 380000}),
             new Template("treat", "月零令", "🍬", "喂宠物零食", "次",
-                    new long[]{50, 100, 200}, new long[]{120000, 240000, 380000}));
+                    new long[]{50, 100, 200}, new long[]{120000, 240000, 380000}),
+            new Template("awaken", "月觉令", "🌟", "装备觉醒", "次",
+                    new long[]{5, 12, 25}, new long[]{150000, 300000, 500000}),
+            new Template("evolve", "月化令", "🦋", "宠物进化", "次",
+                    new long[]{2, 4, 6}, new long[]{150000, 300000, 500000}));
 
     /** 每月全清奖励：金币部分（另加随机宝石 ×3，见 GameService.claimMonthly）。 */
     public static final long ALL_CLEAR_BONUS = 300_000;

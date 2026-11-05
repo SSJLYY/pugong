@@ -1171,6 +1171,28 @@ body.theme-aurora .trait-row span{color:#dcfff2}
 body.theme-aurora .event-log{color:#7dffce}
 body.theme-aurora .float-dmg{text-shadow:0 0 8px rgba(61,255,200,.6),0 1px 3px rgba(0,0,0,.85)}
 
+/* 深海主题（第十二批）：深蓝海渊打底 + 海青 accent，面板带水光辉光 */
+body.theme-tide{
+  --bg0:#04121f; --bg1:#07273d; --bg2:#0b3a54;
+  --panel:rgba(53,196,181,.05); --panel-2:rgba(43,143,163,.09);
+  --border:rgba(53,196,181,.38); --border-strong:rgba(53,196,181,.6);
+  --gold:#35c4b5; --gold-bright:#8ef5e6; --gold-dim:#2b8fa3;
+  --txt:#e8fbff; --txt-dim:#a9d4de; --txt-faint:#5f8291;
+  --shadow:0 4px 22px rgba(53,196,181,.16);
+}
+body.theme-tide .game-title{text-shadow:0 0 14px rgba(53,196,181,.75),0 0 34px rgba(43,143,163,.5)}
+body.theme-tide .panel{box-shadow:0 0 14px rgba(53,196,181,.1),var(--shadow)}
+body.theme-tide input, body.theme-tide select, body.theme-tide textarea{
+  background:#082a3f; color:#e8fbff; border-color:rgba(53,196,181,.45);
+}
+body.theme-tide .panel-tip{color:#7fb6c9}
+body.theme-tide .daily-desc{color:#a9d4de}
+body.theme-tide .codex-item{color:#d8f7ff}
+body.theme-tide .pi-desc, body.theme-tide .gi-meta{color:#a9d4de}
+body.theme-tide .trait-row span{color:#d8f7ff}
+body.theme-tide .event-log{color:#6fe3d4}
+body.theme-tide .float-dmg{text-shadow:0 0 8px rgba(53,196,181,.6),0 1px 3px rgba(0,0,0,.85)}
+
 /* 日志搜索框（第十一批）：位于过滤筹码行上方，与筹码过滤叠加 */
 .log-search{display:block;width:100%;box-sizing:border-box;font-size:12px;padding:3px 8px;margin-top:6px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit}
 

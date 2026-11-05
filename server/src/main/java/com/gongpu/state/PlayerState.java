@@ -290,6 +290,10 @@ public class PlayerState {
         public boolean phase2;
         /** 词条「不朽」是否已触发（第十一批，每只怪仅一次）。 */
         public boolean immortalUsed;
+        /** 词条「金钟」是否已抵挡过第一帧（第十二批，每只怪仅一次）。 */
+        public boolean bellUsed;
+        /** 词条「腐蚀」当前层数（第十二批，命中叠层、本场战斗内有效）。 */
+        public int corrodeStacks;
     }
 
     public static class Stats {
@@ -359,6 +363,16 @@ public class PlayerState {
         public long frenzyKills = 0;
         /** 累计融合出二阶宝石数（第九批）。 */
         public long gemsFused = 0;
+        /** 累计融合出三阶宝石数（第十二批）。 */
+        public long gemTier3Fused = 0;
+        /** 腐蚀词条怪击杀数（第十二批）。 */
+        public long corrodeKills = 0;
+        /** 金钟词条怪击杀数（第十二批）。 */
+        public long bellKills = 0;
+        /** 雷霆词条怪击杀数（第十二批）。 */
+        public long thunderKills = 0;
+        /** 分区域终身击杀数（第十二批·区域精通）：key 为区域 id。 */
+        public java.util.Map<String, Integer> zoneKills = new java.util.LinkedHashMap<>();
         /** 累计直购宝石数（第八批）。 */
         public long gemsBought = 0;
         /** 成就里程碑已发档位掩码（第八批）：bit i 对应第 i 档（15/30/45/60 已领数）。 */

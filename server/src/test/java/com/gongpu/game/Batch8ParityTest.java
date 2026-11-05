@@ -16,13 +16,13 @@ class Batch8ParityTest {
 
     @Test
     void batch8CountsAndCodes() throws Exception {
-        assertEquals(46, GameConst.POTIONS.size(), "药剂 45");
-        assertEquals(32, GameConst.AFFIXES.size(), "词条 26");
-        assertEquals(39, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 38");
-        assertEquals(26, GameConst.MOB_TRAITS.size(), "怪物词条 25");
-        assertEquals(14, GameConst.TALENTS.size(), "天赋 12");
-        assertEquals(113, Achievements.ALL.size(), "成就 113");
-        assertEquals(10, Sets.ALL.size(), "套装 10");
+        assertEquals(47, GameConst.POTIONS.size(), "药剂 45");
+        assertEquals(34, GameConst.AFFIXES.size(), "词条 26");
+        assertEquals(42, GameConst.PASSIVE_SKILLS.size() + GameConst.ACTIVE_SKILLS.size(), "技能 38");
+        assertEquals(29, GameConst.MOB_TRAITS.size(), "怪物词条 25");
+        assertEquals(15, GameConst.TALENTS.size(), "天赋 12");
+        assertEquals(128, Achievements.ALL.size(), "成就 128");
+        assertEquals(11, Sets.ALL.size(), "套装 10");
         String sql = Files.readString(Path.of("src/main/resources/gongpu-full.sql"));
         for (String code : new String[]{
                 // 药剂/被动（81/83）
@@ -37,6 +37,6 @@ class Batch8ParityTest {
             assertTrue(sql.contains("'" + code + "'"), "第八批内容 " + code + " 应在 SQL 中");
         }
         // 宝石是代码常量（不在 cfg 表），单独核 GEMS 规模：一阶 6 + 二阶 6
-        assertEquals(12, GameConst.GEMS.size(), "宝石 12 种");
+        assertEquals(18, GameConst.GEMS.size(), "宝石 12 种");
     }
 }

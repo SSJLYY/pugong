@@ -24,7 +24,7 @@ class GemPanelTest {
 
     @Test
     void gemDefinitionsComplete() {
-        assertEquals(12, GameConst.GEMS.size(), "宝石全表应为一阶 6 + 璀璨二阶 6");
+        assertEquals(18, GameConst.GEMS.size(), "宝石全表应为一阶 6 + 璀璨二阶 6");
         assertEquals(6, GameConst.gemTier1Ids().size(), "一阶掉落池应为 6");
         assertEquals(3, GameConst.GEM_SOCKET_MAX);
     }

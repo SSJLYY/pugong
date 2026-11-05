@@ -10,7 +10,7 @@ class EconomySanityTest {
 
     @Test
     void potionsSane() {
-        assertEquals(46, GameConst.POTIONS.size(), "药剂总数 45");
+        assertEquals(47, GameConst.POTIONS.size(), "药剂总数 45");
         for (GameConst.PotionDef p : GameConst.POTIONS.values()) {
             assertTrue(p.price() > 0, p.id() + " 价格应为正");
             assertTrue(p.price() <= 100_000, p.id() + " 价格不应离谱：" + p.price());
@@ -28,7 +28,7 @@ class EconomySanityTest {
 
     @Test
     void affixesSane() {
-        assertEquals(32, GameConst.AFFIXES.size(), "词条总数应为 26");
+        assertEquals(34, GameConst.AFFIXES.size(), "词条总数应为 26");
         for (GameConst.Affix a : GameConst.AFFIXES) {
             assertTrue(a.min() <= a.max(), a.name() + " 区间下限不应大于上限");
             assertTrue(a.max() > 0, a.name() + " 区间上限应为正");

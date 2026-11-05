@@ -13,7 +13,7 @@ class ZoneHongmengTest {
 
     @Test
     void hongmengIsTwelfthZone() {
-        assertEquals(12, GameConst.ZONES.size(), "区域 12");
+        assertEquals(13, GameConst.ZONES.size(), "区域 12");
         GameConst.ZoneDef z = GameConst.ZONES.get("hongmeng");
         assertNotNull(z);
         assertEquals("50000000000", z.req().get("maxHP"), "门槛生命 500 亿");
@@ -21,9 +21,9 @@ class ZoneHongmengTest {
         assertEquals("400000", z.req().get("ATK"));
         assertEquals(4, z.mobs().size(), "鸿蒙界 4 怪");
         assertEquals("hongmeng", GameEngine.nextZoneId("chaos"), "混沌界之后即鸿蒙界");
-        assertEquals(null, GameEngine.nextZoneId("hongmeng"), "鸿蒙界为最深区域");
+        assertEquals("guixu", GameEngine.nextZoneId("hongmeng"), "鸿蒙界之后即归墟界（第十二批）");
         assertEquals("500000000000", z.boss().maxHP(), "Boss 鸿蒙道祖 5000 亿血");
-        assertEquals(43, GameConst.codexTotal(), "图鉴 43（38 + 鸿蒙 4 怪 1 Boss）");
+        assertEquals(48, GameConst.codexTotal(), "图鉴 48（43 + 归墟 4 怪 1 Boss）");
     }
 
     @Test
@@ -35,7 +35,7 @@ class ZoneHongmengTest {
 
     @Test
     void hongmengSuitIsTenth() {
-        assertEquals(10, Sets.ALL.size(), "套装 10 套");
+        assertEquals(11, Sets.ALL.size(), "套装 11 套");
         assertNotNull(Sets.byId("hongmengsuit"));
     }
 

@@ -18,8 +18,8 @@ class ZoneChaosTest {
         assertEquals("30000000000", z.boss().maxHP(), "混沌魔君 300 亿血");
         assertEquals("chaos", GameEngine.nextZoneId("void"), "虚空界之后即混沌界");
         assertEquals("hongmeng", GameEngine.nextZoneId("chaos"), "混沌界之后即鸿蒙界（第十一批）");
-        assertEquals(12, GameConst.ZONES.size(), "区域 12");
-        assertEquals(43, GameConst.codexTotal(), "图鉴 43");
+        assertEquals(13, GameConst.ZONES.size(), "区域 12");
+        assertEquals(48, GameConst.codexTotal(), "图鉴 43");
     }
 
     @Test
@@ -30,7 +30,7 @@ class ZoneChaosTest {
 
     @Test
     void chaosSetRegistered() {
-        assertEquals(10, Sets.ALL.size(), "套装 10 套");
+        assertEquals(11, Sets.ALL.size(), "套装 10 套");
         assertNotNull(Sets.byId("chaossuit"));
     }
 }

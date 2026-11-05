@@ -31,7 +31,7 @@ class TalentViewTest {
         Map<String, Object> v = new GameService().talentView(s);
         List<Map<String, Object>> pool = (List<Map<String, Object>>) v.get("pool");
         assertEquals(GameConst.TALENTS.size(), pool.size(), "天赋池下发应与 GameConst.TALENTS 同数");
-        assertEquals(14, pool.size());
+        assertEquals(15, pool.size());
         List<String> ids = pool.stream().map(m -> String.valueOf(m.get("id"))).toList();
         assertTrue(ids.contains("lucky"), "幸运儿应在天赋池下发中");
         assertTrue(ids.contains("iron_gut"), "铁胃应在天赋池下发中");

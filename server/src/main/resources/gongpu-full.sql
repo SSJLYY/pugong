@@ -1498,3 +1498,70 @@ INSERT INTO `cfg_equipment_template` (`code`, `name`, `emoji`, `slot`, `tier`, `
 --   代码镜像：怪物词条 26 / 成就 113 / 天赋 14 / 套装 10 / 区域 12 / 图鉴 43 / 宠物 9
 --   （Batch11FinalCountsTest 三方锁；全文件可重复执行）
 -- ============================================================
+
+-- ---------- 第十二批·集群二：归墟界（装备/委托/配方） ----------
+
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('guixu_sword','guixu_bow','guixu_cap','guixu_armor','guixu_boots','guixu_ring');
+INSERT INTO `cfg_equipment_template` (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('guixu_sword', '归墟沉剑', '🗡️', 'weapon', 4, 'guixu', '{"PATK":"16000","CRITD":"0.40"}', 10, 120000, '沉在归墟底的剑，拔出来时带起一整个海', 1, 91),
+  ('guixu_bow', '归墟潮弓', '🏹', 'bow', 4, 'guixu', '{"PATK":"12800","RNG":"2","ASPD":"0.30"}', 10, 120000, '弦是退潮时绷紧的那根线', 1, 92),
+  ('guixu_cap', '归墟水帽', '🎩', 'head', 4, 'guixu', '{"maxHP":"650000","PDEF":"4800","MDEF":"6500"}', 10, 102000, '戴上它，你听见万水归墟的声音', 1, 93),
+  ('guixu_armor', '归墟重铠', '🥋', 'chest', 4, 'guixu', '{"maxHP":"850000","PDEF":"6000","MDEF":"7500"}', 10, 108000, '以沉船龙骨锻成的铠，万钧不沉', 1, 94),
+  ('guixu_boots', '归墟踏靴', '🦿', 'legs', 4, 'guixu', '{"maxHP":"500000","PDEF":"5200","SPD":"80"}', 10, 102000, '踏浪如平地，沉渊亦可往', 1, 95),
+  ('guixu_ring', '归墟珠环', '💍', 'ring1', 4, 'guixu', '{"MATK":"14500","MREGEN":"220","EVA":"0.05"}', 10, 114000, '环心嵌着归墟珠，深不见底', 1, 96);
+
+DELETE FROM `cfg_quest` WHERE `code` IN ('guixu_patrol','guixu_heart');
+INSERT INTO `cfg_quest` (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('guixu_patrol', '归墟巡狩', '🌊', '万水之渊凶影横行：于归墟界猎杀一百只魔物', 'guixu', '{"maxHP":500000000000,"ATK":1000000}', 100, 20000000, 'hongmeng_qi', 2, 1, 1, 35),
+  ('guixu_heart', '无量之心', '🖤', '深入归墟：于归墟界猎杀六十只灭世玄龟与沉渊巨鲸', 'guixu', '{"maxHP":500000000000,"ATK":1000000}', 60, 40000000, 'chaos_core', 5, 1, 1, 36);
+
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_guixu_sword','c_guixu_ring');
+INSERT INTO `cfg_craft` (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_guixu_sword', '锻造归墟沉剑', '🗡️', 'guixu_sword', '{"guixu_pearl":6,"hongmeng_qi":4}', 1500000, 0, 1, 46),
+  ('c_guixu_ring', '锻造归墟珠环', '💍', 'guixu_ring', '{"guixu_pearl":4,"hongmeng_qi":6}', 1200000, 0, 1, 47);
+
+-- ---------- 第十二批·集群三：战斗深化七（天罚/归墟体/归墟琼浆） ----------
+
+DELETE FROM `cfg_skill` WHERE `code` IN ('heaven_wrath','guixu_body');
+INSERT INTO `cfg_skill` (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('heaven_wrath', '天罚', '⚡', 'active', 3000, 100, 150, 0, '{"id":"heaven_wrath"}', '下一击 ×6 伤害（天雷代罚，一击定罪）', 1, 39),
+  ('guixu_body', '归墟体', '🌊', 'passive', 0, 0, 0, 0, '{"kind":"crit","val":0.05}', '暴击率 +5%（沉渊淬体）', 1, 40);
+
+DELETE FROM `cfg_item` WHERE `code` IN ('guixu');
+INSERT INTO `cfg_item` (`code`, `name`, `emoji`, `kind`, `price`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('guixu', '归墟琼浆', '🌊', 'potion', 15000, '{"gold":0,"hp":0,"mp":0,"buff":"guixu_pot","buffVal":0.80,"duration":60}', '60s 内暴击伤害 +80%、吸血 +8%', 1, 64);
+DELETE FROM `cfg_buff` WHERE `code` IN ('guixu_pot');
+INSERT INTO `cfg_buff` (`code`, `name`, `emoji`, `nature`, `group_type`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('guixu_pot', '归墟', '🌊', 'atk', 'potion', '{"kind":"guixu"}', '归墟琼浆：暴击伤害 +80%、吸血 +8%', 1, 47);
+
+-- ---------- 第十二批·集群九：内容扩充八（词条/被动/委托/配方/装备） ----------
+
+DELETE FROM `cfg_affix` WHERE `code` IN ('guixu_aff','hanhai_aff');
+INSERT INTO `cfg_affix` (`code`, `name`, `stat_key`, `stat_type`, `min_val`, `max_val`, `rarity`, `side_key`, `side_val`, `enabled`, `sort_no`) VALUES
+  ('guixu_aff', '归墟', 'PATK', 'flat', 90, 180, 'epic', NULL, NULL, 1, 33),
+  ('hanhai_aff', '瀚海', 'maxHP', 'flat', 50000, 120000, 'epic', NULL, NULL, 1, 34);
+
+DELETE FROM `cfg_skill` WHERE `code` IN ('tide_body');
+INSERT INTO `cfg_skill` (`code`, `name`, `emoji`, `kind`, `price`, `mp`, `cd`, `dur`, `effect_json`, `desc`, `enabled`, `sort_no`) VALUES
+  ('tide_body', '潮汐之体', '🌊', 'passive', 0, 0, 0, 0, '{"kind":"eva","val":0.06}', '闪避率 +6%（身随潮汐）', 1, 41);
+
+DELETE FROM `cfg_quest` WHERE `code` IN ('guixu_longhunt','guixu_deep');
+INSERT INTO `cfg_quest` (`code`, `name`, `emoji`, `desc`, `target_zone`, `req_json`, `target_kills`, `reward_gold`, `reward_item`, `reward_item_count`, `repeatable`, `enabled`, `sort_no`) VALUES
+  ('guixu_longhunt', '归墟长猎', '🌊', '在归墟界猎杀 200 只怪物', 'guixu', '{"maxHP":500000000000,"ATK":1000000}', 200, 30000000, 'guixu', 2, 1, 1, 37),
+  ('guixu_deep', '沉渊之约', '🐋', '在归墟界猎杀 150 只怪物', 'guixu', '{"maxHP":500000000000,"ATK":1000000}', 150, 24000000, 'pet_treat', 5, 1, 1, 38);
+
+DELETE FROM `cfg_craft` WHERE `code` IN ('c_guixu_cap','c_guixu_armor');
+INSERT INTO `cfg_craft` (`code`, `name`, `emoji`, `product_code`, `mats_json`, `gold_cost`, `need_blueprint`, `enabled`, `sort_no`) VALUES
+  ('c_guixu_cap', '锻造归墟水帽', '🎩', 'guixu_cap', '{"guixu_pearl":5,"hongmeng_qi":3}', 1200000, 0, 1, 48),
+  ('c_guixu_armor', '锻造归墟重铠', '👘', 'guixu_armor', '{"guixu_pearl":6,"hongmeng_qi":4}', 1400000, 0, 1, 49);
+
+DELETE FROM `cfg_equipment_template` WHERE `code` IN ('guixu_aegis','guixu_amulet');
+INSERT INTO `cfg_equipment_template` (`code`, `name`, `emoji`, `slot`, `tier`, `min_zone`, `base_stats`, `enhance_max`, `sell_base`, `remark`, `enabled`, `sort_no`) VALUES
+  ('guixu_aegis', '归墟神盾', '🛡️', 'offhand', 4, 'guixu', '{"PDEF":"7200","MDEF":"7200","maxHP":"400000"}', 10, 114000, '盾面是凝固的浪，万钧压来也只是又一朵', 1, 97),
+  ('guixu_amulet', '归墟之瞳', '🧿', 'necklace', 4, 'guixu', '{"MATK":"12000","CRIT":"0.06","MREGEN":"180"}', 10, 114000, '瞳孔深处是归墟的漩涡，看久了会听见潮声', 1, 98);
+
+-- ============================================================
+-- 第十二批验收口径（2026-11-05）：cfg_equipment_template 98 / cfg_item 47 /
+-- cfg_affix 34 / cfg_skill 42 / cfg_quest 38 / cfg_craft 38（均按 code 去重、enabled 计）
+-- 代码侧：区域 13 / 套装 11 / 成就 128 / 天赋 15 / 怪物词条 29 / 宝石 18 / 图鉴 48
+-- ============================================================

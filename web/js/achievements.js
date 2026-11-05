@@ -70,11 +70,23 @@
     { id: 'pet_all', name: '宠物收藏家', emoji: '🐾', desc: '集齐全部 9 只宠物' },
     { id: 'evolve_1', name: '进化之光', emoji: '🦋', desc: '首次让一只宠物进化' },
     { id: 'evolve_3', name: '进化大师', emoji: '🦋', desc: '累计让宠物进化 3 次' },
+    { id: 'evolve_5', name: '万兽化境', emoji: '🦋', desc: '累计进化 5 只宠物' },
     { id: 'awaken_10', name: '觉醒大师', emoji: '☀️', desc: '累计装备觉醒 10 次' },
+    { id: 'awaken_25', name: '觉醒宗师', emoji: '🌟', desc: '累计觉醒 25 次' },
+    { id: 'mastery_first', name: '地利初成', emoji: '🗺️', desc: '任一区域终身击杀达到 500（精通 +2%）' },
+    { id: 'mastery_max', name: '一方地主', emoji: '🏯', desc: '任一区域终身击杀达到 5000（精通满级 +20%）' },
+    { id: 'mastery_3', name: '纵横四海', emoji: '🧭', desc: '三个区域都达到精通满级（各 5000 杀）' },
+    { id: 'tier3_5', name: '曜石成行', emoji: '💠', desc: '累计融合出 5 颗曜三阶宝石' },
+    { id: 'bell_50', name: '碎钟五十', emoji: '🔔', desc: '击杀 50 只带「金钟」词条的怪物' },
+    { id: 'guixu_1', name: '归墟初啜', emoji: '🌊', desc: '首次饮下归墟琼浆' },
+    { id: 'thunder_10', name: '引雷者', emoji: '⛈️', desc: '击杀 10 只带「雷霆」词条的怪物' },
+    { id: 'mastery_10k', name: '此间主人', emoji: '👑', desc: '任一区域终身击杀达到 10000' },
     { id: 'immortal_50', name: '不朽终结者', emoji: '💀', desc: '击杀 50 只带「不朽」词条的怪物' },
     { id: 'devour_50', name: '吞噬终结者', emoji: '👹', desc: '击杀 50 只带「吞噬」词条的怪物' },
     { id: 'taixu_1', name: '太虚初啜', emoji: '🕳️', desc: '首次饮下太虚神液' },
     { id: 'taixu_10', name: '太虚猎手', emoji: '🕳️', desc: '击杀 10 只带「太虚」词条的怪物' },
+    { id: 'bell_10', name: '破钟者', emoji: '🔔', desc: '击杀 10 只带「金钟」词条的怪物' },
+    { id: 'corrode_10', name: '除锈者', emoji: '🧪', desc: '击杀 10 只带「腐蚀」词条的怪物' },
     { id: 'pet_feed_100', name: '喂食达人', emoji: '🐾', desc: '累计喂食宠物 100 次' },
     { id: 'pet_bond_100', name: '羁绊深厚', emoji: '💞', desc: '全部宠物总等级达到 100' },
     { id: 'pet_bond_250', name: '万兽羁绊', emoji: '💞', desc: '全部宠物总等级达到 250' },
@@ -91,6 +103,8 @@
     { id: 'weaken_10', name: '虚弱克星', emoji: '🥀', desc: '击杀 10 只带「虚弱」词条的怪物' },
     { id: 'chaos_first', name: '混沌初临', emoji: '🌪️', desc: '首次击杀混沌界的怪物' },
     { id: 'chaos_lord', name: '无序之主', emoji: '👑', desc: '击杀混沌魔君·无序之源' },
+    { id: 'guixu_first', name: '归墟初临', emoji: '🌊', desc: '首次击杀归墟界的怪物' },
+    { id: 'guixu_lord', name: '无量之主', emoji: '👑', desc: '击杀归墟之主·无量' },
     { id: 'hongmeng_first', name: '鸿蒙初临', emoji: '🌌', desc: '首次击杀鸿蒙界的怪物' },
     { id: 'hongmeng_lord', name: '太初之主', emoji: '👑', desc: '击杀鸿蒙道祖·太初' },
     { id: 'merchant_1m', name: '材料巨鳄', emoji: '💰', desc: '卖材料累计收入 1,000,000 金币' },
@@ -105,6 +119,7 @@
     { id: 'monthly_1', name: '月令初成', emoji: '📆', desc: '领满一整月月常任务（累计领取 3 个）' },
     { id: 'monthly_6', name: '半年月令', emoji: '📆', desc: '累计领取 18 个月常任务（六个月全清）' },
     { id: 'fuse_5', name: '融合大师', emoji: '💎', desc: '累计融合出 5 颗璀璨二阶宝石' },
+    { id: 'tier3_1', name: '曜石初成', emoji: '💠', desc: '首次融合出曜三阶宝石' },
     { id: 'pierce_learn', name: '破甲之道', emoji: '🏹', desc: '学会被动「破甲专精」' },
     { id: 'flurry_500', name: '连环如雨', emoji: '🤲', desc: '连环掌累计追加命中 500 次' },
     { id: 'star_first', name: '星瞳初开', emoji: '🌌', desc: '首次击杀星界的怪物' },
@@ -180,8 +195,10 @@
         render(container);
       });
     }
+    // 搜索关键词（第十二批，app.js 的 #achSearch 写入 window.__achSearchKw）：与筛选筹码叠加
+    var achKw = window.__achSearchKw || '';
     // 签名守卫:解锁/已领取状态位不变就不重建(轮询帧每秒都进这里,重建 DOM 纯浪费)
-    var sig = 'f=' + achFilter + '|';
+    var sig = 'f=' + achFilter + '|q=' + achKw + '|';
     ACH.forEach(function (a) {
       sig += (unlocked[a.id] ? '1' : '0') + (claimed[a.id] ? '1' : '0');
       // 进度按 5% 分桶进签名：进度条会动，又不会每帧重建
@@ -202,7 +219,7 @@
     }
     // 里程碑进度（第八批，第九批扩 75 档）：与服务端档位镜像——累计已领 15/30/45/60/75 项各发一次奖金
     var claimedN = ACH.filter(function (a) { return claimed[a.id]; }).length;
-    var TIERS = [[15, 10000], [30, 30000], [45, 80000], [60, 200000], [75, 500000], [90, 1000000], [105, 3000000]];
+    var TIERS = [[15, 10000], [30, 30000], [45, 80000], [60, 200000], [75, 500000], [90, 1000000], [105, 3000000], [120, 5000000]];
     var nextTier = TIERS.filter(function (t) { return claimedN < t[0]; })[0];
     html.push('<div class="effect-item"><span>🏆</span><b>成就里程碑：已领 ' + claimedN + ' 项</b><i>' +
       (nextTier ? '下一档 ' + nextTier[0] + ' 项（奖金 +' + nextTier[1] + ' 金）' : '全部里程碑奖金已达成 🎉') +
@@ -232,13 +249,15 @@
       return 0;
     });
     var shown = ordered.filter(function (a) {
+      if (achKw && (a.name + ' ' + a.desc).indexOf(achKw) < 0) return false;
       if (achFilter === 'claim') return achState(a) === 0;
       if (achFilter === 'doing') return achState(a) === 1 || achState(a) === 2;
       if (achFilter === 'done') return achState(a) === 3;
       return true;
     });
     if (!shown.length) {
-      html.push('<div class="effect-item"><span>·</span><b>暂无该类成就</b><i></i></div>');
+      html.push('<div class="effect-item"><span>·</span><b>' +
+        (achKw ? '没有匹配「' + achKw + '」的成就' : '暂无该类成就') + '</b><i></i></div>');
     }
     shown.forEach(function (a) {
       var on = !!unlocked[a.id];
@@ -256,7 +275,7 @@
         tail += ' <span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
           pr[0] + '/' + pr[1];
       }
-      html.push('<div class="effect-item" style="opacity:' + (on ? 1 : .45) + '">' +
+      html.push('<div class="effect-item ach-entry" style="opacity:' + (on ? 1 : .45) + '">' +
         '<span>' + (on ? a.emoji : '🔒') + '</span><b>' + a.name + '</b>' +
         '<i>' + a.desc + tail + '</i></div>');
     });

@@ -119,6 +119,7 @@ public class GameService {
             case "charge" -> s.buffs.put("charge", 30.0);
             case "void_slash" -> s.buffs.put("void_slash", 30.0);
             case "sword_rain" -> s.buffs.put("sword_rain", 30.0);
+            case "heaven_wrath" -> s.buffs.put("heaven_wrath", 30.0);
             case "time_stop" -> s.buffs.put("time_stop", (double) def.dur());
             case "flurry" -> s.flurryHits += GameConst.FLURRY_HITS;
             case "hex_slow" -> {
@@ -912,10 +913,10 @@ public class GameService {
                 score += v.doubleValue();
             }
         }
-        // 镶嵌宝石计分（第八批）：一阶 +80/颗、二阶 +200/颗——自动换装/整理/管护不再把镶钻装备当裸装换掉
+        // 镶嵌宝石计分（第八批）：一阶 +80/颗、二阶 +200/颗、三阶 +500/颗（第十二批）——自动换装/整理/管护不再把镶钻装备当裸装换掉
         if (it.gems != null) {
             for (String g : it.gems) {
-                score += g != null && g.endsWith("_2") ? 200 : 80;
+                score += g != null && g.endsWith("_3") ? 500 : g != null && g.endsWith("_2") ? 200 : 80;
             }
         }
         return score * (1 + it.enhance * 0.05) * (1 + it.temper * 0.04) * (1 + it.star * 0.03) * (1 + it.awaken * 0.05);
@@ -1065,8 +1066,8 @@ public class GameService {
     }
 
     /** 成就里程碑档位（第八批）：累计已领成就数达标线与一次性奖金（每档只发一次，掩码落档）。 */
-    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75, 90, 105};
-    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000, 1_000_000, 3_000_000};
+    static final long[] ACH_MILESTONE_TIERS = {15, 30, 45, 60, 75, 90, 105, 120};
+    static final long[] ACH_MILESTONE_BONUS = {10_000, 30_000, 80_000, 200_000, 500_000, 1_000_000, 3_000_000, 5_000_000};
 
     /** 领取后结算里程碑：返回本次新发的里程碑奖金（0 = 未跨新档），奖金已入账。 */
     static long settleAchMilestone(PlayerState s) {
@@ -1267,11 +1268,14 @@ public class GameService {
         return m;
     }
 
-    /** 宝石融合（第八批）：3 颗同种一阶 → 1 颗璀璨二阶（属性 ×2.5）。 */
+    /** 宝石融合（第八批）：3 颗同种一阶 → 1 颗璀璨二阶（属性 ×2.5）；第十二批：3 颗同种二阶 → 1 颗曜三阶。 */
     public Map<String, Object> fuseGem(PlayerState s, String gemCode) {
         GameConst.GemDef def = GameConst.GEMS.get(gemCode);
-        if (def == null || gemCode.endsWith("_2")) {
-            throw ApiException.badRequest("只能融合一阶宝石");
+        if (def == null) {
+            throw ApiException.badRequest("宝石不存在：" + gemCode);
+        }
+        if (gemCode.endsWith("_3")) {
+            throw ApiException.badRequest("三阶宝石已是最高阶，无法继续融合");
         }
         int have = s.materials.getOrDefault(gemCode, 0);
         if (have < 3) {
@@ -1279,11 +1283,18 @@ public class GameService {
         }
         s.materials.put(gemCode, have - 3);
         s.stats.gemsFused++;
-        String t2 = gemCode + "_2";
-        s.materials.merge(t2, 1, Integer::sum);
+        boolean tier3 = gemCode.endsWith("_2");
+        if (tier3) {
+            s.stats.gemTier3Fused++;
+        }
+        String next = gemCode.substring(0, gemCode.length() - (tier3 ? 2 : 0)) + (tier3 ? "_3" : "_2");
+        if (!tier3) {
+            next = gemCode + "_2";
+        }
+        s.materials.merge(next, 1, Integer::sum);
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
-        m.put("gem", t2);
+        m.put("gem", next);
         m.put("left", have - 3);
         return m;
     }
@@ -1521,7 +1532,7 @@ public class GameService {
         return new int[]{s.petLevels.getOrDefault(s.pet, 1), ups};
     }
 
-    /** 批量融合（第九批）：把所有一阶宝石按 3:1 全部融合成璀璨二阶，口径与逐颗融合一致。 */
+    /** 批量融合（第九批）：把所有一阶宝石按 3:1 全部融合成璀璨二阶，口径与逐颗融合一致；第十二批：二阶继续级联融成曜三阶。 */
     public Map<String, Object> fuseAllGems(PlayerState s) {
         int fused = 0;
         for (String id : GameConst.gemTier1Ids()) {
@@ -1535,12 +1546,26 @@ public class GameService {
             fused += n;
             s.stats.gemsFused += n;
         }
-        if (fused == 0) {
-            throw ApiException.badRequest("没有可融合的宝石（每 3 颗同种一阶融 1 颗二阶）");
+        int fused3 = 0;
+        for (String id : GameConst.gemTier2Ids()) {
+            int have = s.materials.getOrDefault(id, 0);
+            int n = have / 3;
+            if (n <= 0) {
+                continue;
+            }
+            s.materials.put(id, have - n * 3);
+            s.materials.merge(id.substring(0, id.length() - 2) + "_3", n, Integer::sum);
+            fused3 += n;
+            s.stats.gemsFused += n;
+            s.stats.gemTier3Fused += n;
+        }
+        if (fused == 0 && fused3 == 0) {
+            throw ApiException.badRequest("没有可融合的宝石（每 3 颗同种宝石融 1 颗高一阶）");
         }
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("ok", true);
         m.put("fused", fused);
+        m.put("fusedTier3", fused3);
         return m;
     }
 
@@ -2204,6 +2229,9 @@ public class GameService {
         // 连环掌剩余次数（第八批收官实测修复）：此前误挂在 setAutoLines 回执上，
         // fullView 没有——前端 buff 条的 🤲 计数芯片永远读不到（与第七批 dailyTasks 同类事故）
         m.put("flurryHits", s.flurryHits);
+        // 区域精通（第十二批）：分区域终身击杀 + 当前区域地利加成（% 数值），挂 fullView 本体
+        m.put("zoneKills", s.stats.zoneKills);
+        m.put("masteryPct", Math.round((GameEngine.zoneMasteryMul(s) - 1) * 100));
         m.put("pet", petView(s));
         m.put("blackMarket", BlackMarket.viewOf(s));
         m.put("rerollPity", s.rerollPity);

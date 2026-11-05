@@ -81,11 +81,23 @@ public final class Achievements {
             new Def("pet_all", "宠物收藏家", "🐾", "集齐全部 9 只宠物"),
             new Def("evolve_1", "进化之光", "🦋", "首次让一只宠物进化"),
             new Def("evolve_3", "进化大师", "🦋", "累计让宠物进化 3 次"),
+            new Def("evolve_5", "万兽化境", "🦋", "累计进化 5 只宠物"),
+            new Def("awaken_25", "觉醒宗师", "🌟", "累计觉醒 25 次"),
+            new Def("mastery_first", "地利初成", "🗺️", "任一区域终身击杀达到 500（精通 +2%）"),
+            new Def("mastery_max", "一方地主", "🏯", "任一区域终身击杀达到 5000（精通满级 +20%）"),
+            new Def("mastery_3", "纵横四海", "🧭", "三个区域都达到精通满级（各 5000 杀）"),
+            new Def("tier3_5", "曜石成行", "💠", "累计融合出 5 颗曜三阶宝石"),
+            new Def("bell_50", "碎钟五十", "🔔", "击杀 50 只带「金钟」词条的怪物"),
+            new Def("guixu_1", "归墟初啜", "🌊", "首次饮下归墟琼浆"),
+            new Def("thunder_10", "引雷者", "⛈️", "击杀 10 只带「雷霆」词条的怪物"),
+            new Def("mastery_10k", "此间主人", "👑", "任一区域终身击杀达到 10000"),
             new Def("awaken_10", "觉醒大师", "☀️", "累计装备觉醒 10 次"),
             new Def("immortal_50", "不朽终结者", "💀", "击杀 50 只带「不朽」词条的怪物"),
             new Def("devour_50", "吞噬终结者", "👹", "击杀 50 只带「吞噬」词条的怪物"),
             new Def("taixu_1", "太虚初啜", "🕳️", "首次饮下太虚神液"),
             new Def("taixu_10", "太虚猎手", "🕳️", "击杀 10 只带「太虚」词条的怪物"),
+            new Def("bell_10", "破钟者", "🔔", "击杀 10 只带「金钟」词条的怪物"),
+            new Def("corrode_10", "除锈者", "🧪", "击杀 10 只带「腐蚀」词条的怪物"),
             new Def("pet_feed_100", "喂食达人", "🐾", "累计喂食宠物 100 次"),
             new Def("pet_bond_100", "羁绊深厚", "💞", "全部宠物总等级达到 100"),
             new Def("pet_treat_10", "零食大户", "🍬", "累计喂宠物零食 10 次"),
@@ -112,6 +124,7 @@ public final class Achievements {
             new Def("monthly_1", "月令初成", "📆", "领满一整月月常任务（累计领取 3 个）"),
             new Def("monthly_6", "半年月令", "📆", "累计领取 18 个月常任务（六个月全清）"),
             new Def("fuse_5", "融合大师", "💎", "累计融合出 5 颗璀璨二阶宝石"),
+            new Def("tier3_1", "曜石初成", "💠", "首次融合出曜三阶宝石"),
             new Def("pierce_learn", "破甲之道", "🏹", "学会被动「破甲专精」"),
             new Def("flurry_500", "连环如雨", "🤲", "连环掌累计追加命中 500 次"),
             new Def("star_first", "星瞳初开", "🌌", "首次击杀星界的怪物"),
@@ -120,6 +133,8 @@ public final class Achievements {
             new Def("void_lord", "无相之主", "👑", "击杀虚空之主·无相天魔"),
             new Def("chaos_first", "混沌初临", "🌪️", "首次击杀混沌界的怪物"),
             new Def("chaos_lord", "无序之主", "👑", "击杀混沌魔君·无序之源"),
+            new Def("guixu_first", "归墟初临", "🌊", "首次击杀归墟界的怪物"),
+            new Def("guixu_lord", "无量之主", "👑", "击杀归墟之主·无量"),
             new Def("hongmeng_first", "鸿蒙初临", "🌌", "首次击杀鸿蒙界的怪物"),
             new Def("hongmeng_lord", "太初之主", "👑", "击杀鸿蒙道祖·太初"),
             new Def("weekly_1", "周常初成", "🗓️", "领取 3 个周常任务奖励（整整一周全清）"),
@@ -146,9 +161,9 @@ public final class Achievements {
                     "potion_5", "codex_10", "talent" -> 100L;
             case "hp_1m", "wear_epic", "lived_1h", "gen_12", "codex_all", "potion_15",
                     "kill_10k", "boss_10", "craft_25", "boss_50", "potion_25", "set_4", "temper_5",
-                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5", "pet_all", "pet_feed_100", "burn_50", "pet_bond_100", "mirror_10", "weaken_10", "pet_treat_50", "star_25", "enchant_500", "frenzy_10", "evolve_1", "immortal_10", "devour_10", "awaken_3", "awaken_10", "taixu_10" -> 2_000L;
+                    "daily_30", "phase_breaker", "merchant", "epic_affix", "gem_10", "flurry_500", "weekly_1", "gem_collector", "set_wearer", "punch_1m", "dismantle_1000", "eclipse_hunter", "pet_25", "drain_10", "rend_10", "monthly_1", "fuse_5", "pet_all", "pet_feed_100", "burn_50", "pet_bond_100", "mirror_10", "weaken_10", "pet_treat_50", "star_25", "enchant_500", "frenzy_10", "evolve_1", "immortal_10", "devour_10", "awaken_3", "awaken_10", "taixu_10", "tier3_1", "bell_10", "corrode_10", "thunder_10" -> 2_000L;
             case "gold_1m", "best_hit_1m", "boss_100", "craft_50", "abyss_lord", "star_lord", "weekly_8",
-                    "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord", "monthly_6", "pet_50", "punch_100m", "merchant_500k", "chaos_lord", "merchant_1m", "feed_500", "pet_bond_250", "hongmeng_lord", "star_100", "treat_200", "evolve_3", "immortal_50", "devour_50" -> 5_000L;
+                    "kill_100k", "gold_100m", "craft_200", "gen_30", "void_lord", "monthly_6", "pet_50", "punch_100m", "merchant_500k", "chaos_lord", "merchant_1m", "feed_500", "pet_bond_250", "hongmeng_lord", "star_100", "treat_200", "evolve_3", "immortal_50", "devour_50", "guixu_lord", "evolve_5", "awaken_25", "mastery_max", "mastery_3", "tier3_5", "bell_50", "mastery_10k" -> 5_000L;
             default -> 500L;
         };
     }
@@ -202,6 +217,48 @@ public final class Achievements {
         }
         int n = 0;
         for (String id : new String[]{"void_mote", "void_reaper", "void_eye", "void_leviathan"}) {
+            if (s.codex.contains(id)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /** 区域精通最高击杀（第十二批，mastery 系列成就口径）。 */
+    static int maxZoneKills(PlayerState s) {
+        if (s.stats == null || s.stats.zoneKills == null) {
+            return 0;
+        }
+        int max = 0;
+        for (Integer n : s.stats.zoneKills.values()) {
+            if (n != null && n > max) {
+                max = n;
+            }
+        }
+        return max;
+    }
+
+    /** 精通满级区域数（第十二批，mastery_3 成就口径）：终身击杀 ≥5000 的区域计数。 */
+    static int zonesAtMastery(PlayerState s) {
+        if (s.stats == null || s.stats.zoneKills == null) {
+            return 0;
+        }
+        int n = 0;
+        for (Integer v : s.stats.zoneKills.values()) {
+            if (v != null && v >= 5000) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /** 归墟界图鉴命中数（第十二批，guixu_first 成就口径）。 */
+    static int guixuCodexHits(PlayerState s) {
+        if (s.codex == null) {
+            return 0;
+        }
+        int n = 0;
+        for (String id : new String[]{"guixu_wraith", "guixu_whale", "guixu_warden", "guixu_turtle"}) {
             if (s.codex.contains(id)) {
                 n++;
             }
@@ -367,6 +424,8 @@ public final class Achievements {
             case "star_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_star") ? 1 : 0, 1};
             case "void_first" -> new long[]{voidCodexHits(s), 1};
             case "void_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_void") ? 1 : 0, 1};
+            case "guixu_first" -> new long[]{guixuCodexHits(s), 1};
+            case "guixu_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_guixu") ? 1 : 0, 1};
             case "hongmeng_first" -> new long[]{hongmengCodexHits(s), 1};
             case "hongmeng_lord" -> new long[]{s.bossKills != null && s.bossKills.contains("boss_hongmeng") ? 1 : 0, 1};
             case "chaos_first" -> new long[]{chaosCodexHits(s), 1};
@@ -399,11 +458,23 @@ public final class Achievements {
             case "pet_treat_50" -> new long[]{s.stats.petTreats, 50};
             case "evolve_1" -> new long[]{s.stats.petEvolves, 1};
             case "evolve_3" -> new long[]{s.stats.petEvolves, 3};
+            case "evolve_5" -> new long[]{s.stats.petEvolves, 5};
+            case "awaken_25" -> new long[]{s.stats.awakens, 25};
+            case "mastery_first" -> new long[]{maxZoneKills(s), 500};
+            case "mastery_max" -> new long[]{maxZoneKills(s), 5000};
+            case "mastery_3" -> new long[]{zonesAtMastery(s), 3};
+            case "tier3_5" -> new long[]{s.stats.gemTier3Fused, 5};
+            case "bell_50" -> new long[]{s.stats.bellKills, 50};
+            case "guixu_1" -> new long[]{s.usedPotions != null && s.usedPotions.contains("guixu") ? 1 : 0, 1};
+            case "thunder_10" -> new long[]{s.stats.thunderKills, 10};
+            case "mastery_10k" -> new long[]{maxZoneKills(s), 10000};
             case "awaken_10" -> new long[]{s.stats.awakens, 10};
             case "immortal_50" -> new long[]{s.stats.immortalKills, 50};
             case "devour_50" -> new long[]{s.stats.devourKills, 50};
             case "taixu_1" -> new long[]{s.usedPotions != null && s.usedPotions.contains("taixu") ? 1 : 0, 1};
             case "taixu_10" -> new long[]{s.stats.taixuKills, 10};
+            case "bell_10" -> new long[]{s.stats.bellKills, 10};
+            case "corrode_10" -> new long[]{s.stats.corrodeKills, 10};
             case "star_25" -> new long[]{s.stats.starsDone, 25};
             case "star_100" -> new long[]{s.stats.starsDone, 100};
             case "treat_200" -> new long[]{s.stats.petTreats, 200};
@@ -419,6 +490,7 @@ public final class Achievements {
             case "monthly_1" -> new long[]{s.stats.monthlyClaims, 3};
             case "monthly_6" -> new long[]{s.stats.monthlyClaims, 18};
             case "fuse_5" -> new long[]{s.stats.gemsFused, 5};
+            case "tier3_1" -> new long[]{s.stats.gemTier3Fused, 1};
             case "gem_10" -> new long[]{s.stats.gemsSocketed, 10};
             case "pierce_learn" -> new long[]{s.passives.contains("armor_pierce") ? 1 : 0, 1};
             case "flurry_500" -> new long[]{s.stats.flurryExtra.longValue(), 500};
@@ -513,6 +585,8 @@ public final class Achievements {
                 case "star_lord" -> s.bossKills != null && s.bossKills.contains("boss_star");
                 case "void_first" -> voidCodexHits(s) >= 1;
                 case "void_lord" -> s.bossKills != null && s.bossKills.contains("boss_void");
+                case "guixu_first" -> guixuCodexHits(s) >= 1;
+                case "guixu_lord" -> s.bossKills != null && s.bossKills.contains("boss_guixu");
                 case "hongmeng_first" -> hongmengCodexHits(s) >= 1;
                 case "hongmeng_lord" -> s.bossKills != null && s.bossKills.contains("boss_hongmeng");
                 case "chaos_first" -> chaosCodexHits(s) >= 1;
@@ -534,6 +608,7 @@ public final class Achievements {
                 case "monthly_1" -> s.stats.monthlyClaims >= 3;
                 case "monthly_6" -> s.stats.monthlyClaims >= 18;
                 case "fuse_5" -> s.stats.gemsFused >= 5;
+                case "tier3_1" -> s.stats.gemTier3Fused >= 1;
                 case "daily_1" -> s.stats.dailyClaims >= 1;
                 case "daily_30" -> s.stats.dailyClaims >= 30;
                 case "phase_breaker" -> s.stats.bossPhaseKills >= 1;
@@ -554,11 +629,23 @@ public final class Achievements {
                 case "pet_treat_50" -> s.stats.petTreats >= 50;
                 case "evolve_1" -> s.stats.petEvolves >= 1;
                 case "evolve_3" -> s.stats.petEvolves >= 3;
+                case "evolve_5" -> s.stats.petEvolves >= 5;
+                case "awaken_25" -> s.stats.awakens >= 25;
+                case "mastery_first" -> maxZoneKills(s) >= 500;
+                case "mastery_max" -> maxZoneKills(s) >= 5000;
+                case "mastery_3" -> zonesAtMastery(s) >= 3;
+                case "tier3_5" -> s.stats.gemTier3Fused >= 5;
+                case "bell_50" -> s.stats.bellKills >= 50;
+                case "guixu_1" -> s.usedPotions != null && s.usedPotions.contains("guixu");
+                case "thunder_10" -> s.stats.thunderKills >= 10;
+                case "mastery_10k" -> maxZoneKills(s) >= 10000;
                 case "awaken_10" -> s.stats.awakens >= 10;
                 case "immortal_50" -> s.stats.immortalKills >= 50;
                 case "devour_50" -> s.stats.devourKills >= 50;
                 case "taixu_1" -> s.usedPotions != null && s.usedPotions.contains("taixu");
                 case "taixu_10" -> s.stats.taixuKills >= 10;
+                case "bell_10" -> s.stats.bellKills >= 10;
+                case "corrode_10" -> s.stats.corrodeKills >= 10;
                 case "star_25" -> s.stats.starsDone >= 25;
                 case "star_100" -> s.stats.starsDone >= 100;
                 case "treat_200" -> s.stats.petTreats >= 200;

@@ -54,7 +54,7 @@ class ZoneStarTest {
         assertTrue(set.isPresent(), "星辰战装应存在");
         assertEquals(4, set.get().members().size());
         assertTrue(set.get().members().contains("star_blade"));
-        assertEquals(10, Sets.ALL.size(), "套装应达 10 套");
+        assertEquals(11, Sets.ALL.size(), "套装应达 10 套");
     }
 
     @Test

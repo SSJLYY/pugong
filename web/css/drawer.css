@@ -1,0 +1,544 @@
+/* 双窗工作台与多抽屉布局：保留既有主题变量，所有功能按需展开。 */
+:root {
+  --drawer-width: min(430px, calc(100vw - 28px));
+  --drawer-ease: cubic-bezier(.22, 1, .36, 1);
+  --drawer-duration: 260ms;
+  --dock-height: 66px;
+  --control-radius: 9px;
+  --txt-faint: #938d80;
+}
+
+.game-title {
+  background: none;
+  color: var(--gold-bright);
+  -webkit-text-fill-color: var(--gold-bright);
+  text-shadow: none;
+}
+
+::selection { background: var(--gold); color: var(--bg0); }
+input, textarea { caret-color: var(--gold); }
+button, a, input, select, textarea, [tabindex] { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+button { font: inherit; }
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  z-index: 4000;
+  padding: 9px 14px;
+  border-radius: 8px;
+  background: var(--gold-bright);
+  color: var(--bg0);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translate(-50%, -180%);
+  transition: transform 160ms ease;
+}
+.skip-link:focus { transform: translate(-50%, 0); }
+button, [role="button"] { touch-action: manipulation; }
+button:disabled { filter: saturate(.55); }
+* { scrollbar-color: var(--gold-dim) var(--bg0); scrollbar-width: thin; }
+
+#gameRoot.on { width: 100%; max-width: 1560px; min-height: 0; }
+#gameRoot .game-header { display: none; }
+.topbar, .bulletin-bar { max-width: 1560px; }
+.topbar {
+  margin-top: 0;
+  padding: 9px 12px;
+  gap: 8px 14px;
+  background: var(--bg1);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg2) 94%, var(--gold) 6%), var(--bg1));
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+}
+.brand-mini { color: var(--gold-bright); font-size: 14px; letter-spacing: 1px; }
+.shell-actions { display: flex; align-items: center; gap: 5px; order: 12; }
+.shell-action, .workspace-action, .drawer-close, .drawer-menu-action, .dock-btn {
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--panel);
+  color: var(--txt-dim);
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+.shell-action {
+  min-height: 36px;
+  padding: 6px 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.shell-action:hover, .shell-action[aria-expanded="true"], .workspace-action:hover,
+.drawer-menu-action:hover, .dock-btn:hover {
+  color: var(--gold-bright);
+  border-color: var(--border-strong);
+  background: var(--panel-2);
+}
+.shell-action:active, .workspace-action:active, .drawer-close:active,
+.drawer-menu-action:active, .dock-btn:active { transform: translateY(1px); }
+.shell-action[aria-expanded="true"] { box-shadow: inset 0 -2px 0 var(--gold); }
+.hp-line { min-width: 180px; }
+.hp-max { color: var(--gold-bright); -webkit-text-fill-color: var(--gold-bright); background: none; filter: none; }
+.hp-max-label { color: var(--txt-dim); }
+.bars { max-width: 360px; }
+.bar { border-color: var(--border); }
+.meta-row { color: var(--txt-dim); }
+.meta-row .gen { color: var(--gold); }
+#netState { min-width: 14px; text-align: center; }
+
+/* 主屏严格保持两个核心模块：战斗 + 当前功能。 */
+.game-shell, body.theme-ink .game-shell {
+  max-width: 1560px;
+  margin-top: 10px;
+  grid-template-columns: minmax(340px, .9fr) minmax(430px, 1.1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "combat utility";
+  gap: 12px;
+  overflow: hidden;
+}
+.play-column { display: contents; }
+.combat {
+  grid-area: combat;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  border-color: var(--border-strong);
+  background: var(--bg1);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--bg2) 92%, var(--gold) 8%), var(--bg1) 42%);
+}
+.utility-panel {
+  grid-area: utility;
+  min-height: 0;
+  background: var(--bg1);
+  border-color: var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+}
+.workspace-bar {
+  flex: 0 0 auto;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+.workspace-bar h2, .workspace-bar h2:not(:first-child) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--gold-bright);
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: 1px;
+  text-wrap: balance;
+}
+.workspace-actions { display: flex; gap: 6px; flex: 0 0 auto; }
+.workspace-action { min-height: 34px; padding: 5px 10px; font-size: 12px; }
+.workspace-close { display: none; }
+.tab-pane {
+  padding: 16px 18px 22px;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scroll-padding-top: 12px;
+}
+.tab-pane h2, .save-box h2 { margin-top: 18px; }
+.tab-pane h2:first-child, .save-box > h2:first-child { margin-top: 0; }
+.tab-pane h2, .save-box h2, .combat h2, .panel h2 {
+  border-left-width: 1px;
+  letter-spacing: 1.2px;
+}
+.tab-pane .save-box + .save-box { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+#achArea, #titleArea, .codex-area { max-height: none; overflow: visible; padding-right: 0; }
+.event-log { max-height: 104px; overflow-y: auto; overscroll-behavior: contain; }
+.story-line { color: var(--txt-dim); }
+.log-search, #bagSearch { min-height: 36px; padding: 7px 10px; background: var(--bg0); color: var(--txt); }
+.log-search::placeholder, #bagSearch::placeholder, .auth-input::placeholder { color: var(--txt-dim); opacity: 1; }
+
+/* 共用抽屉层：实底、清晰边界与柔和偏移阴影，避免内容互相透视。 */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2400;
+  background: rgba(0, 0, 0, .56);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--drawer-duration) ease, visibility 0s linear var(--drawer-duration);
+}
+.drawer-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+.side-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 2500;
+  width: var(--drawer-width);
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg1);
+  color: var(--txt);
+  border-color: var(--border-strong);
+  box-shadow: 12px 0 40px rgba(0, 0, 0, .36);
+  visibility: hidden;
+  transition: transform var(--drawer-duration) var(--drawer-ease), visibility 0s linear var(--drawer-duration);
+}
+.side-drawer--left { left: 0; transform: translate3d(-102%, 0, 0); border-right: 1px solid var(--border-strong); }
+.side-drawer--right { right: 0; transform: translate3d(102%, 0, 0); border-left: 1px solid var(--border-strong); box-shadow: -12px 0 40px rgba(0, 0, 0, .36); }
+.side-drawer.open { transform: translate3d(0, 0, 0); visibility: visible; transition-delay: 0s; }
+.drawer-header {
+  flex: 0 0 auto;
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  padding-top: max(14px, env(safe-area-inset-top));
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.drawer-header h2 { margin: 0; padding: 0; border: 0; color: var(--gold-bright); font-size: 17px; letter-spacing: 1px; }
+.drawer-header p { margin: 5px 0 0; color: var(--txt-dim); font-size: 12px; line-height: 1.5; }
+.drawer-close {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--txt);
+  font-size: 26px;
+  line-height: 1;
+}
+.drawer-close:hover { color: var(--gold-bright); border-color: var(--gold); background: var(--panel-2); }
+.drawer-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px; }
+.drawer-section { padding: 16px; border-top: 1px solid var(--border); }
+.drawer-footnote { margin: auto 16px 16px; padding: 12px 0 max(4px, env(safe-area-inset-bottom)); color: var(--txt-dim); font-size: 11px; line-height: 1.7; }
+
+/* 功能目录抽屉 */
+.nav-drawer { width: min(360px, calc(100vw - 28px)); }
+.drawer-tab-list.game-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 14px;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+.drawer-tab-list .game-tab {
+  min-height: 52px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-color: var(--border);
+  background: var(--panel);
+  color: var(--txt-dim);
+  font-size: 13px;
+  text-align: left;
+  white-space: normal;
+}
+.drawer-tab-list .game-tab:hover { transform: translateY(-1px); }
+.drawer-tab-list .game-tab.active {
+  color: var(--gold-bright);
+  border-color: var(--gold);
+  background: var(--panel-2);
+  box-shadow: inset 0 -2px 0 var(--gold);
+}
+.drawer-nav-extras { display: grid; gap: 8px; }
+.drawer-menu-action {
+  min-height: 44px;
+  padding: 9px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--txt);
+  text-align: left;
+}
+.drawer-menu-action span { color: var(--txt-faint); font-size: 11px; }
+
+/* 地图抽屉 */
+.map-drawer .map-panel {
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.map-drawer .zones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; overflow: visible; }
+.map-drawer .zone-btn {
+  min-width: 0;
+  min-height: 58px;
+  padding: 9px 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  background: var(--panel);
+  color: var(--txt);
+  border-color: var(--border);
+  line-height: 1.25;
+}
+.map-drawer .zone-btn.active { border-color: var(--gold); background: var(--panel-2); color: var(--gold-bright); }
+.map-drawer .zone-btn .req { color: var(--txt-dim); text-align: left; }
+.map-drawer .zone-btn.locked { opacity: .62; }
+.map-drawer .zone-btn .mastery { font-size: 10px; color: var(--gold-dim); }
+.map-primary-actions, .map-secondary-actions, .map-reference-actions { display: grid; gap: 8px; margin-top: 16px; }
+.map-primary-actions { grid-template-columns: 1fr 1fr; }
+.map-secondary-actions { grid-template-columns: 1fr 1fr; }
+.map-secondary-actions #btnAuto { grid-column: 1 / -1; }
+.map-reference-actions { grid-template-columns: 1fr 1fr; padding-top: 14px; border-top: 1px solid var(--border); }
+.map-drawer .boss-btn { min-height: 42px; margin: 0; padding: 9px; }
+.map-drawer .map-reference-actions .boss-btn { background: var(--panel); color: var(--txt-dim); border-color: var(--border); }
+
+/* 设置抽屉 */
+.settings-content { display: grid; align-content: start; gap: 22px; padding: 20px 16px; }
+.settings-group { padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.settings-group:last-child { border-bottom: 0; }
+.settings-group h3 { margin: 0 0 7px; color: var(--gold-bright); font-size: 14px; }
+.settings-group p { margin: 0 0 14px; color: var(--txt-dim); font-size: 12px; line-height: 1.7; }
+.settings-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.settings-group .daily-btn { min-height: 44px; padding: 9px 12px; color: var(--gold-bright); background: var(--panel); }
+.settings-group #btnHelp { width: 100%; min-height: 44px; }
+.audio-settings-slot button#gp-audio-btn {
+  position: static !important;
+  z-index: auto !important;
+  width: 100% !important;
+  height: 44px !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: var(--control-radius) !important;
+  background: var(--panel) !important;
+  color: var(--gold-bright) !important;
+  box-shadow: none !important;
+}
+.audio-settings-slot button#gp-audio-btn:hover { transform: none; border-color: var(--gold) !important; }
+
+.mobile-dock { display: none; }
+
+/* 各主题只换材料与色彩，抽屉拓扑保持一致。 */
+body.theme-light .side-drawer, body.theme-ink .side-drawer,
+body.theme-light .utility-panel, body.theme-ink .utility-panel,
+body.theme-light .combat, body.theme-ink .combat {
+  background: var(--bg0);
+  box-shadow: 12px 0 32px rgba(46, 58, 56, .18);
+}
+body.theme-light .drawer-backdrop, body.theme-ink .drawer-backdrop { background: rgba(46, 42, 28, .38); }
+body.theme-light .shell-action, body.theme-light .workspace-action,
+body.theme-light .drawer-close, body.theme-light .drawer-menu-action,
+body.theme-light .dock-btn, body.theme-ink .shell-action,
+body.theme-ink .workspace-action, body.theme-ink .drawer-close,
+body.theme-ink .drawer-menu-action, body.theme-ink .dock-btn { color: var(--txt-dim); background: var(--panel); }
+body.theme-neon .side-drawer, body.theme-aurora .side-drawer,
+body.theme-tide .side-drawer, body.theme-ember .side-drawer { box-shadow: -10px 0 32px color-mix(in srgb, var(--gold) 12%, transparent); }
+
+@media (min-width: 901px) {
+  body { padding: 10px 14px 14px; }
+  #gameRoot.on { height: 100%; }
+  .topbar {
+    display: grid;
+    grid-template-columns: auto auto minmax(220px, 1fr) auto auto auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+  }
+  .brand-mini, #titleChip, #petChip { display: none !important; }
+  .char-badge { grid-column: 1; grid-row: 1; }
+  .hp-line { grid-column: 2; grid-row: 1; }
+  .bars { grid-column: 3; grid-row: 1; max-width: none; width: 100%; }
+  #dpsChip { grid-column: 4; grid-row: 1; }
+  #powerChip { grid-column: 5; grid-row: 1; }
+  .shell-actions { grid-column: 6; grid-row: 1; order: initial; }
+  .bless-row { grid-column: 1 / 7; grid-row: 2; justify-self: start; max-width: 36%; }
+  .meta-row { grid-column: 1 / 7; grid-row: 2; justify-self: end; max-width: 62%; margin: 0; }
+  .game-shell, body.theme-ink .game-shell { flex: 1; min-height: 0; }
+  .utility-panel { display: flex !important; transform: none; visibility: visible; }
+  .mobile-dock { display: none !important; }
+}
+
+@media (min-width: 1500px) {
+  .game-shell, body.theme-ink .game-shell { grid-template-columns: minmax(480px, .92fr) minmax(560px, 1.08fr); }
+  .combat { padding: 18px; }
+  .tab-pane { padding: 20px 22px 26px; }
+}
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  .brand-mini { display: none; }
+  .topbar { gap: 7px 10px; }
+  .dps-chip { display: none; }
+  .game-shell, body.theme-ink .game-shell { grid-template-columns: minmax(320px, .9fr) minmax(390px, 1.1fr); gap: 9px; }
+  .shell-action span { display: none; }
+  .shell-action { min-width: 36px; }
+}
+
+@media (max-height: 760px) and (min-width: 901px) {
+  .topbar { padding-top: 6px; padding-bottom: 6px; }
+  .char-badge { width: 46px; height: 46px; }
+  .hp-max { font-size: 23px; }
+  .game-shell, body.theme-ink .game-shell { margin-top: 7px; }
+  .combat { gap: 8px; }
+  .mob { padding: 10px 12px; }
+}
+
+/* 手机与窄屏：战斗常驻，当前功能成为底部抽屉。 */
+@media (max-width: 900px) {
+  body { min-height: 100dvh; padding: 8px 8px calc(var(--dock-height) + 18px + env(safe-area-inset-bottom)); overflow-x: hidden; }
+  body.drawer-open { overflow: hidden; }
+  #gameRoot.on { display: block; }
+  .topbar, body.theme-ink .topbar {
+    margin: 0 0 8px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px 10px;
+    border-radius: 12px;
+  }
+  .brand-mini, .dps-chip, #titleChip, #petChip { display: none !important; }
+  .shell-actions { grid-column: 3; grid-row: 1; order: initial; }
+  .shell-action { width: 38px; height: 38px; min-height: 38px; padding: 0; }
+  .shell-action span { display: none; }
+  #btnNav { display: none; }
+  .char-badge { grid-column: 1; grid-row: 1; width: 44px; height: 44px; order: initial; }
+  .hp-line { grid-column: 2; grid-row: 1; min-width: 0; order: initial; justify-content: center; }
+  .hp-max { font-size: 24px; }
+  .hp-max-label { font-size: 10px; }
+  .bars { grid-column: 1 / -1; grid-row: 2; max-width: none; width: 100%; order: initial; }
+  .bless-row { grid-column: 1 / -1; grid-row: 3; order: initial; text-align: center; }
+  .meta-row { grid-column: 1 / -1; grid-row: 4; order: initial; margin: 0; justify-content: center; text-align: center; }
+  .game-shell, body.theme-ink .game-shell {
+    display: block;
+    flex: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .play-column { display: block; }
+  .combat { min-height: calc(100dvh - 285px); max-height: none; overflow: visible; padding: 12px; }
+  .combat-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .skill-btn { min-width: 0; min-height: 42px; }
+  .event-log { max-height: 96px; }
+  .hotkey-hint { display: none; }
+
+  .utility-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2500;
+    width: 100%;
+    height: min(82dvh, 780px);
+    min-height: 0;
+    display: flex;
+    border: 1px solid var(--border-strong);
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+    background: var(--bg1);
+    box-shadow: 0 -16px 44px rgba(0, 0, 0, .42);
+    transform: translate3d(0, 102%, 0);
+    visibility: hidden;
+    transition: transform var(--drawer-duration) var(--drawer-ease), visibility 0s linear var(--drawer-duration);
+  }
+  body.utility-open .utility-panel { transform: translate3d(0, 0, 0); visibility: visible; transition-delay: 0s; }
+  .workspace-bar { min-height: 60px; padding: 8px 12px; border-radius: 18px 18px 0 0; touch-action: pan-y; }
+  .workspace-bar::before { content: ""; position: absolute; top: 6px; left: 50%; width: 42px; height: 4px; border-radius: 2px; background: var(--border-strong); transform: translateX(-50%); }
+  .workspace-bar h2 { padding-top: 4px; }
+  .workspace-close { display: inline-flex; align-items: center; }
+  .tab-pane { overflow-y: auto; padding: 14px 12px calc(24px + env(safe-area-inset-bottom)); }
+  .tab-pane .daily-list { grid-template-columns: 1fr; }
+  .tab-pane .equipped-grid { grid-template-columns: 1fr 1fr; }
+
+  .side-drawer { top: 0; bottom: 0; width: min(390px, calc(100vw - 24px)); }
+  .map-drawer .zones { grid-template-columns: 1fr 1fr; }
+  .drawer-header { min-height: 68px; }
+  .drawer-tab-list .game-tab { min-height: 50px; }
+  .drawer-close { width: 44px; height: 44px; }
+
+  .mobile-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2200;
+    height: calc(var(--dock-height) + env(safe-area-inset-bottom));
+    padding: 6px 6px env(safe-area-inset-bottom);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    background: var(--bg1);
+    border-top: 1px solid var(--border-strong);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .26);
+  }
+  .dock-btn {
+    min-width: 0;
+    min-height: 50px;
+    padding: 4px 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border-color: transparent;
+    background: transparent;
+    font-size: 11px;
+  }
+  .dock-btn span { font-size: 18px; line-height: 1; }
+  .dock-btn.active { color: var(--gold-bright); background: var(--panel-2); border-color: var(--border); }
+  button#gp-audio-btn {
+    right: 8px !important;
+    bottom: calc(var(--dock-height) + 12px + env(safe-area-inset-bottom)) !important;
+    z-index: 2300 !important;
+  }
+  #butlerFab { bottom: calc(var(--dock-height) + 64px + env(safe-area-inset-bottom)); }
+  #butlerPanel { bottom: calc(var(--dock-height) + 118px + env(safe-area-inset-bottom)); }
+  .stat-hover-card { bottom: calc(var(--dock-height) + 8px + env(safe-area-inset-bottom)); z-index: 2600; }
+}
+
+@media (max-width: 480px) {
+  .topbar { gap: 7px 8px; }
+  .hp-icon, .hp-max-label { display: none; }
+  .hp-max { font-size: 23px; }
+  .meta-row { gap: 5px 8px; font-size: 11px; }
+  .meta-row #hudRate, .meta-row #talentBadge { display: none; }
+  .combat-btns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mob { padding: 10px; gap: 10px; }
+  .mob-emoji { font-size: 38px; }
+  .map-drawer .zones { grid-template-columns: 1fr; }
+  .map-drawer .zone-btn { min-height: 52px; }
+  .map-primary-actions, .map-secondary-actions { grid-template-columns: 1fr; }
+  .map-secondary-actions #btnAuto { grid-column: auto; }
+  .drawer-tab-list.game-tabs { grid-template-columns: 1fr 1fr; padding: 10px; gap: 7px; }
+  .tab-pane .equipped-grid { grid-template-columns: 1fr; }
+  .tab-pane .equip-slot .eq-base { display: block; margin-top: 5px; line-height: 1.5; }
+  .workspace-action { padding: 5px 8px; }
+  #btnWorkspaceNav { font-size: 0; }
+  #btnWorkspaceNav::after { content: "☰"; font-size: 16px; }
+  .settings-controls { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-drawer, .utility-panel, .drawer-backdrop, .shell-action,
+  .workspace-action, .drawer-close, .drawer-menu-action, .dock-btn { transition-duration: 1ms !important; }
+}
+body.motion-off .side-drawer, body.motion-off .utility-panel, body.motion-off .drawer-backdrop { transition: none !important; }
+body.fx-off .side-drawer, body.fx-off .utility-panel, body.fx-off .drawer-backdrop { transition: none !important; }
+
+@media (forced-colors: active) {
+  .side-drawer, .utility-panel, .mobile-dock, .drawer-header, .workspace-bar { border-color: CanvasText; }
+  .drawer-backdrop { background: Canvas; opacity: .82; }
+  .game-tab.active, .dock-btn.active, .shell-action[aria-expanded="true"] { outline: 2px solid Highlight; }
+}

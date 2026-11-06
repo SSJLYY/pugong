@@ -9,8 +9,9 @@
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="css/style.css?v=234">
-<link rel="stylesheet" href="css/v2.css?v=234">
+<link rel="stylesheet" href="css/style.css?v=250">
+<link rel="stylesheet" href="css/v2.css?v=250">
+<link rel="stylesheet" href="css/drawer.css?v=250">
 </head>
 <body>
 
@@ -45,6 +46,7 @@
 
 <!-- ======== 游戏主体 ======== -->
 <div id="gameRoot">
+<a class="skip-link" href="#zoneName">跳到战斗区</a>
 <header class="game-header">
   <h1 class="game-title"><span class="fist">👊</span> 普攻永久增加生命上限</h1>
   <p class="game-sub">一拳一点命 · <em>万世不修仙</em> · 死了就重开</p>
@@ -52,7 +54,12 @@
 
 <header class="topbar">
   <span class="brand-mini">👊 普攻永久增加生命上限</span>
-  <div id="charBadge" class="char-badge" title="属性面板（悬浮 / 点击）" tabindex="0" role="button" aria-label="查看详细属性">
+  <div class="shell-actions" role="group" aria-label="界面抽屉">
+    <button id="btnNav" class="shell-action" type="button" data-open-drawer="nav" aria-controls="navDrawer" aria-expanded="false" title="功能目录（N）">☰<span>功能</span></button>
+    <button id="btnMapDrawer" class="shell-action" type="button" data-open-drawer="map" aria-controls="mapDrawer" aria-expanded="false" title="地图与行动（M）">🗺️<span>地图</span></button>
+    <button id="btnSettings" class="shell-action" type="button" data-open-drawer="settings" aria-controls="settingsDrawer" aria-expanded="false" title="界面设置">⚙️<span>设置</span></button>
+  </div>
+  <div id="charBadge" class="char-badge" title="属性面板（悬浮 / 点击）" tabindex="0" role="button" aria-label="查看详细属性" aria-controls="statCard">
     <span class="char-emoji">🥋</span>
     <div class="char-hpbar"><div id="charHpFill" class="fill"></div></div>
   </div>
@@ -116,12 +123,7 @@
     <span id="talentBadge" class="talent-badge" style="display:none" title="当前觉醒天赋"></span>
     <span id="saveState" class="saveok">✅ 云端已同步</span>
     <button id="btnDaily" class="daily-btn" title="每日签到：金币+药剂礼包">🎁 签到</button>
-    <button id="btnFx" class="daily-btn" title="特效开关：关掉飘字与动画（低配/省电）">✨ 特效</button>
-    <button id="btnMotion" class="daily-btn" title="静态模式：停用全部动画与过渡（晕动敏感/更省电）">🧘 静态模式</button>
-    <button id="btnTheme" class="daily-btn" title="主题切换：玄夜（暗）/宣纸（亮）/星空（紫）/水墨（纸）/霓虹（夜）/极光（蓝）/深海（青）/熔火（橙）">🌗 主题</button>
-    <button id="btnFont" class="daily-btn" title="字号切换：标准/大/特大">🔠 字号</button>
-    <button id="btnHelp" class="daily-btn" title="玩法说明与新功能一览">❓ 帮助</button>
-    <span id="netState" class="netok">●</span>
+    <span id="netState" class="netok" role="status" aria-label="云端连接正常">●</span>
   </div>
 </header>
 
@@ -163,33 +165,18 @@
       <input id="logSearch" class="log-search" type="text" placeholder="🔍 搜日志（与下方分类筹码叠加过滤）" autocomplete="off">
       <div id="eventLog" class="event-log" title="最近的战斗大事（Boss 击杀 / 图纸 / 史诗掉落）"></div>
     </section>
-
-    <section class="panel map-panel">
-      <h2>🗺️ 地图 <span class="panel-tip">战斗与切图始终可见</span></h2>
-      <div class="zones" id="zoneBtns"></div>
-      <button id="btnDeepestZone" class="boss-btn" title="按当前面板达标情况，一键前往序号最深的可进区域">🚀 前往最深可进区域</button>
-      <button id="btnSweep10" class="boss-btn" title="花金币扫荡当前区域 10 次：单杀 50+区域深度×50 金（新区更贵），只涨区域精通与击杀类任务进度，不出掉落">🧹 扫荡×10</button>
-      <button id="btnSweep100" class="boss-btn" title="花金币扫荡当前区域 100 次：单杀 50+区域深度×50 金（新区更贵），只涨区域精通与击杀类任务进度，不出掉落">🧹 扫荡×100</button>
-      <button id="btnBoss" class="boss-btn">👑 挑战 Boss</button>
-      <button id="btnTraits" class="boss-btn" title="野怪出生可能携带的词条一览">📖 词条图鉴</button>
-      <button id="btnSets" class="boss-btn" title="区域套装成员与加成一览">🧩 套装图鉴</button>
-      <button id="btnAuto" class="boss-btn" title="服务端一直在自动挂机结算;此按钮只是暂停本页面刷新(死亡弹窗也会暂停)">🤖 自动挂机（开）</button>
-    </section>
   </div>
 
-  <section class="panel utility-panel">
-    <nav class="game-tabs" role="tablist">
-      <button id="tabBtnEquip" class="game-tab active" data-tab="equip">🎒 装备</button>
-      <button id="tabBtnSkills" class="game-tab" data-tab="skills">✋ 技能药剂</button>
-      <button id="tabBtnQuest" class="game-tab" data-tab="quest">📜 委托<span id="questBadge" class="tab-badge" hidden></span></button>
-      <button id="tabBtnCraft" class="game-tab" data-tab="craft">⚒️ 锻造</button>
-      <button id="tabBtnRole" class="game-tab" data-tab="role">👤 角色<span id="achBadge" class="tab-badge" hidden></span></button>
-      <button id="tabBtnSave" class="game-tab" data-tab="save">💾 存档</button>
-      <button id="tabBtnSocial" class="game-tab" data-tab="social">🏮 江湖</button>
-      <button id="tabBtnRank" class="game-tab" data-tab="rank">🏆 榜单</button>
-    </nav>
+  <section id="utilityPanel" class="panel utility-panel" aria-labelledby="workspaceTitle">
+    <header class="workspace-bar">
+      <h2 id="workspaceTitle"><span id="workspaceIcon" aria-hidden="true">🎒</span> <span id="workspaceName">装备与背包</span></h2>
+      <div class="workspace-actions">
+        <button id="btnWorkspaceNav" class="workspace-action" type="button" data-open-drawer="nav" aria-controls="navDrawer" aria-expanded="false">☰ 全部功能</button>
+        <button id="btnWorkspaceClose" class="workspace-action workspace-close" type="button" aria-label="收起当前功能">⌄ 收起</button>
+      </div>
+    </header>
 
-    <div id="tabEquip" class="tab-pane active" data-pane="equip">
+    <div id="tabEquip" class="tab-pane active" data-pane="equip" role="tabpanel" aria-labelledby="tabBtnEquip">
       <div class="equip-cols">
         <div class="equipped-box">
           <h2>👤 已装备</h2>
@@ -307,6 +294,107 @@
     </div>
   </section>
 </main>
+
+<div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
+<aside id="navDrawer" class="side-drawer side-drawer--left nav-drawer" aria-labelledby="navDrawerTitle" aria-hidden="true" inert>
+  <header class="drawer-header">
+    <div>
+      <h2 id="navDrawerTitle">功能目录</h2>
+      <p>选择一项作为当前工作区</p>
+    </div>
+    <button class="drawer-close" type="button" data-close-drawer aria-label="关闭功能目录">×</button>
+  </header>
+  <nav class="game-tabs drawer-tab-list" role="tablist" aria-label="游戏功能">
+    <button id="tabBtnEquip" class="game-tab active" data-tab="equip" role="tab" aria-selected="true" aria-controls="tabEquip">🎒 装备</button>
+    <button id="tabBtnSkills" class="game-tab" data-tab="skills" role="tab" aria-selected="false" aria-controls="tabSkills" tabindex="-1">✋ 技能药剂</button>
+    <button id="tabBtnQuest" class="game-tab" data-tab="quest" role="tab" aria-selected="false" aria-controls="tabQuest" tabindex="-1">📜 委托<span id="questBadge" class="tab-badge" hidden></span></button>
+    <button id="tabBtnCraft" class="game-tab" data-tab="craft" role="tab" aria-selected="false" aria-controls="tabCraft" tabindex="-1">⚒️ 锻造</button>
+    <button id="tabBtnRole" class="game-tab" data-tab="role" role="tab" aria-selected="false" aria-controls="tabRole" tabindex="-1">👤 角色<span id="achBadge" class="tab-badge" hidden></span></button>
+    <button id="tabBtnSave" class="game-tab" data-tab="save" role="tab" aria-selected="false" aria-controls="tabSave" tabindex="-1">💾 存档</button>
+    <button id="tabBtnSocial" class="game-tab" data-tab="social" role="tab" aria-selected="false" aria-controls="tabSocial" tabindex="-1">🏮 江湖</button>
+    <button id="tabBtnRank" class="game-tab" data-tab="rank" role="tab" aria-selected="false" aria-controls="tabRank" tabindex="-1">🏆 榜单</button>
+  </nav>
+  <div class="drawer-section drawer-nav-extras">
+    <button class="drawer-menu-action" type="button" data-open-drawer="map">🗺️ 地图与区域行动 <span>M</span></button>
+    <button class="drawer-menu-action" type="button" data-open-drawer="settings">⚙️ 界面与偏好设置</button>
+  </div>
+  <p class="drawer-footnote">快捷键：E 装备 · Q 委托 · X 药剂 · V 锻造</p>
+</aside>
+
+<aside id="mapDrawer" class="side-drawer side-drawer--right map-drawer" aria-labelledby="mapDrawerTitle" aria-hidden="true" inert>
+  <header class="drawer-header">
+    <div>
+      <h2 id="mapDrawerTitle">地图与行动</h2>
+      <p>换区后收起抽屉，战斗不会中断</p>
+    </div>
+    <button class="drawer-close" type="button" data-close-drawer aria-label="关闭地图">×</button>
+  </header>
+  <div class="drawer-scroll">
+    <section class="panel map-panel" aria-label="区域与战斗行动">
+      <div class="zones" id="zoneBtns"></div>
+      <div class="map-primary-actions">
+        <button id="btnDeepestZone" class="boss-btn" title="按当前面板达标情况，一键前往序号最深的可进区域">🚀 前往最深可进区域</button>
+        <button id="btnBoss" class="boss-btn">👑 挑战 Boss</button>
+      </div>
+      <div class="map-secondary-actions">
+        <button id="btnSweep10" class="boss-btn" title="花金币扫荡当前区域 10 次：只涨区域精通与击杀类任务进度，不出掉落">🧹 扫荡×10</button>
+        <button id="btnSweep100" class="boss-btn" title="花金币扫荡当前区域 100 次：只涨区域精通与击杀类任务进度，不出掉落">🧹 扫荡×100</button>
+        <button id="btnAuto" class="boss-btn" title="服务端一直在自动挂机结算；此按钮只暂停本页面刷新">🤖 自动挂机（开）</button>
+      </div>
+      <div class="map-reference-actions">
+        <button id="btnTraits" class="boss-btn" title="野怪出生可能携带的词条一览">📖 词条图鉴</button>
+        <button id="btnSets" class="boss-btn" title="区域套装成员与加成一览">🧩 套装图鉴</button>
+      </div>
+    </section>
+  </div>
+</aside>
+
+<aside id="settingsDrawer" class="side-drawer side-drawer--right settings-drawer" aria-labelledby="settingsDrawerTitle" aria-hidden="true" inert>
+  <header class="drawer-header">
+    <div>
+      <h2 id="settingsDrawerTitle">界面与偏好</h2>
+      <p>所有选择仍保存在本机</p>
+    </div>
+    <button class="drawer-close" type="button" data-close-drawer aria-label="关闭界面设置">×</button>
+  </header>
+  <div class="drawer-scroll settings-content">
+    <section class="settings-group" aria-labelledby="appearanceTitle">
+      <h3 id="appearanceTitle">阅读与主题</h3>
+      <p>八套主题循环切换，字号随偏好即时调整。</p>
+      <div class="settings-controls">
+        <button id="btnTheme" class="daily-btn" title="主题切换：玄夜 / 宣纸 / 星空 / 水墨 / 霓虹 / 极光 / 深海 / 熔火">🌗 主题</button>
+        <button id="btnFont" class="daily-btn" title="字号切换：标准 / 大 / 特大">🔠 字号</button>
+      </div>
+    </section>
+    <section class="settings-group" aria-labelledby="motionTitle">
+      <h3 id="motionTitle">动效与性能</h3>
+      <p>静态模式尊重晕动敏感需求，低特效可减少挂机开销。</p>
+      <div class="settings-controls">
+        <button id="btnMotion" class="daily-btn" title="静态模式：停用全部动画与过渡">🧘 静态模式</button>
+        <button id="btnFx" class="daily-btn" title="特效开关：关掉飘字与动画">✨ 特效</button>
+      </div>
+    </section>
+    <section class="settings-group" aria-labelledby="audioTitle">
+      <h3 id="audioTitle">游戏音效</h3>
+      <p>音效开关收入设置，不再悬浮遮挡战斗日志。</p>
+      <div id="audioSettingsSlot" class="audio-settings-slot"></div>
+    </section>
+    <section class="settings-group" aria-labelledby="helpTitle">
+      <h3 id="helpTitle">玩法支持</h3>
+      <p>查看核心循环、系统说明、快捷键与新增内容。</p>
+      <button id="btnHelp" class="daily-btn" title="玩法说明与新功能一览">❓ 打开玩法帮助</button>
+    </section>
+  </div>
+</aside>
+
+<nav class="mobile-dock" aria-label="快捷功能">
+  <button type="button" data-dock-action="combat" class="dock-btn active"><span aria-hidden="true">⚔️</span>战斗</button>
+  <button type="button" data-dock-tab="equip" class="dock-btn"><span aria-hidden="true">🎒</span>装备</button>
+  <button type="button" data-dock-tab="quest" class="dock-btn"><span aria-hidden="true">📜</span>委托</button>
+  <button type="button" data-open-drawer="map" class="dock-btn" aria-controls="mapDrawer" aria-expanded="false"><span aria-hidden="true">🗺️</span>地图</button>
+  <button type="button" data-open-drawer="nav" class="dock-btn" aria-controls="navDrawer" aria-expanded="false"><span aria-hidden="true">☰</span>全部</button>
+</nav>
 </div>
 
 <!-- ======== 死亡画面 ======== -->
@@ -346,13 +434,14 @@
   </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=234"></script>
-<script src="js/api.js?v=234"></script>
-<script src="js/achievements.js?v=234"></script>
-<script src="js/tutorial.js?v=234"></script>
-<script src="js/app.js?v=234"></script>
+<script src="js/audio.js?v=250"></script>
+<script src="js/api.js?v=250"></script>
+<script src="js/achievements.js?v=250"></script>
+<script src="js/tutorial.js?v=250"></script>
+<script src="js/drawer.js?v=250"></script>
+<script src="js/app.js?v=250"></script>
 </body>
 </html>

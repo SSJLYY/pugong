@@ -64,9 +64,14 @@
     try { return localStorage.getItem('gongpu_fx') === 'off'; } catch (e) { return false; }
   }
   function applyFxPref() {
-    document.body.classList.toggle('fx-off', fxOff());
+    const off = fxOff();
+    document.body.classList.toggle('fx-off', off);
     const b = $('btnFx');
-    if (b) b.textContent = fxOff() ? '🚫 特效' : '✨ 特效';
+    if (b) {
+      b.textContent = off ? '🚫 特效已关' : '✨ 特效已开';
+      b.setAttribute('aria-pressed', String(off));
+      b.setAttribute('aria-label', off ? '开启战斗特效' : '关闭战斗特效');
+    }
   }
 
   // ---------------- 静态模式（第十批）：与低特效独立的偏好开关，body 类停用全部动画/过渡 ----------------
@@ -74,9 +79,14 @@
     try { return localStorage.getItem('gongpu_motion') === 'off'; } catch (e) { return false; }
   }
   function applyMotionPref() {
-    document.body.classList.toggle('motion-off', motionOff());
+    const off = motionOff();
+    document.body.classList.toggle('motion-off', off);
     const b = $('btnMotion');
-    if (b) b.textContent = motionOff() ? '🧘 静态·开' : '🧘 静态模式';
+    if (b) {
+      b.textContent = off ? '🧘 静态·开' : '🧘 静态模式';
+      b.setAttribute('aria-pressed', String(off));
+      b.setAttribute('aria-label', off ? '关闭静态模式，恢复动画' : '开启静态模式，停用动画');
+    }
   }
 
   // ---------------- 主题切换（第七批玄夜/宣纸；第八批加星空三循环），存 localStorage ----------------
@@ -96,7 +106,10 @@
     document.body.classList.toggle('fs-l', f === 'l');
     document.body.classList.toggle('fs-xl', f === 'xl');
     const b = $('btnFont');
-    if (b) b.textContent = { m: '🔠 字号', l: '🔠 大字', xl: '🔠 特大' }[f] || '🔠 字号';
+    if (b) {
+      b.textContent = { m: '🔠 字号', l: '🔠 大字', xl: '🔠 特大' }[f] || '🔠 字号';
+      b.setAttribute('aria-label', '切换字号，当前' + ({ m: '标准', l: '大字', xl: '特大' }[f] || '标准'));
+    }
   }
   function applyThemePref() {
     const t = themeName();
@@ -108,7 +121,17 @@
     document.body.classList.toggle('theme-tide', t === 'tide');
     document.body.classList.toggle('theme-ember', t === 'ember');
     const b = $('btnTheme');
-    if (b) b.textContent = THEME_LABEL[t] || THEME_LABEL.dark;
+    if (b) {
+      b.textContent = THEME_LABEL[t] || THEME_LABEL.dark;
+      b.setAttribute('aria-label', '切换主题，当前' + (b.textContent.replace(/^\S+\s*/, '') || '玄夜'));
+    }
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.content = {
+      dark: '#14100c', light: '#f3ecd9', star: '#0b1030', ink: '#ece7db',
+      neon: '#150a2a', aurora: '#071a30', tide: '#07273d', ember: '#2a0d06'
+    }[t] || '#14100c';
+    document.documentElement.style.colorScheme = (t === 'light' || t === 'ink') ? 'light' : 'dark';
+    document.body.dataset.theme = t;
   }
 
   // ---------------- 战斗飘字（预算节流防爆屏） ----------------
@@ -196,9 +219,11 @@
 
   function setNet(ok) {
     const el = $('netState');
+    const text = ok ? '云端连接正常' : '连接中断，自动重试中';
     el.textContent = ok ? '●' : '○';
     el.className = ok ? 'netok' : 'netbad';
-    el.title = ok ? '云端连接正常' : '连接中断，自动重试中';
+    el.title = text;
+    el.setAttribute('aria-label', text);
   }
 
   function sfx(name) {
@@ -1322,7 +1347,7 @@
         '<div class="trait-row"><b>🌿 新词条与破甲</b><span>新词条🌿再生（怪每秒回 3% 血，速杀克它）与🪨坚韧（你的暴击对它减半，平推克它）已入深区；被动「破甲专精」与破甲药剂能无视防御、乘算叠加，厚甲怪不再难啃；新招「连环掌」让接下来 30 次命中全部双击。</span></div>',
         '<div class="trait-row"><b>🏅 成就</b><span>角色页成就带进度条与金币奖励，可按可领取/进行中筛选，解锁后记得领取（可一键全领）。累计领取达 15/30/45/60/75 项还有里程碑奖金（1 万/3 万/8 万/20 万/50 万，每档一次）。</span></div>',
         '<div class="trait-row"><b>✋ 扩展技能</b><span>战斗区第二行：治愈术（回 35% 血）/ 嗜血术 / 铁壁 / 净化（清中毒·灼烧·沉默·时滞·寒霜）/ 冲锋（下一击 ×3）/ 迟缓咒（怪攻速 -30%）。</span></div>',
-        '<div class="trait-row"><b>🎨 界面偏好</b><span>顶栏可关特效（省电低配）、循环切换玄夜/宣纸/星空/水墨/霓虹/极光/深海/熔火八种主题；药剂可 📌 置顶常用款，弱网时轮询会自动降频。</span></div>',
+        '<div class="trait-row"><b>🎨 双窗与抽屉</b><span>主屏固定「战斗 + 当前功能」，地图、功能目录、界面设置分别收进独立抽屉；手机功能页从底部展开。按 M 开地图、N 开功能目录、Esc 返回战斗。设置抽屉可关特效、循环切换八种主题与三档字号；药剂可 📌 置顶常用款，弱网时轮询会自动降频。</span></div>',
         '<div class="trait-row"><b>🌌 极光与日志搜索</b><span>第六种主题「🌌 极光」：深蓝夜幕打底，青绿与蓝紫极光辉光描边，标题自带流光。战斗日志上方新增 🔍 搜索框：输入关键词即按文本过滤日志（与 👑 Boss/🧺 掉落/📌 系统分类筹码叠加生效，清空恢复）；页签标题也会带上 ⚔️ DPS 历史峰值，切去别的标签页也能瞄见战力。</span></div>',
         '<div class="trait-row"><b>🌆 霓虹与静态模式</b><span>新主题「🌆 霓虹」：深紫夜幕打底、青与品红霓虹描边，标题自带辉光；顶栏「🧘 静态模式」是与特效开关独立的偏好，一键停用全站动画与过渡，晕动敏感或想更省电时开启。另：顶栏 ⚔️ DPS 筹码会记住你的历史峰值（悬浮可见），委托页出战宠物卡带经验进度条。</span></div>',
         '<div class="trait-row"><b>🖌 水墨主题</b><span>参照文字修仙类游戏的纸面居中卡布局：水墨远山底、朱砂点缀、属性改标签网格、已装备改品质标签、战斗区顶部有随场景变化的叙事条；顶栏另有 💪 综合战力（DPS×生存×防御）供横向比较。布局灵感致谢开源项目《我的文字修仙全靠刷》（vue-XiuXianGame，CC BY-NC 4.0），本作实现为原创代码。</span></div>',
@@ -3516,8 +3541,18 @@
     const card = $('statCard');
     if (!badge || !card) return;
     let hideTimer = null;
-    const open = () => { clearTimeout(hideTimer); card.classList.add('open'); };
-    const close = () => { clearTimeout(hideTimer); card.classList.remove('open'); };
+    const open = () => {
+      clearTimeout(hideTimer);
+      card.classList.add('open');
+      card.setAttribute('aria-hidden', 'false');
+      badge.setAttribute('aria-expanded', 'true');
+    };
+    const close = () => {
+      clearTimeout(hideTimer);
+      card.classList.remove('open');
+      card.setAttribute('aria-hidden', 'true');
+      badge.setAttribute('aria-expanded', 'false');
+    };
     const closeSoon = () => { clearTimeout(hideTimer); hideTimer = setTimeout(close, 180); };
     // 悬浮仅限真指针设备:触屏 tap 会先触发 mouseenter 再 click,悬浮+点击同挂会互相打架
     if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
@@ -3526,7 +3561,18 @@
       card.addEventListener('mouseenter', open);
       card.addEventListener('mouseleave', closeSoon);
     }
-    badge.addEventListener('click', (e) => { e.stopPropagation(); card.classList.toggle('open'); });
+    badge.setAttribute('aria-expanded', 'false');
+    card.setAttribute('aria-hidden', 'true');
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (card.classList.contains('open')) close(); else open();
+    });
+    badge.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (card.classList.contains('open')) close(); else open();
+    });
     card.addEventListener('click', (e) => e.stopPropagation());
     // statlord:点击属性行 → 选数量加点(金币/统计行无 data-stat,不响应)
     card.addEventListener('click', async (e) => {

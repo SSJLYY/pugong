@@ -29,3 +29,5 @@ server/logs/
 .zcode/
 dump.rdb
 commit-msg-*.txt
+.impeccable/edge-profile/
+.impeccable/edge-ui-profile/

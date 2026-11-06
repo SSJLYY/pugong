@@ -34,6 +34,44 @@ public class SaveService {
         this.cache = cache;
     }
 
+    // ---- 冗余列边界防护（第十四批修复，2026-11-06）----
+    // 事故：玩家终身击杀指数增长冲破 10^65，DECIMAL(65,0) 冗余列 Out of range，
+    // 整批 update 失败 → 登录/存档 500（「服务器开小差」）。
+    // state_json 才是真实状态源，冗余列仅供运营 SUM，超限时钳到上限，不丢玩家数据。
+
+    /** 冗余统计列安全上限：DECIMAL(65,0) 极值 10^65-1，取 10^63 留两级聚合余量。 */
+    private static final java.math.BigDecimal STATS_COLUMN_CAP =
+            java.math.BigDecimal.ONE.scaleByPowerOfTen(63);
+
+    /** max_hp 列宽 varchar(80)：大数 toPlainString 可能超长，需截断。 */
+    private static final int MAX_HP_COLUMN_LEN = 80;
+
+    /** 冗余统计列写入钳制：null→0、去尾零、超 ±10^63 封顶（保持单调，聚合安全）。 */
+    static java.math.BigDecimal capStatsColumn(java.math.BigDecimal v) {
+        if (v == null) {
+            return java.math.BigDecimal.ZERO;
+        }
+        java.math.BigDecimal s = v.stripTrailingZeros();
+        if (s.scale() != 0) {
+            s = s.setScale(0, java.math.RoundingMode.DOWN);
+        }
+        if (s.compareTo(STATS_COLUMN_CAP) > 0) {
+            return STATS_COLUMN_CAP;
+        }
+        if (s.compareTo(STATS_COLUMN_CAP.negate()) < 0) {
+            return STATS_COLUMN_CAP.negate();
+        }
+        return s;
+    }
+
+    /** varchar 列写入截断。 */
+    static String capVarchar(String s, int len) {
+        if (s == null || s.length() <= len) {
+            return s;
+        }
+        return s.substring(0, len);
+    }
+
     // 存档体积观测（第八批）：落库 JSON 字节数——体积膨胀是编解码/落库成本的第一指标
     private static final java.util.concurrent.atomic.AtomicLong STATE_BYTES_LAST =
             new java.util.concurrent.atomic.AtomicLong();
@@ -219,13 +257,13 @@ public class SaveService {
         }
         gs.setGen(s.gen);
         gs.setZone(s.zone);
-        gs.setMaxHp(Num.plain(s.life.maxHP));
+        gs.setMaxHp(capVarchar(Num.plain(s.life.maxHP), MAX_HP_COLUMN_LEN));
         gs.setAliveSeconds(StateCodec.aliveSeconds(s));
         // 运营统计冗余列：与 JSON 内 stats 同步维护，聚合端一条 SUM 取全服累计
         if (s.stats != null) {
             // 冗余列存终身口径：当世 punches/kills 每世重置，聚合 SUM 必须单调（见 StatDailyAggregator）
-            gs.setPunchesTotal(s.stats.lifetimePunches == null ? java.math.BigDecimal.ZERO : s.stats.lifetimePunches);
-            gs.setKillsTotal(s.stats.lifetimeKills == null ? java.math.BigDecimal.ZERO : s.stats.lifetimeKills);
+            gs.setPunchesTotal(capStatsColumn(s.stats.lifetimePunches));
+            gs.setKillsTotal(capStatsColumn(s.stats.lifetimeKills));
             gs.setDeathsTotal(s.stats.deaths);
             gs.setRebirthsTotal(s.stats.rebirths);
         }
@@ -317,10 +355,10 @@ public class SaveService {
         gs.setUpdatedAt(Instant.now());
         gs.setGen(restored.gen);
         gs.setZone(restored.zone);
-        gs.setMaxHp(Num.plain(restored.life.maxHP));
+        gs.setMaxHp(capVarchar(Num.plain(restored.life.maxHP), MAX_HP_COLUMN_LEN));
         if (restored.stats != null) {
-            gs.setPunchesTotal(restored.stats.lifetimePunches == null ? java.math.BigDecimal.ZERO : restored.stats.lifetimePunches);
-            gs.setKillsTotal(restored.stats.lifetimeKills == null ? java.math.BigDecimal.ZERO : restored.stats.lifetimeKills);
+            gs.setPunchesTotal(capStatsColumn(restored.stats.lifetimePunches));
+            gs.setKillsTotal(capStatsColumn(restored.stats.lifetimeKills));
             gs.setDeathsTotal(restored.stats.deaths);
             gs.setRebirthsTotal(restored.stats.rebirths);
         }

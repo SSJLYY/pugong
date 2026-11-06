@@ -1154,3 +1154,331 @@ button:disabled { cursor: not-allowed; }
   color: var(--gold);
   font-weight: 700;
 }
+
+/* ===== 第十五批 A 线追加（主战斗与信息呈现 R1-R11 配套） ===== */
+
+/* R2 飞升进度条：攻速→通关线 1e44 的百分比，细金条 + 淡描边 */
+.ascend-prog {
+  position: relative;
+  height: 14px;
+  margin: 8px 0 4px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid var(--border-strong, rgba(232, 197, 104, .25));
+  overflow: hidden;
+}
+.ascend-prog-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #6b4f1e, #e8c872 65%, #ffe9a8);
+  transition: width .35s ease-out;
+}
+.ascend-prog-txt {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  color: var(--gold-bright, #ffe9a8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
+  pointer-events: none;
+}
+body.motion-off .ascend-prog-fill { transition: none; }
+
+/* R3 世代徽章四档：青 → 金 → 紫 → 虹光 */
+#gen.gen-t1 { color: #8fa6b8; }
+#gen.gen-t2 { color: #e8c872; }
+#gen.gen-t3 { color: #c58bff; text-shadow: 0 0 6px rgba(197, 139, 255, .45); }
+#gen.gen-t4 {
+  background: linear-gradient(90deg, #ff8ab0, #ffd970, #8be8ff, #c58bff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+/* R4 HUD 双速率：小号等宽，与击杀速率并列不抢眼 */
+#hudPps { font-size: 11.5px; color: var(--gold, #d9b06c); opacity: .9; }
+
+/* R5 HP 趋势迷你图：与生命上限数字同行右端 */
+#hpSpark {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+  width: 110px;
+  height: 26px;
+  opacity: .85;
+  background: rgba(0, 0, 0, .18);
+  border-radius: 4px;
+}
+
+/* R6 断线三态：黄=连接不稳定，红=重连中 */
+#netState.net-warn { color: #e3b341; }
+#netState.net-bad { color: #ff6b6b; animation: net-pulse 1.1s ease-in-out infinite; }
+@keyframes net-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+body.motion-off #netState.net-bad { animation: none; }
+
+/* R8 尸检折叠按钮 */
+#autopsyToggle { display: block; width: 100%; margin: 8px 0 4px; font-size: 12px; }
+#deathAutopsy[hidden] { display: none; }
+
+/* R9 日志增强：回底按钮 / 行首时间戳 / 新行高亮渐隐 */
+.ev-bottom-btn {
+  display: block;
+  margin: 4px 0 0 auto;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong, rgba(232, 197, 104, .25));
+  background: rgba(0, 0, 0, .3);
+  color: var(--gold, #d9b06c);
+  cursor: pointer;
+}
+.ev-bottom-btn:hover { background: rgba(232, 197, 104, .12); }
+.event-line .ev-ts { color: var(--txt-faint, #7b7168); margin-right: 5px; font-variant-numeric: tabular-nums; }
+.event-line.event-fresh { animation: ev-fresh 2.4s ease-out 1; }
+@keyframes ev-fresh {
+  0% { background: rgba(232, 197, 104, .22); }
+  100% { background: transparent; }
+}
+body.motion-off .event-line.event-fresh { animation: none; }
+
+/* R10 药剂低库存角标 */
+.potion-item.potion-low { position: relative; border-color: rgba(255, 107, 107, .45); }
+.potion-item.potion-low::after {
+  content: '低';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: #d9433f;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .35);
+  pointer-events: none;
+}
+
+/* R12 Boss 按钮就绪态：交战中呼吸红边 */
+#btnBoss.boss-fighting {
+  border-color: #d9433f;
+  color: #ffb3b0;
+  animation: boss-fight-pulse 1.4s ease-in-out infinite;
+}
+@keyframes boss-fight-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 67, 63, 0); }
+  50% { box-shadow: 0 0 0 3px rgba(217, 67, 63, .28); }
+}
+body.motion-off #btnBoss.boss-fighting { animation: none; }
+
+/* R13 下一站推荐：脉冲描边提醒玩家冲门槛 */
+.zone-btn.next-zone {
+  border-color: var(--gold-bright, #ffe9a8) !important;
+  animation: next-zone-pulse 1.8s ease-in-out infinite;
+}
+.zone-btn.next-zone::before {
+  content: '→';
+  margin-right: 3px;
+  color: var(--gold-bright, #ffe9a8);
+  font-weight: 700;
+}
+@keyframes next-zone-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 197, 104, .0); }
+  50% { box-shadow: 0 0 0 3px rgba(232, 197, 104, .22); }
+}
+body.motion-off .zone-btn.next-zone { animation: none; }
+
+/* R14 词条徽章可悬停：给可点击提示 */
+#mobDesc.has-trait { cursor: help; text-decoration: underline dotted rgba(232, 197, 104, .45); text-underline-offset: 3px; }
+
+/* R16 赋能行：可悬停详情 */
+#blessRow { cursor: help; }
+#blessRow:hover { color: var(--gold-bright, #ffe9a8); }
+
+/* R17 属性卡每秒增量：绿色小字挂在 td[data-rate] 后，不重建 DOM */
+.stat-hover-card td[data-rate]::after {
+  content: ' ' attr(data-rate);
+  color: #6fcf6f;
+  font-size: 10.5px;
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* R19 宠物卡定位高亮 */
+.save-box.pet-focus { box-shadow: 0 0 0 2px var(--gold, #d9b06c); transition: box-shadow .3s ease; }
+
+/* R20 toast 堆叠层：主 toast 上方逐条淡出（最多 3 条） */
+.toast-stack {
+  position: fixed;
+  bottom: 66px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+  z-index: 199;
+  pointer-events: none;
+  align-items: center;
+}
+.toast-stack-item {
+  background: rgba(24, 22, 16, .9);
+  border: 1px solid var(--border-strong, rgba(232, 197, 104, .25));
+  border-radius: 18px;
+  padding: 7px 16px;
+  font-size: 12px;
+  color: var(--txt-dim, #c9bdb2);
+  white-space: nowrap;
+  max-width: 84vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: .92;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.toast-stack-item.out { opacity: 0; transform: translateY(-6px); }
+.toast-stack-item.ok { border-color: rgba(111, 207, 111, .5); }
+.toast-stack-item.err { border-color: rgba(217, 67, 63, .55); }
+
+/* R22 金币大额进出：HUD 短闪绿进红出 */
+#hudGold.gold-up { animation: gold-flash-up .9s ease-out 1; }
+#hudGold.gold-down { animation: gold-flash-down .9s ease-out 1; }
+@keyframes gold-flash-up {
+  0% { color: #6fcf6f; text-shadow: 0 0 8px rgba(111, 207, 111, .7); transform: scale(1.08); }
+  100% { color: inherit; text-shadow: none; transform: scale(1); }
+}
+@keyframes gold-flash-down {
+  0% { color: #ff6b6b; text-shadow: 0 0 8px rgba(255, 107, 107, .7); transform: scale(1.08); }
+  100% { color: inherit; text-shadow: none; transform: scale(1); }
+}
+body.motion-off #hudGold.gold-up,
+body.motion-off #hudGold.gold-down { animation: none; }
+.float-dmg.gold-out { color: #ff8a80; }
+
+/* R25 今日未签到红点 */
+#btnDaily.daily-todo { position: relative; border-color: rgba(217, 67, 63, .55); }
+#btnDaily.daily-todo::after {
+  content: '';
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ff5252;
+  box-shadow: 0 0 0 2px rgba(20, 17, 12, .9);
+  animation: daily-dot 1.6s ease-in-out infinite;
+}
+@keyframes daily-dot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: .65; } }
+body.motion-off #btnDaily.daily-todo::after { animation: none; }
+
+/* R26 增益/减益分色：好绿坏红，视觉分组 */
+.buff-chip[data-grp="good"] { border-color: rgba(111, 207, 111, .45); }
+.buff-chip[data-grp="bad"] { border-color: rgba(217, 67, 63, .5); }
+
+/* R27 沉默生效：主动技能统一置灰 */
+.skill-btn.silenced {
+  opacity: .45;
+  filter: grayscale(.7);
+  cursor: not-allowed;
+}
+
+/* R29 技能冷却角标：右上角剩余秒数，最后 1 秒转红 */
+.skill-btn { position: relative; }
+.cd-badge {
+  position: absolute;
+  top: -5px; right: -5px;
+  min-width: 18px; height: 18px;
+  line-height: 18px;
+  padding: 0 3px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  background: rgba(60, 48, 30, .95);
+  border: 1px solid rgba(232, 197, 104, .5);
+  pointer-events: none;
+}
+.cd-badge.cd-soon { background: #d9433f; border-color: #ff8a80; }
+
+/* R30 连环掌芯片强调 */
+.buff-chip.flurry-chip { border-color: rgba(232, 197, 104, .7); box-shadow: 0 0 0 1px rgba(232, 197, 104, .25); font-weight: 700; }
+
+/* R31 自动挂机开关状态色 */
+#btnAuto.auto-on { border-color: rgba(111, 207, 111, .55); color: #9fe89f; }
+#btnAuto:not(.auto-on) { opacity: .72; }
+
+/* R33 存档状态四态（沿用 saveok/savewarn/savebad，补可悬停提示） */
+#saveState { cursor: help; }
+
+/* R38 榜单：我的名次高亮 + 定位按钮 + 闪烁提示 */
+.grave-item.rank-me {
+  border-color: var(--gold, #d9b06c);
+  background: rgba(232, 197, 104, .08);
+}
+.grave-item.rank-me .me-tag {
+  font-style: normal;
+  font-size: 10px;
+  padding: 1px 5px;
+  margin-left: 4px;
+  border-radius: 8px;
+  background: var(--gold, #d9b06c);
+  color: #1b160e;
+  font-weight: 700;
+}
+.grave-item.rank-flash { animation: rank-flash 1.5s ease-out 1; }
+@keyframes rank-flash {
+  0% { box-shadow: 0 0 0 3px rgba(232, 197, 104, .55); }
+  100% { box-shadow: none; }
+}
+.rank-goto {
+  display: block;
+  margin: 8px auto 0;
+  padding: 5px 14px;
+  font-size: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border-strong, rgba(232, 197, 104, .25));
+  background: rgba(0, 0, 0, .28);
+  color: var(--gold, #d9b06c);
+  cursor: pointer;
+}
+.rank-goto:hover { background: rgba(232, 197, 104, .14); }
+
+/* R43 任务：可交付徽章 + 百分比 */
+.daily-head .deliver-badge {
+  font-style: normal;
+  font-size: 10px;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(111, 207, 111, .18);
+  border: 1px solid rgba(111, 207, 111, .5);
+  color: #9fe89f;
+}
+.daily-prog .daily-pct { font-style: normal; font-size: 10.5px; color: var(--txt-faint, #7b7168); margin-left: 6px; }
+
+/* R41 黑市：售罄态与限购余量 */
+.market-item.market-soldout { opacity: .6; }
+.market-item .market-sold {
+  font-style: normal; font-size: 10px; margin-left: 4px;
+  padding: 1px 5px; border-radius: 8px;
+  background: rgba(217, 67, 63, .18); border: 1px solid rgba(217, 67, 63, .45); color: #ff9d99;
+}
+
+/* R44 宠物经验条：增长平滑动画 */
+.pet-exp-bar { height: 6px; border-radius: 3px; background: rgba(0,0,0,.35); overflow: hidden; margin: 4px 0 8px; }
+.pet-exp-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, #6b4f1e, #e8c872);
+  transition: width .45s cubic-bezier(.2,.7,.3,1);
+}
+body.motion-off .pet-exp-fill { transition: none; }
+
+/* R45 空状态行动指引 */
+.empty-hint.act-hint { line-height: 1.8; }
+.empty-hint .act-link { color: var(--gold, #d9b06c); text-decoration: underline dotted; cursor: pointer; }

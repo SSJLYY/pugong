@@ -29,8 +29,19 @@
       <span class="ov-item">存档 <b id="ovSaves">-</b></span>
       <span class="ov-item">墓碑 <b id="ovGraves">-</b></span>
       <span class="ov-item" id="ovToday" title="今日运营增量(每小时聚合)" style="display:none"></span>
+      <!-- 第十五批·轮4：服务健康徽章（redis/mysql 圆点 + 文字，数据源 /api/health） -->
+      <span class="ov-item" id="healthBadge" title="服务健康状态（redis / mysql）"><span class="health-dot pending"></span>健康检测中…</span>
     </div>
     <div class="adm-actions">
+      <!-- 第十五批·轮7：自动刷新间隔（关闭/5s/15s/60s），localStorage 记忆，0=停止 -->
+      <select id="refreshSel" class="adm-input" title="自动刷新间隔">
+        <option value="0">自动刷新：关闭</option>
+        <option value="5">自动刷新：5 秒</option>
+        <option value="15">自动刷新：15 秒</option>
+        <option value="60">自动刷新：60 秒</option>
+      </select>
+      <!-- 第十五批·轮6：表格密度切换（紧凑/舒适），localStorage 记忆 -->
+      <button id="btnDensity" class="adm-btn small" title="切换表格行距（紧凑/舒适）">紧凑</button>
       <button id="btnReloadCfg" class="adm-btn small">🔄 刷新配置</button>
       <button id="btnLogout" class="adm-btn small danger">退出</button>
     </div>
@@ -90,7 +101,17 @@
       <section id="page-audit" class="adm-page">
         <div class="page-head">
           <h2>📜 操作审计</h2>
-          <div class="page-tools"><button id="auditRefresh" class="adm-btn small">刷新</button></div>
+          <div class="page-tools">
+            <!-- 第十五批·轮3：级别 + 关键词组合过滤（输入即刷新，不重拉） -->
+            <select id="auditLevel" class="adm-input" title="按级别过滤">
+              <option value="">全部级别</option>
+              <option value="WARN">WARN</option>
+              <option value="ERROR">ERROR</option>
+              <option value="INFO">INFO</option>
+            </select>
+            <input id="auditKw" class="adm-input" placeholder="关键词过滤" maxlength="64">
+            <button id="auditRefresh" class="adm-btn small">刷新</button>
+          </div>
         </div>
         <div class="table-wrap"><table class="adm-table" id="auditTable"></table></div>
       </section>

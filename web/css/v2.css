@@ -1374,3 +1374,62 @@ body.theme-ink .boss-btn{
 .ach-chip.on{border-color:var(--gold);color:var(--gold-bright)}
 .monthly-card{border-color:rgba(167,139,250,.5)}
 .monthly-card.done{border-color:#a78bfa}
+
+/* ===== 第十五批 B3 追加 ===== */
+
+/* 1) 教学步骤圆点行（第十五批）：flex 行 + 8px 圆点，当前点放大 1.4 倍高亮，完成点实心 */
+.tut-dots{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 4px}
+.tut-dots .tut-dot{
+  width:8px;height:8px;border-radius:50%;padding:0;flex:0 0 auto;cursor:pointer;
+  background:transparent;border:1px solid var(--border-strong,var(--border));
+  transition:transform .18s,background .18s,border-color .18s,box-shadow .18s;
+}
+.tut-dots .tut-dot.done{background:var(--gold-dim);border-color:var(--gold-dim)}
+.tut-dots .tut-dot.current{
+  transform:scale(1.4);
+  background:var(--gold-bright);border-color:var(--gold-bright);
+  box-shadow:0 0 8px var(--gold,rgba(232,197,104,.6));
+}
+body.motion-off .tut-dots .tut-dot{transition:none}
+
+/* 2) 水墨主题对比度提升（第十五批）：正文/次要文本变量加深一档（同特异性后置覆盖） */
+body.theme-ink{
+  --txt:#181c15;
+  --txt-dim:#3a4036;
+  --txt-faint:#63685a;
+}
+
+/* 3) 霓虹主题面板背景提亮（第十五批）：--panel/--panel-2 提亮一档 */
+body.theme-neon{
+  --panel:rgba(0,229,255,.09);
+  --panel-2:rgba(255,43,214,.12);
+}
+
+/* 4) 熔火主题 hover 色阶（第十五批）：主要交互 hover 统一熔火橙红高亮 */
+body.theme-ember .d-btn:hover{
+  border-color:#ff6a2a;box-shadow:0 0 12px rgba(255,106,42,.45);
+}
+body.theme-ember .game-tab:hover{
+  color:#ffb37a;border-color:rgba(255,106,42,.65);background:rgba(255,106,42,.12);
+}
+body.theme-ember .dock-btn:hover{
+  color:#ffb37a;border-color:rgba(255,106,42,.65);background:rgba(255,106,42,.12);
+}
+
+/* 5) 深海主题交互色统一（第十五批）：新增 --tide-accent，链接/按钮/进度条 fill 统一引用 */
+body.theme-tide{--tide-accent:#35c4b5}
+body.theme-tide a{color:var(--tide-accent)}
+body.theme-tide .d-btn:hover{border-color:var(--tide-accent);color:var(--tide-accent)}
+body.theme-tide .game-tab:hover{color:var(--tide-accent);background:rgba(53,196,181,.10)}
+body.theme-tide .bar .fill{background:linear-gradient(90deg,#2b8fa3,var(--tide-accent))}
+body.theme-tide .ach-prog-fill{background:var(--tide-accent)}
+body.theme-tide .pet-exp-fill{background:linear-gradient(90deg,#2b8fa3,var(--tide-accent))}
+
+/* 6) 极光主题渐变降重绘（第十五批）：大面积背景改纯色分层，禁用 fixed 附件，移除大面积 will-change */
+body.theme-aurora{
+  background:#071a30;
+  background-image:none;
+  background-attachment:scroll;
+}
+body.theme-aurora .panel{background:rgba(10,26,44,.92)}
+body.theme-aurora *, body.theme-aurora *::before, body.theme-aurora *::after{will-change:auto}

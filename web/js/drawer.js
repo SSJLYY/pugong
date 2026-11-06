@@ -49,6 +49,17 @@
     if (talent) talent.classList.remove('open');
   }
 
+  /* 第十五批·轮2：打开瞬间挂 drawer-skeleton，300ms 后移除；.drawer-scroll 缺失时落到抽屉根。 */
+  function showDrawerSkeleton(el) {
+    if (!el) return;
+    const target = el.querySelector('.drawer-scroll') || el;
+    target.classList.add('drawer-skeleton');
+    window.setTimeout(() => {
+      /* 只有仍是同一节点且未被移除时才摘类，避免跨抽屉误摘。 */
+      if (target.isConnected) target.classList.remove('drawer-skeleton');
+    }, 300);
+  }
+
   function focusFirst(container) {
     if (!container) return;
     const target = container.querySelector('.drawer-close, .workspace-close, ' + FOCUSABLE);
@@ -71,6 +82,9 @@
     if (activeDrawer) closeDrawer(false);
     drawerReturnFocus = document.activeElement;
     activeDrawer = name;
+
+    /* 第十五批·轮2：抽屉打开瞬间挂 drawer-skeleton，300ms 后移除（样式类由 drawer.css 提供）。 */
+    showDrawerSkeleton(drawer);
 
     Object.entries(DRAWERS).forEach(([key, drawerId]) => {
       const el = $(drawerId);
@@ -170,6 +184,31 @@
       if (active) btn.setAttribute('aria-current', 'page');
       else btn.removeAttribute('aria-current');
     });
+  }
+
+  /* 第十五批·轮1：监听 gongpu:workspacechange，同步 .mobile-dock 内按钮高亮。 */
+  function syncMobileDock(tab) {
+    const dock = document.querySelector('.mobile-dock');
+    if (!dock) return;
+    const utilityOpen = isMobile() && document.body.classList.contains('utility-open');
+    dock.querySelectorAll('[data-dock-tab]').forEach(btn => {
+      const active = utilityOpen && btn.dataset.dockTab === tab;
+      btn.classList.toggle('active', active);
+      if (active) btn.setAttribute('aria-current', 'page');
+      else btn.removeAttribute('aria-current');
+    });
+    dock.querySelectorAll('[data-dock-action="combat"]').forEach(btn => {
+      const active = !utilityOpen && !activeDrawer;
+      btn.classList.toggle('active', active);
+      if (active) btn.setAttribute('aria-current', 'page');
+      else btn.removeAttribute('aria-current');
+    });
+  }
+
+  function onWorkspaceChange(e) {
+    const tab = (e && e.detail && e.detail.tab) || currentTab();
+    /* 延后一拍执行，等事件派发方（如 openUtility）落定后再按最终状态高亮。 */
+    window.setTimeout(() => syncMobileDock(tab), 0);
   }
 
   function applyTab(tab, options) {
@@ -329,6 +368,85 @@
     }
   }
 
+  /* 第十五批·轮3：settings 抽屉分组折叠——注入折叠按钮、切换 .folded、状态存 gongpu_settings_fold。 */
+  function readSettingsFold() {
+    try { return JSON.parse(localStorage.getItem('gongpu_settings_fold') || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+
+  function writeSettingsFold(state) {
+    try { localStorage.setItem('gongpu_settings_fold', JSON.stringify(state || {})); }
+    catch (e) { /* 隐私模式下折叠状态仅本次会话有效 */ }
+  }
+
+  function initSettingsFold() {
+    const groups = document.querySelectorAll('section.settings-group');
+    if (!groups.length) return;
+    const saved = readSettingsFold();
+    groups.forEach(group => {
+      const heading = group.querySelector('h3');
+      if (!heading || heading.querySelector('.settings-fold')) return;
+      const title = (heading.textContent || '').trim();
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'settings-fold';
+      button.setAttribute('aria-expanded', 'true');
+      button.textContent = '▾';
+      button.addEventListener('click', () => {
+        const folded = group.classList.toggle('folded');
+        button.setAttribute('aria-expanded', String(!folded));
+        button.textContent = folded ? '▸' : '▾';
+        const state = readSettingsFold();
+        if (folded) state[title] = true;
+        else delete state[title];
+        writeSettingsFold(state);
+      });
+      heading.appendChild(button);
+      if (saved[title]) {
+        group.classList.add('folded');
+        button.setAttribute('aria-expanded', 'false');
+        button.textContent = '▸';
+      }
+    });
+  }
+
+  /* 第十五批·轮4：主题切换防闪白——body class 变化时禁过渡一帧，下个 rAF 还原。 */
+  function initThemeFlashGuard() {
+    const body = document.body;
+    const docEl = document.documentElement;
+    let lastThemes = Array.from(body.classList).filter(cls => /^theme-/.test(cls)).sort().join(' ');
+    const observer = new MutationObserver(records => {
+      let changed = false;
+      records.forEach(record => {
+        if (record.attributeName === 'class') changed = true;
+      });
+      if (!changed) return;
+      const themes = Array.from(body.classList).filter(cls => /^theme-/.test(cls)).sort().join(' ');
+      if (themes === lastThemes) return;
+      lastThemes = themes;
+      /* 禁止过渡并让底色立即落到当前主题，避免主题类增删瞬间闪白。 */
+      docEl.style.transition = 'none';
+      body.style.transition = 'none';
+      const background = window.getComputedStyle(body).backgroundColor;
+      if (background && background !== 'rgba(0, 0, 0, 0)') docEl.style.backgroundColor = background;
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          docEl.style.transition = '';
+          body.style.transition = '';
+          docEl.style.backgroundColor = '';
+        });
+      });
+    });
+    observer.observe(body, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  /* 第十五批·轮5：字号超大档启动兜底——gongpu_font==='xl' 时挂 font-xl。 */
+  function initFontXlBootstrap() {
+    try {
+      if (localStorage.getItem('gongpu_font') === 'xl') document.body.classList.add('font-xl');
+    } catch (e) { /* 隐私模式下跳过启动挂类 */ }
+  }
+
   function restoreWorkspace() {
     let tab = 'equip';
     try {
@@ -344,6 +462,14 @@
     const audioButton = $('gp-audio-btn');
     const audioSlot = $('audioSettingsSlot');
     if (audioButton && audioSlot) audioSlot.appendChild(audioButton);
+    /* 第十五批·轮1：先注册事件再恢复工作区，启动期切换同样同步 dock。 */
+    document.addEventListener('gongpu:workspacechange', onWorkspaceChange);
+    /* 第十五批·轮3：启动时初始化 settings 分组折叠按钮并恢复持久化状态。 */
+    initSettingsFold();
+    /* 第十五批·轮4：主题切换防闪白监听。 */
+    initThemeFlashGuard();
+    /* 第十五批·轮5：字号超大档启动兜底挂类。 */
+    initFontXlBootstrap();
     restoreWorkspace();
     configureUtility();
     syncDock();

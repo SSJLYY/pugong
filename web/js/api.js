@@ -16,8 +16,11 @@
   //     页面在后端根下 → API_BASE=''，请求 '/api/...'
   const API_BASE = apiBase();
 
-  const TOKEN_KEY = 'gongpu.token';
+  // 第十五批·轮 5：token 键版本化——读写 gongpu_token_v2；旧键启动时迁移后移除
+  const TOKEN_KEY = 'gongpu_token_v2';
   const USER_KEY = 'gongpu.user';
+  // 历史旧键：规范指定键 gongpu_token + 实际代码沿用过的 gongpu.token，都要迁走
+  const LEGACY_TOKEN_KEYS = ['gongpu_token', 'gongpu.token'];
 
   // localStorage 在隐私模式/被禁用/损坏时抛异常——不能让整个 api.js IIFE 挂掉整页白屏
   function lsGet(k) {
@@ -32,6 +35,22 @@
   function lsJson(k) {
     try { return JSON.parse(lsGet(k) || 'null'); } catch (e) { return null; }
   }
+
+  // 第十五批·轮 5：旧 token 键迁移——v2 键为空则从旧键搬入，随后一律 removeItem 旧键（老用户不掉登录）
+  (function migrateLegacyToken() {
+    if (!lsGet(TOKEN_KEY)) {
+      for (var i = 0; i < LEGACY_TOKEN_KEYS.length; i++) {
+        var legacy = lsGet(LEGACY_TOKEN_KEYS[i]);
+        if (legacy) {
+          lsSet(TOKEN_KEY, legacy);
+          break;
+        }
+      }
+    }
+    for (var j = 0; j < LEGACY_TOKEN_KEYS.length; j++) {
+      lsDel(LEGACY_TOKEN_KEYS[j]);
+    }
+  })();
 
   const state = {
     token: lsGet(TOKEN_KEY) || '',
@@ -63,7 +82,11 @@
     }
   }
 
+  // 第十五批·轮 1：默认请求超时 15s；request(method, path, body, opts) 可用 opts.timeout 覆盖
   const REQUEST_TIMEOUT_MS = 15000;
+  // 第十五批·轮 2：幂等 GET 遇 429 时指数退避重试（1s/2s/4s，最多 3 次）；写请求不重试
+  const GET_RETRY_BASE_MS = 1000;
+  const GET_RETRY_MAX = 3;
 
   class ApiError extends Error {
     constructor(code, message, status) {
@@ -73,14 +96,25 @@
     }
   }
 
-  async function request(method, path, body) {
+  // 第十五批·C1f·轮 1：错误文案映射表——所有抛 ApiError 的地方统一从这里取中文文案；
+  // app.js 直接 toast(e.message)，改表即改全站报错话术，不用再到处找内联文案
+  const ERR_TEXT = {
+    ERR_NET: '网络连接失败，请检查网络',
+    ERR_TIMEOUT: '请求超时，请稍后重试',
+    ERR_SERVER: '服务器开小差了，稍后再试',
+    ERR_AUTH: '登录已过期，请重新登录'
+  };
+
+  // 第十五批·轮 1/2/5：原始 fetch 封装——超时 abort、429 重试、GET 并发节流都在这一层
+  async function rawRequest(method, path, body, timeout) {
     const headers = { 'Content-Type': 'application/json' };
     if (state.token) {
       headers['Authorization'] = 'Bearer ' + state.token;
     }
     let res;
+    const t0 = performance.now();
     const ctl = new AbortController();
-    const killer = setTimeout(() => ctl.abort(), REQUEST_TIMEOUT_MS);
+    const killer = setTimeout(() => ctl.abort(), timeout);
     try {
       res = await fetch(API_BASE + path, {
         method,
@@ -89,6 +123,8 @@
         signal: ctl.signal
       });
       state.online = true;
+      // 第十五批·轮8：响应耗时埋点——最近一次请求的往返毫秒数，调试面板/排障时可直接读
+      window.__gp_last_latency = Math.round(performance.now() - t0);
       // 滑动续期：服务端在令牌快到期时通过响应头回新令牌，无感替换本地存储
       const nt = res.headers.get('X-New-Token');
       if (nt && nt !== state.token) {
@@ -97,12 +133,77 @@
       }
     } catch (e) {
       state.online = false;
-      // AbortController 超时与断线同义:轮询循环 catch 后自动续转,不会永久卡死
-      throw new ApiError('NETWORK', '网络断开，正在重连…', 0);
+      // 超时(abort)抛 ERR_TIMEOUT,与断线区分;轮询循环 catch 后自动续转,不会永久卡死
+      if (e && (e.name === 'AbortError' || e.name === 'TimeoutError')) {
+        throw new ApiError('ERR_TIMEOUT', ERR_TEXT.ERR_TIMEOUT, 0);
+      }
+      throw new ApiError('ERR_NET', ERR_TEXT.ERR_NET, 0);
     } finally {
       clearTimeout(killer);
     }
+    return res;
+  }
 
+  // 第十五批·轮 5：GET 并发节流——FIFO 队列，同刻最多 GET_CONCURRENCY 个 GET 在飞，超出排队；写请求不排队
+  const GET_CONCURRENCY = 4;
+  const getQueue = [];
+  let getInFlight = 0;
+
+  function acquireGetSlot() {
+    return new Promise(resolve => {
+      if (getInFlight < GET_CONCURRENCY) {
+        getInFlight++;
+        resolve();
+      } else {
+        getQueue.push(resolve);
+      }
+    });
+  }
+
+  function releaseGetSlot() {
+    const next = getQueue.shift();
+    if (next) {
+      next();
+    } else {
+      getInFlight = Math.max(0, getInFlight - 1);
+    }
+  }
+
+  // 第十五批·轮 2/C1f：429 重试包装（仅幂等 GET）——超时/断网由 rawRequest 抛 ApiError，
+  // 429 重试只对 GET 生效；拿到响应后统一交给 parseAndCheck 解析（含 !res.ok 抛错）
+  async function request(method, path, body, opts) {
+    opts = opts || {};
+    const timeout = opts.timeout > 0 ? opts.timeout : REQUEST_TIMEOUT_MS;
+    if (method !== 'GET') {
+      // 写请求：不节流不重试，直接解析
+      const res = await rawRequest(method, path, body, timeout);
+      return parseAndCheck(res, path);
+    }
+    // GET：走并发节流 + 429 指数退避重试
+    await acquireGetSlot();
+    try {
+      for (var attempt = 0; ; attempt++) {
+        const res = await rawRequest('GET', path, body, timeout);
+        if (res.status !== 429) {
+          return await parseAndCheck(res, path);
+        }
+        if (attempt >= GET_RETRY_MAX) {
+          return await parseAndCheck(res, path); // 超过最大重试次数：把 429 响应交给解析层抛错
+        }
+        await sleep(GET_RETRY_BASE_MS * Math.pow(2, attempt));
+      }
+    } finally {
+      releaseGetSlot();
+    }
+  }
+
+  function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  // 第十五批·C1f·轮 1：响应统一解析——原函数头在上一轮编辑中丢失导致顶层 await 语法错，
+  // 已重建并接回 request()；非 2xx 一律抛 ApiError，文案优先走 ERR_TEXT 映射表
+  async function parseAndCheck(res, path) {
     let data = null;
     const text = await res.text();
     if (text) {
@@ -110,16 +211,22 @@
     }
 
     if (!res.ok) {
+      const isAuthApi = path.indexOf('/api/auth/') === 0;
       // 401 只对会话过期生效;登录/注册接口的 401 是"密码错误",不能误清 token + 广播"已过期"
-      if (res.status === 401 && path.indexOf('/api/auth/') !== 0) {
+      if (res.status === 401 && !isAuthApi) {
         clearAuth();
         global.dispatchEvent(new CustomEvent('gongpu:unauthorized'));
       }
-      throw new ApiError(
-        (data && data.code) || 'HTTP_' + res.status,
-        (data && data.message) || '请求失败（' + res.status + '）',
-        res.status
-      );
+      const code = (data && data.code) || 'HTTP_' + res.status;
+      let message = (data && data.message) || '请求失败（' + res.status + '）';
+      // 第十五批·C1f·轮 1：5xx 对玩家统一"服务器开小差"；会话过期 401 固定提示重登——
+      // 后端这两类的报错文案常是开发向措辞/英文堆栈，直接 toast 出去没有意义
+      if (res.status >= 500) {
+        message = ERR_TEXT.ERR_SERVER;
+      } else if (res.status === 401 && !isAuthApi) {
+        message = ERR_TEXT.ERR_AUTH;
+      }
+      throw new ApiError(code, message, res.status);
     }
     return data;
   }

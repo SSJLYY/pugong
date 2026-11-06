@@ -15,7 +15,13 @@
     { sel: '.combat', text: '看到这只木桩了吗？出拳就是修行——每拳永久 +1 生命上限' },
     { sel: '#charBadge', text: '悬浮或点击左上角头像，可随时展开你的详细属性面板' },
     { sel: '.zones', text: '生命上限够了就去新地图：怪物更强，掉落更好' },
+    // 第十五批·B4b 轮1：抽屉导航——引导打开左上 ☰ 功能目录（八个功能 tab）
+    // sels 候选数组：宽屏高亮顶栏 #btnNav；窄屏 #btnNav 被 drawer.css 隐藏，回退到底部 dock 的 ☰ 全部按钮
+    { sels: ['#btnNav', '[data-open-drawer="nav"]'], text: '点左上 ☰ 打开功能目录，八个功能随时切换' },
     { sel: '#tabBtnQuest', text: '冒险公会委托：接任务杀怪领赏，前期金币主要来源' },
+    // 第十五批·B4b 轮2：飞升就绪——纯描述型预告步，不等待/检测真实战斗状态
+    // 目标固定为常驻的战斗区 .combat（不挂 #btnRebirth：按钮初始 display:none，等待会误触发轮询跳步）
+    { sel: '.combat', text: '攻速练到 1 载次/秒时，战斗区会亮起 🌟 飞升转世按钮' },
     { sel: '#tabBtnSave', text: '记得存档！死了档就没了——回村口点「立即存档」' }
   ];
 
@@ -66,6 +72,8 @@
     tip.className = 'gt-tip';
     tip.innerHTML =
       '<div class="gt-step"></div>' +
+      // 第十五批·B4b 轮4：步骤进度点容器（圆点数 = 步骤数，当前步高亮）
+      '<div class="tut-dots" aria-hidden="true"></div>' +
       '<div class="gt-text"></div>' +
       '<div class="gt-btns">' +
       '<button class="gt-skip" type="button">跳过 (ESC)</button>' +
@@ -96,7 +104,16 @@
 
     if (idx >= STEPS.length) { finish(true); return; }
     var step = STEPS[idx];
-    var target = document.querySelector(step.sel);
+    // 第十五批·B4b 轮1：支持候选选择器 sels 数组，按序取首个可见目标；旧单 sel 机制保留兼容
+    var target = null;
+    if (step.sels) {
+      for (var s = 0; s < step.sels.length; s++) {
+        var cand = document.querySelector(step.sels[s]);
+        if (cand && cand.offsetParent !== null) { target = cand; break; }
+      }
+    } else {
+      target = document.querySelector(step.sel);
+    }
 
     // 目标不存在 → 有限次数轮询等待（8 次 ≈3.2s），超限跳过该步
     // （避免 DOM 结构异常时引导死循环卡住玩家）
@@ -135,6 +152,15 @@
 
     tip.style.display = 'block';
     tip.querySelector('.gt-step').textContent = '第 ' + (idx + 1) + ' / ' + STEPS.length + ' 步';
+    // 第十五批·B4b 轮4：进度点——已过步实心 done、当前步当前高亮 current
+    var dots = tip.querySelector('.tut-dots');
+    if (dots) {
+      var dh = '';
+      for (var d = 0; d < STEPS.length; d++) {
+        dh += '<span class="tut-dot' + (d < idx ? ' done' : d === idx ? ' current' : '') + '"></span>';
+      }
+      dots.innerHTML = dh;
+    }
     tip.querySelector('.gt-text').textContent = step.text;
     tip.querySelector('.gt-btn').textContent = (idx === STEPS.length - 1) ? '开始修行' : '下一步';
 
@@ -154,12 +180,32 @@
   }
 
   function next() {
+    // 第十五批·B4b 轮3：当前步标记完成（重进引导时跳过）
+    markStepDone(idx);
     idx++;
     if (idx >= STEPS.length) {
       finish(true);
     } else {
       render();
     }
+  }
+
+  // 第十五批·B4b 轮3：已完成步骤记忆——localStorage gongpu_tut_done（逗号分隔步骤下标）
+  var DONE_KEY = 'gongpu_tut_done';
+  function readDoneSteps() {
+    try {
+      var raw = localStorage.getItem(DONE_KEY) || '';
+      return raw ? raw.split(',') : [];
+    } catch (e) { return []; }
+  }
+  function markStepDone(i) {
+    try {
+      var list = readDoneSteps();
+      if (list.indexOf(String(i)) < 0) {
+        list.push(String(i));
+        localStorage.setItem(DONE_KEY, list.join(','));
+      }
+    } catch (e) { /* 隐私模式忽略 */ }
   }
 
   function finish(save) {
@@ -193,7 +239,11 @@
       if (localStorage.getItem(STORE_KEY)) return;
     } catch (e) { return; }
     active = true;
+    // 第十五批·B4b 轮3：从首个未完成步骤续播（已完成的下标跳过，全完成则不再启动）
+    var done = readDoneSteps();
     idx = 0;
+    while (idx < STEPS.length && done.indexOf(String(idx)) >= 0) idx++;
+    if (idx >= STEPS.length) { active = false; return; }
     injectCss();
     buildDom();
     render();

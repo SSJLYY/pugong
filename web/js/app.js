@@ -23,7 +23,18 @@
     if (v === 'Infinity' || v === '-Infinity' || v === Infinity || v === -Infinity) return '∞';
     let d;
     try { d = new Decimal(v); } catch (e) { d = new Decimal(Number(v) || 0); }
-    if (d.lt(10000)) return Math.floor(d.toNumber()).toLocaleString('zh-CN');
+    // 第十五批 R23：小于 1 万时的口径补强——
+    // 旧实现 Math.floor 会把 9999.7 压成 9999、把 0.4 压成 0，大后期小增量看似消失；
+    // 现改为：≥1 保留 2 位小数去尾零，<1 保留 4 位有效小数（成长速率/吸血率等小量可见）
+    if (d.lt(10000)) {
+      const n = d.toNumber();
+      if (!Number.isFinite(n)) return d.toExponential(2);
+      const abs = Math.abs(n);
+      if (abs >= 1000) return Math.floor(n).toLocaleString('zh-CN');
+      if (abs >= 1) return String(Math.round(n * 100) / 100);
+      if (abs === 0) return '0';
+      return String(Math.round(n * 10000) / 10000);
+    }
     const mant = d.mantissa, exp = d.exponent; // d = mantissa × 10^exponent
     for (let i = 0; i < CN_UNITS.length; i++) {
       const u = CN_UNITS[i];
@@ -137,9 +148,16 @@
   // ---------------- 战斗飘字（预算节流防爆屏） ----------------
   let _floatLayer = null, _floatBudget = 0, _floatLast = 0;
   function floatDmg(text, cls, anchorId) {
+    // 第十五批 R7：后台标签页不飘字（降载），回到前台自动恢复
+    if (document.hidden) return;
     if (fxOff()) return;
     const now = performance.now();
-    if (now - _floatLast > 120) { _floatBudget = 4; _floatLast = now; }
+    // 第十五批 R21：飘字预算按设备内存分档——低配机（≤2GB）每 120ms 只放 2 个，中配 4 个，高配 6 个
+    if (now - _floatLast > 120) {
+      const mem = Number(navigator.deviceMemory) || 4;
+      _floatBudget = mem <= 2 ? 2 : (mem >= 8 ? 6 : 4);
+      _floatLast = now;
+    }
     if (_floatBudget <= 0) return;
     _floatBudget--;
     if (!_floatLayer) {
@@ -210,18 +228,53 @@
   };
 
   function toast(msg, kind) {
+    // 第十五批 R20：toast 队列堆叠——主 toast 保持原样（兼容 108 处既有调用），
+    // 上一条尚未消失时，把旧消息推入堆叠层（最多 3 条），新消息占据主位。
     const el = $('toast');
+    const showing = el.classList.contains('show') && el.textContent;
+    if (showing) pushToastStack(el.textContent, el.className);
     el.textContent = msg;
     el.className = 'toast show ' + (kind || '');
     clearTimeout(el._t);
     el._t = setTimeout(() => { el.className = 'toast'; }, 2200);
   }
 
+  // 第十五批 R20：堆叠层容器（浮于主 toast 上方，逐条淡出）
+  function pushToastStack(text, cls) {
+    let layer = $('toastStack');
+    if (!layer) {
+      layer = document.createElement('div');
+      layer.id = 'toastStack';
+      layer.className = 'toast-stack';
+      layer.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(layer);
+    }
+    const item = document.createElement('div');
+    item.className = ('toast-stack-item ' + (cls || '')).replace(/\bshow\b/g, '').trim();
+    item.textContent = text;
+    layer.appendChild(item);
+    while (layer.children.length > 3) layer.removeChild(layer.firstChild);
+    setTimeout(() => {
+      item.classList.add('out');
+      setTimeout(() => item.remove(), 260);
+    }, 1600);
+  }
+
   function setNet(ok) {
+    // 第十五批 R6 断线三态：连败计数（成功清零），1~2 次黄态「连接不稳定」，≥3 次红态「重连中」
     const el = $('netState');
-    const text = ok ? '云端连接正常' : '连接中断，自动重试中';
-    el.textContent = ok ? '●' : '○';
-    el.className = ok ? 'netok' : 'netbad';
+    if (ok) S._netFails = 0;
+    else S._netFails = (S._netFails || 0) + 1;
+    let text, cls, dot;
+    if (ok) {
+      text = '云端连接正常'; cls = 'netok'; dot = '●';
+    } else if (S._netFails <= 2) {
+      text = '连接不稳定'; cls = 'net-warn'; dot = '◐';
+    } else {
+      text = '连接中断，自动重试中'; cls = 'net-bad'; dot = '● 重连中';
+    }
+    el.textContent = dot;
+    el.className = cls;
     el.title = text;
     el.setAttribute('aria-label', text);
   }
@@ -717,6 +770,23 @@
       const def0 = ((S.meta && S.meta.pets) || []).find(d => d.id === pv0.active);
       pc.hidden = !def0;
       if (def0) pc.textContent = def0.emoji + ' Lv.' + (pv0.level || 1);
+      // 第十五批 R19：点击宠物芯片直达委托页宠物卡（切页签 + 滚动定位，省去翻目录）
+      if (!pc._boundClick) {
+        pc._boundClick = true;
+        pc.style.cursor = 'pointer';
+        pc.addEventListener('click', () => {
+          const qb = $('tabBtnQuest');
+          if (qb) qb.click();
+          setTimeout(() => {
+            const box = $('petList');
+            if (!box) return;
+            const card = box.closest('.save-box') || box;
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            card.classList.add('pet-focus');
+            setTimeout(() => card.classList.remove('pet-focus'), 1800);
+          }, 120);
+        });
+      }
     }
     const p = view.panel;
 
@@ -793,14 +863,57 @@
       const tsig = pct + '|' + zt + '|' + (view.dead ? 1 : 0) + '|' + petSeg + '|' + dpsSeg;
       if (tsig !== applyView._titleSig) {
         applyView._titleSig = tsig;
-        document.title = view.dead ? '💀 已阵亡 | 普攻永久增加生命上限'
-          : '❤' + pct + '% ' + zt + (petSeg ? ' ' + petSeg : '') + (dpsSeg ? ' ' + dpsSeg : '') + ' | 普攻永久增加生命上限';
+        // 第十五批 A1 R1：低调英文页签（公司环境不暴露游戏内容），og 等 meta 保持中文不动
+        document.title = view.dead ? '💀 Down · Gongpu'
+          : '❤' + pct + '% ' + zt + (petSeg ? ' ' + petSeg : '') + (dpsSeg ? ' ' + dpsSeg : '') + ' | Gongpu';
       }
     }
     const hg = $('hudGold');
-    if (hg) hg.textContent = '💰 ' + fmt(view.gold || 0);
+    if (hg) {
+      hg.textContent = '💰 ' + fmt(view.gold || 0);
+      // 第十五批 R22：金币大额进出——单帧变动超过当前持有 1% 且 ≥1 万时，HUD 短闪（绿=进、红=出）
+      try {
+        const cur = new Decimal(view.gold || 0);
+        if (S._goldFxPrev != null) {
+          const d = cur.minus(new Decimal(S._goldFxPrev));
+          const big = d.abs().gte(10000) && (new Decimal(S._goldFxPrev).lte(0) || d.abs().gte(new Decimal(S._goldFxPrev).mul(0.01)));
+          if (big) {
+            const up = d.gt(0);
+            hg.classList.remove('gold-up', 'gold-down');
+            void hg.offsetWidth;                 // 强制回流，同一动画可重复触发
+            hg.classList.add(up ? 'gold-up' : 'gold-down');
+            clearTimeout(hg._fxT);
+            hg._fxT = setTimeout(() => hg.classList.remove('gold-up', 'gold-down'), 900);
+            floatDmg((up ? '+' : '−') + fmt(d.abs()) + ' 金', up ? 'gold' : 'gold-out', 'hudGold');
+          }
+        }
+        S._goldFxPrev = view.gold;
+      } catch (e) { /* 金币特效失败不影响主流程 */ }
+    }
     const hk = $('hudKills');
     if (hk && view.stats) hk.textContent = '💀 ' + fmt(view.stats.kills || 0);
+
+    // 第十五批 R2：飞升进度条——攻速为进度，通关线 1e44（log10=44）拉满
+    const ap = $('ascendProg');
+    if (ap) {
+      const aspd = Number(view.panel.ASPD) || 0;
+      const pct = Math.min(100, Math.max(0, Math.log10(Math.max(aspd, 1)) / 44 * 100));
+      if (view.clearReady) {
+        ap.hidden = true;                       // 已通关可飞升：进度条让位给飞升按钮
+      } else {
+        ap.hidden = false;
+        ap.querySelector('.ascend-prog-fill').style.width = pct.toFixed(2) + '%';
+        ap.querySelector('.ascend-prog-txt').textContent = '飞升 ' + pct.toFixed(1) + '%';
+      }
+    }
+
+    // 第十五批 R3：世代徽章四档位配色（青→金→紫→虹光），先清旧档再挂新档
+    const genEl = $('gen');
+    if (genEl) {
+      genEl.classList.remove('gen-t1', 'gen-t2', 'gen-t3', 'gen-t4');
+      genEl.classList.add(view.gen >= 12 ? 'gen-t4' : view.gen >= 5 ? 'gen-t3' : view.gen >= 1 ? 'gen-t2' : 'gen-t1');
+    }
+    $('gen').textContent = '第 ' + view.gen + ' 世';
     // 击杀速率：会话内滚动采样（5 分钟窗口），挂机效率一眼可见
     const hr = $('hudRate');
     if (hr && view.stats) {
@@ -813,6 +926,34 @@
         const mins = (now - smp[0].t) / 60000;
         const rate = mins >= 0.5 ? (kills - smp[0].k) / mins : 0;
         hr.textContent = rate > 0 ? '⚔️ ' + (rate >= 10 ? Math.round(rate) : rate.toFixed(1)) + '/分' : '';
+      }
+    }
+
+    // 第十五批 R4：HUD 双速率——出拳/s 与 HP 上限成长/s（会话内差分，dt<0.5s 跳过防抖）
+    const hpEl = $('hudPps');
+    if (hpEl && view.stats) {
+      const now = Date.now();
+      const pv = S._ratePrev;
+      if (!pv) S._ratePrev = { t: now, p: Number(view.stats.punches) || 0, hp: Number(view.panel.maxHP) || 0 };
+      else {
+        const dt = (now - pv.t) / 1000;
+        if (dt >= 0.5) {
+          const pnow = Number(view.stats.punches) || 0;
+          const hpNow = Number(view.panel.maxHP) || 0;
+          const pps = Math.max(0, (pnow - pv.p) / dt);
+          // HP 成长速率用 fmt 短格式（万/亿/载 中文单位），数值过大时 toNumber 可能溢出则降级显示 '∞+'
+          const hps = Math.max(0, hpNow - pv.hp);
+          let hpDisp = '0';
+          if (hps > 0) {
+            try {
+              const hpRate = new Decimal(hps).div(dt);
+              hpDisp = fmt(hpRate);
+            } catch (e) { hpDisp = '∞+'; }
+          }
+          hpEl.textContent = '👊' + (pps >= 10 ? Math.round(pps) : pps.toFixed(1)) + '/s ❤️' + hpDisp + '/s';
+          hpEl.hidden = false;
+          S._ratePrev = { t: now, p: pnow, hp: hpNow };
+        }
       }
     }
 
@@ -859,6 +1000,22 @@
     });
     $('blessRow').textContent = '🧬 赋能: ' + (parts.join(' · ') || 'HP+1/拳');
 
+    // 第十五批 R16：赋能行详情卡——每条赋能的步长 / 强化等级 / 本世累计增量（悬停可见）
+    {
+      const br = $('blessRow');
+      if (br) {
+        const lvMap = view.blessLevels || {};
+        const lines = order.filter(k => view.blessings && view.blessings[k] !== undefined).map(k => {
+          const step = Number(view.blessings[k]) || 0;
+          const lv = lvMap[k] || 0;
+          return '· ' + nameMap[k] + '：每拳 +' + trimNum(step) + (lv ? '（强化 ' + lv + ' 级）' : '');
+        });
+        br.title = lines.length
+          ? '本世普攻赋能（每条同时成长，互不抢占）：\n' + lines.join('\n') + '\n\n强化等级靠转生「强化纪元」提升，步长 ×(1+等级)'
+          : '本世普攻赋能：HP+1/拳';
+      }
+    }
+
     // 顶栏 DPS 速览（第八批）：面板理论值，(PATK+MATK)×ASPD×(1+CRIT×(CRITD−1))
     const dpsEl = $('dpsChip');
     if (dpsEl) {
@@ -901,6 +1058,39 @@
     $('stMREGEN').textContent = fmt(p.MREGEN) + '/s';
     $('stLIFESTEAL').textContent = fmt(p.LIFESTEAL);
     $('stGold').textContent = fmt(view.gold);
+
+    // 第十五批 R17：属性卡每秒增量——会话内帧差分（绿色小字挂在 td 上，用 CSS ::after 渲染不重建 DOM）
+    {
+      const nowMs = Date.now();
+      const pv2 = S._statPrev;
+      const snap = {
+        t: nowMs,
+        PATK: Number(p.PATK) || 0, MATK: Number(p.MATK) || 0,
+        PDEF: Number(p.PDEF) || 0, MDEF: Number(p.MDEF) || 0,
+        ASPD: Number(p.ASPD) || 0, maxHP: Number(p.maxHP) || 0
+      };
+      if (!pv2) {
+        S._statPrev = snap;
+      } else {
+        const dt2 = (nowMs - pv2.t) / 1000;
+        if (dt2 >= 1) {
+          // 只有变化可观（≥0.01/帧）才标注，避免浮点噪声满屏绿字
+          const rateKeys = ['PATK', 'MATK', 'PDEF', 'MDEF', 'ASPD', 'maxHP'];
+          const idMap = { PATK: 'stPATK', MATK: 'stMATK', PDEF: 'stPDEF', MDEF: 'stMDEF', ASPD: 'stASPD', maxHP: 'hpMax' };
+          rateKeys.forEach(k => {
+            const el = $(idMap[k]);
+            if (!el) return;
+            const dv = (snap[k] - pv2[k]) / dt2;
+            if (dv > 0.01) {
+              el.dataset.rate = '+' + (dv >= 100 ? fmt(dv) : dv.toFixed(1)) + '/s';
+            } else {
+              delete el.dataset.rate;
+            }
+          });
+          S._statPrev = snap;
+        }
+      }
+    }
 
     // 无限属性点天赋:自由点数行 + 属性行可点(statlord 专属)
     const statCardEl = $('statCard');
@@ -987,6 +1177,23 @@
         : (view.mob.trait
             ? '词条「' + view.mob.trait.emoji + ' ' + view.mob.trait.name + '」' + view.mob.trait.desc
             : '出拳就是修行');
+      // 第十五批 R14：词条徽章——悬停看完整说明（数据来自 mobView.trait，前端只渲染不查表）
+      if (view.mob.trait && !view.mob.boss) {
+        const t = view.mob.trait;
+        $('mobDesc').title = '词条「' + t.emoji + ' ' + t.name + '」\n' + (t.desc || '') +
+          (t.zoneOnly ? '\n（仅在 ' + t.zoneOnly + ' 出现）' : '');
+        $('mobDesc').classList.add('has-trait');
+      } else {
+        $('mobDesc').title = '';
+        $('mobDesc').classList.remove('has-trait');
+      }
+      // 第十五批 R15：击杀预估胶囊——统一渲染「预计 N 拳 · M 秒」
+      const ep = view.mob.estPunches, es = view.mob.estSeconds;
+      if (ep && !view.mob.boss) {
+        $('mobHp').title = '预计 ' + fmt(ep) + ' 拳' + (es ? ' · ' + es + ' 秒' : '') + '（按当前面板每拳期望伤害推算）';
+      } else {
+        $('mobHp').title = '';
+      }
     } else {
       $('mobEmoji').textContent = '💨';
       $('mobName').textContent = '寻找目标中…';
@@ -1106,8 +1313,61 @@
     // 飞升按钮
     $('btnRebirth').style.display = view.clearReady ? 'inline-block' : 'none';
 
+    // 第十五批 R12：Boss 就绪态——村口无 Boss（隐藏）、Boss 战中标注「交战中」、其余标注该区 Boss 可挑战
+    {
+      const bb = $('btnBoss');
+      if (bb) {
+        const inBoss = !!(view.mob && view.mob.boss);
+        bb.classList.toggle('boss-fighting', inBoss);
+        if (view.zone === 'village') {
+          bb.title = '村口没有 Boss，先换到野外区域（地图 M）';
+          bb.textContent = '👑 挑战 Boss（村口无）';
+        } else if (inBoss) {
+          bb.title = 'Boss 交战中——半血会进入二阶段狂怒';
+          bb.textContent = '👑 交战中' + (view.mob.phase2 ? '·狂怒' : '');
+        } else {
+          bb.title = '挑战当前区域 Boss：血厚攻高，会沉默你的被动；半血进二阶段';
+          bb.textContent = '👑 挑战 Boss';
+        }
+      }
+    }
+
+    // 第十五批 R13：下一站推荐——首个未能进入的区域挂脉冲（地图抽屉与该区按钮共用 .next-zone）
+    {
+      const zs = Array.from(document.querySelectorAll('.zone-btn'));
+      zs.forEach(z => z.classList.remove('next-zone'));
+      const lockedFirst = zs.find(z => z.classList.contains('locked'));
+      if (lockedFirst) {
+        lockedFirst.classList.add('next-zone');
+        lockedFirst.title = (lockedFirst.title || '') + ' · 🎯 下一站推荐';
+      }
+    }
+
     // 技能冷却显示
     renderSkillCooldowns(view);
+
+    // 第十五批 R27：沉默生效时全部主动技能按钮统一置灰标注（服务端 panel.silenced 下发）
+    {
+      const silenced = !!(view.panel && view.panel.silenced);
+      const skillIds = ['btnBurn', 'btnRapid', 'btnHeavy', 'btnBlock', 'btnSurge', 'btnRoar',
+        'btnHeal', 'btnBloodlust', 'btnIronWall', 'btnCleanse'];
+      skillIds.forEach(id => {
+        const b = $(id);
+        if (!b) return;
+        b.classList.toggle('silenced', silenced);
+        if (silenced) b.title = '🤐 沉默生效中：主动技能与被动全部失效（净化/解毒剂可解）';
+      });
+    }
+
+    // 第十五批 R28：村口无敌人可逃——隐藏「逃跑回村」按钮，避免误点空转
+    {
+      const fb = $('btnFlee');
+      if (fb) {
+        const inVillage = view.zone === 'village';
+        fb.hidden = inVillage;
+        if (!inVillage) fb.title = '逃跑回村口（有失败概率，失败扣血强行回村）';
+      }
+    }
 
     // 被动状态栏（buff-chip 横条）：当前生效增益/减益
     // 永续天赋下永久生效的增益不再逐个展示(8 个常驻 chip 挤满主画面毫无信息量),
@@ -1154,7 +1414,9 @@
         if (isEt && ETERNAL_KEYS.includes(k)) return;   // 永久生效 → 不占主画面
         const m = CHIP_META[k];
         if (!m) return;
-        html += '<span class="buff-chip ' + (m[2] ? 'good' : 'bad') + '" title="剩余 ' + fmtDur(v) + '">' +
+        // 第十五批 R26：增益/减益分色并分组排列——好的（m[2]）统一在左、坏的统一在右，色板区分
+        html += '<span class="buff-chip ' + (m[2] ? 'good' : 'bad') + '" data-grp="' + (m[2] ? 'good' : 'bad') +
+          '" title="剩余 ' + fmtDur(v) + '">' +
           '<span>' + m[0] + ' ' + m[1] + '</span>' +
           '<span class="buff-time">' + fmtDur(v) + '</span>' +
           '</span>';
@@ -1162,7 +1424,7 @@
       // 连环掌（第八批）：计数型 buff 不在 buffs 秒表里，单独出芯片（次数进签名，变化即重建）
       const flurryLeft = Math.floor(Number(view.flurryHits || 0));
       if (flurryLeft > 0) {
-        html += '<span class="buff-chip good" title="连环掌：每次命中追加一次同额命中">' +
+        html += '<span class="buff-chip good flurry-chip" title="连环掌：每次命中追加一次同额命中">' +
           '<span>🤲 连环掌</span><span class="buff-time">剩 ' + flurryLeft + ' 次</span></span>';
       }
       // 签名守卫(范式同 renderPotions):chip 集合不变只更新倒计时文本,
@@ -1186,6 +1448,53 @@
     // 燃烧状态条
     const burnLeft = view.buffs && view.buffs.burn;
     $('burnBuff').textContent = burnLeft ? ('🔥 燃烧中 · 攻击×2 · 剩余 ' + fmtDur(burnLeft)) : '';
+
+    // 第十五批 R5：HP 上限趋势迷你图（最近 120 帧折线，min-max 归一，末点高亮）
+    {
+      const hist = S._hpHist || (S._hpHist = []);
+      const hpv = Number(view.panel.maxHP) || 0;
+      hist.push(hpv);
+      if (hist.length > 120) hist.shift();
+      const cv = $('hpSpark');
+      if (cv && cv.getContext) {
+        const ctx = cv.getContext('2d');
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        if (hist.length >= 2) {
+          let lo = Infinity, hi = -Infinity;
+          for (let i = 0; i < hist.length; i++) {
+            if (hist[i] < lo) lo = hist[i];
+            if (hist[i] > hi) hi = hist[i];
+          }
+          if (hi > lo) {
+            const W = cv.width, H = cv.height, pad = 2;
+            ctx.beginPath();
+            for (let i = 0; i < hist.length; i++) {
+              const x = hist.length === 1 ? 0 : (i / (hist.length - 1)) * (W - pad * 2) + pad;
+              const y = H - pad - ((hist[i] - lo) / (hi - lo)) * (H - pad * 2);
+              if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = '#e8c872';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            // 末点高亮圆点
+            const lx = (hist.length - 1) / (hist.length - 1) * (W - pad * 2) + pad;
+            const ly = H - pad - ((hist[hist.length - 1] - lo) / (hi - lo)) * (H - pad * 2);
+            ctx.beginPath();
+            ctx.arc(lx, ly, 2, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffd970';
+            ctx.fill();
+          } else {
+            // 恒定血线：画一条基线避免空白误导
+            ctx.strokeStyle = 'rgba(232,200,114,0.35)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, cv.height / 2);
+            ctx.lineTo(cv.width, cv.height / 2);
+            ctx.stroke();
+          }
+        }
+      }
+    }
   }
 
   function trimNum(v) {
@@ -1297,6 +1606,16 @@
     [['btnSweep10', 10], ['btnSweep100', 100]].forEach(([id, n]) => {
       const btn = $(id);
       if (!btn) return;
+      // 第十五批 R32：扫荡成本预览——悬停即见「单杀 50+深度×50 金」的总价（与服务端 sweep 同公式）
+      btn.addEventListener('mouseenter', () => {
+        const v = S.view;
+        const zones = (S.meta && S.meta.zones) || [];
+        const idx = v ? zones.findIndex(x => x.id === v.zone) : -1;
+        if (idx < 0) return;
+        const per = 50 + idx * 50;
+        btn.title = '🧹 扫荡 ' + n + ' 次：单杀 ' + per + ' 金（50 + 深度 ' + idx + ' ×50），合计约 ' +
+          fmt(per * n) + ' 金\n只涨区域精通与击杀类任务进度，不出掉落、不计 Boss';
+      });
       btn.addEventListener('click', async () => {
         const r = await call(() => API.sweep(API.state.slot, n));
         applyView(r);
@@ -1311,7 +1630,11 @@
 
     $('btnAuto').addEventListener('click', () => {
       S.auto = !S.auto;
-      $('btnAuto').textContent = S.auto ? '🤖 自动挂机（开）' : '⏸️ 自动挂机（关）';
+      // 第十五批 R31：开/关状态文案+颜色区分（开=绿、关=灰）
+      const ab = $('btnAuto');
+      ab.textContent = S.auto ? '🤖 自动挂机（开）' : '⏸️ 自动挂机（关）';
+      ab.classList.toggle('auto-on', S.auto);
+      ab.title = S.auto ? '服务端持续结算中，此按钮只暂停本页面刷新' : '本页面已暂停刷新，服务端仍照常结算';
       if (S.auto) startLoop();
     });
 
@@ -1412,6 +1735,9 @@
         '❤️ 生命上限 ' + fmt(v.panel.maxHP) + ' · 💰 金币 ' + fmt(v.gold || 0),
         '👊 终身出拳 ' + fmt((v.stats || {}).lifetimePunches || 0) + ' · 💀 本世击杀 ' + fmt((v.stats || {}).kills || 0) +
           ' · 👑 Boss 击杀 ' + fmt((v.stats || {}).bossKillCount || 0),
+        // 第十五批 R34：补世代/转生/赋能/称号计数，摘要更完整
+        '🌟 转生 ' + fmt((v.stats || {}).rebirths || 0) + ' 次 · 🧬 赋能 ' +
+          Object.keys(v.blessings || {}).length + ' 条 · 🎖️ 称号 ' + (v.titles || []).length + ' 项',
         '💥 最高单击 ' + fmt((v.stats || {}).bestHit || 0) + ' · 🏅 成就 ' +
           (v.achievements || []).length + '/' + Object.keys(v.achRewards || {}).length,
         '📖 图鉴 ' + (Array.isArray(v.codex) ? v.codex.length : 0) + ' 种 · ⚒️ 合成 ' + fmt((v.stats || {}).crafts || 0) + ' 次'
@@ -1495,10 +1821,14 @@
       let done = false;
       try { done = !!localStorage.getItem(dailyKey()); } catch (e) { /* 忽略 */ }
       const b = $('btnDaily');
-      if (b && done) {
-        b.disabled = true;
-        b.textContent = '✅ 已签到';
-        b.title = '今日已签到，明天再来';
+      if (b) {
+        // 第十五批 R25：未签到当日红点（::after 脉冲），签到后清除
+        b.classList.toggle('daily-todo', !done);
+        if (done) {
+          b.disabled = true;
+          b.textContent = '✅ 已签到';
+          b.title = '今日已签到，明天再来';
+        }
       }
     }
     renderDailyState();
@@ -1532,6 +1862,19 @@
       } else {
         el.disabled = false;
         delete el.dataset.cd;
+      }
+      // 第十五批 R29：冷却角标增强——剩余秒数以 .cd-badge 叠加显示，最后 1 秒转红提示「马上好了」
+      let badge = el.querySelector('.cd-badge');
+      if (cd && cd > 0) {
+        if (!badge) {
+          badge = document.createElement('i');
+          badge.className = 'cd-badge';
+          el.appendChild(badge);
+        }
+        badge.textContent = cd <= 1 ? '好' : Math.ceil(cd) + 's';
+        badge.classList.toggle('cd-soon', cd <= 1);
+      } else if (badge) {
+        badge.remove();
       }
       // 技能熟练度提示（服务端 mastery 下发）：每 20 次 +1 档，每档 CD-3%，最高 5 档
       const mv = view.mastery && view.mastery[id];
@@ -1613,15 +1956,23 @@
 
   function renderSaveHint(view) {
     const el = $('saveState');
+    // 第十五批 R33：同步状态四态——同步中（每帧短暂）/ 已同步 / 战斗中不可存 / 失败
+    const netFails = S._netFails || 0;
     if (view.dead) {
       el.textContent = '💀 已阵亡';
       el.className = 'savebad';
+    } else if (netFails >= 3) {
+      el.textContent = '⚠️ 同步失败，重试中';
+      el.className = 'savebad';
+      el.title = '网络中断：本地显示可能落后，服务端仍在结算';
     } else if (view.zone !== 'village') {
       el.textContent = '⚔️ 战斗中（不可存档）';
       el.className = 'savewarn';
+      el.title = '战斗中不可手动存档，进度仍每秒自动落库';
     } else {
       el.textContent = '✅ 安全区';
       el.className = 'saveok';
+      el.title = '位于安全区，可手动存档';
     }
     const hint = $('saveRuleHint');
     if (hint) {
@@ -1789,6 +2140,16 @@
         renderEvents._sig = null;
         if (S.view) renderEvents(S.view);
       });
+      // 第十五批 R9：日志区底部「⤓ 回到底部」小按钮（只建一次，点击滚回日志底部）
+      if (!$('evBottomBtn')) {
+        const bb = document.createElement('button');
+        bb.id = 'evBottomBtn';
+        bb.className = 'ev-bottom-btn';
+        bb.type = 'button';
+        bb.textContent = '⤓ 回到底部';
+        bb.addEventListener('click', () => { box.scrollTop = box.scrollHeight; });
+        box.insertAdjacentElement('afterend', bb);
+      }
       box.parentNode.insertBefore(bar, box);
     }
     document.querySelectorAll('#evFilterBar .bf-chip').forEach(c =>
@@ -1798,8 +2159,13 @@
     const sig = eventFilter + '|' + logSearchKw + '|' + evs.join('|');
     if (sig === renderEvents._sig) return;
     renderEvents._sig = sig;
+    // 第十五批 R9：行首渲染时刻 HH:MM:SS——重建时取当下，不进签名（签名含时间戳会每秒重建 DOM）；
+    // 新插入行挂 .event-fresh 高亮渐隐
+    const nowD = new Date();
+    const evTs = [nowD.getHours(), nowD.getMinutes(), nowD.getSeconds()]
+      .map(n => String(n).padStart(2, '0')).join(':');
     box.innerHTML = evs.length
-      ? evs.slice(-6).reverse().map(e => '<div class="event-line">' + esc(e) + '</div>').join('')
+      ? evs.slice(-6).reverse().map(e => '<div class="event-line event-fresh"><span class="ev-ts">[' + evTs + ']</span>' + esc(e) + '</div>').join('')
       : '';
   }
 
@@ -1994,7 +2360,7 @@
     const bag = $('bagList');
     bag.innerHTML = '';
     if (!view.bag || !view.bag.length) {
-      bag.innerHTML = '<p class="empty-hint">击杀怪物掉落装备</p>';
+      bag.innerHTML = '<p class="empty-hint act-hint">🎒 背包空空如也<br>去 <span class="act-link" data-goto="map">🗺️ 地图</span> 换到野外区域打怪，装备与图纸都会掉落</p>';
       return;
     }
     // 背包筛选条：只建一次（部位 + 品质两组筹码），点击改 bagFilter 后强制重绘
@@ -2303,6 +2669,27 @@
           <div class="pi-desc">把小血药 / 大血药 / 蓝药 / 解毒剂补到 10 瓶（按当前金币量力买）</div></div>
         <div class="pi-btns"><button id="btnRestock">补给</button></div>`;
       box.appendChild(rb);
+      // 第十五批 R42：补给成本预览——悬停按钮按当前商店价估算补到 10 瓶的金币合计
+      const restockBtn = rb.querySelector('#btnRestock');
+      restockBtn.addEventListener('mouseenter', () => {
+        const v = S.view || {};
+        const have = v.potions || {};
+        const defs = (S.meta && S.meta.potions) || [];
+        let total = 0;
+        const detail = [];
+        ['hp_s', 'hp_l', 'mp', 'cure'].forEach(id => {
+          const def = defs.find(d => d.id === id);
+          if (!def) return;
+          const need = Math.max(0, 10 - (Number(have[id]) || 0));
+          if (!need) return;
+          const cost = new Decimal(def.price || 0).mul(need);
+          total += Number(cost.toNumber ? cost.toNumber() : cost);
+          detail.push(esc(def.name) + '×' + need);
+        });
+        restockBtn.title = detail.length
+          ? '补到 10 瓶：' + detail.join(' + ') + '\n按当前标价约需 ' + fmt(total) + ' 金（实际按动态涨价逐个结算，金币不足自动停）'
+          : '各项已补足 10 瓶，无需补给';
+      });
       rb.querySelector('#btnRestock').addEventListener('click', async () => {
         // 服务端 buyfill 逐瓶补到 10：动态涨价口径与手动逐瓶买一致，客户端不再按标价估算
         let bought = 0;
@@ -2403,8 +2790,13 @@
       }
       const have = (view.potions && view.potions[p.id]) || 0;
       const pinned = pins.includes(p.id);
+      // 第十五批 R10：低库存角标——血药 <3、蓝药 <2 时条目挂 .potion-low（CSS ::after 红色「低」角标）
+      let low = false;
+      if (p.id === 'hp_s' || p.id === 'hp_l' || p.id === 'hp_xl') low = have < 3;
+      else if (p.id === 'mp' || p.id === 'mp_l') low = have < 2;
+      else if (p.id === 'cure') low = have < 1;
       const d = document.createElement('div');
-      d.className = 'potion-item' + (pinned ? ' pinned' : '');
+      d.className = 'potion-item' + (pinned ? ' pinned' : '') + (low ? ' potion-low' : '');
       d.innerHTML = `
         <div class="pi-info"><b>${p.emoji} ${p.name}</b> <span class="pi-own">×${have}</span>
           <button class="pin-btn" data-act="pin" title="${pinned ? '取消置顶' : '置顶到本组最前'}">${pinned ? '📌' : '📍'}</button>
@@ -2521,6 +2913,21 @@
       rows.push(`· 最后的战斗：${view.recentKills.join('、')}`);
     }
     $('deathAutopsy').textContent = rows.join('\n');
+    // 第十五批 R8：尸检报告默认收起，点击切换展开/收起与按钮文案
+    {
+      const body = $('deathAutopsy');
+      const tg = $('autopsyToggle');
+      body.hidden = true;
+      tg.textContent = '🧾 展开尸检报告';
+      if (!tg._bound) {
+        tg._bound = true;
+        tg.onclick = () => {
+          const nowOpen = body.hidden;
+          body.hidden = !nowOpen;
+          tg.textContent = nowOpen ? '🧾 收起尸检报告' : '🧾 展开尸检报告';
+        };
+      }
+    }
     sfx('death');
     $('deathMask').style.display = 'flex';
 
@@ -2549,7 +2956,9 @@
       startLoop();
     };
     $('btnNewGame').onclick = async () => {
-      if (!confirm('重新开档：本世面板清零，但万世传承（赋能与世代）保留。继续？')) return;
+      // 第十五批 R24：「尘归尘」不可逆动作二次确认（第一层说明后果，第二层确认真意）
+      if (!confirm('⚰️ 重新开档：本世面板、装备、背包全部清零，仅保留万世传承（赋能与世代）。继续？')) return;
+      if (!confirm('这是本世成果将永久失去的最后确认——真的要让这一世尘归尘吗？')) return;
       const r = await call(() => API.deathAction(API.state.slot, 'restart'), '尘归尘，新的一世');
       $('deathMask').style.display = 'none';
       S.wasDead = false;
@@ -2860,6 +3269,17 @@
       const top = list[list.length - 1];
       tc.hidden = !top;
       if (top) tc.textContent = top[0] + ' ' + top[1];
+      // 第十五批 R18：点击称号芯片弹出全部称号清单（computeTitles 同源，只读展示）
+      if (!tc._boundClick) {
+        tc._boundClick = true;
+        tc.style.cursor = 'pointer';
+        tc.addEventListener('click', () => {
+          const all = computeTitles(S.view || {});
+          infoModal('🎖️ 我的称号（' + all.length + '）', all.length
+            ? all.map(t => '<div class="trait-row"><b>' + t[0] + ' ' + esc(t[1]) + '</b><span>' + esc(t[2]) + '</span></div>').join('')
+            : '<div class="effect-none">尚未获得称号</div>');
+        });
+      }
     }
     if (!list.length) {
       holder.innerHTML = '<div class="effect-none">尚未获得称号</div>';
@@ -2923,23 +3343,37 @@
       const tabs = RANK_TABS.map(([id, label]) =>
         `<button class="rank-tab${id === rankBoard ? ' active' : ''}" data-board="${id}">${label}</button>`).join('');
       if (!r.rows || !r.rows.length) {
-        box.innerHTML = tabs + '<p class="empty-hint">还没有人上榜，第一个就是你了</p>';
+        box.innerHTML = tabs + '<p class="empty-hint act-hint">🏆 还没有人上榜，第一个就是你了<br>继续出拳涨生命上限，榜单按最高成绩记录</p>';
       } else {
         box.innerHTML = tabs + r.rows.map(x => {
           const meta = rankBoard === 'gold' ? '身家 ' + esc(x.goldText)
             : rankBoard === 'gen' ? '已达 ' + Number(x.gen) + ' 世'
             : rankBoard === 'damage' ? '第 ' + esc(x.gen) + ' 世 · 总伤害 ' + esc(x.damageText)
             : '第 ' + esc(x.gen) + ' 世 · 生命上限 ' + esc(x.maxHPText);
-          return `<div class="grave-item">
-            <b>#${x.rank} ${esc(x.username)}</b>
+          // 第十五批 R38：我的行高亮（用户名与本地登录名一致即标 .rank-me）
+          const mine = x.username && API.state.user && x.username === API.state.user;
+          return `<div class="grave-item${mine ? ' rank-me' : ''}"${mine ? ' id="rankMe"' : ''}>
+            <b>#${x.rank} ${esc(x.username)}${mine ? ' <i class="me-tag">我</i>' : ''}</b>
             <span class="gi-meta">${meta}</span>
           </div>`;
-        }).join('');
+        }).join('') +
+          // 第十五批 R38：一键滚动定位到我的名次（不在榜则不显示）
+          (r.rows.some(x => x.username && API.state.user && x.username === API.state.user)
+            ? '<button class="rank-goto" type="button">�� 定位我的名次</button>' : '');
       }
       box.querySelectorAll('.rank-tab').forEach(b => b.addEventListener('click', () => {
         rankBoard = b.dataset.board;
         loadRank();
       }));
+      const goto = box.querySelector('.rank-goto');
+      if (goto) goto.addEventListener('click', () => {
+        const me = box.querySelector('#rankMe');
+        if (me) {
+          me.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          me.classList.add('rank-flash');
+          setTimeout(() => me.classList.remove('rank-flash'), 1500);
+        }
+      });
     } catch (e) {
       box.innerHTML = '<p class="empty-hint">榜单暂时不可用</p>';
     }
@@ -2950,7 +3384,7 @@
     try {
       const rows = await API.graveyardMine();
       if (!rows || !rows.length) {
-        box.innerHTML = '<p class="empty-hint">还没有碑。阵亡立黑碑，飞升立金碑。</p>';
+        box.innerHTML = '<p class="empty-hint act-hint">🪦 还没有碑<br>阵亡立黑碑、飞升立金碑；在 <span class="act-link" data-goto="map">🗺️ 地图</span> 打到 1 载攻速即可飞升留名</p>';
         return;
       }
       box.innerHTML = rows.map(g => {
@@ -2979,16 +3413,21 @@
     }
     box.innerHTML = tasks.map(t => {
       const pct = t.target > 0 ? Math.min(100, Math.floor(100 * t.progress / t.target)) : 0;
+      // 第十五批 R43：可交付徽章——已达目标未领的任务卡挂 ready 描边与「可交付」角标
+      const deliverable = t.done && !t.claimed;
       const btn = t.claimed
         ? '<button class="daily-claim" disabled>✅ 已领取</button>'
         : t.done
           ? '<button class="daily-claim ready" data-daily-claim="' + esc(t.id) + '">🎁 领取 +' + fmt(t.rewardGold) + ' 金</button>'
           : '<button class="daily-claim" disabled>未完成</button>';
       return '<div class="daily-card' + (t.claimed ? ' claimed' : t.done ? ' done' : '') + '">' +
-        '<div class="daily-head"><span>' + t.emoji + ' ' + esc(t.name) + '</span><span class="daily-reward">+' + fmt(t.rewardGold) + ' 金</span></div>' +
+        '<div class="daily-head"><span>' + t.emoji + ' ' + esc(t.name) +
+          (deliverable ? '<i class="deliver-badge">可交付</i>' : '') + '</span>' +
+        '<span class="daily-reward">+' + fmt(t.rewardGold) + ' 金</span></div>' +
         '<div class="daily-desc">' + esc(t.desc) + '</div>' +
         '<div class="daily-prog"><span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
-        fmt(t.progress) + '/' + fmt(t.target) + '</div>' + btn + '</div>';
+        fmt(t.progress) + '/' + fmt(t.target) +
+        '<i class="daily-pct">' + pct + '%</i></div>' + btn + '</div>';
     }).join('') + (tasks.every(t => t.claimed)
       ? '<p class="daily-allclear">🎉 今日任务已全清，全清奖励也到手了——明天见！</p>' : '');
     box.querySelectorAll('[data-daily-claim]').forEach(btn => {
@@ -3207,9 +3646,14 @@
     }
     box.innerHTML = offers.map(o => {
       const soldOut = o.bought >= o.limit;
-      return '<div class="potion-item market-item"><div class="pi-info"><b>' + o.emoji + ' ' + esc(o.name) +
-        ' <span class="market-off">-' + o.discount + '%</span></b>' +
-        '<div class="pi-desc">' + esc(o.desc) + ' · 库存 ' + o.stock + ' · 今日已购 ' + o.bought + '/' + o.limit + '</div></div>' +
+      // 第十五批 R41：黑市条目显示 已购/限购 进度与售罄态（英文短标 + 中文说明）
+      const boughtLeft = Math.max(0, (o.limit || 0) - (o.bought || 0));
+      return '<div class="potion-item market-item' + (soldOut ? ' market-soldout' : '') + '">' +
+        '<div class="pi-info"><b>' + o.emoji + ' ' + esc(o.name) +
+        ' <span class="market-off">-' + o.discount + '%</span>' +
+        (soldOut ? ' <i class="market-sold">已售罄</i>' : '') + '</b>' +
+        '<div class="pi-desc">' + esc(o.desc) + ' · 库存 ' + o.stock + ' · 今日已购 ' + o.bought + '/' + o.limit +
+        (soldOut ? '' : '（还可买 ' + boughtLeft + '）') + '</div></div>' +
         '<div class="pi-btns"><span class="market-price"><s>' + fmt(o.basePrice) + '</s> ' + fmt(o.price) + ' 金</span>' +
         '<button data-market-buy="' + esc(o.id) + '"' + (soldOut ? ' disabled' : '') + '>' +
         (soldOut ? '已达限购' : '购买') + '</button></div></div>';
@@ -3712,6 +4156,8 @@
         case 'KeyX': { const b = $('tabBtnSkills'); if (b) b.click(); break; }
         case 'KeyC': { const b = $('tabBtnQuest'); if (b) b.click(); break; }
         case 'KeyV': { const b = $('tabBtnCraft'); if (b) b.click(); break; }
+        // 第十五批 R11：? 键呼出玩法帮助（输入框聚焦时上面已 return，不误触）
+        case 'Slash': if (e.shiftKey) { const b = $('btnHelp'); if (b) b.click(); break; } return;
         default: return;
       }
       e.preventDefault();
@@ -3741,6 +4187,23 @@
       if (document.visibilityState === 'visible' && S.view && !S.view.dead) {
         S._nextPollAt = 0;   // 回到前台立即补一帧，不等退避到期
         tick();
+      }
+    });
+    // 第十五批 R45：空状态行动指引——[data-goto] 链接点击直达对应抽屉/页签（事件委托，DOM 重建不丢）
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('[data-goto]');
+      if (!link) return;
+      e.preventDefault();
+      const target = link.dataset.goto;
+      if (target === 'map') {
+        const btn = document.querySelector('[data-open-drawer="map"]');
+        if (btn) btn.click();
+      } else if (target === 'nav') {
+        const btn = document.querySelector('[data-open-drawer="nav"]');
+        if (btn) btn.click();
+      } else {
+        const tab = $('tabBtn' + target.charAt(0).toUpperCase() + target.slice(1));
+        if (tab) tab.click();
       }
     });
   }

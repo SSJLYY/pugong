@@ -158,6 +158,22 @@
   var byId = {};
   ACH.forEach(function (a) { byId[a.id] = a; });
 
+  /** 第十五批·轮2：进度统一百分比口径——cur/need → 0~100 整数百分比，防除零、防 >100%、负值钳 0。 */
+  function pctOf(cur, need) {
+    cur = Number(cur) || 0;
+    need = Number(need) || 0;
+    if (need <= 0 || cur <= 0) return 0;
+    return Math.min(100, Math.floor(cur * 100 / need));
+  }
+
+  /** 第十五批·轮3：中文大数金额——≥1e8 显示 X.X亿、≥1e4 显示 X.X万，其余原样直显。 */
+  function fmtReward(v) {
+    v = Number(v) || 0;
+    if (v >= 1e8) return (Math.round(v / 1e7) / 10) + '亿';
+    if (v >= 1e4) return (Math.round(v / 1e3) / 10) + '万';
+    return String(v);
+  }
+
   // 服务端下发的解锁集合(最近一次 view)
   var unlocked = {};
   // 已领取奖励集合与奖励金额表(服务端 view 下发,金额以服务端 Achievements.rewardOf 为准)
@@ -213,31 +229,35 @@
     // 搜索关键词（第十二批，app.js 的 #achSearch 写入 window.__achSearchKw）：与筛选筹码叠加
     var achKw = window.__achSearchKw || '';
     // 签名守卫:解锁/已领取状态位不变就不重建(轮询帧每秒都进这里,重建 DOM 纯浪费)
-    var sig = 'f=' + achFilter + '|q=' + achKw + '|';
+    var sig = 'f=' + achFilter + '|q=' + achKw + '|v15'; // 第十五批：签名带版本，升级后强制重建一次
     ACH.forEach(function (a) {
       sig += (unlocked[a.id] ? '1' : '0') + (claimed[a.id] ? '1' : '0');
-      // 进度按 5% 分桶进签名：进度条会动，又不会每帧重建
+      // 进度按 5% 分桶进签名：进度条会动，又不会每帧重建（第十五批·轮2：统一走 pctOf）
       var pr = progress[a.id];
-      if (pr) sig += ':' + Math.floor(Math.min(1, pr[0] / Math.max(1, pr[1])) * 20);
+      if (pr) sig += ':' + Math.floor(pctOf(pr[0], pr[1]) / 5);
     });
     if (sig === render._sig) return;
     render._sig = sig;
     var n = 0;
     for (var k in unlocked) { if (unlocked[k]) n++; }
+    // 统计头（第十五批·轮6）：渲染区顶部一行「解锁 X/Y · 完成率 Z%」
+    var ratePct = pctOf(n, ACH.length);
     var html = ['<div class="effect-group"><div class="effect-group-title">🏅 成就（' +
       n + '/' + ACH.length + '）</div>'];
+    html.push('<div class="effect-item ach-stat-head"><span>📊</span><b>解锁 ' + n + '/' + ACH.length +
+      ' · 完成率 ' + ratePct + '%</b><i>第十五批统计</i></div>');
     var claimable = ACH.filter(function (a) { return unlocked[a.id] && !claimed[a.id]; });
     if (claimable.length) {
       var sum = claimable.reduce(function (t, a) { return t + (rewards[a.id] || 0); }, 0);
       html.push('<div class="effect-item"><span>🎁</span><b>待领奖励 ' + claimable.length + ' 项</b>' +
-        '<i><button class="ach-claim" data-ach-claim-all="1">一键全领 +' + sum + ' 金</button></i></div>');
+        '<i><button class="ach-claim" data-ach-claim-all="1">一键全领 +' + fmtReward(sum) + ' 金</button></i></div>');
     }
     // 里程碑进度（第八批，第九批扩 75 档）：与服务端档位镜像——累计已领 15/30/45/60/75 项各发一次奖金
     var claimedN = ACH.filter(function (a) { return claimed[a.id]; }).length;
     var TIERS = [[15, 10000], [30, 30000], [45, 80000], [60, 200000], [75, 500000], [90, 1000000], [105, 3000000], [120, 5000000], [135, 10000000]];
     var nextTier = TIERS.filter(function (t) { return claimedN < t[0]; })[0];
     html.push('<div class="effect-item"><span>🏆</span><b>成就里程碑：已领 ' + claimedN + ' 项</b><i>' +
-      (nextTier ? '下一档 ' + nextTier[0] + ' 项（奖金 +' + nextTier[1] + ' 金）' : '全部里程碑奖金已达成 🎉') +
+      (nextTier ? '下一档 ' + nextTier[0] + ' 项（奖金 +' + fmtReward(nextTier[1]) + ' 金）' : '全部里程碑奖金已达成 🎉') +
       '</i></div>');
     // 排序与筛选（第七批）：可领取置顶 → 进行中（进度高优先）→ 未解锁 → 已领奖垫底；筛选只影响列表子集
     function achState(a) {
@@ -254,11 +274,17 @@
       return '<button class="ach-chip' + (achFilter === c[0] ? ' on' : '') + '" data-ach-filter="' + c[0] + '">' + c[1] + '</button>';
     }).join('') + '</div>');
     var ordered = ACH.slice().sort(function (x, y) {
+      // 第十五批·轮5：已解锁整体优先于未解锁；两组内部各按第七批既有细则稳定排序
+      var ux = unlocked[x.id] ? 0 : 1;
+      var uy = unlocked[y.id] ? 0 : 1;
+      if (ux !== uy) return ux - uy;
+      // 已解锁组内：可领取(0) < 已领奖(3) 的既有顺序保持
       var d = achState(x) - achState(y);
       if (d !== 0) return d;
-      if (achState(x) === 1) {
-        var px = progress[x.id] ? progress[x.id][0] / Math.max(1, progress[x.id][1]) : 0;
-        var py = progress[y.id] ? progress[y.id][0] / Math.max(1, progress[y.id][1]) : 0;
+      // 未解锁组内：进度百分比降序（第十五批·轮2 统一口径 pctOf）
+      if (!unlocked[x.id]) {
+        var px = progress[x.id] ? pctOf(progress[x.id][0], progress[x.id][1]) : 0;
+        var py = progress[y.id] ? pctOf(progress[y.id][0], progress[y.id][1]) : 0;
         return py - px;
       }
       return 0;
@@ -271,39 +297,65 @@
       return true;
     });
     if (!shown.length) {
-      html.push('<div class="effect-item"><span>·</span><b>' +
-        (achKw ? '没有匹配「' + achKw + '」的成就' : '暂无该类成就') + '</b><i></i></div>');
+      // 第十五批·轮7：关键词过滤后为空 → 「无匹配成就」占位，class 沿用 empty-hint
+      html.push('<div class="empty-hint">' +
+        (achKw ? '无匹配成就「' + achKw + '」' : '暂无该类成就') + '</div>');
     }
-    shown.forEach(function (a) {
+    // 第十五批·轮1：分组渲染——shown 按解锁/未解锁拆两组，各带组标题行；条目 DOM 结构不变，仅外层加分组标题
+    var unlockedShown = shown.filter(function (a) { return !!unlocked[a.id]; });
+    var lockedShown = shown.filter(function (a) { return !unlocked[a.id]; });
+    function pushGroup(title, list) {
+      if (!list.length) return;
+      html.push('<div class="ach-group-title">' + title + ' · ' + list.length + ' 项</div>');
+      list.forEach(function (a) { pushEntry(a); });
+    }
+    function pushEntry(a) {
       var on = !!unlocked[a.id];
       var tail = '';
       if (on && !claimed[a.id]) {
-        // 领取按钮由 app.js 的委托监听处理（data-ach-claim）
+        // 领取按钮由 app.js 的委托监听处理（data-ach-claim）；金额走 fmtReward（第十五批·轮3）
         tail = ' · <button class="ach-claim" data-ach-claim="' + a.id + '">领取 +' +
-          (rewards[a.id] || 0) + ' 金</button>';
+          fmtReward(rewards[a.id] || 0) + ' 金</button>';
       } else if (on) {
         tail = ' · ✅ 已领奖';
       }
       if (!on && progress[a.id]) {
         var pr = progress[a.id];
-        var pct = Math.min(100, Math.floor(pr[0] * 100 / Math.max(1, pr[1])));
+        var pct = pctOf(pr[0], pr[1]); // 第十五批·轮2：进度条宽度与文案百分比统一口径
         tail += ' <span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
-          pr[0] + '/' + pr[1];
+          pct + '%（' + pr[0] + '/' + pr[1] + '）';
       }
       html.push('<div class="effect-item ach-entry" style="opacity:' + (on ? 1 : .45) + '">' +
         '<span>' + (on ? a.emoji : '🔒') + '</span><b>' + a.name + '</b>' +
         '<i>' + a.desc + tail + '</i></div>');
-    });
+    }
+    pushGroup('🏅 已解锁', unlockedShown);
+    pushGroup('🧭 修行中', lockedShown);
     html.push('</div>');
     container.innerHTML = html.join('');
   }
 
-  /** 取本次新解锁（供 toast 弹窗）。 */
+  /** 取本次新解锁（供 toast 弹窗）。
+   *  第十五批·轮4说明：toast 弹出逻辑在 app.js:1047（drain().forEach → toast），
+   *  本文件不含弹出代码，且 known 哈希已天然防重（同一 id 只入队一次），
+   *  故会话级 Set 去重在 achievements.js 侧无需新增——已跳过，弹层去重口径归 app.js。 */
   function drain() {
     var out = newlyUnlocked.slice();
     newlyUnlocked.length = 0;
     return out;
   }
 
-  window.__achievements = { check: check, render: render, drain: drain };
+  /** 第十五批·轮8：外部过滤入口——写入 window.__achSearchKw 并触发重渲染。
+   *  与 app.js 的 #achSearch 输入监听共用同一全局变量口径（只写不读其内部状态）。 */
+  function setAchFilter(kw) {
+    kw = (kw == null) ? '' : String(kw).trim();
+    window.__achSearchKw = kw;
+    render._sig = null; // 强制下一次 render 重建（签名含关键词，置空即失效）
+    var box = document.getElementById('achArea');
+    if (box) render(box);
+    return kw;
+  }
+
+  // 硬约束：check/render/drain 三键名与签名不可变不可删（app.js:1044-1058 调用）；setAchFilter 为新增第四键
+  window.__achievements = { check: check, render: render, drain: drain, setAchFilter: setAchFilter };
 })();

@@ -32,6 +32,8 @@
 
   var LS_VOLUME = 'gongpu_audio_volume';
   var LS_MUTED = 'gongpu_audio_muted';
+  var LS_VOL = 'gongpu_vol'; // 第十五批：新音量键（0~1，默认 1），优先于旧键 LS_VOLUME
+  var LS_SFX_CATS = 'gongpu_sfx_cats'; // 第十五批：分类开关 JSON {"battle":true,"ui":true,"achv":true}
 
   // ---------------- 状态（localStorage 持久化） ----------------
   function readNum(key, dflt) {
@@ -50,7 +52,8 @@
     try { localStorage.setItem(key, val); } catch (e) { /* 隐私模式等场景忽略 */ }
   }
 
-  var volume = readNum(LS_VOLUME, 0.5);
+  // 第十五批：音量优先读 gongpu_vol（0~1，默认 1），未写过新键时回退旧键 gongpu_audio_volume
+  var volume = readNum(LS_VOL, readNum(LS_VOLUME, 1));
   var muted = readBool(LS_MUTED, false);
 
   // ---------------- AudioContext（首次用户交互后创建） ----------------
@@ -63,7 +66,11 @@
       return !!master;
     }
     var AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return false;                       // 老浏览器无 WebAudio
+    if (!AC) {
+      // 第十五批：WebAudio 不可用告警去重，只警告一次
+      warnOnce('no-webaudio', '[audio] WebAudio API unavailable, sfx disabled');
+      return false;                       // 老浏览器无 WebAudio
+    }
     ctx = new AC();
     master = ctx.createGain();
     master.gain.value = muted ? 0 : volume;
@@ -145,6 +152,17 @@
     // UI 点击：极短 tick
     click: function (out) {
       tone(out, 0, 'square', 2400, 0.03, 0.12);
+    },
+    // 金币入账（第十五批新增入口）：复用 buy 的金币叮当采样（B5→E6 上行），调用方暂不存在，入口先备好
+    coin: function (out) {
+      tone(out, 0,    'sine', 987.77, 0.10, 0.26);
+      tone(out, 0.07, 'sine', 1318.51, 0.18, 0.26);
+    },
+    // 稀有掉落（第十五批新增入口）：复用 drop 的清脆叮声采样（G6+C7 泛音）并加一层高八度泛音强调稀有感
+    rare: function (out) {
+      tone(out, 0,    'sine', 1567.98, 0.16, 0.28);
+      tone(out, 0.02, 'sine', 2093.00, 0.24, 0.16);
+      tone(out, 0.04, 'sine', 4186.01, 0.20, 0.10);
     }
   };
 
@@ -152,22 +170,70 @@
   var THROTTLE = { punch: 220, click: 60 };
   var lastPlay = {};
 
+  // ---------------- 分类开关（第十五批） ----------------
+  // name → 类别映射表（第十五批）：现有全部 name 归类如下
+  //   battle 战斗类：punch 出拳 / kill 击杀 / death 死亡 / levelup 飞升觉醒
+  //   ui     界面类：click 按钮点击 / buy 买药 / sell 卖装（商店操作反馈）
+  //   achv   奖励成就类：drop 装备掉落入包 / coin 金币入账 / rare 稀有掉落
+  //     （coin/rare 为第十五批新增入口，见 SFX 清单；未映射的 name 默认放行）
+  var NAME_CAT = {
+    punch: 'battle', kill: 'battle', death: 'battle', levelup: 'battle',
+    click: 'ui', buy: 'ui', sell: 'ui',
+    drop: 'achv', coin: 'achv', rare: 'achv'
+  };
+
+  function readCats() {
+    var cats = { battle: true, ui: true, achv: true }; // 默认全开
+    try {
+      var raw = localStorage.getItem(LS_SFX_CATS);
+      if (!raw) return cats;
+      var obj = JSON.parse(raw);
+      for (var k in cats) {
+        if (obj.hasOwnProperty(k)) cats[k] = !!obj[k];
+      }
+    } catch (e) { /* JSON 损坏时回落默认全开 */ }
+    return cats;
+  }
+  var cats = readCats();
+
+  function saveCats() {
+    writeLS(LS_SFX_CATS, JSON.stringify(cats));
+  }
+
+  // ---------------- 失败告警去重（第十五批） ----------------
+  // 模块级 Set 记录已 console.warn 的资源名/错误名，同一资源只警告一次
+  var warned = typeof Set === 'function' ? new Set() : { _m: {}, has: function (k) { return !!this._m[k]; }, add: function (k) { this._m[k] = 1; } };
+
+  function warnOnce(key, msg) {
+    if (warned.has(key)) return;
+    warned.add(key);
+    try { console.warn(msg); } catch (e) { /* 控制台不可用时静默 */ }
+  }
+
   // ---------------- 对外接口 ----------------
   function play(name) {
     var fn = SFX[name];
     if (!fn || muted) return;
     if (!ensureCtx()) return;
+    // 第十五批：按 name→类别映射表过滤，被关闭的类别不播放
+    var cat = NAME_CAT[name];
+    if (cat && !cats[cat]) return;
     var gap = THROTTLE[name] || 0;
     if (gap > 0) {
       var now = Date.now();
       if (lastPlay[name] && now - lastPlay[name] < gap) return;
       lastPlay[name] = now;
     }
-    try { fn(master); } catch (e) { /* 单音失败不影响游戏 */ }
+    try { fn(master); } catch (e) {
+      // 第十五批：播放失败告警去重，同一 name 只警告一次
+      warnOnce('sfx:' + name, '[audio] sfx play failed: ' + name + ' (' + (e && e.message ? e.message : e) + ')');
+    }
   }
 
   function setVolume(v) {
     volume = Math.min(1, Math.max(0, Number(v) || 0));
+    // 第十五批：写入新键 gongpu_vol 并同步旧键保持兼容；音量即时作用于现有播放链路（master.gain）
+    writeLS(LS_VOL, String(volume));
     writeLS(LS_VOLUME, String(volume));
     if (master && !muted) master.gain.value = volume;
   }
@@ -236,5 +302,10 @@
     setMuted: setMuted,
     isMuted: function () { return muted; },
     toggle: toggle
+  };
+  // ---------------- GPAudio 导出（第十五批） ----------------
+  // 与既有 __audio.setVolume 同源实现，勿重名冲突；按规约暴露 setVolume(v)
+  window.GPAudio = {
+    setVolume: setVolume
   };
 })();

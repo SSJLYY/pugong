@@ -82,6 +82,20 @@ body {
 .ov-item b { color: var(--gold-bright); font-size: 15px; margin-left: 4px; }
 .adm-actions { display: flex; gap: 8px; }
 
+/* ---------- 第十五批·轮4：健康徽章圆点 ---------- */
+.health-dot {
+  display: inline-block;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+  background: #6b6862; /* 未知/检测中 */
+  box-shadow: 0 0 4px rgba(0, 0, 0, .35);
+}
+.health-dot.up { background: #4caf50; box-shadow: 0 0 6px rgba(76, 175, 80, .55); }
+.health-dot.down { background: #f44336; box-shadow: 0 0 6px rgba(244, 67, 54, .55); }
+.health-dot.pending { background: #6b6862; opacity: .7; }
+
 /* ---------- 布局 ---------- */
 .adm-layout {
   max-width: 1240px; margin: 0 auto;
@@ -181,6 +195,10 @@ textarea.adm-input { min-width: 100%; min-height: 64px; resize: vertical; font-f
 }
 .adm-table tbody tr:nth-child(even) { background: rgba(255, 255, 255, .022); }
 .adm-table tbody tr:hover { background: rgba(232, 197, 104, .07); }
+
+/* 第十五批·轮5：紧凑密度模式（body.dense）——单元格 padding 收紧 */
+body.dense .adm-table th { padding: 6px 8px; letter-spacing: .5px; }
+body.dense .adm-table td { padding: 5px 8px; }
 .adm-table tbody tr:last-child td { border-bottom: none; }
 .adm-table .num { font-variant-numeric: tabular-nums; }
 .adm-table .dim { color: var(--txt-dim); }

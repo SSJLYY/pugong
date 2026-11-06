@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>普攻永久增加生命上限 · 一拳一点命</title>
+<title>Gongpu</title>
 <meta name="description" content="反等级制大数放置网游：每次普攻永久 +1 生命上限，攻速无上限，觉醒天赋、转生赋能、死了就重开。">
 <meta name="theme-color" content="#14100c">
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="css/style.css?v=250">
-<link rel="stylesheet" href="css/v2.css?v=250">
-<link rel="stylesheet" href="css/drawer.css?v=250">
+<link rel="stylesheet" href="css/style.css?v=260">
+<link rel="stylesheet" href="css/v2.css?v=260">
+<link rel="stylesheet" href="css/drawer.css?v=260">
 </head>
 <body>
 
@@ -109,6 +109,7 @@
     <span class="hp-icon">❤️</span>
     <span class="hp-max-label">生命上限</span>
     <span id="hpMax" class="hp-max">100</span>
+    <canvas id="hpSpark" width="110" height="26" aria-hidden="true"></canvas><!-- 第十五批 R5 HP 趋势迷你图 -->
   </div>
   <div class="bars">
     <div class="bar hp"><div id="hpBar" class="fill"></div><span class="bar-txt"><span id="hpCur">100</span><span id="shieldVal" hidden></span> HP</span></div>
@@ -120,6 +121,7 @@
     <span id="hudGold" class="gen" title="当前金币">💰 0</span>
     <span id="hudKills" class="gen" title="本世击杀">💀 0</span>
     <span id="hudRate" class="gen" title="最近 5 分钟的击杀速率（本页会话内统计）"></span>
+    <span id="hudPps" class="gen" hidden title="出拳速率 / 生命成长速率（本页会话统计）"></span><!-- 第十五批 R4 HUD 双速率 -->
     <span id="talentBadge" class="talent-badge" style="display:none" title="当前觉醒天赋"></span>
     <span id="saveState" class="saveok">✅ 云端已同步</span>
     <button id="btnDaily" class="daily-btn" title="每日签到：金币+药剂礼包">🎁 签到</button>
@@ -133,6 +135,7 @@
   <div class="play-column">
     <section class="panel combat">
       <div id="storyLine" class="story-line">你的江湖之旅开始了。</div>
+      <div id="ascendProg" class="ascend-prog" hidden><i class="ascend-prog-fill"></i><span class="ascend-prog-txt"></span></div><!-- 第十五批 R2 飞升进度条 -->
       <h2 id="zoneName">🏡 村口</h2>
       <div class="mob">
         <div id="mobEmoji" class="mob-emoji">🪵</div>
@@ -407,7 +410,11 @@
     <p>本世战绩：击杀 <span id="deathKills">-</span> · Boss <span id="deathBoss">-</span> · 最高单击 <span id="deathBest">-</span></p>
     <p class="death-save-info" id="deathSave">-</p>
     <p class="death-incense" id="deathIncenseInfo"></p>
-    <div id="deathAutopsy" class="death-autopsy"></div>
+    <!-- 第十五批 R8：尸检默认折叠，点按钮展开 -->
+    <div class="autopsy-fold">
+      <button id="autopsyToggle" class="d-btn" type="button">🧾 展开尸检报告</button>
+      <div id="deathAutopsy" class="death-autopsy" hidden></div>
+    </div>
     <div class="death-btns">
       <button id="btnIncense" class="d-btn load">🕯️ 香火复活（满血原地）</button>
       <button id="btnLoadLast" class="d-btn load">📂 回档到最近存档</button>
@@ -437,11 +444,11 @@
 <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=250"></script>
-<script src="js/api.js?v=250"></script>
-<script src="js/achievements.js?v=250"></script>
-<script src="js/tutorial.js?v=250"></script>
-<script src="js/drawer.js?v=250"></script>
-<script src="js/app.js?v=250"></script>
+<script src="js/audio.js?v=260"></script>
+<script src="js/api.js?v=260"></script>
+<script src="js/achievements.js?v=260"></script>
+<script src="js/tutorial.js?v=260"></script>
+<script src="js/drawer.js?v=260"></script>
+<script src="js/app.js?v=260"></script>
 </body>
 </html>

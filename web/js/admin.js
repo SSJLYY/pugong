@@ -13,6 +13,8 @@
   }
   const API_BASE = apiBase(); // 页面在 /gongpu/ 下 → '/gongpu'，根路径 → ''
   const TOKEN_KEY = 'gongpu.admin.token';
+  const DENSE_KEY = 'gongpu_admin_dense';    // 第十五批·轮6：表格密度记忆（'1'=紧凑）
+  const REFRESH_KEY = 'gongpu_admin_refresh'; // 第十五批·轮7：自动刷新间隔记忆（秒，0=关闭）
 
   /* ---------- 小工具 ---------- */
   const $ = function (id) { return document.getElementById(id); };
@@ -120,6 +122,47 @@
     return data;
   }
 
+  /* ============================================================
+   * 第十五批·轮6：表格密度切换（紧凑/舒适）
+   * body 挂 .dense 类收紧单元格 padding；localStorage gongpu_admin_dense 记忆
+   * ============================================================ */
+  function isDense() {
+    return document.body.classList.contains('dense');
+  }
+
+  function applyDensity(dense) {
+    document.body.classList.toggle('dense', !!dense);
+    lsSet(DENSE_KEY, dense ? '1' : '0');
+    var btn = $('btnDensity');
+    if (btn) {
+      // 按钮文案显示「当前可切换到的目标态」，语义与点击结果一致
+      btn.textContent = dense ? '舒适' : '紧凑';
+      btn.title = dense ? '当前：紧凑 · 点击切换为舒适' : '当前：舒适 · 点击切换为紧凑';
+      btn.setAttribute('aria-pressed', dense ? 'true' : 'false');
+    }
+  }
+
+  function toggleDensity() {
+    applyDensity(!isDense());
+  }
+
+  /* ---------- 第十五批·轮7：自动刷新间隔（关闭/5s/15s/60s，localStorage 记忆，0=停止） ---------- */
+  var refreshTimer = null;
+  function applyRefreshInterval(sec) {
+    sec = Number(sec) || 0;
+    if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } // 接管旧定时器
+    lsSet(REFRESH_KEY, sec ? String(sec) : '0');
+    var sel = $('refreshSel');
+    if (sel) sel.value = String(sec);
+    if (sec > 0) {
+      refreshTimer = setInterval(function () {
+        if (!state.token) { applyRefreshInterval(0); return; } // 已退出登录则停止
+        loadTab(state.currentTab); // 重拉当前页数据
+        loadHealth(); // 第十五批·轮4：健康徽章同步刷新
+      }, sec * 1000);
+    }
+  }
+
   /* ---------- 登录 / 退出 ---------- */
   function showLogin() {
     $('loginMask').style.display = 'flex';
@@ -154,6 +197,7 @@
     $('loginMask').style.display = 'none';
     $('adminRoot').style.display = 'block';
     loadOverview();
+    loadHealth(); // 第十五批·轮4：顶栏健康徽章（redis/mysql）
     loadTrend();
     activateTab(state.currentTab || 'users');
   }
@@ -185,6 +229,39 @@
       }
     } catch (e) {
       if (e.status !== 401 && e.status !== 403) toast('概览加载失败：' + e.message, 'err');
+    }
+  }
+
+  /* ============================================================
+   * 第十五批·轮4：服务健康徽章
+   * 数据源 GET /api/health（未鉴权、服务端 2 秒短缓存）→ {ok,redis,mysql,...}
+   * redis/mysql 值为 "up"/"down"：up → 绿 #4caf50 圆点，down → 红 #f44336 圆点 + 文字
+   * ============================================================ */
+  function healthDotHtml(up) {
+    return '<span class="health-dot ' + (up ? 'up' : 'down') + '"></span>';
+  }
+
+  function renderHealth(r) {
+    var el = $('healthBadge');
+    if (!el) return;
+    if (!r) {
+      el.innerHTML = '<span class="health-dot down"></span>健康状态未知';
+      el.title = '健康接口不可用';
+      return;
+    }
+    var redisUp = String(r.redis || '').toLowerCase() === 'up';
+    var mysqlUp = String(r.mysql || '').toLowerCase() === 'up';
+    el.innerHTML = healthDotHtml(redisUp) + 'Redis ' + (redisUp ? '正常' : '异常') +
+      ' · ' + healthDotHtml(mysqlUp) + 'MySQL ' + (mysqlUp ? '正常' : '异常');
+    el.title = '服务健康状态：redis=' + (r.redis || '-') + ' · mysql=' + (r.mysql || '-');
+  }
+
+  async function loadHealth() {
+    try {
+      var r = await request('GET', '/api/health');
+      renderHealth(r);
+    } catch (e) {
+      renderHealth(null);
     }
   }
 
@@ -338,7 +415,11 @@
     state.currentTab = tab;
     var btns = document.querySelectorAll('.nav-btn');
     for (var i = 0; i < btns.length; i++) {
-      btns[i].classList.toggle('active', btns[i].getAttribute('data-tab') === tab);
+      var isCur = btns[i].getAttribute('data-tab') === tab;
+      btns[i].classList.toggle('active', isCur);
+      // 第十五批·轮1：当前导航项挂 aria-current="page"（点击/切换视图共用此入口，高亮 + 无障碍双保险）
+      if (isCur) { btns[i].setAttribute('aria-current', 'page'); }
+      else { btns[i].removeAttribute('aria-current'); }
     }
     var pages = document.querySelectorAll('.adm-page');
     for (var j = 0; j < pages.length; j++) {
@@ -353,18 +434,100 @@
     else if (CFG[tab]) { loadConfig(tab); }
   }
 
+  /* ============================================================
+   * 第十五批·轮2：数据表格列头点击排序（asc/desc 切换 + ▲▼ 箭头指示）
+   * 覆盖账号表 / 六个配置表 / 审计表；排序状态存 sortState，刷新后保持
+   * ============================================================ */
+  var sortState = {}; // tableId → { key, dir }
+
+  function cmpRows(a, b, key) {
+    var va = a ? a[key] : undefined, vb = b ? b[key] : undefined;
+    var sa = (va === null || va === undefined) ? '' : String(va);
+    var sb = (vb === null || vb === undefined) ? '' : String(vb);
+    var na = Number(sa), nb = Number(sb);
+    // 两边都是纯数字 → 数值比较；否则字符串比较（时间列 YYYY-MM-DD 文本天然有序）
+    if (sa !== '' && sb !== '' && isFinite(na) && isFinite(nb)) { return na - nb; }
+    if (sa === '' && sb !== '') { return 1; }  // 空值沉底
+    if (sb === '' && sa !== '') { return -1; }
+    return sa.localeCompare(sb, 'zh-CN');
+  }
+
+  function applyTableSort(tableId, rows) {
+    var st = sortState[tableId];
+    if (!st || !st.key || !rows) return rows || [];
+    var arr = rows.slice();
+    arr.sort(function (a, b) {
+      var c = cmpRows(a, b, st.key);
+      return st.dir === 'desc' ? -c : c;
+    });
+    return arr;
+  }
+
+  // 依据 sortState 重绘列头箭头（▲ 升序 / ▼ 降序），data-label 为箭头重绘基准
+  function updateSortArrows(tableEl) {
+    if (!tableEl) return;
+    var st = sortState[tableEl.id];
+    var ths = tableEl.querySelectorAll('th[data-sort]');
+    for (var i = 0; i < ths.length; i++) {
+      var base = ths[i].getAttribute('data-label') || ths[i].textContent.replace(/\s*[▲▼]\s*$/, '');
+      ths[i].textContent = base + (st && ths[i].getAttribute('data-sort') === st.key
+        ? (st.dir === 'asc' ? ' ▲' : ' ▼') : '');
+    }
+  }
+
+  // 点击列头后按当前缓存行重排重绘
+  function rerenderSortedTable(tableId) {
+    if (tableId === 'userTable') {
+      renderUsersRows(applyTableSort('userTable', userRowsCache));
+    } else if (tableId === 'auditTable') {
+      refreshAuditView();
+    } else if (tableId.indexOf('tbl-') === 0) {
+      var tab = tableId.slice(4);
+      var cache = rowCache[tab] || {};
+      var rows = [];
+      Object.keys(cache).forEach(function (k) { rows.push(cache[k]); });
+      renderConfigTable(tab, applyTableSort(tableId, rows));
+    }
+  }
+
+  function onTableSortClick(e) {
+    var th = e.target.closest('th[data-sort]');
+    if (!th) return;
+    var table = th.closest('table');
+    if (!table || !table.id) return;
+    var key = th.getAttribute('data-sort');
+    var st = sortState[table.id] || { key: null, dir: 'asc' };
+    st.dir = (st.key === key && st.dir === 'asc') ? 'desc' : 'asc'; // 同列再点翻转，异列重置升序
+    st.key = key;
+    sortState[table.id] = st;
+    rerenderSortedTable(table.id);
+  }
+
   /* ---------- 账号页 ---------- */
-  var USER_HEAD = '<thead><tr><th>ID</th><th>用户名</th><th>注册时间</th><th>最近登录</th><th>香火</th><th>PvP 胜/负</th><th>操作</th></tr></thead>';
+  // 第十五批·轮2：列头挂 data-sort（可排序）/ data-label（箭头重绘基准）；PvP 与操作为复合列不排序
+  var USER_HEAD = '<thead><tr>' +
+    '<th data-sort="id" data-label="ID">ID</th>' +
+    '<th data-sort="username" data-label="用户名">用户名</th>' +
+    '<th data-sort="createdAt" data-label="注册时间">注册时间</th>' +
+    '<th data-sort="lastLoginAt" data-label="最近登录">最近登录</th>' +
+    '<th data-sort="incense" data-label="香火">香火</th>' +
+    '<th data-label="PvP 胜/负">PvP 胜/负</th>' +
+    '<th data-label="操作">操作</th>' +
+    '</tr></thead>';
+  var userRowsCache = []; // 第十五批·轮2：账号原始行缓存（列头排序重排用）
 
   function renderUsersRows(rows) {
     var t = $('userTable');
-    if (!rows || !rows.length) {
+    userRowsCache = rows || []; // 第十五批·轮2：缓存原始行，供列头点击排序重排
+    var sorted = applyTableSort('userTable', userRowsCache);
+    if (!sorted.length) {
       t.innerHTML = USER_HEAD + '<tbody><tr class="empty-row"><td colspan="7">无匹配账号</td></tr></tbody>';
+      updateSortArrows(t); // 第十五批·轮2：空表也保持箭头指示
       return;
     }
     var html = USER_HEAD + '<tbody>';
-    for (var i = 0; i < rows.length; i++) {
-      var u = rows[i];
+    for (var i = 0; i < sorted.length; i++) {
+      var u = sorted[i];
       html += '<tr>' +
         '<td class="num">' + esc(u.id) + '</td>' +
         '<td>' + esc(u.username) + '</td>' +
@@ -378,6 +541,7 @@
         '</td></tr>';
     }
     t.innerHTML = html + '</tbody>';
+    updateSortArrows(t); // 第十五批·轮2：每次重绘同步箭头指示
   }
 
   async function loadUsers(kw) {
@@ -564,12 +728,16 @@
   function renderConfigTable(tab, rows) {
     var c = CFG[tab];
     var t = $('tbl-' + tab);
-    var head = '<thead><tr><th>ID</th>';
-    for (var i = 0; i < c.fields.length; i++) { head += '<th>' + esc(c.fields[i].key) + '</th>'; }
-    head += '<th>操作</th></tr></thead>';
+    // 第十五批·轮2：列头挂 data-sort / data-label 支持点击排序（id 与各字段列；操作列不排序）
+    var head = '<thead><tr><th data-sort="id" data-label="ID">ID</th>';
+    for (var i = 0; i < c.fields.length; i++) {
+      head += '<th data-sort="' + esc(c.fields[i].key) + '" data-label="' + esc(c.fields[i].key) + '">' + esc(c.fields[i].key) + '</th>';
+    }
+    head += '<th data-label="操作">操作</th></tr></thead>';
 
     if (!rows || !rows.length) {
       t.innerHTML = head + '<tbody><tr class="empty-row"><td colspan="' + (c.fields.length + 2) + '">暂无数据</td></tr></tbody>';
+      updateSortArrows(t);
       return;
     }
     var body = '<tbody>';
@@ -586,14 +754,19 @@
         '</td></tr>';
     }
     t.innerHTML = head + body + '</tbody>';
+    updateSortArrows(t); // 第十五批·轮2：重绘同步箭头
   }
 
-  // tab → 当前行缓存（供编辑回填）
+  // tab → 当前行缓存（供编辑回填 + 第十五批·轮2 列头排序重排）
   var rowCache = {};
 
   async function loadConfig(tab) {
+    // 第十五批·轮2：请求期间保留列头（含箭头），避免加载闪空
+    var tbl = $('tbl-' + tab);
+    if (tbl && !tbl.querySelector('thead')) {
+      tbl.innerHTML = '<tbody><tr class="empty-row"><td>加载中…</td></tr></tbody>';
+    }
     var t = $('tbl-' + tab);
-    t.innerHTML = '<tbody><tr class="empty-row"><td>加载中…</td></tr></tbody>';
     try {
       var r = await request('GET', '/api/admin/' + tab);
       var rows = (r && r.rows) || [];
@@ -677,6 +850,7 @@
   async function saveForm() {
     var c = CFG[formCtx.tab];
     if (!c) return;
+    var curIdRef = formCtx.id; // 第十五批·轮8：编辑态标记（新增态为 null，跳过 diff）
     var payload = {};
     for (var i = 0; i < c.fields.length; i++) {
       var f = c.fields[i];
@@ -705,6 +879,22 @@
         continue;
       }
       payload[f.key] = v;
+    }
+
+    // 第十五批·轮8：编辑保存前 diff 预览——对比旧值→新值，有变化才 confirm
+    if (curIdRef != null) {
+      var oldRow = rowCache[formCtx.tab] && rowCache[formCtx.tab][String(formCtx.id)];
+      if (oldRow) {
+        var lines = [];
+        for (var k in payload) {
+          if (!Object.prototype.hasOwnProperty.call(payload, k)) continue;
+          var ov = oldRow[k] === undefined || oldRow[k] === null ? '' : String(oldRow[k]);
+          var nv = payload[k] === undefined || payload[k] === null ? '' : String(payload[k]);
+          if (ov !== nv) lines.push(k + '：' + (ov === '' ? '（空）' : ov) + '  →  ' + (nv === '' ? '（空）' : nv));
+        }
+        if (lines.length === 0) { toast('没有变化，未提交', 'warn'); return; } // 无变化不打接口
+        if (!confirm('以下字段将被修改：\n\n' + lines.join('\n') + '\n\n确认保存？')) return;
+      }
     }
 
     $('formSave').disabled = true;
@@ -737,27 +927,71 @@
   }
 
   /* ---------- 审计页 ---------- */
-  var AUDIT_HEAD = '<thead><tr><th style="width:170px">时间</th><th style="width:200px">动作</th><th>详情</th></tr></thead>';
+  // 第十五批·轮2：列头挂 data-sort / data-label（时间/动作可排序，详情列长文本不排序）
+  var AUDIT_HEAD = '<thead><tr>' +
+    '<th style="width:170px" data-sort="createdAt" data-label="时间">时间</th>' +
+    '<th style="width:200px" data-sort="action" data-label="动作">动作</th>' +
+    '<th data-label="详情">详情</th>' +
+    '</tr></thead>';
+  var auditRowsCache = []; // 第十五批·轮2：审计原始行缓存（排序 + 轮3 过滤共用）
+
+  // 第十五批·轮2/轮3：审计视图渲染 = 缓存行 → 级别+关键词过滤 → 排序 → 重绘
+  function refreshAuditView() {
+    var t = $('auditTable');
+    if (!t) return;
+    var rows = filterAuditRows(auditRowsCache); // 轮3 组合过滤
+    rows = applyTableSort('auditTable', rows);
+    if (!rows.length) {
+      t.innerHTML = AUDIT_HEAD + '<tbody><tr class="empty-row"><td colspan="3">' +
+        (auditRowsCache.length ? '无匹配记录（调整级别/关键词）' : '暂无记录') + '</td></tr></tbody>';
+      updateSortArrows(t);
+      return;
+    }
+    var html = AUDIT_HEAD + '<tbody>';
+    for (var i = 0; i < rows.length; i++) {
+      var a = rows[i];
+      html += '<tr>' +
+        '<td class="dim">' + fmtTime(a.createdAt) + '</td>' +
+        '<td class="mono">' + esc(a.action) + '</td>' +
+        '<td class="dim">' + esc(a.detail) + '</td></tr>';
+    }
+    t.innerHTML = html + '</tbody>';
+    updateSortArrows(t);
+  }
+
+  // 第十五批·轮3：级别 + 关键词组合过滤（对缓存行执行，输入即刷新视图）
+  function filterAuditRows(rows) {
+    var levelSel = $('auditLevel');
+    var kwInput = $('auditKw');
+    var level = levelSel ? levelSel.value : '';
+    var kw = kwInput ? kwInput.value.trim().toLowerCase() : '';
+    if (!level && !kw) return rows;
+    return (rows || []).filter(function (a) {
+      if (level && auditRowLevel(a) !== level) return false;
+      var hay = (String(a.action || '') + ' ' + String(a.detail || '')).toLowerCase();
+      if (kw && hay.indexOf(kw) === -1) return false;
+      return true;
+    });
+  }
+
+  // 第十五批·轮3：从动作/详情推断日志级别（WARN/ERROR/INFO）
+  function auditRowLevel(a) {
+    var s = (String(a.action || '') + ' ' + String(a.detail || '')).toUpperCase();
+    if (s.indexOf('ERROR') >= 0 || s.indexOf('失败') >= 0 || s.indexOf('ERR') >= 0) return 'ERROR';
+    if (s.indexOf('WARN') >= 0 || s.indexOf('警告') >= 0) return 'WARN';
+    return 'INFO';
+  }
 
   async function loadAudit() {
     var t = $('auditTable');
-    t.innerHTML = AUDIT_HEAD + '<tbody><tr class="empty-row"><td colspan="3">加载中…</td></tr></tbody>';
+    // 第十五批·轮2：加载中保留列头（含箭头），避免整表闪空
+    if (!t.querySelector('thead')) {
+      t.innerHTML = AUDIT_HEAD + '<tbody><tr class="empty-row"><td colspan="3">加载中…</td></tr></tbody>';
+    }
     try {
       var r = await request('GET', '/api/admin/audit');
-      var rows = (r && r.rows) || [];
-      if (!rows.length) {
-        t.innerHTML = AUDIT_HEAD + '<tbody><tr class="empty-row"><td colspan="3">暂无记录</td></tr></tbody>';
-        return;
-      }
-      var html = AUDIT_HEAD + '<tbody>';
-      for (var i = 0; i < rows.length; i++) {
-        var a = rows[i];
-        html += '<tr>' +
-          '<td class="dim">' + fmtTime(a.createdAt) + '</td>' +
-          '<td class="mono">' + esc(a.action) + '</td>' +
-          '<td class="dim">' + esc(a.detail) + '</td></tr>';
-      }
-      t.innerHTML = html + '</tbody>';
+      auditRowsCache = (r && r.rows) || []; // 第十五批·轮2：缓存原始行
+      refreshAuditView();
     } catch (e) {
       if (e.status !== 401 && e.status !== 403) {
         t.innerHTML = '<tbody><tr class="empty-row"><td>' + esc(e.message) + '</td></tr></tbody>';
@@ -766,7 +1000,13 @@
   }
 
   /* ---------- 刷新配置 ---------- */
+  // 第十五批·轮5：重载配置/清缓存类危险操作统一确认（立即生效，误触不可撤销）
+  function confirmDanger() {
+    return confirm('⚠️ 该操作立即生效，确定继续？');
+  }
+
   async function reloadServerConfig() {
+    if (!confirmDanger()) return; // 第十五批·轮5：重载服务端配置属危险操作，先确认
     var btn = $('btnReloadCfg');
     btn.disabled = true;
     try {
@@ -808,10 +1048,16 @@
     // 顶栏
     $('btnLogout').addEventListener('click', logout);
     $('btnReloadCfg').addEventListener('click', reloadServerConfig);
+    $('btnDensity').addEventListener('click', toggleDensity); // 第十五批·轮6：密度切换
+    $('refreshSel').addEventListener('change', function () { // 第十五批·轮7：自动刷新间隔切换
+      applyRefreshInterval(Number(this.value) || 0);
+    });
     // 导航
     document.querySelector('.adm-nav').addEventListener('click', onNavClick);
     // 主区：账号表与配置页按钮统一事件代理
     document.querySelector('.adm-main').addEventListener('click', function (e) {
+      // 第十五批·轮2 收尾：列头排序代理先于按钮代理（th 点击优先于按钮点击，命中即终止）
+      onTableSortClick(e);
       if (e.target.closest('#userTable')) { onUserTableClick(e); return; }
       onMainClick(e);
     });
@@ -822,6 +1068,9 @@
     });
     // 审计刷新
     $('auditRefresh').addEventListener('click', loadAudit);
+    // 第十五批·轮3 收尾：级别下拉 + 关键词输入 → 只重绘过滤视图（对缓存行执行，不重拉）
+    $('auditLevel').addEventListener('change', refreshAuditView);
+    $('auditKw').addEventListener('input', refreshAuditView);
     // 趋势卡：指标切换 + 手动刷新
     $('trendTabs').addEventListener('click', onTrendTabClick);
     $('trendRefresh').addEventListener('click', loadTrend);
@@ -840,6 +1089,8 @@
   function init() {
     buildConfigPages();
     bind();
+    applyDensity(lsGet(DENSE_KEY) === '1'); // 第十五批·轮6：恢复密度记忆
+    applyRefreshInterval(Number(lsGet(REFRESH_KEY)) || 0); // 第十五批·轮7：恢复自动刷新间隔
     if (state.token) {
       enterAdmin(); // 已有 token 直接进；首个请求 401/403 会清 token 回登录页
     } else {

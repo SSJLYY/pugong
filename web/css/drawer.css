@@ -1,4 +1,14 @@
 /* 双窗工作台与多抽屉布局：保留既有主题变量，所有功能按需展开。 */
+/* 第十五批：变量中文速查（逐条一行）
+   --drawer-width        抽屉宽度上限，窄屏自动收窄到 viewport - 28px
+   --drawer-ease         抽屉滑入/滑出主缓动曲线
+   --drawer-duration     抽屉开合基础时长（260ms）
+   --dock-height         移动端底部 dock 高度，决定 body 底部留白与浮球偏移
+   --control-radius      控件统一圆角（按钮/抽屉内输入框）
+   --txt-faint           最弱一级文字色，用于次要说明
+   --focus-ring          键盘聚焦描边（box-shadow 组合值），挂 :focus-visible
+   --drawer-mutex-ease   抽屉与遮罩互斥切换共用曲线，避免闪跳
+*/
 :root {
   --drawer-width: min(430px, calc(100vw - 28px));
   --drawer-ease: cubic-bezier(.22, 1, .36, 1);
@@ -6,6 +16,15 @@
   --dock-height: 66px;
   --control-radius: 9px;
   --txt-faint: #938d80;
+  --focus-ring: 0 0 0 2px var(--bg0), 0 0 0 4px var(--gold-bright); /* 第十五批：键盘聚焦描边 */
+  --drawer-mutex-ease: cubic-bezier(.2, .7, .3, 1); /* 第十五批：抽屉与遮罩共用的互斥过渡曲线 */
+}
+
+/* 第十五批：抽屉互斥过渡——backdrop 与抽屉统一缓动曲线，切换不闪跳。 */
+.drawer-backdrop,
+.side-drawer,
+.utility-panel {
+  transition-timing-function: var(--drawer-mutex-ease);
 }
 
 .game-title {
@@ -84,6 +103,16 @@ button:disabled { filter: saturate(.55); }
 .shell-action:active, .workspace-action:active, .drawer-close:active,
 .drawer-menu-action:active, .dock-btn:active { transform: translateY(1px); }
 .shell-action[aria-expanded="true"] { box-shadow: inset 0 -2px 0 var(--gold); }
+/* 第十五批：抽屉内关键操作控件统一聚焦描边。 */
+.drawer-close:focus-visible,
+.drawer-tab-list .game-tab:focus-visible,
+.dock-btn:focus-visible,
+.shell-action:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--gold-bright);
+  color: var(--gold-bright);
+}
 .hp-line { min-width: 180px; }
 .hp-max { color: var(--gold-bright); -webkit-text-fill-color: var(--gold-bright); background: none; filter: none; }
 .hp-max-label { color: var(--txt-dim); }
@@ -197,9 +226,10 @@ button:disabled { filter: saturate(.55); }
   visibility: hidden;
   transition: transform var(--drawer-duration) var(--drawer-ease), visibility 0s linear var(--drawer-duration);
 }
-.side-drawer--left { left: 0; transform: translate3d(-102%, 0, 0); border-right: 1px solid var(--border-strong); }
-.side-drawer--right { right: 0; transform: translate3d(102%, 0, 0); border-left: 1px solid var(--border-strong); box-shadow: -12px 0 40px rgba(0, 0, 0, .36); }
-.side-drawer.open { transform: translate3d(0, 0, 0); visibility: visible; transition-delay: 0s; }
+/* 第十五批：抽屉方向化滑入——左抽屉自 -100% 起点，右抽屉自 +100%，开态统一归零。 */
+.side-drawer--left { left: 0; transform: translateX(-100%); border-right: 1px solid var(--border-strong); }
+.side-drawer--right { right: 0; transform: translateX(100%); border-left: 1px solid var(--border-strong); box-shadow: -12px 0 40px rgba(0, 0, 0, .36); }
+.side-drawer.open, .side-drawer--left.open, .side-drawer--right.open { transform: translateX(0); visibility: visible; transition-delay: 0s; }
 .drawer-header {
   flex: 0 0 auto;
   min-height: 74px;
@@ -225,6 +255,15 @@ button:disabled { filter: saturate(.55); }
 }
 .drawer-close:hover { color: var(--gold-bright); border-color: var(--gold); background: var(--panel-2); }
 .drawer-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px; }
+/* 第十五批：抽屉滚动条窄轨化，金色 thumb，hover 加深，轨道透明。 */
+.drawer-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.drawer-scroll::-webkit-scrollbar-track { background: transparent; }
+.drawer-scroll::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--gold, #d9b06c);
+}
+.drawer-scroll::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--gold, #d9b06c) 72%, #000); }
+.drawer-scroll { scrollbar-width: thin; scrollbar-color: var(--gold, #d9b06c) transparent; }
 .drawer-section { padding: 16px; border-top: 1px solid var(--border); }
 .drawer-footnote { margin: auto 16px 16px; padding: 12px 0 max(4px, env(safe-area-inset-bottom)); color: var(--txt-dim); font-size: 11px; line-height: 1.7; }
 
@@ -270,6 +309,32 @@ button:disabled { filter: saturate(.55); }
   text-align: left;
 }
 .drawer-menu-action span { color: var(--txt-faint); font-size: 11px; }
+
+/* 第十五批：骨架屏占位 shimmer，由 JS 挂 .drawer-skeleton 类使用。 */
+.drawer-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--control-radius);
+  background: color-mix(in srgb, var(--panel) 88%, var(--bg0));
+  color: transparent;
+}
+.drawer-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--gold, #d9b06c) 18%, transparent) 45%,
+    transparent 90%);
+  background-size: 220% 100%;
+  animation: drawer-shimmer 1.35s linear infinite;
+}
+.drawer-skeleton--line { height: 14px; margin: 8px 0; }
+.drawer-skeleton--block { height: 72px; margin: 10px 0; }
+@keyframes drawer-shimmer {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
 
 /* 地图抽屉 */
 .map-drawer .map-panel {
@@ -497,6 +562,8 @@ body.theme-tide .side-drawer, body.theme-ember .side-drawer { box-shadow: -10px 
     font-size: 11px;
   }
   .dock-btn span { font-size: 18px; line-height: 1; }
+/* 第十五批：dock 按压反馈——轻微缩小 + 提亮。 */
+.dock-btn:active { transform: scale(.92); filter: brightness(1.2); }
   .dock-btn.active { color: var(--gold-bright); background: var(--panel-2); border-color: var(--border); }
   button#gp-audio-btn {
     right: 8px !important;
@@ -508,8 +575,56 @@ body.theme-tide .side-drawer, body.theme-ember .side-drawer { box-shadow: -10px 
   .stat-hover-card { bottom: calc(var(--dock-height) + 8px + env(safe-area-inset-bottom)); z-index: 2600; }
 }
 
-@media (max-width: 480px) {
-  .topbar { gap: 7px 8px; }
+/* 第十五批：横屏小高度适配——dock 压缩、抽屉与底部面板全高。 */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --dock-height: 52px; }
+  .mobile-dock {
+    height: calc(var(--dock-height) + env(safe-area-inset-bottom));
+    padding: 3px 4px env(safe-area-inset-bottom);
+  }
+  .dock-btn { min-height: 44px; padding: 2px; font-size: 10px; gap: 1px; }
+  .dock-btn span { font-size: 15px; }
+  .side-drawer { top: 0; bottom: 0; height: 100%; max-height: 100dvh; }
+  .drawer-header { min-height: 54px; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); }
+  .drawer-header h2 { font-size: 15px; }
+  .drawer-header p { display: none; }
+  .drawer-scroll { padding: 10px; }
+  .utility-panel { height: 100dvh; max-height: 100dvh; border-radius: 0; }
+  .workspace-bar { min-height: 46px; border-radius: 0; }
+  .tab-pane { padding: 10px 12px calc(14px + env(safe-area-inset-bottom)); }
+  .map-drawer .zones { grid-template-columns: 1fr 1fr 1fr; }
+  .drawer-tab-list.game-tabs { grid-template-columns: 1fr 1fr 1fr; }
+  .map-drawer .zone-btn { min-height: 46px; }
+}
+
+/* 第十五批：utility 抽屉把手触区 ≥44px（备用类，配合横条 ::before 扩大命中区）。 */
+.utility-grip {
+  position: relative;
+  display: block;
+  width: 64px;
+  height: 22px;
+  margin: 2px auto -2px;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+.utility-grip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  /* 横条视觉 42x4，命中区溢出到 44x44 */
+  transform: translate(-50%, -50%);
+  border-radius: 22px;
+  background: linear-gradient(var(--border-strong), var(--border-strong)) center / 42px 4px no-repeat;
+}
+.utility-grip:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 10px; }
+.workspace-bar .utility-grip { flex: 0 0 auto; }
+
+@media (max-width: 480px) {  .topbar { gap: 7px 8px; }
   .hp-icon, .hp-max-label { display: none; }
   .hp-max { font-size: 23px; }
   .meta-row { gap: 5px 8px; font-size: 11px; }
@@ -533,12 +648,90 @@ body.theme-tide .side-drawer, body.theme-ember .side-drawer { box-shadow: -10px 
 @media (prefers-reduced-motion: reduce) {
   .side-drawer, .utility-panel, .drawer-backdrop, .shell-action,
   .workspace-action, .drawer-close, .drawer-menu-action, .dock-btn { transition-duration: 1ms !important; }
+  /* 第十五批：抽屉作用域内全部过渡/动画压缩到 .01ms。 */
+  .side-drawer, .side-drawer *,
+  .utility-panel, .utility-panel *,
+  .drawer-backdrop,
+  .mobile-dock, .mobile-dock *,
+  .drawer-skeleton, .drawer-skeleton::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
 body.motion-off .side-drawer, body.motion-off .utility-panel, body.motion-off .drawer-backdrop { transition: none !important; }
 body.fx-off .side-drawer, body.fx-off .utility-panel, body.fx-off .drawer-backdrop { transition: none !important; }
+
+/* 第十五批：打印——隐藏频道型浮层，仅输出白底黑字的抽屉/面板内容。 */
+@media print {
+  .mobile-dock,
+  .side-drawer,
+  .drawer-backdrop,
+  #drawerBackdrop,
+  #butlerFab,
+  #butlerPanel,
+  button#gp-audio-btn,
+  .skip-link,
+  .stat-hover-card {
+    display: none !important;
+  }
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+  }
+  .utility-panel,
+  .drawer-scroll,
+  .drawer-section,
+  .tab-pane,
+  .combat {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+  .drawer-header,
+  .workspace-bar {
+    background: #fff !important;
+    color: #000 !important;
+    border-bottom: 1px solid #000 !important;
+  }
+  .drawer-header h2,
+  .workspace-bar h2,
+  .game-title {
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+  }
+  .drawer-skeleton::after,
+  .utility-grip::before,
+  .workspace-bar::before {
+    display: none !important;
+  }
+}
 
 @media (forced-colors: active) {
   .side-drawer, .utility-panel, .mobile-dock, .drawer-header, .workspace-bar { border-color: CanvasText; }
   .drawer-backdrop { background: Canvas; opacity: .82; }
   .game-tab.active, .dock-btn.active, .shell-action[aria-expanded="true"] { outline: 2px solid Highlight; }
+  /* 第十五批：高对比模式下关键控件强制 WindowText 边框，保留可见边界。 */
+  .drawer-close, .drawer-tab-list .game-tab, .dock-btn {
+    border: 1px solid WindowText !important;
+    forced-color-adjust: auto;
+  }
+  .drawer-close:focus-visible, .drawer-tab-list .game-tab:focus-visible, .dock-btn:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
 }

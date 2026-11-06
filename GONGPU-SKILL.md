@@ -112,6 +112,7 @@ curl -o /dev/null -w '%{http_code}' http://192.168.215.136:8088/gongpu/
 | API 404 / 双重 /api/api/ | 前端 fetch 没走 API_BASE 或 nginx 丢了前缀 | api.js 用 API_BASE 拼接；nginx `^~ /gongpu/api/` |
 | mysql 客户端跑 SQL 中文报错/表被清空 | Windows 客户端默认字符集非 utf8；seed 是先 DELETE 再 INSERT | 一律 `mysql --default-character-set=utf8mb4`（deploy.sh 已全量内置；本地库 2026-10-31 踩坑后已重灌） |
 | git commit 中文信息变乱码 | Bash 管道编码被污染 | 用 `git commit -F <utf8文件>`（Write 工具写消息文件），别走 -m 长串 |
+| git 拉取报 `Failed to connect ... port 7897/7900` / Connection reset / 443 超时 | git 代理通道失效或直连 GitHub 不稳（浏览器能开不代表命令行通道可用） | 走固定代理：`git -c http.proxy=http://127.0.0.1:7897 fetch origin main`（用户 2026-11-05 确认端口 7897）；仍不通先 curl -x 探测 7897/7890 再重试，勿裸重试 |
 | 并行会话把自己/别人的半成品提交了 | 多智能体同时开，有人用 `git add -A` | 小批即提交、`git add <具体文件>`；开工前先 `git log -2`+`git status` 探测并行改动 |
 | 玩家点击频繁弹"操作太快" | 轮询每秒持锁~百毫秒,点击撞窗(已修:前端等锁+409 重试+写队列,后端 run 短等重试) | 别改回瞬时拒绝;若再现查 StateCache.unlock 的 Lua token 是否单 varargs |
 | 玩家中后期页面卡死 | 背包膨胀(吞噬累加 BAG_CAP+售卖关闭)→状态接口全量下发 MB 级 JSON | 开「自动管护」开关即自清;根治链已 v3.13 部署(截断+钳制+O(n log n));若再现查 devourInto 是否又累加了容量类词条 |

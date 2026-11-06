@@ -288,6 +288,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* 第十六批·视觉回归：flex 子项默认 min-width:auto 不肯收缩，
+     窄屏下整行被进度条顶出视口（移动端实测 9 处横向溢出）；显式放开后走省略号 */
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 /* ---------------- 转生选项禁用态 ---------------- */
@@ -947,12 +951,14 @@ body.theme-ink .event-log .event-line{border-top-color:rgba(46,58,56,.15)}
 /* 背包筛选条（第六批：部位/品质筹码） */
 .bag-filter-bar{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
 #bagSearch{flex:1;min-width:120px;background:var(--panel2,#1e2433);border:1px solid var(--line,#39415a);border-radius:6px;color:inherit;padding:2px 8px;font-size:12px}
-.bf-chip{font-size:12px;padding:2px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#bbb;cursor:pointer}
+.bf-chip{font-size:12px;padding:2px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#bbb;cursor:pointer;min-height:28px;line-height:1.4}
 .bf-chip.on{background:#c9a227;color:#1a1503;border-color:#c9a227;font-weight:700}
 .bf-sep{width:10px}
 
-/* 成就进度条（第六批：未解锁的可量化成就） */
-.ach-prog{display:inline-block;width:90px;height:7px;border-radius:4px;background:rgba(255,255,255,.14);vertical-align:middle;overflow:hidden}
+/* 成就进度条（第六批：未解锁的可量化成就）
+   第十六批·视觉回归：width 改弹性——窄屏下 .effect-item 的 i 是单行省略容器，
+   固定 90px 会把行尾百分比顶出视口（移动端实测 9 处横向溢出） */
+.ach-prog{display:inline-block;width:clamp(38px,22vw,90px);height:7px;border-radius:4px;background:rgba(255,255,255,.14);vertical-align:middle;overflow:hidden;flex:0 1 auto}
 .ach-prog-fill{display:block;height:100%;background:#c9a227;border-radius:4px}
 
 /* 词条图鉴弹窗（第六批） */
@@ -1084,9 +1090,10 @@ body.theme-ink .event-log .event-line{border-top-color:rgba(46,58,56,.15)}
 .daily-reward{color:#ffb300;white-space:nowrap}
 .daily-desc{color:#cbbfa5}
 .daily-claim{min-height:30px}
+.daily-claim:disabled{color:var(--txt-dim);opacity:.75}
 .daily-claim.ready{background:#c9a227;color:#1a1503;font-weight:700;border-color:#c9a227;cursor:pointer}
 .daily-allclear{grid-column:1/-1;text-align:center;color:#ffb300;font-size:13px;margin:2px 0 0}
-.mat-sell{font-size:12px;padding:1px 7px;min-height:22px;background:#c9a227;color:#1a1503;border-color:#c9a227;font-weight:700;cursor:pointer;border-radius:4px}
+.mat-sell{font-size:12px;padding:4px 9px;min-height:28px;background:#c9a227;color:#1a1503;border-color:#c9a227;font-weight:700;cursor:pointer;border-radius:4px}
 
 /* 每日黑市（第七批） */
 .market-box{margin-bottom:10px}
@@ -1110,7 +1117,7 @@ body.motion-off *, body.motion-off *::before, body.motion-off *::after{animation
 .pet-exp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#c9a227,#e8c84a);transition:width .3s}
 
 .ev-filter-bar{display:flex;gap:4px;margin:4px 0}
-.tab-badge{display:inline-block;min-width:16px;margin-left:5px;padding:0 4px;border-radius:999px;background:#e5484d;color:#fff;font-size:11px;line-height:16px;text-align:center;vertical-align:2px}
+.tab-badge{display:inline-block;min-width:16px;margin-left:5px;padding:0 4px;border-radius:999px;background:#c9333a;color:#fff;font-size:11px;line-height:16px;text-align:center;vertical-align:2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
 
 /* 字号档位（第八批）：根字号缩放，rem 布局整体跟随 */
 body.fs-l{font-size:17.5px}
@@ -1315,7 +1322,7 @@ body.theme-ink .stat-hover-card.statlord table.stats tr[data-stat]:hover{
 @media (max-width: 768px){
   .topbar{flex-wrap:wrap;row-gap:6px}
   .brand-mini{font-size:13px}
-  .daily-btn{padding:4px 9px;font-size:12.5px}
+  .daily-btn{padding:6px 11px;font-size:12.5px;min-height:40px}
   .market-item .pi-btns{flex-wrap:wrap;justify-content:flex-end;row-gap:4px}
   .potion-item .pi-btns button{min-height:36px}
   .daily-claim{min-height:38px}
@@ -1323,11 +1330,18 @@ body.theme-ink .stat-hover-card.statlord table.stats tr[data-stat]:hover{
   .zone-btn{min-height:42px}
   .mat-sell{min-height:28px;padding:2px 10px}
   .rank-tab{margin-bottom:4px}
+  /* 第十六批·视觉回归：移动端触控目标统一抬到 ≥36px，主操作 ≥40px */
+  .bf-chip, .kit-btn, .ach-chip, .mat-sell { min-height: 36px; }
+  .ev-bottom-btn { min-height: 36px; padding: 6px 12px; }
+  .workspace-action { min-height: 40px; }
+  .auto-line-input { min-height: 32px; min-width: 56px; }
+  .pin-btn { min-width: 32px; min-height: 32px; }
+  .ach-claim { min-height: 34px; padding: 5px 10px; }
 }
 
 /* 药剂置顶（第七批） */
 .potion-item.pinned{border-left:3px solid #ffb300}
-.pin-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;min-height:0;opacity:.85}
+.pin-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;min-height:24px;min-width:24px;opacity:.85}
 
 /* 区域就绪标记（第七批） */
 .zone-btn.ready::after{content:' ✓';color:#7dd87d;font-weight:700}
@@ -1372,6 +1386,12 @@ body.theme-ink .boss-btn{
 .ach-filters{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
 .ach-chip{background:var(--panel);border:1px solid var(--border);color:var(--txt-dim);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;min-height:26px}
 .ach-chip.on{border-color:var(--gold);color:var(--gold-bright)}
+/* 第十六批·视觉回归：窄屏成就条目允许换行，避免进度条把百分比挤成省略号 */
+@media (max-width: 480px) {
+  .effect-item.ach-entry { align-items: flex-start; flex-wrap: wrap; }
+  .effect-item.ach-entry i { white-space: normal; overflow: visible; text-overflow: clip; flex: 1 1 100%; }
+  .ach-prog { width: clamp(44px, 26vw, 90px); }
+}
 .monthly-card{border-color:rgba(167,139,250,.5)}
 .monthly-card.done{border-color:#a78bfa}
 

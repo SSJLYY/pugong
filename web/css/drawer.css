@@ -472,7 +472,7 @@ body.theme-tide .side-drawer, body.theme-ember .side-drawer { box-shadow: -10px 
   }
   .brand-mini, .dps-chip, #titleChip, #petChip { display: none !important; }
   .shell-actions { grid-column: 3; grid-row: 1; order: initial; }
-  .shell-action { width: 38px; height: 38px; min-height: 38px; padding: 0; }
+  .shell-action { width: 44px; height: 44px; min-height: 44px; padding: 0; }
   .shell-action span { display: none; }
   #btnNav { display: none; }
   .char-badge { grid-column: 1; grid-row: 1; width: 44px; height: 44px; order: initial; }
@@ -639,7 +639,7 @@ body.theme-tide .side-drawer, body.theme-ember .side-drawer { box-shadow: -10px 
   .drawer-tab-list.game-tabs { grid-template-columns: 1fr 1fr; padding: 10px; gap: 7px; }
   .tab-pane .equipped-grid { grid-template-columns: 1fr; }
   .tab-pane .equip-slot .eq-base { display: block; margin-top: 5px; line-height: 1.5; }
-  .workspace-action { padding: 5px 8px; }
+  .workspace-action { padding: 5px 8px; min-height: 40px; }
   #btnWorkspaceNav { font-size: 0; }
   #btnWorkspaceNav::after { content: "☰"; font-size: 16px; }
   .settings-controls { grid-template-columns: 1fr; }

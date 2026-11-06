@@ -44,11 +44,11 @@
     '.gt-tip .gt-text{word-break:break-all;}' +
     '.gt-tip .gt-btns{margin-top:12px;display:flex;justify-content:space-between;align-items:center;}' +
     '.gt-btn{background:#e8c568;color:#1c1812;border:none;border-radius:4px;' +
-    'padding:6px 18px;cursor:pointer;font-size:14px;font-weight:bold;}' +
+    'padding:9px 20px;min-height:40px;cursor:pointer;font-size:14px;font-weight:bold;}' +
     '.gt-btn:hover{background:#f2d488;}' +
     '.gt-btn:active{transform:translateY(1px);}' +
     '.gt-skip{background:none;border:none;color:#e8c568;opacity:.55;cursor:pointer;' +
-    'font-size:12px;text-decoration:underline;padding:0;}' +
+    'font-size:12px;text-decoration:underline;padding:10px 6px;min-height:40px;}' +
     '.gt-skip:hover{opacity:.9;}';
 
   function injectCss() {

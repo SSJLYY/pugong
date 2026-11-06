@@ -325,7 +325,7 @@
         tail += ' <span class="ach-prog"><span class="ach-prog-fill" style="width:' + pct + '%"></span></span> ' +
           pct + '%（' + pr[0] + '/' + pr[1] + '）';
       }
-      html.push('<div class="effect-item ach-entry" style="opacity:' + (on ? 1 : .45) + '">' +
+      html.push('<div class="effect-item ach-entry" style="opacity:' + (on ? 1 : .7) + '">' +
         '<span>' + (on ? a.emoji : '🔒') + '</span><b>' + a.name + '</b>' +
         '<i>' + a.desc + tail + '</i></div>');
     }

@@ -1229,7 +1229,8 @@ body.motion-off #netState.net-bad { animation: none; }
 .ev-bottom-btn {
   display: block;
   margin: 4px 0 0 auto;
-  padding: 2px 8px;
+  padding: 5px 10px;
+  min-height: 28px;
   font-size: 11px;
   border-radius: 6px;
   border: 1px solid var(--border-strong, rgba(232, 197, 104, .25));

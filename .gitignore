@@ -31,3 +31,4 @@ dump.rdb
 commit-msg-*.txt
 .impeccable/edge-profile/
 .impeccable/edge-ui-profile/
+qa_visual/

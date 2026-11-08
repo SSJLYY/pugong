@@ -185,6 +185,59 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // ---------------- 功能页内子页签（第十七批） ----------------
+  // 契约：.tab-pane 内 .sub-tabs > .sub-tab[data-sub] ↔ 同级 .sub-pane[data-subpane]。
+  // 目的：委托/技能药剂/角色页不再一屏堆 3~5 个模块，单屏只展示一个子模块（主屏=战斗+当前功能）。
+  // 选择记忆到 localStorage(gongpu_sub_<paneId>)，纯前端状态，不影响后端渲染与懒加载。
+  function activateSubTab(pane, sub, focus) {
+    if (!pane) return;
+    const tabs = Array.from(pane.querySelectorAll(':scope > .sub-tabs > .sub-tab'));
+    const panes = Array.from(pane.querySelectorAll(':scope > .sub-pane'));
+    if (!tabs.length || !panes.length) return;
+    const valid = tabs.some(t => t.dataset.sub === sub) ? sub : tabs[0].dataset.sub;
+    tabs.forEach(t => {
+      const on = t.dataset.sub === valid;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      if (on && focus) t.focus({ preventScroll: true });
+    });
+    panes.forEach(p => { p.hidden = p.dataset.subpane !== valid; });
+    try { localStorage.setItem('gongpu_sub_' + pane.id, valid); } catch (e) { /* 隐私模式忽略 */ }
+  }
+
+  function restoreSubTabs() {
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+      if (!pane.querySelector(':scope > .sub-tabs')) return;
+      let saved = null;
+      try { saved = localStorage.getItem('gongpu_sub_' + pane.id); } catch (e) { /* ignore */ }
+      activateSubTab(pane, saved || (pane.querySelector(':scope > .sub-tabs > .sub-tab') || {}).dataset?.sub, false);
+    });
+  }
+
+  // 子页签点击：事件委托，兼容动态内容与隐藏面板（渲染器无需感知显隐）
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('.sub-tab');
+    if (!t || !t.dataset.sub) return;
+    const pane = t.closest('.tab-pane');
+    if (!pane) return;
+    e.preventDefault();
+    activateSubTab(pane, t.dataset.sub, false);
+  });
+
+  // 子页签键盘可达：←/→ 在同组子页签间循环（与主目录 tab 的 ARIA 语义一致）
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const t = e.target.closest && e.target.closest('.sub-tab');
+    if (!t) return;
+    const tabs = Array.from(t.parentElement.querySelectorAll('.sub-tab'));
+    const i = tabs.indexOf(t);
+    if (i < 0) return;
+    e.preventDefault();
+    const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    activateSubTab(t.closest('.tab-pane'), next.dataset.sub, true);
+  });
+
+
   function fmtDur(sec) {
     sec = Math.max(0, Math.floor(sec));
     const d = Math.floor(sec / 86400);
@@ -777,6 +830,9 @@
         pc.addEventListener('click', () => {
           const qb = $('tabBtnQuest');
           if (qb) qb.click();
+          // 第十七批：宠物已收入委托页「宠物」子页签，先激活再定位（否则目标在隐藏子面板里）
+          const questPane = $('tabQuest');
+          if (questPane) activateSubTab(questPane, 'pets', false);
           setTimeout(() => {
             const box = $('petList');
             if (!box) return;
@@ -4169,6 +4225,7 @@
     initStatCard();
     initTalentPop();
     bindHotkeys();
+    restoreSubTabs();
     // 先挂 401 监听再触发请求:否则启动时 token 已过期,事件发出时无人接收,静默跳回登录页无提示
     window.addEventListener('gongpu:unauthorized', () => {
       stopLoop();

@@ -9,9 +9,9 @@
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="css/style.css?v=261">
-<link rel="stylesheet" href="css/v2.css?v=261">
-<link rel="stylesheet" href="css/drawer.css?v=261">
+<link rel="stylesheet" href="css/style.css?v=270">
+<link rel="stylesheet" href="css/v2.css?v=270">
+<link rel="stylesheet" href="css/drawer.css?v=270">
 </head>
 <body>
 
@@ -162,7 +162,7 @@
         <button id="btnCleanse" class="skill-btn" title="净化：清除中毒/灼烧/沉默/时滞（蓝 20 / 冷却 30s）">🕊️ 净化</button>
       </div>
       <div class="combat-btns" id="extSkillRow"></div>
-      <div class="hotkey-hint">⌨️ 快捷键：<b>1</b> 小血药 · <b>2</b> 大血药 · <b>3</b> 蓝药 · <b>4</b> 治愈术 · <b>5</b> 净化 · <b>F</b> 逃跑 · <b>B</b> 挑战 Boss</div>
+      <details class="hotkey-details"><summary>⌨️ 快捷键</summary><div class="hotkey-hint"><b>1</b> 小血药 · <b>2</b> 大血药 · <b>3</b> 蓝药 · <b>4</b> 治愈术 · <b>5</b> 净化 · <b>F</b> 逃跑 · <b>B</b> 挑战 Boss · <b>M</b> 地图 · <b>N</b> 功能目录</div></details>
       <div id="buffBar" class="buff-bar" title="当前生效的增益 / 减益"></div>
       <div id="burnBuff" class="burn-buff"></div>
       <input id="logSearch" class="log-search" type="text" placeholder="🔍 搜日志（与下方分类筹码叠加过滤）" autocomplete="off">
@@ -201,43 +201,73 @@
     </div>
 
     <div id="tabSkills" class="tab-pane" data-pane="skills" hidden>
+      <div class="sub-tabs" role="tablist" aria-label="技能药剂分类">
+        <button class="sub-tab active" data-sub="potions" role="tab" aria-selected="true">🧪 药剂</button>
+        <button class="sub-tab" data-sub="passives" role="tab" aria-selected="false">📖 被动</button>
+        <button class="sub-tab" data-sub="market" role="tab" aria-selected="false">🌑 黑市</button>
+      </div>
+      <div class="sub-pane" data-subpane="market" hidden>
       <div class="potion-box market-box">
         <h2>🌑 每日黑市 <span class="panel-tip">每天 3 种药剂打折出售 · 每种限购 5 件 · 0 点刷新</span></h2>
         <div id="marketList" class="potion-list"><p class="empty-hint">加载中…</p></div>
       </div>
+      </div>
+      <div class="sub-pane" data-subpane="potions">
       <div class="skill-cols">
         <div class="potion-box">
           <h2>🧪 药剂 <button id="btnBuyKit" class="kit-btn" title="把血药/蓝药/解毒剂/食物一次补到 10/5/3/3">🎒 一键补给包</button></h2>
           <div id="potionList" class="potion-list"></div>
         </div>
+      </div>
+      </div>
+      <div class="sub-pane" data-subpane="passives" hidden>
+      <div class="skill-cols">
         <div class="passive-box">
           <h2>📖 被动技能</h2>
           <div id="passiveList" class="passive-list"></div>
         </div>
       </div>
+      </div>
     </div>
 
     <div id="tabQuest" class="tab-pane" data-pane="quest" hidden>
+      <div class="sub-tabs" role="tablist" aria-label="委托分类">
+        <button class="sub-tab active" data-sub="daily" role="tab" aria-selected="true">📅 每日</button>
+        <button class="sub-tab" data-sub="weekly" role="tab" aria-selected="false">🗓️ 每周</button>
+        <button class="sub-tab" data-sub="monthly" role="tab" aria-selected="false">📆 每月</button>
+        <button class="sub-tab" data-sub="pets" role="tab" aria-selected="false">🐾 宠物</button>
+        <button class="sub-tab" data-sub="guild" role="tab" aria-selected="false">📜 委托</button>
+      </div>
+      <div class="sub-pane" data-subpane="daily">
       <div class="save-box">
         <h2>📅 每日任务 <span class="panel-tip">每天自动签发 3 个 · 不限区域计进度 · 完成逐个领金币 · 三个全清额外 +5,000 金</span></h2>
         <div id="dailyList" class="daily-list"><p class="empty-hint">加载中…</p></div>
       </div>
+      </div>
+      <div class="sub-pane" data-subpane="weekly" hidden>
       <div class="save-box">
         <h2>🗓️ 周常任务 <span class="panel-tip">每周一自动签发 3 个长线任务 · 完成逐个领金币 · 三个全清额外 +50,000 金与随机宝石 ×2</span></h2>
         <div id="weeklyList" class="daily-list"><p class="empty-hint">加载中…</p></div>
       </div>
+      </div>
+      <div class="sub-pane" data-subpane="monthly" hidden>
       <div class="save-box">
         <h2>📆 月常任务 <span class="panel-tip">每月 1 日自动签发 3 个超长线任务 · 三个全清额外 +300,000 金与随机宝石 ×3</span></h2>
         <div id="monthlyList" class="daily-list"><p class="empty-hint">加载中…</p></div>
       </div>
+      </div>
+      <div class="sub-pane" data-subpane="pets" hidden>
       <div class="save-box">
         <h2>🐾 宠物伙伴 <span class="panel-tip">领养后随你击杀成长 · 等级放大属性加成 · 喂食 150 金 +10 经验</span></h2>
         <div id="petList" class="daily-list"><p class="empty-hint">加载中…</p></div>
       </div>
+      </div>
+      <div class="sub-pane" data-subpane="guild" hidden>
       <div class="save-box">
         <h2>📜 冒险公会委托</h2>
         <p class="save-rule-hint">按属性门槛接取，击杀任意怪物计入进度，回来交付领赏（最多同时 3 个）</p>
         <div id="questList" class="graveyard-list"><p class="empty-hint">加载中…</p></div>
+      </div>
       </div>
     </div>
 
@@ -250,14 +280,29 @@
     </div>
 
     <div id="tabRole" class="tab-pane" data-pane="role" hidden>
+      <div class="sub-tabs" role="tablist" aria-label="角色分类">
+        <button class="sub-tab active" data-sub="ach" role="tab" aria-selected="true">🏅 成就</button>
+        <button class="sub-tab" data-sub="titles" role="tab" aria-selected="false">🎖️ 称号</button>
+        <button class="sub-tab" data-sub="codex" role="tab" aria-selected="false">📖 图鉴</button>
+      </div>
+      <div class="sub-pane" data-subpane="ach">
       <div class="save-box">
         <h2>🏅 成就</h2>
         <input id="achSearch" class="log-search" type="text" placeholder="🔍 搜索成就（名称/描述，与下方筛选筹码叠加过滤）" autocomplete="off">
         <div id="achArea" class="effect-area"></div>
+      </div>
+      </div>
+      <div class="sub-pane" data-subpane="titles" hidden>
+      <div class="save-box">
         <h2>🎖️ 称号</h2>
         <div id="titleArea" class="effect-area"></div>
+      </div>
+      </div>
+      <div class="sub-pane" data-subpane="codex" hidden>
+      <div class="save-box">
         <h2>📖 怪物图鉴</h2>
         <div id="codexArea" class="effect-area codex-area"></div>
+      </div>
       </div>
     </div>
 
@@ -308,15 +353,23 @@
     </div>
     <button class="drawer-close" type="button" data-close-drawer aria-label="关闭功能目录">×</button>
   </header>
+  <div class="nav-search-wrap">
+    <input id="navSearch" class="log-search" type="text" placeholder="🔍 搜索功能（装备/药剂/委托…）" autocomplete="off" aria-label="搜索功能">
+  </div>
+  <div id="navRecent" class="nav-recent" hidden></div>
   <nav class="game-tabs drawer-tab-list" role="tablist" aria-label="游戏功能">
+    <div class="nav-group-title" role="presentation">⚔️ 成长</div>
     <button id="tabBtnEquip" class="game-tab active" data-tab="equip" role="tab" aria-selected="true" aria-controls="tabEquip">🎒 装备</button>
     <button id="tabBtnSkills" class="game-tab" data-tab="skills" role="tab" aria-selected="false" aria-controls="tabSkills" tabindex="-1">✋ 技能药剂</button>
-    <button id="tabBtnQuest" class="game-tab" data-tab="quest" role="tab" aria-selected="false" aria-controls="tabQuest" tabindex="-1">📜 委托<span id="questBadge" class="tab-badge" hidden></span></button>
     <button id="tabBtnCraft" class="game-tab" data-tab="craft" role="tab" aria-selected="false" aria-controls="tabCraft" tabindex="-1">⚒️ 锻造</button>
     <button id="tabBtnRole" class="game-tab" data-tab="role" role="tab" aria-selected="false" aria-controls="tabRole" tabindex="-1">👤 角色<span id="achBadge" class="tab-badge" hidden></span></button>
-    <button id="tabBtnSave" class="game-tab" data-tab="save" role="tab" aria-selected="false" aria-controls="tabSave" tabindex="-1">💾 存档</button>
+    <div class="nav-group-title" role="presentation">📜 冒险</div>
+    <button id="tabBtnQuest" class="game-tab" data-tab="quest" role="tab" aria-selected="false" aria-controls="tabQuest" tabindex="-1">📜 委托<span id="questBadge" class="tab-badge" hidden></span></button>
+    <div class="nav-group-title" role="presentation">🏮 社交</div>
     <button id="tabBtnSocial" class="game-tab" data-tab="social" role="tab" aria-selected="false" aria-controls="tabSocial" tabindex="-1">🏮 江湖</button>
     <button id="tabBtnRank" class="game-tab" data-tab="rank" role="tab" aria-selected="false" aria-controls="tabRank" tabindex="-1">🏆 榜单</button>
+    <div class="nav-group-title" role="presentation">💾 系统</div>
+    <button id="tabBtnSave" class="game-tab" data-tab="save" role="tab" aria-selected="false" aria-controls="tabSave" tabindex="-1">💾 存档</button>
   </nav>
   <div class="drawer-section drawer-nav-extras">
     <button class="drawer-menu-action" type="button" data-open-drawer="map">🗺️ 地图与区域行动 <span>M</span></button>
@@ -335,7 +388,9 @@
   </header>
   <div class="drawer-scroll">
     <section class="panel map-panel" aria-label="区域与战斗行动">
+      <div class="map-group-title">🗺️ 区域选择</div>
       <div class="zones" id="zoneBtns"></div>
+      <div class="map-group-title">⚔️ 战斗行动</div>
       <div class="map-primary-actions">
         <button id="btnDeepestZone" class="boss-btn" title="按当前面板达标情况，一键前往序号最深的可进区域">🚀 前往最深可进区域</button>
         <button id="btnBoss" class="boss-btn">👑 挑战 Boss</button>
@@ -345,6 +400,7 @@
         <button id="btnSweep100" class="boss-btn" title="花金币扫荡当前区域 100 次：只涨区域精通与击杀类任务进度，不出掉落">🧹 扫荡×100</button>
         <button id="btnAuto" class="boss-btn" title="服务端一直在自动挂机结算；此按钮只暂停本页面刷新">🤖 自动挂机（开）</button>
       </div>
+      <div class="map-group-title">📚 图鉴参考</div>
       <div class="map-reference-actions">
         <button id="btnTraits" class="boss-btn" title="野怪出生可能携带的词条一览">📖 词条图鉴</button>
         <button id="btnSets" class="boss-btn" title="区域套装成员与加成一览">🧩 套装图鉴</button>
@@ -444,11 +500,11 @@
 <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=261"></script>
-<script src="js/api.js?v=261"></script>
-<script src="js/achievements.js?v=261"></script>
-<script src="js/tutorial.js?v=261"></script>
-<script src="js/drawer.js?v=261"></script>
-<script src="js/app.js?v=261"></script>
+<script src="js/audio.js?v=270"></script>
+<script src="js/api.js?v=270"></script>
+<script src="js/achievements.js?v=270"></script>
+<script src="js/tutorial.js?v=270"></script>
+<script src="js/drawer.js?v=270"></script>
+<script src="js/app.js?v=270"></script>
 </body>
 </html>

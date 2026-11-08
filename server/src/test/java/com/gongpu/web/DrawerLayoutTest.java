@@ -132,10 +132,77 @@ class DrawerLayoutTest {
     @Test
     void newAssetsJoinTheSameCacheVersion() throws Exception {
         String s = html();
-        assertTrue(s.contains("css/drawer.css?v=261"));
-        assertTrue(s.contains("js/drawer.js?v=261"));
-        assertFalse(s.contains("v=250"), "旧静态版本必须全部升级（第十六批升 261）");
-        assertTrue(s.indexOf("js/drawer.js?v=261") < s.indexOf("js/app.js?v=261"),
+        assertTrue(s.contains("css/drawer.css?v=270"));
+        assertTrue(s.contains("js/drawer.js?v=270"));
+        assertFalse(s.contains("v=250"), "旧静态版本必须全部升级（第十七批升 270）");
+        assertFalse(s.contains("v=261"), "旧静态版本必须全部升级（第十七批升 270）");
+        assertTrue(s.indexOf("js/drawer.js?v=270") < s.indexOf("js/app.js?v=270"),
                 "抽屉控制器必须先于原游戏逻辑初始化");
+    }
+
+    // ---------------- 第十七批：功能页内子分组（单屏单模块） ----------------
+
+    @Test
+    void questPageSplitIntoFiveSubPanes() throws Exception {
+        String s = html();
+        String quest = s.substring(s.indexOf("id=\"tabQuest\""), s.indexOf("id=\"tabCraft\""));
+        for (String sub : List.of("daily", "weekly", "monthly", "pets", "guild")) {
+            assertTrue(quest.contains("data-sub=\"" + sub + "\""), "委托页缺子页签 " + sub);
+            assertTrue(quest.contains("data-subpane=\"" + sub + "\""), "委托页缺子面板 " + sub);
+        }
+        // 除默认每日外，其余子面板初始必须隐藏（单屏只展示一个子模块）
+        assertTrue(quest.contains("data-subpane=\"weekly\" hidden"));
+        assertTrue(quest.contains("data-subpane=\"monthly\" hidden"));
+        assertTrue(quest.contains("data-subpane=\"pets\" hidden"));
+        assertTrue(quest.contains("data-subpane=\"guild\" hidden"));
+    }
+
+    @Test
+    void roleAndSkillsPagesSplitIntoSubPanes() throws Exception {
+        String s = html();
+        String role = s.substring(s.indexOf("id=\"tabRole\""), s.indexOf("id=\"tabSave\""));
+        for (String sub : List.of("ach", "titles", "codex")) {
+            assertTrue(role.contains("data-sub=\"" + sub + "\""), "角色页缺子页签 " + sub);
+        }
+        assertTrue(role.contains("data-subpane=\"titles\" hidden"));
+        assertTrue(role.contains("data-subpane=\"codex\" hidden"));
+        String skills = s.substring(s.indexOf("id=\"tabSkills\""), s.indexOf("id=\"tabQuest\""));
+        for (String sub : List.of("potions", "passives", "market")) {
+            assertTrue(skills.contains("data-sub=\"" + sub + "\""), "技能药剂页缺子页签 " + sub);
+        }
+        assertTrue(skills.contains("data-subpane=\"passives\" hidden"));
+        assertTrue(skills.contains("data-subpane=\"market\" hidden"));
+    }
+
+    @Test
+    void subTabControllerKeepsStateAndKeyboardAccess() throws Exception {
+        String s = app();
+        assertTrue(s.contains("function activateSubTab("));
+        assertTrue(s.contains("function restoreSubTabs("));
+        assertTrue(s.contains("gongpu_sub_"));
+        assertTrue(s.contains("e.target.closest('.sub-tab')"));
+        assertTrue(s.contains("restoreSubTabs();"), "boot 必须恢复子页签记忆");
+        // 宠物芯片直达必须先激活 pets 子页签，否则目标在隐藏子面板里
+        assertTrue(s.contains("activateSubTab(questPane, 'pets', false)"));
+    }
+
+    @Test
+    void navDrawerGroupedWithSearch() throws Exception {
+        String s = html();
+        assertTrue(s.contains("id=\"navSearch\""), "功能目录缺搜索框");
+        for (String g : List.of("⚔️ 成长", "📜 冒险", "🏮 社交", "💾 系统")) {
+            assertTrue(s.contains(g), "功能目录缺分组 " + g);
+        }
+        assertTrue(s.contains("class=\"nav-group-title\""));
+    }
+
+    @Test
+    void combatHotkeysCollapsedAndMapGrouped() throws Exception {
+        String s = html();
+        assertTrue(s.contains("class=\"hotkey-details\""), "快捷键说明应默认折叠");
+        String map = s.substring(s.indexOf("id=\"mapDrawer\""), s.indexOf("id=\"settingsDrawer\""));
+        for (String g : List.of("🗺️ 区域选择", "⚔️ 战斗行动", "📚 图鉴参考")) {
+            assertTrue(map.contains(g), "地图抽屉缺分组 " + g);
+        }
     }
 }

@@ -97,8 +97,15 @@
     });
     syncExpanded();
     syncBackdrop();
+    // 第十七批：打开功能目录时刷新最近使用并直达搜索框（N 键效率路径）
+    if (name === 'nav') renderNavRecent();
     window.setTimeout(() => {
-      if (activeDrawer === name) focusFirst(drawer);
+      if (activeDrawer !== name) return;
+      if (name === 'nav') {
+        const search = $('navSearch');
+        if (search) { search.focus({ preventScroll: true }); return; }
+      }
+      focusFirst(drawer);
     }, 30);
   }
 
@@ -242,9 +249,91 @@
 
   function selectTab(tab) {
     applyTab(tab, { open: true });
+    recordRecent(tab);
     if (activeDrawer === 'nav') closeDrawer(false);
     if (!isMobile()) safeFocus($('btnWorkspaceNav'));
   }
+
+  /* ---------------- 第十七批：功能目录——搜索过滤 / 最近使用 ---------------- */
+  const RECENT_KEY = 'gongpu_recent_tabs';
+
+  function readRecent() {
+    try {
+      const v = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      return Array.isArray(v) ? v.filter(t => TAB_META[t]) : [];
+    } catch (e) { return []; }
+  }
+
+  function recordRecent(tab) {
+    if (!TAB_META[tab]) return;
+    const list = [tab].concat(readRecent().filter(t => t !== tab)).slice(0, 3);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch (e) { /* 隐私模式仅本次会话 */ }
+    renderNavRecent();
+  }
+
+  function renderNavRecent() {
+    const box = $('navRecent');
+    if (!box) return;
+    const current = currentTab();
+    const items = readRecent().filter(t => t !== current);
+    if (!items.length) { box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false;
+    box.innerHTML = '<span class="nav-recent-label">🕘 最近</span>' + items.map(t =>
+      '<button type="button" class="nav-recent-chip" data-recent-tab="' + t + '">' +
+      TAB_META[t][0] + ' ' + TAB_META[t][1] + '</button>').join('');
+  }
+
+  /* 目录搜索：按按钮文本 + 功能全称过滤；分组标题随组内可见性联动；无结果给提示。 */
+  function filterNav(query) {
+    const drawer = $('navDrawer');
+    if (!drawer) return;
+    const q = (query || '').trim().toLowerCase();
+    let anyVisible = false;
+    drawer.querySelectorAll('.game-tab[data-tab]').forEach(btn => {
+      const meta = TAB_META[btn.dataset.tab];
+      const text = (btn.textContent + ' ' + (meta ? meta[1] : '')).toLowerCase();
+      const show = !q || text.indexOf(q) >= 0;
+      btn.hidden = !show;
+      if (show) anyVisible = true;
+    });
+    drawer.querySelectorAll('.nav-group-title').forEach(title => {
+      let el = title.nextElementSibling;
+      let has = false;
+      while (el && !el.classList.contains('nav-group-title')) {
+        if (el.classList.contains('game-tab') && !el.hidden) has = true;
+        el = el.nextElementSibling;
+      }
+      title.hidden = q ? !has : false;
+    });
+    let empty = $('navEmpty');
+    if (!empty) {
+      empty = document.createElement('p');
+      empty.id = 'navEmpty';
+      empty.className = 'nav-empty';
+      const nav = drawer.querySelector('.drawer-tab-list');
+      if (nav) nav.appendChild(empty);
+    }
+    empty.textContent = '没有匹配「' + (query || '').trim() + '」的功能';
+    empty.hidden = anyVisible || !q;
+  }
+
+  function initNavFilter() {
+    const input = $('navSearch');
+    if (!input || input._boundNavFilter) return;
+    input._boundNavFilter = true;
+    input.addEventListener('input', () => filterNav(input.value));
+    // Esc 在搜索框里优先清空而不是关抽屉（由 onKeydown 的 input 早退保证不冲突）
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && input.value) {
+        e.preventDefault();
+        e.stopPropagation();
+        input.value = '';
+        filterNav('');
+      }
+    });
+    renderNavRecent();
+  }
+
 
   function trapFocus(e) {
     const container = activeDrawer ? $(DRAWERS[activeDrawer]) :
@@ -339,6 +428,13 @@
       return;
     }
     if (e.target.closest('#btnWorkspaceClose')) { e.preventDefault(); closeUtility(); return; }
+
+    const recentChip = e.target.closest('[data-recent-tab]');
+    if (recentChip) {
+      e.preventDefault();
+      selectTab(recentChip.dataset.recentTab);
+      return;
+    }
 
     const tabButton = e.target.closest('.game-tab[data-tab]');
     if (tabButton) {
@@ -470,6 +566,8 @@
     initThemeFlashGuard();
     /* 第十五批·轮5：字号超大档启动兜底挂类。 */
     initFontXlBootstrap();
+    /* 第十七批：目录搜索过滤 + 最近使用初始化。 */
+    initNavFilter();
     restoreWorkspace();
     configureUtility();
     syncDock();

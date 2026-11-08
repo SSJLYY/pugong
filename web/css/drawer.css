@@ -735,3 +735,117 @@ body.fx-off .side-drawer, body.fx-off .utility-panel, body.fx-off .drawer-backdr
     box-shadow: none;
   }
 }
+
+/* ==================== 第十七批：功能页子分组 + 目录分组/搜索 ==================== */
+
+/* 功能页内子页签条：比主目录更轻，胶囊筹码、横滚不挤压。 */
+.sub-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 2px 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+.sub-tab {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--txt-dim);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.sub-tab:hover { color: var(--gold-bright); border-color: var(--gold); }
+.sub-tab.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #1a1503;
+  font-weight: 700;
+}
+.sub-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.sub-pane { min-height: 0; }
+.sub-pane[hidden] { display: none !important; }
+/* 子面板内原两列布局单列化（药剂/被动、切磋/墓园拆页后不再并栏）。 */
+.sub-pane .skill-cols { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+/* 目录分组标题：占满整行，细分组标识。 */
+.nav-group-title {
+  grid-column: 1 / -1;
+  padding: 12px 6px 4px;
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: var(--txt-faint);
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: 2px;
+}
+.nav-group-title[hidden] { display: none !important; }
+
+/* 目录搜索与最近使用。 */
+.nav-search-wrap { padding: 0 10px 8px; }
+#navSearch { width: 100%; min-height: 40px; }
+.nav-recent { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 0 10px 8px; }
+.nav-recent[hidden] { display: none !important; }
+.nav-recent-label { font-size: 12px; color: var(--txt-faint); }
+.nav-recent-chip {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--txt-dim);
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.nav-recent-chip:hover { color: var(--gold-bright); border-color: var(--gold); }
+.nav-recent-chip:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.nav-empty { grid-column: 1 / -1; padding: 16px; text-align: center; color: var(--txt-faint); font-size: 13px; }
+.nav-empty[hidden] { display: none !important; }
+
+/* 战斗区快捷键说明默认折叠。 */
+.hotkey-details { margin: 6px 0; font-size: 12px; color: var(--txt-dim); }
+.hotkey-details > summary {
+  cursor: pointer;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 4px;
+  border-radius: 6px;
+  list-style: none;
+}
+.hotkey-details > summary::-webkit-details-marker { display: none; }
+.hotkey-details > summary::before { content: '▸'; margin-right: 5px; }
+.hotkey-details[open] > summary::before { content: '▾'; }
+.hotkey-details > summary:hover { color: var(--gold-bright); }
+.hotkey-details > summary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.hotkey-details .hotkey-hint { margin-top: 4px; line-height: 1.7; }
+
+/* 地图抽屉分组小标题。 */
+.map-group-title {
+  margin: 12px 2px 6px;
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--txt-faint);
+  border-left: 2px solid var(--gold);
+  padding-left: 8px;
+}
+.map-group-title:first-child { margin-top: 2px; }
+
+/* 移动端：子页签触达尺寸加大到 40px。 */
+@media (max-width: 900px) {
+  .sub-tab { min-height: 40px; padding: 7px 14px; }
+  .nav-recent-chip { min-height: 36px; }
+}
+
+/* 减弱动效：子页签/最近项不做颜色过渡。 */
+@media (prefers-reduced-motion: reduce) {
+  .sub-tab, .nav-recent-chip { transition: none; }
+}
+body.motion-off .sub-tab, body.motion-off .nav-recent-chip { transition: none; }

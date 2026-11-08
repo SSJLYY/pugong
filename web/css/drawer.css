@@ -891,3 +891,30 @@ body.motion-off .sub-tab, body.motion-off .nav-recent-chip { transition: none; }
   background: var(--gold);
   color: #1a1503;
 }
+
+/* ==================== 第十九批：日志折叠 + 锻造子分组 ==================== */
+
+/* 战斗日志区可折叠（默认展开，可收起减少战斗区高度）。 */
+.log-fold { margin-top: 6px; }
+.log-fold-head {
+  cursor: pointer;
+  list-style: none;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--txt-dim);
+  border-left: 2px solid var(--gold);
+  padding-left: 7px;
+  border-radius: 4px;
+}
+.log-fold-head::-webkit-details-marker { display: none; }
+.log-fold-head::before { content: '▾'; color: var(--gold); }
+.log-fold:not([open]) > .log-fold-head::before { content: '▸'; }
+.log-fold-head:hover { color: var(--gold-bright); }
+.log-fold-head:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.log-body { margin-top: 6px; }
+
+/* 燃烧状态条空态隐藏。 */
+#burnBuff[hidden] { display: none !important; }

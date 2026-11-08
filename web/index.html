@@ -9,9 +9,9 @@
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="css/style.css?v=280">
-<link rel="stylesheet" href="css/v2.css?v=280">
-<link rel="stylesheet" href="css/drawer.css?v=280">
+<link rel="stylesheet" href="css/style.css?v=290">
+<link rel="stylesheet" href="css/v2.css?v=290">
+<link rel="stylesheet" href="css/drawer.css?v=290">
 </head>
 <body>
 
@@ -168,8 +168,13 @@
       <details class="hotkey-details"><summary>⌨️ 快捷键</summary><div class="hotkey-hint"><b>1</b> 小血药 · <b>2</b> 大血药 · <b>3</b> 蓝药 · <b>4</b> 治愈术 · <b>5</b> 净化 · <b>F</b> 逃跑 · <b>B</b> 挑战 Boss · <b>M</b> 地图 · <b>N</b> 功能目录</div></details>
       <div id="buffBar" class="buff-bar" title="当前生效的增益 / 减益"></div>
       <div id="burnBuff" class="burn-buff"></div>
-      <input id="logSearch" class="log-search" type="text" placeholder="🔍 搜日志（与下方分类筹码叠加过滤）" autocomplete="off">
-      <div id="eventLog" class="event-log" title="最近的战斗大事（Boss 击杀 / 图纸 / 史诗掉落）"></div>
+      <details class="log-fold" open>
+        <summary class="log-fold-head">📜 大事记 <span class="panel-tip">Boss / 掉落 / 系统 · 点击收起</span></summary>
+        <div class="log-body">
+          <input id="logSearch" class="log-search" type="text" placeholder="🔍 搜日志（与下方分类筹码叠加过滤）" autocomplete="off">
+          <div id="eventLog" class="event-log" title="最近的战斗大事（Boss 击杀 / 图纸 / 史诗掉落）"></div>
+        </div>
+      </details>
     </section>
   </div>
 
@@ -275,10 +280,39 @@
     </div>
 
     <div id="tabCraft" class="tab-pane" data-pane="craft" hidden>
+      <div class="sub-tabs" role="tablist" aria-label="锻造分类">
+        <button class="sub-tab active" data-sub="recipes" role="tab" aria-selected="true">🔨 配方</button>
+        <button class="sub-tab" data-sub="mats" role="tab" aria-selected="false">💰 材料</button>
+        <button class="sub-tab" data-sub="gems" role="tab" aria-selected="false">💎 宝石</button>
+        <button class="sub-tab" data-sub="batch" role="tab" aria-selected="false">🧰 批量</button>
+      </div>
+      <div class="sub-pane" data-subpane="recipes">
       <div class="save-box">
         <h2>⚒️ 图纸合成</h2>
         <p class="save-rule-hint">打怪掉图纸与材料，集齐即可锻造指定装备（词条随机）：基础配方出优秀品质、图纸配方出稀有品质，都有 25% 概率升一品</p>
         <div id="craftList" class="graveyard-list"><p class="empty-hint">加载中…</p></div>
+      </div>
+      </div>
+      <div class="sub-pane" data-subpane="mats" hidden>
+      <div class="save-box">
+        <h2>💰 材料兑换与出售</h2>
+        <p class="save-rule-hint">3 份任意区域材料兑换 1 份目标材料；出售按区域深度定价，买入急用调剂</p>
+        <div id="craftMats" class="graveyard-list"></div>
+      </div>
+      </div>
+      <div class="sub-pane" data-subpane="gems" hidden>
+      <div class="save-box">
+        <h2>💎 宝石融合与出售</h2>
+        <p class="save-rule-hint">3 颗同种一阶融合成璀璨（属性 ×2.5）；背包装备点「镶嵌」装上，每件 3 孔</p>
+        <div id="craftGems" class="graveyard-list"></div>
+      </div>
+      </div>
+      <div class="sub-pane" data-subpane="batch" hidden>
+      <div class="save-box">
+        <h2>🧰 批量操作</h2>
+        <p class="save-rule-hint">一键卖材料 / 全融合 / 拆宝石 / 卖多余图纸 / 全部兑换（兑换源与目标在「材料」页选择）</p>
+        <div id="craftBatch" class="graveyard-list"></div>
+      </div>
       </div>
     </div>
 
@@ -503,11 +537,11 @@
 <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=280"></script>
-<script src="js/api.js?v=280"></script>
-<script src="js/achievements.js?v=280"></script>
-<script src="js/tutorial.js?v=280"></script>
-<script src="js/drawer.js?v=280"></script>
-<script src="js/app.js?v=280"></script>
+<script src="js/audio.js?v=290"></script>
+<script src="js/api.js?v=290"></script>
+<script src="js/achievements.js?v=290"></script>
+<script src="js/tutorial.js?v=290"></script>
+<script src="js/drawer.js?v=290"></script>
+<script src="js/app.js?v=290"></script>
 </body>
 </html>

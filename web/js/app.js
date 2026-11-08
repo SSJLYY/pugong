@@ -1501,9 +1501,11 @@
       buffBar.innerHTML = html;
     }
 
-    // 燃烧状态条
+    // 燃烧状态条（第十九批：无燃烧时隐藏，不占视觉高度）
     const burnLeft = view.buffs && view.buffs.burn;
-    $('burnBuff').textContent = burnLeft ? ('🔥 燃烧中 · 攻击×2 · 剩余 ' + fmtDur(burnLeft)) : '';
+    const burnEl = $('burnBuff');
+    burnEl.textContent = burnLeft ? ('🔥 燃烧中 · 攻击×2 · 剩余 ' + fmtDur(burnLeft)) : '';
+    burnEl.hidden = !burnLeft;
 
     // 第十五批 R5：HP 上限趋势迷你图（最近 120 帧折线，min-max 归一，末点高亮）
     {
@@ -3783,7 +3785,10 @@
 
   // ================= 图纸合成 =================
   async function loadCrafts() {
-    const box = $('craftList');
+    // 第十九批：锻造页拆子页签（配方/材料/宝石/批量）。box 指向整页容器，
+    // 所有 data-* 绑定选择器继续在整页内查找（跨子面板也能命中，DOM 常驻仅 hidden 切换）。
+    const box = $('tabCraft');
+    const listBox = $('craftList');
     if (!box || !API.state.slot) return;
     let data;
     try { data = await API.craftBoard(API.state.slot); } catch (e) { return; }
@@ -3849,7 +3854,11 @@
       ' <button class="mat-sell" id="btnSellExtraBp">📐 卖多余图纸（每种留 1）</button>' +
       ' <button class="mat-sell" id="btnExchangeAll">🔄 按上方选择全部兑换</button>' +
       '</div></div></div>';
-    box.innerHTML = batchRow + exchangeRow + sellRow + gemRow + (rows || '<p class="empty-hint">暂无配方</p>');
+    // 分容器渲染：配方→craftList，兑换+出售→craftMats，宝石→craftGems，批量→craftBatch
+    if (listBox) listBox.innerHTML = rows || '<p class="empty-hint">暂无配方</p>';
+    const matsBox = $('craftMats'); if (matsBox) matsBox.innerHTML = exchangeRow + sellRow;
+    const gemsBox = $('craftGems'); if (gemsBox) gemsBox.innerHTML = gemRow;
+    const batchBox = $('craftBatch'); if (batchBox) batchBox.innerHTML = batchRow;
     const batchBind = (id, fn, okMsg) => {
       const b = box.querySelector('#' + id);
       if (b) b.addEventListener('click', async () => {

@@ -132,11 +132,11 @@ class DrawerLayoutTest {
     @Test
     void newAssetsJoinTheSameCacheVersion() throws Exception {
         String s = html();
-        assertTrue(s.contains("css/drawer.css?v=280"));
-        assertTrue(s.contains("js/drawer.js?v=280"));
-        assertFalse(s.contains("v=250"), "旧静态版本必须全部升级（第十八批升 280）");
-        assertFalse(s.contains("v=270"), "旧静态版本必须全部升级（第十八批升 280）");
-        assertTrue(s.indexOf("js/drawer.js?v=280") < s.indexOf("js/app.js?v=280"),
+        assertTrue(s.contains("css/drawer.css?v=290"));
+        assertTrue(s.contains("js/drawer.js?v=290"));
+        assertFalse(s.contains("v=280"), "旧静态版本必须全部升级（第十九批升 290）");
+        assertFalse(s.contains("v=270"), "旧静态版本必须全部升级（第十九批升 290）");
+        assertTrue(s.indexOf("js/drawer.js?v=290") < s.indexOf("js/app.js?v=290"),
                 "抽屉控制器必须先于原游戏逻辑初始化");
     }
 
@@ -230,5 +230,40 @@ class DrawerLayoutTest {
         // 仍由 JS hidden 控制显隐（details 与 hidden 共存）
         assertTrue(app().contains("stripWrap.hidden = extraOpen === 0"));
         assertTrue(app().contains("wrap.hidden = rows.length === 0"));
+    }
+
+    // ---------------- 第十九批：锻造子分组 + 日志折叠 ----------------
+
+    @Test
+    void craftPageSplitIntoSubPanes() throws Exception {
+        String s = html();
+        String craft = s.substring(s.indexOf("id=\"tabCraft\""), s.indexOf("id=\"tabRole\""));
+        for (String sub : List.of("recipes", "mats", "gems", "batch")) {
+            assertTrue(craft.contains("data-sub=\"" + sub + "\""), "锻造页缺子页签 " + sub);
+            assertTrue(craft.contains("data-subpane=\"" + sub + "\""), "锻造页缺子面板 " + sub);
+        }
+        // 四个独立容器
+        for (String id : List.of("craftList", "craftMats", "craftGems", "craftBatch")) {
+            assertTrue(craft.contains("id=\"" + id + "\""), "缺容器 " + id);
+        }
+        assertTrue(craft.contains("data-subpane=\"mats\" hidden"));
+        assertTrue(craft.contains("data-subpane=\"gems\" hidden"));
+        assertTrue(craft.contains("data-subpane=\"batch\" hidden"));
+        // 分容器渲染 + 整页容器绑定（跨子面板选择器仍命中）
+        String app = app();
+        assertTrue(app.contains("const box = $('tabCraft')"));
+        assertTrue(app.contains("matsBox.innerHTML = exchangeRow + sellRow"));
+        assertTrue(app.contains("gemsBox.innerHTML = gemRow"));
+        assertTrue(app.contains("batchBox.innerHTML = batchRow"));
+    }
+
+    @Test
+    void combatLogIsCollapsible() throws Exception {
+        String s = html();
+        assertTrue(s.contains("class=\"log-fold\""), "日志区应可折叠");
+        assertTrue(s.contains("class=\"log-fold-head\""));
+        assertTrue(s.contains("class=\"log-body\""));
+        // 燃烧条空态隐藏
+        assertTrue(app().contains("burnEl.hidden = !burnLeft"));
     }
 }

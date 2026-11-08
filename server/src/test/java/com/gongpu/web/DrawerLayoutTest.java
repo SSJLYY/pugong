@@ -132,11 +132,11 @@ class DrawerLayoutTest {
     @Test
     void newAssetsJoinTheSameCacheVersion() throws Exception {
         String s = html();
-        assertTrue(s.contains("css/drawer.css?v=270"));
-        assertTrue(s.contains("js/drawer.js?v=270"));
-        assertFalse(s.contains("v=250"), "旧静态版本必须全部升级（第十七批升 270）");
-        assertFalse(s.contains("v=261"), "旧静态版本必须全部升级（第十七批升 270）");
-        assertTrue(s.indexOf("js/drawer.js?v=270") < s.indexOf("js/app.js?v=270"),
+        assertTrue(s.contains("css/drawer.css?v=280"));
+        assertTrue(s.contains("js/drawer.js?v=280"));
+        assertFalse(s.contains("v=250"), "旧静态版本必须全部升级（第十八批升 280）");
+        assertFalse(s.contains("v=270"), "旧静态版本必须全部升级（第十八批升 280）");
+        assertTrue(s.indexOf("js/drawer.js?v=280") < s.indexOf("js/app.js?v=280"),
                 "抽屉控制器必须先于原游戏逻辑初始化");
     }
 
@@ -204,5 +204,31 @@ class DrawerLayoutTest {
         for (String g : List.of("🗺️ 区域选择", "⚔️ 战斗行动", "📚 图鉴参考")) {
             assertTrue(map.contains(g), "地图抽屉缺分组 " + g);
         }
+    }
+
+    // ---------------- 第十八批：战斗区分组 + 装备折叠 ----------------
+
+    @Test
+    void combatSkillsAreGrouped() throws Exception {
+        String s = html();
+        String combat = s.substring(s.indexOf("class=\"panel combat\""), s.indexOf("id=\"utilityPanel\""));
+        assertTrue(combat.contains("⚔️ 主动技"), "缺主动技分组标题");
+        assertTrue(combat.contains("💚 辅助治疗"), "缺辅助治疗分组标题");
+        assertTrue(combat.contains("id=\"extSkillLabel\" hidden"), "赋能技标题应默认隐藏、有内容才显示");
+        assertTrue(combat.contains("class=\"combat-group-label\""));
+        // 赋能技标题随 renderExtSkills 内容联动
+        assertTrue(app().contains("extLabel.hidden = false"));
+    }
+
+    @Test
+    void equipSubSectionsAreCollapsible() throws Exception {
+        String s = html();
+        assertTrue(s.contains("<details id=\"extraStripWrap\""), "无相位栏应可折叠");
+        assertTrue(s.contains("<details id=\"setsBox\""), "套装应可折叠");
+        assertTrue(s.contains("class=\"extra-strip-wrap equip-fold\""));
+        assertTrue(s.contains("class=\"sets-box equip-fold\""));
+        // 仍由 JS hidden 控制显隐（details 与 hidden 共存）
+        assertTrue(app().contains("stripWrap.hidden = extraOpen === 0"));
+        assertTrue(app().contains("wrap.hidden = rows.length === 0"));
     }
 }

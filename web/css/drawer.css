@@ -849,3 +849,45 @@ body.fx-off .side-drawer, body.fx-off .utility-panel, body.fx-off .drawer-backdr
   .sub-tab, .nav-recent-chip { transition: none; }
 }
 body.motion-off .sub-tab, body.motion-off .nav-recent-chip { transition: none; }
+
+/* ==================== 第十八批：战斗区分组 + 装备折叠 ==================== */
+
+/* 战斗区技能分组小标题（主动/辅助/赋能）。 */
+.combat-group-label {
+  margin: 8px 0 4px;
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--txt-faint);
+  border-left: 2px solid var(--gold);
+  padding-left: 7px;
+}
+.combat-group-label[hidden] { display: none !important; }
+
+/* 装备页无相位栏/套装可折叠（默认展开，可手动收起减少视觉噪音）。 */
+.equip-fold > summary {
+  cursor: pointer;
+  list-style: none;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+}
+.equip-fold > summary::-webkit-details-marker { display: none; }
+.equip-fold > summary::before { content: '▾'; margin-right: 5px; color: var(--gold); }
+.equip-fold:not([open]) > summary::before { content: '▸'; }
+.equip-fold > summary:hover { color: var(--gold-bright); }
+.equip-fold > summary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.equip-fold[hidden] { display: none !important; }
+
+/* 目录当前工作区徽标（配合 drawer.js 的 aria-current）。 */
+.drawer-tab-list .game-tab[aria-current="page"]::after {
+  content: '当前';
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: 10px;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #1a1503;
+}

@@ -3594,6 +3594,9 @@
     const defs = ((S.meta && S.meta.skills) || []).filter(d => want.includes(d.id));
     if (!defs.length) return;
     renderExtSkills._built = true;
+    // 第十八批：赋能技分组标题随内容显示（无赋能技时不占视觉）
+    const extLabel = $('extSkillLabel');
+    if (extLabel) extLabel.hidden = false;
     row.innerHTML = defs.map(d =>
       '<button class="skill-btn" data-ext-skill="' + esc(d.id) + '" title="' + esc(d.desc) + '（蓝 ' + d.mp + ' / 冷却 ' + d.cd + 's）">' +
       d.emoji + ' ' + esc(d.name) + '</button>').join('');

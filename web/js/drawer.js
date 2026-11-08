@@ -105,6 +105,11 @@
         const search = $('navSearch');
         if (search) { search.focus({ preventScroll: true }); return; }
       }
+      // 第十八批：地图抽屉打开时把当前区域滚进视野（免手动翻找）
+      if (name === 'map') {
+        const cur = drawer.querySelector('.zone-btn.active');
+        if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+      }
       focusFirst(drawer);
     }, 30);
   }
@@ -226,6 +231,9 @@
       btn.classList.toggle('active', active);
       btn.setAttribute('aria-selected', String(active));
       btn.tabIndex = active ? 0 : -1;
+      // 第十八批：目录当前工作区标识（视觉徽标由 drawer.css ::after 提供）
+      if (active) btn.setAttribute('aria-current', 'page');
+      else btn.removeAttribute('aria-current');
     });
     document.querySelectorAll('.tab-pane[data-pane]').forEach(pane => {
       const active = pane.dataset.pane === tab;

@@ -1453,3 +1453,15 @@ body.theme-aurora{
 }
 body.theme-aurora .panel{background:rgba(10,26,44,.92)}
 body.theme-aurora *, body.theme-aurora *::before, body.theme-aurora *::after{will-change:auto}
+
+/* ==================== 第十八批：视觉统一打磨 ==================== */
+/* 空状态统一：居中、留白、可读。 */
+.empty-hint { display: block; text-align: center; padding: 18px 10px; color: var(--txt-faint, #938d80); line-height: 1.7; }
+/* 列表行 hover 反馈（仅可悬停设备，避免触屏粘滞）。 */
+@media (hover: hover) {
+  .bag-item:hover, .daily-card:hover, .potion-item:hover, .equip-slot:hover { border-color: var(--gold); }
+}
+/* 功能页滚动区滚动条细化统一。 */
+.bag-list::-webkit-scrollbar, .daily-list::-webkit-scrollbar, .event-log::-webkit-scrollbar, .potion-list::-webkit-scrollbar { width: 8px; height: 8px; }
+.bag-list::-webkit-scrollbar-thumb, .daily-list::-webkit-scrollbar-thumb, .event-log::-webkit-scrollbar-thumb, .potion-list::-webkit-scrollbar-thumb { background: var(--border-strong, rgba(232,197,104,.25)); border-radius: 8px; }
+.bag-list, .daily-list, .event-log, .potion-list { scrollbar-width: thin; }

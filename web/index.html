@@ -9,9 +9,9 @@
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="css/style.css?v=270">
-<link rel="stylesheet" href="css/v2.css?v=270">
-<link rel="stylesheet" href="css/drawer.css?v=270">
+<link rel="stylesheet" href="css/style.css?v=280">
+<link rel="stylesheet" href="css/v2.css?v=280">
+<link rel="stylesheet" href="css/drawer.css?v=280">
 </head>
 <body>
 
@@ -145,6 +145,7 @@
           <div id="mobDesc" class="mob-desc">无限血挨打桩，出拳就是修行</div>
         </div>
       </div>
+      <div class="combat-group-label">⚔️ 主动技</div>
       <div class="combat-btns">
         <button id="btnBurn" class="skill-btn">🔥 燃烧生命</button>
         <button id="btnRapid" class="skill-btn">⚡ 急速射击</button>
@@ -155,12 +156,14 @@
         <button id="btnFlee" class="skill-btn">🏃 逃跑回村</button>
         <button id="btnRebirth" class="skill-btn rebirth-btn" style="display:none">🌟 飞升转世</button>
       </div>
+      <div class="combat-group-label">💚 辅助治疗</div>
       <div class="combat-btns">
         <button id="btnHeal" class="skill-btn" title="治愈术：立即恢复 35% 生命上限（蓝 40 / 冷却 60s）">💚 治愈术</button>
         <button id="btnBloodlust" class="skill-btn" title="嗜血术：10s 内吸血 +20%（蓝 30 / 冷却 45s）">🩸 嗜血术</button>
         <button id="btnIronWall" class="skill-btn" title="铁壁：8s 内受击减半（蓝 35 / 冷却 40s）">🧱 铁壁</button>
         <button id="btnCleanse" class="skill-btn" title="净化：清除中毒/灼烧/沉默/时滞（蓝 20 / 冷却 30s）">🕊️ 净化</button>
       </div>
+      <div class="combat-group-label" id="extSkillLabel" hidden>✨ 赋能技</div>
       <div class="combat-btns" id="extSkillRow"></div>
       <details class="hotkey-details"><summary>⌨️ 快捷键</summary><div class="hotkey-hint"><b>1</b> 小血药 · <b>2</b> 大血药 · <b>3</b> 蓝药 · <b>4</b> 治愈术 · <b>5</b> 净化 · <b>F</b> 逃跑 · <b>B</b> 挑战 Boss · <b>M</b> 地图 · <b>N</b> 功能目录</div></details>
       <div id="buffBar" class="buff-bar" title="当前生效的增益 / 减益"></div>
@@ -184,14 +187,14 @@
         <div class="equipped-box">
           <h2>👤 已装备</h2>
           <div id="equippedSlots" class="equipped-grid"></div>
-          <div id="extraStripWrap" class="extra-strip-wrap" hidden>
-            <div class="extra-strip-head">🧳 无相位栏 <span id="extraStripCount" class="panel-tip"></span></div>
+          <details id="extraStripWrap" class="extra-strip-wrap equip-fold" open hidden>
+            <summary class="extra-strip-head">🧳 无相位栏 <span id="extraStripCount" class="panel-tip"></span></summary>
             <div id="extraStrip" class="extra-strip"></div>
-          </div>
-          <div id="setsBox" class="sets-box" hidden>
-            <div class="extra-strip-head">🧩 套装 <span class="panel-tip">同区四件套，穿 2/4 件激活加成</span></div>
+          </details>
+          <details id="setsBox" class="sets-box equip-fold" open hidden>
+            <summary class="extra-strip-head">🧩 套装 <span class="panel-tip">同区四件套，穿 2/4 件激活加成</span></summary>
             <div id="setsList" class="sets-list"></div>
-          </div>
+          </details>
         </div>
         <div class="bag-box">
           <h2>🎒 背包 <span id="bagCount" class="bag-count">0/30</span></h2>
@@ -500,11 +503,11 @@
 <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=270"></script>
-<script src="js/api.js?v=270"></script>
-<script src="js/achievements.js?v=270"></script>
-<script src="js/tutorial.js?v=270"></script>
-<script src="js/drawer.js?v=270"></script>
-<script src="js/app.js?v=270"></script>
+<script src="js/audio.js?v=280"></script>
+<script src="js/api.js?v=280"></script>
+<script src="js/achievements.js?v=280"></script>
+<script src="js/tutorial.js?v=280"></script>
+<script src="js/drawer.js?v=280"></script>
+<script src="js/app.js?v=280"></script>
 </body>
 </html>

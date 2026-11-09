@@ -16,6 +16,9 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class EquipFactory {
 
+    /** 第二十批·轮4：区域序列表静态化（ZONES 是 static 有序 Map，原每次掉落/选底子都重建）。 */
+    private static final List<String> ZONE_ORDER = List.copyOf(GameConst.ZONES.keySet());
+
     private EquipFactory() {
     }
 
@@ -75,7 +78,7 @@ public final class EquipFactory {
             return null;
         }
 
-        List<String> order = new ArrayList<>(GameConst.ZONES.keySet());
+        List<String> order = ZONE_ORDER;
         int zoneIdx = order.indexOf(zoneId);
         int tierBoost = Math.min(3, Math.max(0, zoneIdx / 2));
 
@@ -153,7 +156,7 @@ public final class EquipFactory {
             return null;
         }
         List<com.gongpu.cfg.GameData.Tpl> all = gd.equipmentPool();
-        List<String> order = new ArrayList<>(GameConst.ZONES.keySet());
+        List<String> order = ZONE_ORDER;
         int zoneIdx = order.indexOf(zoneId);
         List<com.gongpu.cfg.GameData.Tpl> eligible = new ArrayList<>();
         for (com.gongpu.cfg.GameData.Tpl t : all) {

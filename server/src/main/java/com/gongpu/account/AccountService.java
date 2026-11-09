@@ -83,6 +83,11 @@ public class AccountService {
             long lockUntil = count >= LOGIN_MAX_FAILS ? now + LOGIN_LOCK_MS : 0;
             return new long[]{count, lockUntil, now};
         });
+        // 第二十批·轮7：攻击者可用海量不存在用户名灌条目（login 里 user==null 也记账），
+        // 超阈值惰性清理过期条目，防进程内存随攻击量单调膨胀（同 LeaderboardService.throttle 范式）
+        if (loginFails.size() > 4096) {
+            loginFails.entrySet().removeIf(e -> now - e.getValue()[2] > LOGIN_LOCK_MS);
+        }
     }
 
     @Transactional
@@ -141,7 +146,11 @@ public class AccountService {
         if (e != null && now - e[1] < 30_000) {
             return (int) e[0];
         }
-        int v = users.findById(userId).map(User::getTokenVersion).orElse(0);
+        int v = users.findById(userId).map(User::getTokenVersion).orElse(-1);
+        // 第二十批·轮7：缓存条目 30 秒过期但永不删除，历史 uid 单调累积——超阈值清过期
+        if (versionCache.size() > 8192) {
+            versionCache.entrySet().removeIf(en -> now - en.getValue()[1] >= 30_000);
+        }
         versionCache.put(userId, new long[]{v, now});
         return v;
     }

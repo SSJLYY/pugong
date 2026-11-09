@@ -88,4 +88,27 @@ class BackupRingTest {
         PlayerState s = SaveService.decodeOrRecover(gs);
         assertEquals(9, s.gen, "主档损坏时应优先用备份环（比存档点快照更新）");
     }
+
+    /** 第二十批·轮3：快速判期——载荷内含转义的 \"t\": 不得误判为真实键；结构不符回退全量解析。 */
+    @Test
+    void fastPathIgnoresEscapedTimestampInPayload() {
+        long t0 = 11_000_000L;
+        // 手工构造：j 载荷内含转义引号的 "t": 文本
+        String ring = "[{\"t\":" + t0 + ",\"j\":\"{\\\"t\\\":999}\"}]";
+        // 未到期 → 原样返回（且最后识别的是真实键 t0，不是载荷里的 999）
+        assertSame(ring, SaveService.rotateBackupRing(ring, stateOf(1), t0 + 60_000L));
+        // 到期 → 追加新元素
+        String grown = SaveService.rotateBackupRing(ring, stateOf(1), t0 + SaveService.BACKUP_ROTATE_MS);
+        PlayerState s = SaveService.decodeFromRing(grown);
+        assertEquals(1, s.gen, "到期后应追加新状态，解码取最新");
+    }
+
+    /** 第二十批·轮3：非数字时间戳/坏结构回退全量解析路径，不炸不吞。 */
+    @Test
+    void fastPathFallsBackOnMalformedTimestamp() {
+        String ring = "[{\"t\":\"not-a-number\",\"j\":\"{}\"}]";
+        // t 非数字 → 全量解析按 lastT=0 处理；now 取远超轮转间隔的值确保会追加
+        String out = SaveService.rotateBackupRing(ring, stateOf(2), 100_000_000L);
+        assertEquals(2, SaveService.decodeFromRing(out).gen, "坏时间戳应回退全量解析并正常追加");
+    }
 }

@@ -67,35 +67,82 @@ public class StateCache {
         return m;
     }
 
+    // ---- 第二十批·轮8：Redis 异常可观测 + 读路径熔断 ----
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StateCache.class);
+    /** 告警节流：Redis 宕机时全 catch 每秒触发，30s 一条合并防刷屏。 */
+    private static final long WARN_INTERVAL_MS = 30_000L;
+    private static final java.util.concurrent.atomic.AtomicLong LAST_WARN =
+            new java.util.concurrent.atomic.AtomicLong();
+
+    private static void warnThrottled(String op, long userId, int slot, RuntimeException e) {
+        long now = System.currentTimeMillis();
+        long last = LAST_WARN.get();
+        if (now - last >= WARN_INTERVAL_MS && LAST_WARN.compareAndSet(last, now)) {
+            log.warn("Redis {} 失败({}:{}): {}（30s 内同类异常合并）", op, userId, slot, e.toString());
+        }
+    }
+
+    /** get 熔断：连续 3 次 Redis 异常后 10s 内直接回源 MySQL——
+     *  否则故障期间每秒轮询×每玩家都等满超时再回源，DB 连接池被拖垮。 */
+    private static final int CB_FAILS = 3;
+    private static final long CB_OPEN_MS = 10_000L;
+    private final java.util.concurrent.atomic.AtomicInteger consecutiveGetFails =
+            new java.util.concurrent.atomic.AtomicInteger();
+    private final java.util.concurrent.atomic.AtomicLong circuitOpenUntil =
+            new java.util.concurrent.atomic.AtomicLong();
+
     public PlayerState get(long userId, int slot) {
+        if (System.currentTimeMillis() < circuitOpenUntil.get()) {
+            MISSES.incrementAndGet();
+            return null;
+        }
+        String json;
         try {
-            String json = redis.opsForValue().get(key(userId, slot));
-            if (json == null) {
-                MISSES.incrementAndGet();
-                return null;
+            json = redis.opsForValue().get(key(userId, slot));
+            consecutiveGetFails.set(0);
+        } catch (RuntimeException e) {
+            // Redis 故障不应阻断读取，直接回源 DB；连续异常触发熔断
+            warnThrottled("get", userId, slot, e);
+            if (consecutiveGetFails.incrementAndGet() >= CB_FAILS) {
+                circuitOpenUntil.set(System.currentTimeMillis() + CB_OPEN_MS);
+                consecutiveGetFails.set(0);
             }
-            HITS.incrementAndGet();
+            return null;
+        }
+        if (json == null) {
+            MISSES.incrementAndGet();
+            return null;
+        }
+        HITS.incrementAndGet();
+        try {
             return StateCodec.decode(json);
         } catch (RuntimeException e) {
-            // Redis 故障不应阻断读取，直接回源 DB
+            // 坏缓存 JSON：回源 DB（decodeOrRecover 有备份环自愈），不计入 Redis 熔断
+            warnThrottled("decode", userId, slot, e);
             return null;
         }
     }
 
     public void put(long userId, int slot, PlayerState state) {
+        putJson(userId, slot, StateCodec.encode(state));
+    }
+
+    /** 第二十批·轮2：调用方已编码时直接写入，免去同一帧的第二次全量 Jackson encode。 */
+    public void putJson(long userId, int slot, String json) {
         try {
-            redis.opsForValue().set(key(userId, slot), StateCodec.encode(state), ttl);
+            redis.opsForValue().set(key(userId, slot), json, ttl);
             PUTS.incrementAndGet();
-        } catch (RuntimeException ignored) {
-            // 缓存写失败可接受
+        } catch (RuntimeException e) {
+            // 缓存写失败可接受（MySQL 是权威源）；留节流 warn 便于发现 Redis 故障
+            warnThrottled("put", userId, slot, e);
         }
     }
 
     public void evict(long userId, int slot) {
         try {
             redis.delete(key(userId, slot));
-        } catch (RuntimeException ignored) {
-            // 忽略
+        } catch (RuntimeException e) {
+            warnThrottled("evict", userId, slot, e);
         }
     }
 
@@ -115,7 +162,8 @@ public class StateCache {
             }
             return false;
         } catch (RuntimeException e) {
-            // fail-closed：Redis 不可用时拒绝推进，防止并发双结算
+            // fail-closed：Redis 不可用时拒绝推进，防止并发双结算；留日志（此前零痕迹，与真实高频操作不可区分）
+            warnThrottled("lock", userId, slot, e);
             return false;
         }
     }

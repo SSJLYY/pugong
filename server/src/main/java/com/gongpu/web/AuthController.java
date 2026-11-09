@@ -69,8 +69,13 @@ public class AuthController {
             limiter.onLoginSuccess(ip);
             return out;
         } catch (RuntimeException e) {
-            // 只对"密码错"这类认证失败记账;限流锁定等业务异常不重复计数
-            limiter.onLoginFail(ip);
+            // 第二十批·轮9：只对 401 认证失败（用户名/密码错）记账。
+            // 此前一切 RuntimeException 都记——DB 抖动等基础设施异常会把无辜 IP
+            // 计到锁死线（10 次/10 分钟），把故障放大成"全员登不上"。
+            // 429（已锁定）/500 等业务与基础设施异常不重复计数。
+            if (e instanceof com.gongpu.common.ApiException ae && ae.getStatus() == 401) {
+                limiter.onLoginFail(ip);
+            }
             throw e;
         }
     }

@@ -58,12 +58,15 @@ public class GameData {
             Map<String, Integer> passivePriceByCode,
             Map<String, DropRateRule> rateByZone,
             Map<String, CraftTemplate> craftByCode,
-            Map<String, Integer> blueprintNeedByCode) {
+            Map<String, Integer> blueprintNeedByCode,
+            // 第二十批·轮4：掉落池随快照预构建（原每次掉落重建池+逐模板解析 baseStats JSON）
+            List<GameConst.Affix> affixPool,
+            List<Tpl> equipmentPool) {
     }
 
     private final AtomicReference<Indexed> snap = new AtomicReference<>(new Indexed(
             emptySnapshot(), Map.of(), Map.of(), List.of(), Map.of(), Map.of(), List.of(),
-            List.of(), Map.of(), Map.of(), Map.of(), Map.of(), Map.of()));
+            List.of(), Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), List.of(), List.of()));
 
     /** 静态入口：供 GameEngine 等静态上下文使用（构造时注册）。 */
     private static volatile GameData INSTANCE;
@@ -198,10 +201,33 @@ public class GameData {
                 blueprintNeedByCode.put(t.getCode(), need);
             }
         }
+        // 第二十批·轮4：词条池/装备池一次性构建进快照，掉落路径零重建零 JSON 解析
+        List<GameConst.Affix> affixPool = new ArrayList<>();
+        for (AffixTemplate t : s.affixes()) {
+            affixPool.add(new GameConst.Affix(
+                    t.getName(), t.getStatKey(), t.getStatType(),
+                    t.getMinVal() == null ? 0 : t.getMinVal(),
+                    t.getMaxVal() == null ? 0 : t.getMaxVal(),
+                    t.getRarity() == null ? "common" : t.getRarity(),
+                    t.getSideKey(), t.getSideVal()));
+        }
+        List<Tpl> equipmentPool = new ArrayList<>();
+        for (EquipmentTemplate t : s.equipment()) {
+            Map<String, BigDecimal> stats = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> e : parseJsonStatic(t.getBaseStats()).entrySet()) {
+                stats.put(e.getKey(), Num.parse(String.valueOf(e.getValue()), Num.ZERO));
+            }
+            equipmentPool.add(new Tpl(t.getCode(), t.getName(), str(t.getEmoji()), t.getSlot(),
+                    stats, t.getTier() == null ? 0 : t.getTier(),
+                    t.getSellBase() == null ? 20 : t.getSellBase(),
+                    t.getEnhanceMax() == null ? GameConst.ENHANCE_MAX_LV : t.getEnhanceMax(),
+                    t.getMinZone(), str(t.getRemark())));
+        }
         return new Indexed(s, Map.copyOf(itemByCode), Map.copyOf(potionByCode), List.copyOf(potionList),
                 Map.copyOf(skillByCode), Map.copyOf(activeSkillByCode), List.copyOf(activeSkillList),
                 List.copyOf(passiveListView), Map.copyOf(passiveEffectByCode), Map.copyOf(passivePriceByCode),
-                Map.copyOf(rateByZone), Map.copyOf(craftByCode), Map.copyOf(blueprintNeedByCode));
+                Map.copyOf(rateByZone), Map.copyOf(craftByCode), Map.copyOf(blueprintNeedByCode),
+                List.copyOf(affixPool), List.copyOf(equipmentPool));
     }
 
     private static GameConst.PotionDef toPotionDef(ItemTemplate t) {
@@ -299,38 +325,18 @@ public class GameData {
         return GameConst.ACTIVE_SKILLS.get(code);
     }
 
-    /** 词条池（生成装备用，DB 优先）。 */
+    /** 词条池（生成装备用，DB 优先；第二十批起走快照预构建，不再每次重建）。 */
     public List<GameConst.Affix> affixPool() {
-        List<GameConst.Affix> out = new ArrayList<>();
-        for (AffixTemplate t : snap.get().s().affixes()) {
-            out.add(new GameConst.Affix(
-                    t.getName(), t.getStatKey(), t.getStatType(),
-                    t.getMinVal() == null ? 0 : t.getMinVal(),
-                    t.getMaxVal() == null ? 0 : t.getMaxVal(),
-                    t.getRarity() == null ? "common" : t.getRarity(),
-                    t.getSideKey(), t.getSideVal()));
-        }
+        List<GameConst.Affix> out = snap.get().affixPool();
         if (!out.isEmpty()) {
             return out;
         }
         return GameConst.AFFIXES;
     }
 
-    /** 装备模板底子（生成装备用，DB 优先）。 */
+    /** 装备模板底子（生成装备用，DB 优先；第二十批起走快照预构建，含 baseStats 已解析）。 */
     public List<Tpl> equipmentPool() {
-        List<Tpl> out = new ArrayList<>();
-        for (EquipmentTemplate t : snap.get().s().equipment()) {
-            Map<String, BigDecimal> stats = new LinkedHashMap<>();
-            for (Map.Entry<String, Object> e : parseJsonStatic(t.getBaseStats()).entrySet()) {
-                stats.put(e.getKey(), Num.parse(String.valueOf(e.getValue()), Num.ZERO));
-            }
-            out.add(new Tpl(t.getCode(), t.getName(), str(t.getEmoji()), t.getSlot(),
-                    stats, t.getTier() == null ? 0 : t.getTier(),
-                    t.getSellBase() == null ? 20 : t.getSellBase(),
-                    t.getEnhanceMax() == null ? GameConst.ENHANCE_MAX_LV : t.getEnhanceMax(),
-                    t.getMinZone(), str(t.getRemark())));
-        }
-        return out;
+        return snap.get().equipmentPool();
     }
 
     /** DB 是否有装备模板（为空时 EquipFactory 回落硬编码）。 */

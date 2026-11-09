@@ -1545,7 +1545,7 @@ public class GameService {
         if (!s.petsOwned.contains(petCode)) {
             throw ApiException.badRequest("尚未领养这只宠物");
         }
-        String n = name == null ? "" : name.trim();
+        String n = name == null ? "" : com.gongpu.common.Texts.stripControl(name).trim();
         if (n.length() > 8) {
             throw ApiException.badRequest("昵称最多 8 个字");
         }
@@ -2367,11 +2367,8 @@ public class GameService {
         m.put("codex", s.codex);
         m.put("achievements", new ArrayList<>(s.achievements));
         m.put("achClaimed", new ArrayList<>(s.achClaimed));
-        Map<String, Object> achRewards = new LinkedHashMap<>();
-        for (Achievements.Def d : Achievements.ALL) {
-            achRewards.put(d.id(), Achievements.rewardOf(d.id()));
-        }
-        m.put("achRewards", achRewards);
+        // 第二十批·轮5：静态奖励表直接复用 Achievements.REWARDS（不可变 Map，Jackson 正常序列化）
+        m.put("achRewards", Achievements.REWARDS);
         // 成就进度（未解锁的可量化成就 → [当前, 目标]，前端画进度条）
         Map<String, Object> achProgress = new LinkedHashMap<>();
         for (Achievements.Def d : Achievements.ALL) {

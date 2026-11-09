@@ -189,6 +189,10 @@ public class AdminController {
         User u = users.findById(id)
                 .orElseThrow(() -> ApiException.notFound("账号不存在"));
         u.setPasswordHash(encoder.encode(pw));
+        // 第二十批·轮9：与玩家侧改密（AccountService.changePassword）对齐——
+        // 版本自增让旧 JWT 立即失效。管理端重置密码的典型场景就是处置盗号，
+        // 不换版本则盗号者手里的旧令牌仍有效（168h TTL+滑动续期），重置形同虚设。
+        u.setTokenVersion(u.getTokenVersion() + 1);
         users.save(u);
         log("USER_RESET_PW", "id=" + id + " username=" + u.getUsername());
         return Map.of("ok", true);

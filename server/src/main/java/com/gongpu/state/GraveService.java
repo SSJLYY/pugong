@@ -74,6 +74,8 @@ public class GraveService {
         if (s == null) {
             return null;
         }
+        // 第二十批·轮10：墓志铭经免登录世界墓园全服可见，先去控制字符再截断（防换行刷屏/渲染异常）
+        s = com.gongpu.common.Texts.stripControl(s);
         return s.length() > max ? s.substring(0, max) : s;
     }
 }

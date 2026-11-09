@@ -128,6 +128,16 @@ public class SaveService {
      * 环本身损坏 → 从当前状态重建单元素环。自愈数据宁可少而新，不可多而旧。
      */
     static String rotateBackupRing(String ringJson, String stateJson, long now) {
+        // 第二十批·轮3 快速判期：环未到期直接原样返回，不做全量 Jackson 解析。
+        // 此前每次落库（含 5 秒节流帧）都把环内最多 3 份完整状态 JSON 解析成 List 再判期，
+        // 而 ≥95% 的调用答案都是「未到期」。JSON 字符串值内引号一律转义，
+        // 裸序列 "t": 只会是真实键，末元素时间戳可安全抽取；抽取失败回退全量解析。
+        if (ringJson != null && !ringJson.isBlank()) {
+            Long lastT = lastRingTimestamp(ringJson);
+            if (lastT != null && now - lastT < BACKUP_ROTATE_MS) {
+                return ringJson;
+            }
+        }
         List<Map<String, Object>> ring = new ArrayList<>();
         if (ringJson != null && !ringJson.isBlank()) {
             try {
@@ -162,6 +172,28 @@ public class SaveService {
             return RING_MAPPER.writeValueAsString(ring);
         } catch (Exception impossible) {
             return ringJson;
+        }
+    }
+
+    /** 抽取备份环末元素时间戳；结构不符/解析失败返回 null（调用方回退全量解析，正确性不受影响）。 */
+    private static Long lastRingTimestamp(String ringJson) {
+        int i = ringJson.lastIndexOf("\"t\":");
+        if (i < 0) {
+            return null;
+        }
+        int start = i + 4;
+        int end = start;
+        while (end < ringJson.length()
+                && (Character.isDigit(ringJson.charAt(end)) || ringJson.charAt(end) == '-')) {
+            end++;
+        }
+        if (end == start) {
+            return null;
+        }
+        try {
+            return Long.parseLong(ringJson.substring(start, end));
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
@@ -234,6 +266,11 @@ public class SaveService {
             return;
         }
         persist(userId, slot, s, null);
+        // 第二十批·轮7：节流表只增不删，随历史玩家×槽位单调膨胀——超阈值清掉久未写入的条目
+        // （条目过期不影响语义：下次写仍按 PERSIST_THROTTLE_MS 从头计）
+        if (lastDbWrite.size() > 4096) {
+            lastDbWrite.entrySet().removeIf(e -> now - e.getValue() > 10 * 60_000L);
+        }
         lastDbWrite.put(key, System.currentTimeMillis());
     }
 
@@ -276,19 +313,21 @@ public class SaveService {
             gs.setBackupRing(rotated);
         }
         gs.setUpdatedAt(Instant.now());
-        repo.save(gs);
         // 回村自动快照(设计 §3.2"回安全区自动存主槽"):在村口且未死亡时,
         // 距上次快照 ≥5 分钟顺手刷一次回档点——从未手动存档的玩家死亡也有保命底线。
         // 快照含当前进度,会让"回档"最多回退 5 分钟,属硬核与体验的折中(注释明确,非 bug)。
+        // 第二十批·轮3：快照字段在首次 save 前设置并复用 stateJson（快照=当前状态同一份编码），
+        // 合并原先「两次 save + 二次 encode」的写放大。
         if ("village".equals(s.zone) && !s.dead) {
             Instant last = gs.getSavedAt();
             if (last == null || Instant.now().toEpochMilli() - last.toEpochMilli() >= 5 * 60_000L) {
-                gs.setSnapshotJson(StateCodec.encode(s));
+                gs.setSnapshotJson(stateJson);
                 gs.setSavedAt(Instant.now());
-                repo.save(gs);
             }
         }
-        cache.put(userId, slot, s);
+        repo.save(gs);
+        // 第二十批·轮2：复用上面已编码的 stateJson，不再让 cache.put 二次全量 encode
+        cache.putJson(userId, slot, stateJson);
     }
 
     /**
@@ -304,14 +343,16 @@ public class SaveService {
                 .orElseThrow(() -> ApiException.notFound("槽位 " + slot + " 没有存档"));
         Instant now = Instant.now();
         s.lastSaveAt = now.toEpochMilli();
-        gs.setSnapshotJson(StateCodec.encode(s));
+        // 第二十批·轮2：快照与主档是同一份状态，encode 一次两用（原两次全量 encode）
+        String stateJson = StateCodec.encode(s);
+        gs.setSnapshotJson(stateJson);
         gs.setSavedAt(now);
-        gs.setStateJson(StateCodec.encode(s));
+        gs.setStateJson(stateJson);
         gs.setUpdatedAt(now);
-        gs.setMaxHp(Num.plain(s.life.maxHP));
+        gs.setMaxHp(capVarchar(Num.plain(s.life.maxHP), MAX_HP_COLUMN_LEN));
         gs.setAliveSeconds(StateCodec.aliveSeconds(s));
         repo.save(gs);
-        cache.put(userId, slot, s);
+        cache.putJson(userId, slot, stateJson);
     }
 
     /** 是否有可回档的快照。 */
@@ -351,7 +392,8 @@ public class SaveService {
         restored.deathCause = null;
         restored.lastTickAt = System.currentTimeMillis();
         restored.lastSaveAt = System.currentTimeMillis();
-        gs.setStateJson(StateCodec.encode(restored));
+        String restoredJson = StateCodec.encode(restored);
+        gs.setStateJson(restoredJson);
         gs.setUpdatedAt(Instant.now());
         gs.setGen(restored.gen);
         gs.setZone(restored.zone);
@@ -363,7 +405,7 @@ public class SaveService {
             gs.setRebirthsTotal(restored.stats.rebirths);
         }
         repo.save(gs);
-        cache.put(userId, slot, restored);
+        cache.putJson(userId, slot, restoredJson);
         return restored;
     }
 

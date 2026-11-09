@@ -131,6 +131,16 @@ public class GameController {
             }
             q.addLast(now);
         }
+        // 第二十批·轮7：每用户条目永驻（队列清了 key 不删），历史玩家单调累积——
+        // 超阈值惰性清掉窗口已空的条目（同 LeaderboardService.throttle 范式）
+        if (WRITE_TIMES.size() > 4096) {
+            WRITE_TIMES.entrySet().removeIf(e -> {
+                java.util.ArrayDeque<Long> dq = e.getValue();
+                synchronized (dq) {
+                    return dq.isEmpty() || now - dq.peekLast() > WRITE_WINDOW_MS * 6;
+                }
+            });
+        }
     }
 
     private Map<String, Object> runLocked(long uid, int slot, String username, String auditLabel,

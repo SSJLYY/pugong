@@ -139,6 +139,17 @@ public class StatDailyAggregator {
     @Scheduled(cron = "0 1 0 * * *")
     @Transactional
     public void rollDay() {
+        // 第二十批·轮10：日切此前无异常保护——午夜 DB 抖一次，昨日最终值永久缺失且零日志。
+        // 幂等 upsert（findById orElseGet + save），重试安全；失败时 lastSnap 不推进，
+        // 次日 delta 仍从旧快照起算，不会吞掉昨日量。
+        try {
+            rollDayUnchecked();
+        } catch (RuntimeException e) {
+            log.warn("rollDay 日切失败（昨日行缺失，下次 aggregate 后数据仍按旧快照累计）: {}", e.toString());
+        }
+    }
+
+    private void rollDayUnchecked() {
         Snapshot cur = collect();
         Delta d = delta(cur, lastSnap.get());
         LocalDate yesterday = LocalDate.now().minusDays(1);

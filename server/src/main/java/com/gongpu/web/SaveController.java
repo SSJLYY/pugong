@@ -82,7 +82,8 @@ public class SaveController {
     public Map<String, Object> rename(HttpServletRequest req, @PathVariable int slot,
                                       @RequestBody RenameReq body) {
         long uid = AuthInterceptor.userId(req);
-        String name = body == null || body.name() == null ? "" : body.name().trim();
+        String name = body == null || body.name() == null
+                ? "" : com.gongpu.common.Texts.stripControl(body.name()).trim();
         if (name.isEmpty() || name.length() > 16) {
             throw com.gongpu.common.ApiException.badRequest("存档名需为 1~16 个字符");
         }

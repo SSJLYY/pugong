@@ -549,20 +549,40 @@ public final class Achievements {
         };
     }
 
+    /** 第二十批·轮5：成就奖励表是纯静态内容，一次构建全服复用
+     *  （原 GameService.fullView 每帧每玩家重建 ~170 项 LinkedHashMap）。 */
+    public static final java.util.Map<String, Long> REWARDS;
+    static {
+        java.util.Map<String, Long> r = new java.util.LinkedHashMap<>();
+        for (Def d : ALL) {
+            r.put(d.id(), rewardOf(d.id()));
+        }
+        REWARDS = java.util.Collections.unmodifiableMap(r);
+    }
+
     public static List<String> evaluate(PlayerState s) {
         if (s == null || s.achievements == null) {
             return List.of();
         }
+        // 第二十批·轮1：全解锁早退 + 面板/套装计数按需构建。
+        // 此前每帧（persistThrottled 每秒一次）无条件 PanelCalculator.of + Sets.wornCounts，
+        // 全成就解锁的老档也照算，是 tick 帧固定 CPU 税。
+        if (s.achievements.size() >= ALL.size()) {
+            return List.of();
+        }
         List<String> newly = new ArrayList<>();
-        PanelCalculator.Panel p = PanelCalculator.of(s);
         long punches = sat(s.stats.lifetimePunches);
         long kills = sat(s.stats.kills);
-        long maxHp = sat(p.maxHP());
         long gold = sat(s.gold);
         int equipCount = s.equipBag.size() + (int) s.equipped.values().stream().filter(it -> it != null).count();
         boolean wearEpic = s.equipped.values().stream()
                 .anyMatch(it -> it != null && it.quality >= 3);
-        java.util.Map<String, Integer> setCounts = Sets.wornCounts(s);
+        // 面板只有 hp_5000/hp_1m 用，套装计数只有 set_4/set_dual 用：都已解锁则零构建
+        long maxHp = (!s.achievements.contains("hp_5000") || !s.achievements.contains("hp_1m"))
+                ? sat(PanelCalculator.of(s).maxHP()) : 0;
+        java.util.Map<String, Integer> setCounts =
+                (!s.achievements.contains("set_4") || !s.achievements.contains("set_dual"))
+                        ? Sets.wornCounts(s) : java.util.Map.of();
 
         for (Def d : ALL) {
             if (s.achievements.contains(d.id())) {

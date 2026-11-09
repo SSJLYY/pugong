@@ -272,6 +272,22 @@ GET  /api/graveyard（个人） /api/leaderboard（公开） /api/config/meta /a
 - ~~成就为纯前端展示层~~ **已落库（v3.3）**：成就服务端权威评估（Achievements.java，2026-11-03 起 24 项），随 state_json 持久化，换设备/清缓存不丢
 - ~~旧版自动管家的 autoBurn/autoSkill buff 常驻链未迁移~~ **已迁移（v3.4）**：挂机管家新增「技能常驻」「燃烧常驻」开关，服务端 GameEngine.autoBuffTick 按 legacy 语义执行（涌动先行免蓝→急速→蓄力常驻、血<60% 补格挡、血<30% 怒吼、血>60% 补燃烧），离线同样生效
 
+## 变更记录（2026-11-09 · 第二十批十轮后台优化）
+
+> 主题：tick 帧热路径 CPU 削减 + 进程内存治理 + 账号安全闭环。两个只读扫描智能体产出 12 项性能 + 10 项健壮性候选，本批择优落地 10 轮，全部小步改动。
+
+- **轮1 成就评估早退**（Achievements.evaluate）：全解锁直接返回空；面板/套装计数按需构建（仅 hp_*、set_* 未解锁才算）。每秒轮询帧固定 CPU 税消除。
+- **轮2 存档编码复用**（StateCache.putJson 新重载）：persist/createSnapshot/rollback 复用已编码 stateJson，动作帧省 1 次全量 Jackson encode；createSnapshot 原两次 encode 合一，且 maxHp 补上 capVarchar 钳制（同类溢出隐患顺手堵上）。
+- **轮3 备份环快速判期**（SaveService.rotateBackupRing）：先用 lastIndexOf 抽末元素时间戳，未到期直接原样返回（≥95% 调用零解析）；坏结构回退全量解析，正确性不变。回村快照合并进首次 save，消除「双 save + 双 encode」写放大。
+- **轮4 掉落池预构建**（GameData.buildIndexed）：词条池/装备池随快照一次性构建（装备池 baseStats JSON 解析提前完成），EquipFactory.ZONE_ORDER 静态化。高攻速溢出帧原最多几百次池重建归零。
+- **轮5 静态奖励表**（Achievements.REWARDS）：fullView 每帧每玩家重建 ~170 项的 achRewards 提为全服单例不可变 Map。
+- **轮6 JWT 单解析**（JwtService.Verified 增加 expiresAtEpochSec）：AuthInterceptor 每请求 HMAC 验签 2 次 → 1 次；String 重载保留兼容测试。
+- **轮7 进程内 Map 惰性清理**（4 处泄漏治理）：SaveService.lastDbWrite / GameController.WRITE_TIMES / AccountService.loginFails / versionCache，照抄 LeaderboardService.throttle 既有范式，超阈值 removeIf 过期条目。
+- **轮8 Redis 可观测 + 读熔断**（StateCache）：get/put/evict/lock 异常 30s 合并 warn（此前全静默，Redis 故障零痕迹）；get 连续 3 次异常熔断 10s 直接回源 MySQL，防故障期每秒轮询拖垮 DB 连接池。lock fail-closed 语义不变。
+- **轮9 账号安全闭环**：管理端 resetPw 递增 tokenVersion（旧 JWT 立即失效，对齐玩家侧改密——处置盗号场景的关键）；删号后 currentTokenVersion 返回 -1（旧令牌不再通过版本校验）；登录端点仅对 401 记 IP 失败计数（原 DB 抖动也会计数，10 次抖动即锁死无辜 IP）。
+- **轮10 健壮性三件**：rollDay 日切 try-catch + warn（原异常直接抛调度器、昨日行永久缺失且零日志）；GlobalExceptionHandler 识别客户端断连（ClientAbortException/broken pipe）降级 debug，500 日志信噪比恢复；新增 common.Texts.stripControl——墓志铭（免登录世界墓园全服可见）/宠物名/存档名入口统一去控制字符。
+- **工程验收**：新增 TextsTest 3 项、AchievementsEarlyExitTest 4 项（含 REWARDS 不可变锁）、BackupRingTest 快速判期 2 项、JwtRenewTest Verified 版 2 项；全量回归 **849 项全绿**（839 + 10）。后端纯服务端改动，前端零变更、无需升静态版本。
+
 ## 变更记录（2026-11-08 · 第十九批一百轮前台优化）
 
 > 主题：把最后的「一屏多模块」清掉——锻造页原先把配方/兑换/出售/宝石/批量全塞进一个容器，本批拆成子页签；战斗日志区可折叠。静态版本 v280 → v290。

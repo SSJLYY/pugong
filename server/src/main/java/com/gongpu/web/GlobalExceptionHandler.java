@@ -74,9 +74,34 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleOther(Exception e, HttpServletRequest req) {
+        // 第二十批·轮10：前端 1 秒轮询，页面关闭/切网时的客户端断连
+        // （ClientAbortException / broken pipe）不是服务端故障——降级 debug，
+        // 否则挂机长期运行下 500 日志被断连堆栈淹没，真异常信噪比劣化。
+        if (isClientAbort(e)) {
+            log.debug("客户端断开: {} {}", req.getMethod(), req.getRequestURI());
+            return ResponseEntity.internalServerError().body(body("INTERNAL", "服务器开小差了，请稍后再试"));
+        }
         // 500 必须带请求上下文:只有堆栈没有 URI,排障时要靠猜
         log.error("未处理异常: {} {}", req.getMethod(), req.getRequestURI(), e);
         return ResponseEntity.internalServerError().body(body("INTERNAL", "服务器开小差了，请稍后再试"));
+    }
+
+    /** 沿异常链识别客户端断开（Tomcat ClientAbortException 或 broken pipe 消息）。 */
+    private static boolean isClientAbort(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            String cn = t.getClass().getName();
+            if (cn.endsWith("ClientAbortException")) {
+                return true;
+            }
+            if (t instanceof java.io.IOException) {
+                String msg = t.getMessage();
+                if (msg != null && (msg.toLowerCase().contains("broken pipe")
+                        || msg.contains("远程主机") || msg.contains("你的主机中的软件中止"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Map<String, Object> body(String code, String msg) {

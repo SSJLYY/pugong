@@ -393,6 +393,9 @@
     });
 
     $('authSubmit').addEventListener('click', doAuth);
+    // 表单化登录（前端 R2）：原生 Enter 提交 + 密码管理器语义，submit 统一走 doAuth（内部防重入）
+    const authForm = $('authForm');
+    if (authForm) authForm.addEventListener('submit', e => { e.preventDefault(); doAuth(); });
     $('authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
     $('authUser').addEventListener('keydown', e => { if (e.key === 'Enter') $('authPass').focus(); });
 
@@ -437,9 +440,12 @@
   }
 
   async function doAuth() {
+    // 防重入：Enter 键、表单提交、按钮点击三路并发只放行一路（原 keydown 不受按钮 disabled 约束，狂按 Enter 会并发发多个登录请求）
+    if (S.authBusy) return;
+    S.authBusy = true;
     const u = $('authUser').value.trim();
     const p = $('authPass').value;
-    if (!u || !p) { $('authErr').textContent = '请填写用户名和密码'; return; }
+    if (!u || !p) { $('authErr').textContent = '请填写用户名和密码'; S.authBusy = false; return; }
     $('authErr').textContent = '';
     $('authSubmit').disabled = true;
     try {
@@ -452,6 +458,7 @@
     } catch (e) {
       $('authErr').textContent = e.message;
     } finally {
+      S.authBusy = false;
       $('authSubmit').disabled = false;
     }
   }

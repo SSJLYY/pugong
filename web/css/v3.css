@@ -1,0 +1,703 @@
+/* ============================================================
+ * v3.css · HUD 皮肤层（UI 重设计）
+ * ------------------------------------------------------------
+ * 设计语言（参考 Mobbin 游戏 UI 提炼）：
+ *   · MMO 面板四角金饰 —— 深色 chrome 分层，内容承担色彩
+ *   · 切角徽章/技能槽 —— 游戏感裁切（clip-path）
+ *   · 分段格子血条 —— 挂机游戏经典语言
+ *   · 全局等宽数字 —— 数据列可扫读
+ * 约束：
+ *   · 颜色全部走 CSS 变量 / color-mix —— 与 8 套主题兼容
+ *   · 不改 DOM 结构与 JS 绑定，仅视觉覆盖
+ *   · 尊重 body.motion-off（静态模式）与 body.fx-off（低特效）
+ *   · color-mix 不支持时整条声明失效、保留旧样式（天然降级）
+ * ============================================================ */
+
+/* ---------------- 0. 皮肤变量 ---------------- */
+:root {
+  /* 切角尺寸 */
+  --cut-s: 7px;   /* 按钮/槽位小切角 */
+  --cut-m: 12px;  /* 徽章中切角 */
+  /* 分段血条格距 */
+  --seg: 11px;
+  /* 角饰长度/线宽 */
+  --corner-l: 14px;
+  --corner-w: 2px;
+}
+
+/* ---------------- 1. 底座氛围：暗角 + 顶部微光 ---------------- */
+body {
+  font-variant-numeric: tabular-nums;
+  background:
+    radial-gradient(1100px 520px at 50% -8%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 62%),
+    radial-gradient(1400px 900px at 50% 118%, rgba(0, 0, 0, .5), transparent 58%),
+    radial-gradient(900px 600px at 8% 92%, color-mix(in srgb, var(--gold) 3%, transparent), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1) 40%, var(--bg0));
+}
+/* 浅色主题：暗角改暖色柔化 */
+body.theme-light, body.theme-ink {
+  background:
+    radial-gradient(1100px 520px at 50% -8%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 62%),
+    radial-gradient(1400px 900px at 50% 118%, rgba(60, 45, 20, .12), transparent 58%),
+    linear-gradient(180deg, var(--bg0), var(--bg1) 40%, var(--bg0));
+}
+
+/* ---------------- 2. 通用面板：四角金饰 ---------------- */
+.panel { position: relative; }
+
+.panel::after,
+.topbar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  --ca: var(--border-strong);
+  background:
+    linear-gradient(var(--ca), var(--ca)) no-repeat left 0 top 0 / var(--corner-l) var(--corner-w),
+    linear-gradient(var(--ca), var(--ca)) no-repeat left 0 top 0 / var(--corner-w) var(--corner-l),
+    linear-gradient(var(--ca), var(--ca)) no-repeat right 0 top 0 / var(--corner-l) var(--corner-w),
+    linear-gradient(var(--ca), var(--ca)) no-repeat right 0 top 0 / var(--corner-w) var(--corner-l),
+    linear-gradient(var(--ca), var(--ca)) no-repeat left 0 bottom 0 / var(--corner-l) var(--corner-w),
+    linear-gradient(var(--ca), var(--ca)) no-repeat left 0 bottom 0 / var(--corner-w) var(--corner-l),
+    linear-gradient(var(--ca), var(--ca)) no-repeat right 0 bottom 0 / var(--corner-l) var(--corner-w),
+    linear-gradient(var(--ca), var(--ca)) no-repeat right 0 bottom 0 / var(--corner-w) var(--corner-l);
+  opacity: .45;
+  transition: opacity .25s;
+}
+
+.panel:hover::after,
+.topbar:hover::after { opacity: .85; }
+
+/* 面板内部分层：更深一档的嵌槽色 */
+.panel {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 5%, var(--panel-2)), var(--panel));
+}
+
+/* 浅色主题关闭角饰 hover 辉度（宣纸/水墨保持安静） */
+body.theme-ink .panel::after, body.theme-ink .topbar::after,
+body.theme-light .panel::after, body.theme-light .topbar::after { opacity: .35; }
+body.theme-ink .panel:hover::after, body.theme-ink .topbar:hover::after,
+body.theme-light .panel:hover::after, body.theme-light .topbar:hover::after { opacity: .5; }
+
+/* ---------------- 3. 顶栏 HUD ---------------- */
+.topbar {
+  position: relative;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 7%, var(--panel-2)), var(--panel) 30%);
+  border-color: var(--border-strong);
+  overflow: hidden;
+}
+/* 顶部金色发丝线 */
+.topbar::before {
+  content: '';
+  position: absolute;
+  left: 24px; right: 24px; top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border-strong) 18%, color-mix(in srgb, var(--gold) 75%, transparent) 50%, var(--border-strong) 82%, transparent);
+  pointer-events: none;
+}
+
+/* 状态 chips：切角徽章 */
+.dps-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 8%, transparent), color-mix(in srgb, var(--gold) 2%, transparent)) padding-box,
+    linear-gradient(180deg, var(--border-strong), var(--border)) border-box;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+  color: var(--txt);
+  font-size: 12.5px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+/* 角色徽章：圆环头像 */
+.char-badge {
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 70%),
+    var(--panel-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 8%, transparent);
+}
+.char-badge:hover, .char-badge:focus-visible {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent), 0 0 18px color-mix(in srgb, var(--gold) 25%, transparent);
+  outline: none;
+}
+.char-hpbar {
+  border-radius: 99px;
+  background: rgba(0, 0, 0, .45);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5);
+}
+body.theme-light .char-hpbar, body.theme-ink .char-hpbar {
+  background: rgba(0, 0, 0, .12);
+}
+
+/* 顶栏操作按钮 */
+.shell-action {
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 6%, transparent), transparent) padding-box,
+    linear-gradient(180deg, var(--border-strong), var(--border)) border-box;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+  border-radius: 0;
+}
+.shell-action:hover {
+  border-color: var(--gold);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gold) 35%, transparent));
+}
+
+/* ---------------- 4. 生命上限牌匾 ---------------- */
+.hp-line {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  padding: 4px 26px 8px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, transparent), color-mix(in srgb, var(--gold) 2%, transparent)) padding-box,
+    linear-gradient(180deg, var(--border-strong), var(--border)) border-box;
+  border: 1px solid transparent;
+  clip-path: polygon(var(--cut-m) 0, calc(100% - var(--cut-m)) 0, 100% var(--cut-m), 100% 100%, calc(100% - var(--cut-m)) 100%, var(--cut-m) 100%, 0 calc(100% - var(--cut-m)), 0 var(--cut-m));
+}
+/* 底部斜纹绶带 */
+.hp-line::after {
+  content: '';
+  position: absolute;
+  left: 14px; right: 14px; bottom: 0;
+  height: 3px;
+  background: repeating-linear-gradient(-55deg, color-mix(in srgb, var(--gold) 55%, transparent) 0 5px, transparent 5px 10px);
+  opacity: .55;
+  pointer-events: none;
+}
+
+.hp-max { letter-spacing: .02em; }
+
+/* ---------------- 5. 分段格子血条 ---------------- */
+.bar {
+  background: rgba(0, 0, 0, .5);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .55), 0 1px 0 rgba(255, 255, 255, .04);
+}
+body.theme-light .bar, body.theme-ink .bar { background: rgba(0, 0, 0, .16); }
+
+.bar .fill {
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .28) 0 1.5px, transparent 1.5px var(--seg)) 0 0 / 100% 100%,
+    linear-gradient(90deg, var(--red-dim), var(--red));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 -3px 6px rgba(0, 0, 0, .35);
+}
+.bar.mp .fill {
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .28) 0 1.5px, transparent 1.5px var(--seg)) 0 0 / 100% 100%,
+    linear-gradient(90deg, #3a5a8c, var(--blue));
+}
+.bar.mob .fill {
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .28) 0 1.5px, transparent 1.5px var(--seg)) 0 0 / 100% 100%,
+    linear-gradient(90deg, #b06a2a, var(--orange));
+}
+
+/* ---------------- 6. 战斗面板 ---------------- */
+.combat { border-color: var(--border-strong); }
+
+/* 对手铭牌 */
+.mob {
+  position: relative;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--gold) 8%, transparent), rgba(0, 0, 0, .32));
+  border-color: var(--border-strong);
+  padding: 18px 16px 16px;
+}
+.mob::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 12px; bottom: 12px;
+  width: 3px;
+  background: linear-gradient(180deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.mob-emoji {
+  position: relative;
+  padding: 8px;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--gold) 18%, transparent), transparent 68%);
+}
+body.fx-off .mob-emoji { background: none; }
+.mob-name { letter-spacing: .04em; }
+
+/* 分组标题：两侧延伸线 */
+.combat-group-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold-dim);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+.combat-group-label::before,
+.combat-group-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-strong));
+}
+.combat-group-label::after { background: linear-gradient(90deg, var(--border-strong), transparent); }
+
+/* 技能按钮：切角技能槽 */
+.skill-btn {
+  border: 1px solid transparent;
+  border-radius: 0;
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--gold) 18%, transparent), color-mix(in srgb, var(--gold) 5%, transparent) 55%, color-mix(in srgb, var(--gold) 10%, transparent)) padding-box,
+    linear-gradient(165deg, var(--gold) 70%, var(--border-strong)) border-box;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+  letter-spacing: .05em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .65);
+}
+.skill-btn:hover:not(:disabled) {
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--gold) 30%, transparent), color-mix(in srgb, var(--gold) 10%, transparent) 55%, color-mix(in srgb, var(--gold) 16%, transparent)) padding-box,
+    linear-gradient(165deg, var(--gold-bright), var(--gold)) border-box;
+  box-shadow: none;
+  filter: drop-shadow(0 3px 10px color-mix(in srgb, var(--gold) 38%, transparent));
+}
+/* 飞升转世按钮：最高品质金 */
+.skill-btn.rebirth-btn {
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--gold-bright) 34%, transparent), color-mix(in srgb, var(--gold) 14%, transparent)) padding-box,
+    linear-gradient(165deg, var(--gold-bright), var(--gold-dim)) border-box;
+}
+.skill-btn.rebirth-btn:hover:not(:disabled) {
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--gold-bright) 55%, transparent));
+}
+
+/* Boss / 地图行动按钮：切角 + 边框渐变 */
+.boss-btn, .d-btn, .daily-btn, .workspace-action, .drawer-menu-action, .sc-btn, .kit-btn, .save-grid button {
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 7%, transparent), color-mix(in srgb, var(--gold) 2%, transparent)) padding-box,
+    linear-gradient(180deg, var(--border-strong), var(--border)) border-box;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+}
+.boss-btn:hover:not(:disabled), .d-btn:hover:not(:disabled), .daily-btn:hover,
+.workspace-action:hover, .drawer-menu-action:hover, .sc-btn:hover, .kit-btn:hover,
+.save-grid button:hover {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 16%, transparent), color-mix(in srgb, var(--gold) 4%, transparent)) padding-box,
+    linear-gradient(180deg, var(--gold), var(--border-strong)) border-box;
+  box-shadow: none;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gold) 30%, transparent));
+}
+/* 主行动按钮（.load）：金色主 CTA，压过旧版蓝色 */
+.d-btn.load {
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--gold) 32%, transparent), color-mix(in srgb, var(--gold) 12%, transparent)) padding-box,
+    linear-gradient(165deg, var(--gold-bright), var(--gold-dim)) border-box;
+  color: var(--gold-bright);
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+.d-btn.load:hover:not(:disabled) {
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--gold) 45%, transparent), color-mix(in srgb, var(--gold) 18%, transparent)) padding-box,
+    linear-gradient(165deg, var(--gold-bright), var(--gold)) border-box;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--gold) 45%, transparent));
+}
+body.theme-ink .d-btn.load, body.theme-light .d-btn.load {
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--gold) 24%, transparent), color-mix(in srgb, var(--gold) 8%, transparent)) padding-box,
+    linear-gradient(165deg, var(--gold-dim), var(--border-strong)) border-box;
+  color: #4a3d16;
+}
+/* 挑战 Boss 单独强调 */
+.boss-btn[title*="Boss"], #btnBoss {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--red) 16%, transparent), color-mix(in srgb, var(--red) 4%, transparent)) padding-box,
+    linear-gradient(180deg, var(--red-dim), var(--red)) border-box;
+  color: #ffd9c9;
+  border-color: var(--red-dim);
+}
+#btnBoss:hover:not(:disabled) {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--red) 26%, transparent), color-mix(in srgb, var(--red) 8%, transparent)) padding-box,
+    linear-gradient(180deg, var(--red), var(--red-dim)) border-box;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--red) 42%, transparent));
+}
+
+/* 区域按钮：切角 + 前进指示 */
+.zone-btn {
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 6%, transparent), transparent) padding-box,
+    linear-gradient(180deg, var(--border-strong), var(--border)) border-box;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+}
+.zone-btn:hover:not(:disabled) {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 15%, transparent), color-mix(in srgb, var(--gold) 3%, transparent)) padding-box,
+    linear-gradient(180deg, var(--gold), var(--border-strong)) border-box;
+  border-color: var(--border-strong);
+  box-shadow: none;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gold) 28%, transparent));
+}
+
+/* ---------------- 7. 工作区面板 ---------------- */
+.utility-panel { overflow: hidden; }
+
+/* 按钮文字描边：让金色文字在任何透明背景上保持锐利（移动端小字号可读性） */
+.skill-btn, .boss-btn, .zone-btn, .d-btn, .daily-btn, .sc-btn, .workspace-action, .drawer-menu-action {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+body.theme-light .skill-btn, body.theme-light .boss-btn, body.theme-light .zone-btn,
+body.theme-light .d-btn, body.theme-light .daily-btn, body.theme-light .sc-btn,
+body.theme-light .workspace-action, body.theme-light .drawer-menu-action,
+body.theme-ink .skill-btn, body.theme-ink .boss-btn, body.theme-ink .zone-btn,
+body.theme-ink .d-btn, body.theme-ink .daily-btn, body.theme-ink .sc-btn,
+body.theme-ink .workspace-action, body.theme-ink .drawer-menu-action {
+  text-shadow: 0 1px 1px rgba(255, 255, 255, .35);
+}
+
+.workspace-bar {
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 8%, transparent), transparent);
+}
+.workspace-bar::after {
+  content: '';
+  position: absolute;
+  left: 20px; right: 20px; bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 70%, transparent) 50%, transparent);
+  pointer-events: none;
+}
+
+/* 子页签：分段控制器 */
+.sub-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid var(--border);
+}
+body.theme-light .sub-tabs, body.theme-ink .sub-tabs { background: rgba(0, 0, 0, .07); }
+.sub-tab {
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--txt-dim);
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.sub-tab:hover { color: var(--txt); }
+.sub-tab.active {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 26%, transparent), color-mix(in srgb, var(--gold) 12%, transparent));
+  color: var(--gold-bright);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+/* 装备槽：切角八边槽 */
+.equip-slot {
+  position: relative;
+  border-radius: 0;
+  border-width: 1px;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 6%, transparent), rgba(0, 0, 0, .22)) padding-box;
+  transition: transform .15s, filter .15s;
+}
+.equip-slot:hover { filter: brightness(1.18) drop-shadow(0 0 8px color-mix(in srgb, var(--gold) 30%, transparent)); transform: translateY(-1px); }
+.equip-slot.empty {
+  border-style: dashed;
+  background: rgba(0, 0, 0, .14);
+}
+body.theme-light .equip-slot, body.theme-ink .equip-slot {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, .3)) padding-box;
+}
+.es-slot {
+  color: var(--txt-faint);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* 背包条目 */
+.bag-item {
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 5%, transparent), transparent) padding-box,
+    linear-gradient(180deg, var(--border-strong), var(--border)) border-box;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+}
+.bag-item:hover {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 14%, transparent), color-mix(in srgb, var(--gold) 3%, transparent)) padding-box,
+    linear-gradient(180deg, var(--gold), var(--border-strong)) border-box;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gold) 26%, transparent));
+}
+
+/* 折叠分组标题（无相位/套装） */
+.extra-strip-head {
+  color: var(--gold-dim);
+  letter-spacing: 1px;
+}
+
+/* 日志区：内嵌墨槽 */
+.log-body .event-log {
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .28);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, .35);
+  padding: 8px;
+}
+body.theme-light .log-body .event-log, body.theme-ink .log-body .event-log {
+  background: rgba(0, 0, 0, .05);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, .12);
+}
+.log-search {
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, .35);
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+}
+body.theme-light .log-search, body.theme-ink .log-search { background: rgba(255, 255, 255, .6); }
+
+/* ---------------- 8. 抽屉 / Dock ---------------- */
+.side-drawer {
+  border-color: var(--border-strong);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, .55), inset 3px 0 0 -1px var(--border-strong);
+}
+.side-drawer--right {
+  box-shadow: 10px 0 40px rgba(0, 0, 0, .55), inset -3px 0 0 -1px var(--border-strong);
+}
+.drawer-header {
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 9%, transparent), transparent);
+}
+.drawer-header h2 { letter-spacing: 2px; color: var(--gold-bright); }
+
+.nav-group-title, .map-group-title {
+  color: var(--gold-dim);
+  letter-spacing: 3px;
+  font-size: 11.5px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 抽屉内功能项：激活左侧金条 */
+.game-tab {
+  position: relative;
+  border-radius: 0;
+  border-left: 3px solid transparent;
+}
+.game-tab.active {
+  border-left-color: var(--gold-bright);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 20%, transparent), color-mix(in srgb, var(--gold) 5%, transparent));
+  color: var(--gold-bright);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+/* 移动 Dock：胶囊浮岛 */
+.mobile-dock {
+  border: 1px solid var(--border-strong);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 8%, var(--bg1)), var(--bg2)) padding-box,
+    linear-gradient(180deg, var(--border-strong), var(--border)) border-box;
+  box-shadow: 0 -6px 28px rgba(0, 0, 0, .5);
+}
+.dock-btn { border-radius: 0; }
+.dock-btn.active {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 24%, transparent), color-mix(in srgb, var(--gold) 8%, transparent));
+  color: var(--gold-bright);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+/* ---------------- 9. 遮罩场景（登录 / 死亡 / 觉醒 / 飞升） ---------------- */
+.death-box, .rebirth-box {
+  position: relative;
+  border-color: var(--border-strong);
+  overflow: hidden;
+}
+.death-box::before, .rebirth-box::before {
+  content: '';
+  position: absolute;
+  left: 26px; right: 26px; top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold) 30%, color-mix(in srgb, var(--gold-bright) 80%, transparent) 50%, var(--gold) 70%, transparent);
+  opacity: .8;
+  pointer-events: none;
+}
+.auth-box h2, .death-box h2, .rebirth-box h2 { letter-spacing: 2px; }
+
+/* 登录页标题：金色渐变字（死亡页保持红字语义） */
+.auth-box h2 {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold) 60%, var(--gold-dim));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: none;
+  font-size: 22px;
+  line-height: 1.5;
+}
+.auth-input {
+  border-radius: 0;
+  background: rgba(0, 0, 0, .4);
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+}
+body.theme-light .auth-input, body.theme-ink .auth-input { background: rgba(255, 255, 255, .72); }
+.auth-tab {
+  border-radius: 0;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+}
+
+/* 存档槽卡 */
+.slot-choice {
+  border-radius: 0;
+  clip-path: polygon(var(--cut-m) 0, calc(100% - var(--cut-m)) 0, 100% var(--cut-m), 100% 100%, calc(100% - var(--cut-m)) 100%, var(--cut-m) 100%, 0 calc(100% - var(--cut-m)), 0 var(--cut-m));
+}
+
+/* ---------------- 10. 杂项 ---------------- */
+/* 面板小标题统一排版 */
+.panel h2, .save-box h2, .potion-box h2, .passive-box h2 {
+  letter-spacing: 3px;
+}
+
+/* 套装/无相位条目 */
+.sets-list, .extra-strip { font-variant-numeric: tabular-nums; }
+
+/* toast 切角 */
+.toast {
+  border-radius: 0;
+  clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s));
+}
+
+/* 公告条 */
+.bulletin-bar {
+  border-color: var(--border-strong);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 14%, transparent), color-mix(in srgb, var(--gold) 4%, transparent));
+}
+
+/* 签到按钮：礼物色微调 */
+.daily-btn[title*="签到"], #btnDaily {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--green) 15%, transparent), color-mix(in srgb, var(--green) 4%, transparent)) padding-box,
+    linear-gradient(180deg, color-mix(in srgb, var(--green) 60%, transparent), var(--border)) border-box;
+}
+
+/* 网络指示灯呼吸 */
+.netok {
+  animation: v3-net-breathe 2.4s ease-in-out infinite;
+}
+@keyframes v3-net-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .45; }
+}
+
+/* ---------------- 10.5 组件精修（R2） ---------------- */
+/* buff 栏：切角增益/减益芯片 */
+.buff-chip {
+  border-radius: 0;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  font-variant-numeric: tabular-nums;
+}
+.buff-chip.good {
+  border-color: color-mix(in srgb, var(--green) 45%, transparent);
+  background: color-mix(in srgb, var(--green) 10%, transparent);
+}
+.buff-chip.bad {
+  border-color: color-mix(in srgb, var(--red) 50%, transparent);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+}
+
+/* 技能按钮禁用态（蓝耗不足/冷却）：灰化下沉，与可用态明确区分 */
+.skill-btn:disabled {
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, .03), rgba(0, 0, 0, .18)) padding-box,
+    linear-gradient(165deg, var(--border), transparent) border-box;
+  color: var(--txt-faint);
+  text-shadow: none;
+}
+body.theme-light .skill-btn:disabled, body.theme-ink .skill-btn:disabled {
+  background: rgba(0, 0, 0, .04) padding-box, linear-gradient(165deg, var(--border), transparent) border-box;
+}
+
+/* 公告条内条目：胶囊化 */
+.bb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  margin-right: 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 顶栏 chips 文字描边（小字号锐度） */
+.dps-chip { text-shadow: 0 1px 2px rgba(0, 0, 0, .55); }
+body.theme-light .dps-chip, body.theme-ink .dps-chip { text-shadow: none; }
+
+/* 死亡页次按钮（重开档）：低调但保持切角语言一致 */
+.d-btn.new { clip-path: polygon(var(--cut-s) 0, 100% 0, 100% calc(100% - var(--cut-s)), calc(100% - var(--cut-s)) 100%, 0 100%, 0 var(--cut-s)); }
+
+/* ---------------- 11. 偏好豁免 ---------------- */
+/* 静态模式：停用 v3 新增动画与过渡（motion-off 由全局规则禁过渡，这里兜底动画） */
+body.motion-off .netok { animation: none; }
+body.motion-off .panel::after,
+body.motion-off .topbar::after,
+body.motion-off .combat-group-label::before,
+body.motion-off .combat-group-label::after,
+body.motion-off .hp-line::after { transition: none; }
+
+/* 低特效：关闭光晕与呼吸 */
+body.fx-off .skill-btn:hover:not(:disabled),
+body.fx-off .boss-btn:hover:not(:disabled),
+body.fx-off .d-btn:hover:not(:disabled),
+body.fx-off .daily-btn:hover,
+body.fx-off .workspace-action:hover,
+body.fx-off .drawer-menu-action:hover,
+body.fx-off .sc-btn:hover,
+body.fx-off .kit-btn:hover,
+body.fx-off .save-grid button:hover,
+body.fx-off .zone-btn:hover:not(:disabled),
+body.fx-off .bag-item:hover,
+body.fx-off .equip-slot:hover,
+body.fx-off .char-badge:hover,
+body.fx-off .shell-action:hover {
+  filter: none;
+}
+body.fx-off .netok { animation: none; }
+
+/* 系统级减少动态 */
+@media (prefers-reduced-motion: reduce) {
+  .netok { animation: none; }
+  .panel::after, .topbar::after { transition: none; }
+}
+
+/* 高对比强制模式：还原纯色边框 */
+@media (forced-colors: active) {
+  .skill-btn, .boss-btn, .d-btn, .daily-btn, .zone-btn, .bag-item,
+  .equip-slot, .dps-chip, .shell-action, .sub-tab, .auth-input, .auth-tab {
+    clip-path: none;
+    border-radius: 6px;
+  }
+  .panel::after, .topbar::after, .hp-line::after { display: none; }
+}

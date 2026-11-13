@@ -2,16 +2,18 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Gongpu</title>
 <meta name="description" content="反等级制大数放置网游：每次普攻永久 +1 生命上限，攻速无上限，觉醒天赋、转生赋能、死了就重开。">
 <meta name="theme-color" content="#14100c">
 <meta property="og:title" content="普攻永久增加生命上限">
 <meta property="og:description" content="一拳一点命 · 万世不修仙 · 死了就重开">
 <meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314100c'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle'%3E%F0%9F%91%8A%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/style.css?v=290">
 <link rel="stylesheet" href="css/v2.css?v=290">
 <link rel="stylesheet" href="css/drawer.css?v=290">
+<link rel="stylesheet" href="css/v3.css?v=290">
 </head>
 <body>
 
@@ -24,10 +26,12 @@
       <button class="auth-tab active" data-mode="login">登录</button>
       <button class="auth-tab" data-mode="register">注册</button>
     </div>
-    <input id="authUser" class="auth-input" placeholder="用户名（2~16 位）" maxlength="16" autocomplete="username">
-    <input id="authPass" class="auth-input" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password">
-    <div id="authErr" class="auth-err"></div>
-    <button id="authSubmit" class="d-btn load auth-submit">进入江湖</button>
+    <form id="authForm" autocomplete="on">
+      <input id="authUser" class="auth-input" placeholder="用户名（2~16 位）" maxlength="16" autocomplete="username">
+      <input id="authPass" class="auth-input" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password">
+      <div id="authErr" class="auth-err"></div>
+      <button id="authSubmit" type="submit" class="d-btn load auth-submit">进入江湖</button>
+    </form>
   </div>
 </div>
 
@@ -536,12 +540,12 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<script src="js/vendor/break_infinity.min.js"></script>
-<script src="js/audio.js?v=290"></script>
-<script src="js/api.js?v=290"></script>
-<script src="js/achievements.js?v=290"></script>
-<script src="js/tutorial.js?v=290"></script>
-<script src="js/drawer.js?v=290"></script>
-<script src="js/app.js?v=290"></script>
+<script defer src="js/vendor/break_infinity.min.js"></script>
+<script defer src="js/audio.js?v=290"></script>
+<script defer src="js/api.js?v=290"></script>
+<script defer src="js/achievements.js?v=290"></script>
+<script defer src="js/tutorial.js?v=290"></script>
+<script defer src="js/drawer.js?v=290"></script>
+<script defer src="js/app.js?v=290"></script>
 </body>
 </html>

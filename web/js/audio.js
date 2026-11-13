@@ -87,7 +87,8 @@
   }
   var GESTURES = ['pointerdown', 'touchstart', 'keydown'];
   for (var gi = 0; gi < GESTURES.length; gi++) {
-    document.addEventListener(GESTURES[gi], armOnce, true);
+    // R3：touchstart 声明 passive，避免首交互前的滚动被非被动监听阻塞
+    document.addEventListener(GESTURES[gi], armOnce, { capture: true, passive: true });
   }
 
   // ---------------- 合成器原语 ----------------

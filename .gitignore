@@ -32,3 +32,16 @@ commit-msg-*.txt
 .impeccable/edge-profile/
 .impeccable/edge-ui-profile/
 qa_visual/
+
+# ---- 工具与工作产物(不入库) ----
+.workbuddy/
+.playwright-cli/
+.impeccable/
+*.genie
+r3-main.png
+login*.png
+main*.png
+drawer*.png
+mobile*.png
+theme-*.png
+skills*.png

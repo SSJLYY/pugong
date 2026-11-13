@@ -172,9 +172,13 @@
     setTimeout(function () { $('loginPass').focus(); }, 50);
   }
 
+  var loginBusy = false;
   async function doLogin() {
+    // 防重入：Enter/表单提交/点击三路并发只放行一路（与主站 doAuth 同款守卫）
+    if (loginBusy) return;
     var pw = $('loginPass').value;
     if (!pw || !pw.trim()) { $('loginErr').textContent = '请输入管理密码'; return; }
+    loginBusy = true;
     $('loginBtn').disabled = true;
     $('loginErr').textContent = '';
     try {
@@ -190,6 +194,7 @@
       // 403 密码错误：后端错误体 {ok:false,message}
       $('loginErr').textContent = e.message || '登录失败';
     }
+    loginBusy = false;
     $('loginBtn').disabled = false;
   }
 
@@ -1042,6 +1047,9 @@
   function bind() {
     // 登录
     $('loginBtn').addEventListener('click', doLogin);
+    // 表单化登录（R3）：原生 Enter 提交 + 密码管理器语义，内部防重入
+    var loginForm = $('loginForm');
+    if (loginForm) loginForm.addEventListener('submit', function (e) { e.preventDefault(); doLogin(); });
     $('loginPass').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { doLogin(); }
     });

@@ -149,6 +149,8 @@ public final class GameEngine {
         // —— 持续伤害与回复 ——
         if (!s.dead) {
             dotTick(s, effective);
+        }
+        if (!s.dead) {
             regenTick(s, effective);
             autoPotion(s);
             autoBuffTick(s);
@@ -1456,6 +1458,10 @@ public final class GameEngine {
     private static void tickBuff(PlayerState s, double seconds) {
         boolean eternal = s.eternal();
         for (String k : new java.util.ArrayList<>(s.buffs.keySet())) {
+            // DoT 在帧尾按实际生效时长结算伤害并计时，不能提前扣时或清除。
+            if ("poison".equals(k) || "burn_dot".equals(k)) {
+                continue;
+            }
             if (eternal && GameConst.ETERNAL_BUFFS.contains(k)) {
                 continue;
             }

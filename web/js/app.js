@@ -265,8 +265,49 @@
     lastMobId: null,
     lastMobHp: null,
     lastMaxHP: null,
-    lastWriteAt: 0
+    lastWriteAt: 0,
+    generation: 0
   };
+
+  function pageContext() {
+    return { generation: S.generation, userId: API.state.user && API.state.user.id,
+      token: API.state.token, slot: API.state.slot };
+  }
+
+  function isCurrentPage(ctx) {
+    return ctx.generation === S.generation && ctx.slot === API.state.slot &&
+      ctx.userId === (API.state.user && API.state.user.id) &&
+      (ctx.userId != null ? !!ctx.token === !!API.state.token : ctx.token === API.state.token);
+  }
+
+  function requireCurrentPage(ctx) {
+    if (!isCurrentPage(ctx)) {
+      const error = new Error('页面已切换');
+      error.code = 'PAGE_CHANGED';
+      throw error;
+    }
+  }
+
+  function resetPage() {
+    S.generation++;
+    S._writeChain = Promise.resolve();
+    stopLoop();
+    S.talentRitual = null;
+    S.rebirthRitual = null;
+    S.rebirthShown = false;
+    const rebirthMask = $('rebirthMask');
+    if (rebirthMask) rebirthMask.style.display = 'none';
+    const rebirthChoices = $('rebirthChoices');
+    if (rebirthChoices) rebirthChoices.innerHTML = '';
+    if (S.ascendFx) { S.ascendFx.remove(); S.ascendFx = null; }
+    const talentMask = $('talentMask');
+    if (talentMask) talentMask.style.display = 'none';
+    const talentChoices = $('talentChoices');
+    if (talentChoices) talentChoices.innerHTML = '';
+    S.busy = false;
+    S.view = null;
+    S._nextPollAt = 0;
+  }
 
   const ZONE_REQ_TEXT = {
     village: '', plain: '≥500血', forest: '≥3千血/5防', mine: '≥1.2万血/攻60',
@@ -313,6 +354,10 @@
     }, 1600);
   }
 
+  function isNetworkFailure(error) {
+    return error.code === 'ERR_NET' || error.code === 'ERR_TIMEOUT';
+  }
+
   function setNet(ok) {
     // 第十五批 R6 断线三态：连败计数（成功清零），1~2 次黄态「连接不稳定」，≥3 次红态「重连中」
     const el = $('netState');
@@ -337,44 +382,38 @@
   }
 
   async function call(fn, okMsg, _retry) {
-    // 1) 等当前轮询让锁:轮询每秒持锁约百毫秒,玩家点击撞进窗口就吃 409"操作太快"
+    const ctx = pageContext();
+    // 等当前轮询让锁，各次操作保留在串行队列中。
     const t0 = Date.now();
     while (S.busy && Date.now() - t0 < 1500) {
       await new Promise(r => setTimeout(r, 60));
-    }
-    // 2) 双击同一动作(<400ms)并入进行中的写请求;更晚的不同动作排队串行执行
-    if (S._writingP && Date.now() - (S._writingStart || 0) < 400) {
-      return S._writingP;
+      requireCurrentPage(ctx);
     }
     S._writeChain = (S._writeChain || Promise.resolve()).catch(() => { /* 前序失败不阻断后续 */ });
-    const mine = S._writeChain.then(() => execWrite(fn, okMsg, _retry));
+    const mine = S._writeChain.then(() => execWrite(fn, okMsg, _retry, ctx));
     S._writeChain = mine;
     return mine;
   }
 
-  async function execWrite(fn, okMsg, _retry) {
+  async function execWrite(fn, okMsg, _retry, ctx) {
+    requireCurrentPage(ctx);
     S.lastWriteAt = Date.now();   // 标记写请求发起时刻,晚于此的过期轮询帧会被丢弃
-    S._writingStart = Date.now();
-    S._writingP = (async () => {
-      const r = await fn();
-      setNet(true);
-      return r;
-    })();
     try {
-      const r = await S._writingP;
+      const r = await fn();
+      requireCurrentPage(ctx);
+      setNet(true);
       if (okMsg) toast(okMsg, 'ok');
       return r;
     } catch (e) {
+      requireCurrentPage(ctx);
       // 争锁 409(双开窗口/极端时序):静默重试一次,不打扰玩家
       if (!_retry && e.code === 'CONFLICT') {
         await new Promise(r => setTimeout(r, 400));
-        return execWrite(fn, okMsg, true);
+        return execWrite(fn, okMsg, true, ctx);
       }
-      setNet(e.code !== 'NETWORK');
+      setNet(!isNetworkFailure(e));
       toast(e.message || '操作失败', 'err');
       throw e;
-    } finally {
-      S._writingP = null;
     }
   }
 
@@ -429,6 +468,7 @@
     });
 
     $('btnLogout').addEventListener('click', () => {
+      resetPage();
       API.clearAuth();
       API.setSlot(0);
       S.view = null;
@@ -465,7 +505,17 @@
 
   // ================= 存档槽 =================
   async function showSlots() {
-    const list = await call(() => API.listSaves());
+    resetPage();
+    API.setSlot(0);
+    const ctx = pageContext();
+    let list;
+    try {
+      list = await call(() => API.listSaves());
+    } catch (e) {
+      if (!isCurrentPage(ctx)) return;
+      throw e;
+    }
+    if (!isCurrentPage(ctx)) return;
     $('whoami').textContent = API.state.user ? ('当前账号：' + API.state.user.username) : '';
     const box = $('slotChoices');
     box.innerHTML = '';
@@ -543,34 +593,45 @@
 
   // ================= 进入游戏 =================
   async function enterGame(slot) {
+    resetPage();
     API.setSlot(slot);
-    // 重置上一档的会话状态：药剂页签名/转生弹窗/离线提示,防止串档残留
-    renderPotions._sig = null;
-    S.rebirthShown = false;
-    S.offlineShown = false;
-    S.wasDead = false;
-    $('slotMask').style.display = 'none';
-    $('gameRoot').classList.add('on');
-    if (!S.meta) {
-      S.meta = await call(() => API.meta());
-      renderZoneButtons();
-      renderSkillButtons();
-    }
-    S._metaAt = Date.now();
-    const view = await call(() => API.loadSave(slot));
-    applyView(view);
-    if (view.dead) {
-      renderDeath(view);
-    } else if (!view.talent) {
-      showTalentRitual();
-    } else if (view.clearReady) {
-      showRebirth(view);
-    }
-    startLoop();
-    // 新手引导：仅当天赋已觉醒（无待办仪式）时才在首进触发；
-    // 未觉醒时由 finishTalent（仪式完成）后再启动，避免引导遮罩挡住觉醒仪式
-    if (window.__tutorial && view.talent) {
-      setTimeout(() => window.__tutorial.start(), 1200);
+    const ctx = pageContext();
+    try {
+      // 重置上一档的会话状态：药剂页签名/转生弹窗/离线提示,防止串档残留
+      renderPotions._sig = null;
+      S.rebirthShown = false;
+      S.offlineShown = false;
+      S.wasDead = false;
+      $('slotMask').style.display = 'none';
+      $('gameRoot').classList.add('on');
+      if (!S.meta) {
+        const meta = await call(() => API.meta());
+        if (!isCurrentPage(ctx)) return;
+        S.meta = meta;
+        renderZoneButtons();
+        renderSkillButtons();
+      }
+      S._metaAt = Date.now();
+      const view = await call(() => API.loadSave(slot));
+      if (!isCurrentPage(ctx)) return;
+      applyView(view);
+      if (view.dead) {
+        renderDeath(view);
+      } else if (!view.talent) {
+        await showTalentRitual();
+        return;
+      } else if (view.clearReady) {
+        showRebirth(view);
+      }
+      startLoop();
+      // 新手引导：仅当天赋已觉醒（无待办仪式）时才在首进触发；
+      // 未觉醒时由 finishTalent（仪式完成）后再启动，避免引导遮罩挡住觉醒仪式
+      if (window.__tutorial && view.talent) {
+        setTimeout(() => { if (isCurrentPage(ctx)) window.__tutorial.start(); }, 1200);
+      }
+    } catch (e) {
+      if (!isCurrentPage(ctx)) return;
+      throw e;
     }
   }
 
@@ -588,6 +649,7 @@
   async function tick() {
     if (S.busy || !API.state.slot) return;
     if (!S.auto) return;
+    const ctx = pageContext();
     // 页面隐藏(后台标签/锁屏)时 5 次才发 1 次轮询:移动端省电省流量,服务端少一半空转。
     // 第八批加固：隐藏判定提到最前——旧顺序下隐藏标签每 10 分钟仍会全量重拉元数据，
     // 后台挂机的省电目标被旁路请求抵消；现在被跳过的帧连元数据重拉一并跳过。
@@ -599,6 +661,7 @@
     if (Date.now() - (S._metaAt || 0) > 600000) {
       S._metaAt = Date.now();
       API.meta().then(m => {
+        if (!isCurrentPage(ctx)) return;
         S.meta = m;
         renderZoneButtons();
         renderSkillButtons();
@@ -623,7 +686,8 @@
     S.busy = true;
     try {
       const t0 = Date.now();
-      const view = await API.gameState(API.state.slot);
+      const view = await API.gameState(ctx.slot);
+      if (!isCurrentPage(ctx)) return;
       // 往返耗时指数滑动平均（弱网自适应降频的输入）
       const rtt = Date.now() - t0;
       S._rttAvg = S._rttAvg ? S._rttAvg * 0.7 + rtt * 0.3 : rtt;
@@ -659,11 +723,12 @@
         showRebirth(view);
       }
     } catch (e) {
-      setNet(e.code !== 'NETWORK');
+      if (!isCurrentPage(ctx)) return;
+      setNet(!isNetworkFailure(e));
       S._failStreak = (S._failStreak || 0) + 1;
       S._nextPollAt = Date.now() + Math.min(30000, 1000 * Math.pow(2, S._failStreak));
     } finally {
-      S.busy = false;
+      if (isCurrentPage(ctx)) S.busy = false;
     }
   }
 
@@ -2938,15 +3003,21 @@
     if (dbh) dbh.textContent = fmt(view.stats.bestHit || 0);
     $('deathSave').textContent = '第 ' + view.gen + ' 世 · 死亡 ' + view.stats.deaths + ' 次';
 
+    const reviveCtx = pageContext();
+    const reviveSlot = reviveCtx.slot;
+    const reviveButton = $('btnIncense');
+    let reviving = false;
     // 香火余额（决定第一个按钮可用性）
     API.socialMe().then(card => {
+      if (!isCurrentPage(reviveCtx)) return;
       const inc = card.incense || 0;
       $('deathIncenseInfo').textContent =
         '🕯️ 你的香火：' + inc + ' 炷' + (inc > 0 ? '（好友祭奠你的墓碑所得）' : '（还没有人祭奠过你）');
       const btn = $('btnIncense');
-      btn.disabled = inc <= 0;
+      btn.disabled = reviving || inc <= 0;
       btn.title = inc > 0 ? '花 1 炷香火，满血满蓝原地复活，面板装备全保留' : '香火不足：去江湖页祭奠别人，别人也会来祭奠你';
     }).catch(() => {
+      if (!isCurrentPage(reviveCtx)) return;
       $('deathIncenseInfo').textContent = '';
       $('btnIncense').disabled = true;
     });
@@ -2996,19 +3067,32 @@
     sfx('death');
     $('deathMask').style.display = 'flex';
 
-    $('btnIncense').onclick = async () => {
+    reviveButton.onclick = async () => {
+      if (!isCurrentPage(reviveCtx) || reviving || reviveButton.disabled) return;
+      reviving = true;
+      reviveButton.disabled = true;
+      let revived = false;
       try {
         sfx('levelup');
-        await API.incenseRevive(API.state.slot);
+        await call(() => API.incenseRevive(reviveSlot), null, true);
+        if (!isCurrentPage(reviveCtx)) return;
+        revived = true;
         toast('🕯️ 香火燃起，你原地满血复活！', 'ok');
         $('deathMask').style.display = 'none';
         S.wasDead = false;
         // 缓存里的死亡态已被复活接口改写，直接拉最新状态
-        const v = await call(() => API.gameState(API.state.slot));
+        const v = await call(() => API.gameState(reviveSlot));
+        if (!isCurrentPage(reviveCtx)) return;
         applyView(v);
         startLoop();
       } catch (e) {
-        toast(e.message, 'err');
+        if (!isCurrentPage(reviveCtx)) return;
+        if (revived) startLoop();
+      } finally {
+        if (isCurrentPage(reviveCtx)) {
+          reviving = false;
+          reviveButton.disabled = false;
+        }
       }
     };
     $('btnLoadLast').onclick = async () => {
@@ -3033,16 +3117,23 @@
   }
 
   // ================= 天赋觉醒 =================
+  function isCurrentTalent(ctx) {
+    return S.talentRitual === ctx && isCurrentPage(ctx);
+  }
+
   async function showTalentRitual() {
+    const ctx = pageContext();
+    S.talentRitual = ctx;
     stopLoop();
     let data;
     try {
-      data = await API.talentView(API.state.slot);
+      data = await API.talentView(ctx.slot);
     } catch (e) {
-      // 接口异常不挡游戏
-      startLoop();
+      // 接口异常不挡游戏，旧页面不得恢复轮询。
+      if (isCurrentTalent(ctx)) startLoop();
       return;
     }
+    if (!isCurrentTalent(ctx)) return;
     if (data.drawn) {
       startLoop();
       return;
@@ -3054,10 +3145,33 @@
     drawBtn.className = 'talent-btn gold';
     drawBtn.style.cssText = 'display:block;margin:0 auto 14px;padding:12px 40px;font-size:16px;';
     drawBtn.innerHTML = '🔮 触摸命运水晶';
+    let drawing = false;
     drawBtn.addEventListener('click', async () => {
+      if (!isCurrentTalent(ctx) || drawing || drawBtn.disabled) return;
+      drawing = true;
       drawBtn.disabled = true;
-      const r = await call(() => API.drawTalent(API.state.slot, null), '觉醒完成');
-      showTalentResult(r.result || r);
+      try {
+        const r = await call(() => API.drawTalent(ctx.slot, null), '觉醒完成');
+        if (!isCurrentTalent(ctx)) return;
+        showTalentResult(r.result || r, ctx);
+      } catch (e) {
+        if (!isCurrentTalent(ctx)) return;
+        try {
+          const latest = await API.talentView(ctx.slot);
+          if (!isCurrentTalent(ctx)) return;
+          if (latest.drawn) {
+            const talent = (latest.pool || []).find(t => t.id === latest.talent);
+            showTalentResult({ ...talent, talent: latest.talent }, ctx);
+            return;
+          }
+        } catch (reconcileError) {
+          if (!isCurrentTalent(ctx)) return;
+          toast('暂时无法确认觉醒结果，请重试', 'err');
+        }
+        if (isCurrentTalent(ctx)) drawBtn.disabled = false;
+      } finally {
+        drawing = false;
+      }
     });
     box.appendChild(drawBtn);
     // 奖池字幕：所有天赋从左到右滚动展示（跑马灯，顶级机缘带概率金标）
@@ -3081,9 +3195,10 @@
   }
 
   // 抽卡结果仪式：顶级机缘(eternal/baglord)= 金色暴雨 + 天选剧本（万中无一仪式感）
-  function showTalentResult(result) {
+  function showTalentResult(result, ctx) {
+    if (!isCurrentTalent(ctx)) return;
     if (!result || !result.talent) {
-      finishTalent(result);
+      finishTalent(result, ctx);
       return;
     }
     const isEternal = result.talent === 'eternal';
@@ -3151,13 +3266,15 @@
       box.appendChild(card);
     }
     $('btnAwakeGo').addEventListener('click', () => {
-      // 清金雨节点
-      document.querySelectorAll('.grain').forEach(el => el.remove());
-      finishTalent(result);
+      if (!isCurrentTalent(ctx)) return;
+      finishTalent(result, ctx);
     });
   }
 
-  function finishTalent(result) {
+  function finishTalent(result, ctx) {
+    if (!isCurrentTalent(ctx)) return;
+    S.talentRitual = null;
+    $('talentChoices').innerHTML = '';
     $('talentMask').style.display = 'none';
     if (result && result.emoji && result.name) {
       toast(result.emoji + ' 觉醒天赋：' + result.name + '（' + result.desc + '）', 'ok');
@@ -3166,14 +3283,16 @@
     startLoop();
     // 觉醒仪式完成后启动新手引导（首次），避免与仪式冲突
     if (window.__tutorial) {
-      setTimeout(() => window.__tutorial.start(), 1200);
+      setTimeout(() => { if (isCurrentPage(ctx)) window.__tutorial.start(); }, 1200);
     }
   }
 
   // ================= 转生 =================
   // 转生全屏特效：满屏 +1 汇成光柱（DESIGN.md §12.1）
   function playAscendFx(done) {
+    if (S.ascendFx) S.ascendFx.remove();
     const fx = document.createElement('div');
+    S.ascendFx = fx;
     fx.id = 'ascendFx';
     fx.innerHTML = '<div class="ascend-beam"></div>';
     document.body.appendChild(fx);
@@ -3193,23 +3312,42 @@
     line.className = 'ascend-line';
     line.textContent = '⚡ 拳至一载，肉身成圣 ⚡';
     fx.appendChild(line);
-    setTimeout(() => { fx.remove(); if (done) done(); }, 1700);
+    setTimeout(() => {
+      fx.remove();
+      if (S.ascendFx !== fx) return;
+      S.ascendFx = null;
+      if (done) done();
+    }, 1700);
+  }
+
+  function isCurrentRebirth(ctx) {
+    return S.rebirthRitual === ctx && isCurrentPage(ctx);
   }
 
   async function showRebirth(view) {
+    const ctx = pageContext();
+    S.rebirthRitual = ctx;
     S.rebirthShown = true;
+    $('rebirthMask').style.display = 'none';
+    $('rebirthChoices').innerHTML = '';
     stopLoop();
     try {
       // 先播全屏光柱特效，再出赋能选择
       playAscendFx(null);
       await new Promise(r => setTimeout(r, 1700));
-      const data = await call(() => API.blessOptions(API.state.slot));
+      if (!isCurrentRebirth(ctx)) return;
+      const data = await call(() => {
+        if (!isCurrentRebirth(ctx)) throw Object.assign(new Error('仪式已结束'), { code: 'PAGE_CHANGED' });
+        return API.blessOptions(ctx.slot);
+      });
+      if (!isCurrentRebirth(ctx)) return;
       const all = view.allBlessed;
       $('rebirthTip').textContent = all
         ? '赋能已集齐全部 13 条属性。进入强化纪元：自选一条已有赋能，让步长永久提升。'
         : '拳至一载，肉身成圣。选择下一世普攻永久成长的新属性：';
       const box = $('rebirthChoices');
       box.innerHTML = '';
+      let selecting = false;
       data.options.forEach(o => {
         const d = document.createElement('button');
         d.className = 'rebirth-choice' + (o.disabled ? ' disabled' : '');
@@ -3218,18 +3356,37 @@
           <span class="rc-name">${o.name}</span>
           <span class="rc-step">+${trimNum(o.step)}/拳${o.lv ? ' · 强化 ' + o.lv : ''}</span>`;
         d.addEventListener('click', async () => {
+          if (!isCurrentRebirth(ctx) || selecting || d.disabled) return;
           if (!confirm('本世飞升，选择「' + o.name + '」带往来生？')) return;
-          const r = await call(() => API.rebirth(API.state.slot, o.key), '🌟 第 ' + (data.gen + 1) + ' 世，开始');
-          $('rebirthMask').style.display = 'none';
-          S.rebirthShown = false;
-          applyView(r);
-          startLoop();
+          if (!isCurrentRebirth(ctx)) return;
+          selecting = true;
+          d.disabled = true;
+          try {
+            const r = await call(() => {
+              if (!isCurrentRebirth(ctx)) throw Object.assign(new Error('仪式已结束'), { code: 'PAGE_CHANGED' });
+              return API.rebirth(ctx.slot, o.key);
+            });
+            if (!isCurrentRebirth(ctx)) return;
+            toast('第 ' + (data.gen + 1) + ' 世，开始', 'ok');
+            $('rebirthMask').style.display = 'none';
+            S.rebirthRitual = null;
+            S.rebirthShown = false;
+            applyView(r);
+            startLoop();
+          } catch (e) {
+            if (!isCurrentRebirth(ctx)) return;
+            // 保留赋能选择，允许失败后重试。
+          } finally {
+            if (isCurrentRebirth(ctx)) { selecting = false; d.disabled = o.disabled; }
+          }
         });
         box.appendChild(d);
       });
       $('rebirthMask').style.display = 'flex';
     } catch (e) {
+      if (!isCurrentRebirth(ctx)) return;
       // 赋能选项拉取失败:复位标记并恢复轮询,否则仪式卡死、轮询停摆
+      S.rebirthRitual = null;
       S.rebirthShown = false;
       startLoop();
     }
@@ -3797,8 +3954,10 @@
     const box = $('tabCraft');
     const listBox = $('craftList');
     if (!box || !API.state.slot) return;
+    const ctx = pageContext();
     let data;
-    try { data = await API.craftBoard(API.state.slot); } catch (e) { return; }
+    try { data = await API.craftBoard(ctx.slot); } catch (e) { return; }
+    if (!isCurrentPage(ctx)) return;
     const rows = (data.crafts || []).map(c => {
       const mats = (c.mats || []).map(m =>
         '<span class="mat-chip' + (m.have >= m.need ? '' : ' lack') + '" title="' + (m.zone ? '来源区域：' + esc(m.zone) + '（打怪/分解该区装备）' : '') + '">' + m.emoji + ' ' + esc(m.name) + ' ' + m.have + '/' + m.need + (m.zone ? ' <i class="mat-src">@' + esc(m.zone) + '</i>' : '') + '</span>').join(' ');
@@ -3944,25 +4103,41 @@
       } catch (e) { toast(e.message, 'err'); b.disabled = false; }
     }));
     const exBtn = box.querySelector('#btnMatExchange');
+    let exchanging = false;
     if (exBtn) exBtn.addEventListener('click', async () => {
+      if (!isCurrentPage(ctx) || exchanging || exBtn.disabled) return;
       const from = box.querySelector('#matFrom').value;
       const to = box.querySelector('#matTo').value;
       if (from === to) { toast('源材料与目标材料不能相同', 'err'); return; }
+      exchanging = true;
+      exBtn.disabled = true;
       try {
-        const r = await API.matExchange(API.state.slot, from, to);
+        const r = await call(() => API.matExchange(ctx.slot, from, to), null, true);
+        if (!isCurrentPage(ctx)) return;
         const ex = (r && r.result) || {};
-        toast('🔄 兑换成功（余 ' + ex.fromHave + ' → 目标现有 ' + ex.toHave + '）', 'ok');
-        loadCrafts();
-      } catch (e) { toast(e.message, 'err'); }
+        toast('兑换成功（余 ' + ex.fromHave + ' → 目标现有 ' + ex.toHave + '）', 'ok');
+        if (r) applyView(r);
+        await loadCrafts();
+        if (!isCurrentPage(ctx)) return;
+      } catch (e) {
+        if (!isCurrentPage(ctx)) return;
+        // call 已提示失败，恢复当前页面的兑换入口。
+      } finally {
+        if (isCurrentPage(ctx)) { exchanging = false; exBtn.disabled = false; }
+      }
     });
     box.querySelectorAll('[data-craft]').forEach(b => b.addEventListener('click', async () => {
+      if (!isCurrentPage(ctx) || b.disabled) return;
       b.disabled = true;
       try {
-        const r = await API.craftDo(API.state.slot, b.dataset.craft);
-        toast('⚒️ 锻造成功：' + (r.itemName || '装备') +
-          (r.quality != null ? '（品质 ' + r.quality + '）已入背包' : ' 已放入药剂栏'), 'ok');
+        const r = await API.craftDo(ctx.slot, b.dataset.craft);
+        if (!isCurrentPage(ctx)) return;
+        const res = (r && r.result) || {};
+        toast('锻造成功：' + (res.itemName || '装备') +
+          (res.quality != null ? '（品质 ' + res.quality + '）已入背包' : ' 已放入药剂栏'), 'ok');
         loadCrafts();
       } catch (e) {
+        if (!isCurrentPage(ctx)) return;
         toast(e.message, 'err');
         b.disabled = false;
       }
@@ -4020,9 +4195,11 @@
   }
 
   async function loadWorldGrave() {
+    const ctx = pageContext();
     const box = $('worldGraveBox');
     try {
       const r = await API.worldGraveyard();
+      if (!isCurrentPage(ctx)) return;
       const rows = r.rows || [];
       if (!rows.length) {
         box.innerHTML = '<p class="empty-hint">全服还没有碑。第一个立碑的留名千古。</p>';
@@ -4038,17 +4215,24 @@
       }).join('');
       box.querySelectorAll('.tribute-btn').forEach(b => {
         b.addEventListener('click', async () => {
+          if (!isCurrentPage(ctx) || b.disabled) return;
+          if (!ctx.slot) { toast('先选择一个存档槽再祭奠', 'err'); return; }
+          b.disabled = true;
           try {
-            if (!API.state.slot) { toast('先选择一个存档槽再祭奠', 'err'); return; }
-            const r = await API.tribute(Number(b.dataset.grave), API.state.slot);
+            const r = await call(() => API.tribute(Number(b.dataset.grave), ctx.slot), null, true);
+            if (!isCurrentPage(ctx)) return;
             toast('🕯️ 已为 ' + r.owner + ' 点上一炷香火' + (r.firstFree ? '（今日首祭免费）' : ''), 'ok');
-            loadWorldGrave();
+            await loadWorldGrave();
+            if (!isCurrentPage(ctx)) return;
           } catch (e) {
-            toast(e.message, 'err');
+            if (!isCurrentPage(ctx)) return;
+          } finally {
+            if (isCurrentPage(ctx)) b.disabled = false;
           }
         });
       });
     } catch (e) {
+      if (!isCurrentPage(ctx)) return;
       box.innerHTML = '<p class="empty-hint">世界墓园加载失败</p>';
     }
   }
@@ -4247,7 +4431,8 @@
     restoreSubTabs();
     // 先挂 401 监听再触发请求:否则启动时 token 已过期,事件发出时无人接收,静默跳回登录页无提示
     window.addEventListener('gongpu:unauthorized', () => {
-      stopLoop();
+      resetPage();
+      API.setSlot(0);
       $('gameRoot').classList.remove('on');
       $('slotMask').style.display = 'none';
       $('authMask').style.display = 'flex';

@@ -132,11 +132,11 @@ class DrawerLayoutTest {
     @Test
     void newAssetsJoinTheSameCacheVersion() throws Exception {
         String s = html();
-        assertTrue(s.contains("css/drawer.css?v=290"));
-        assertTrue(s.contains("js/drawer.js?v=290"));
+        assertTrue(s.contains("css/drawer.css?v=293"));
+        assertTrue(s.contains("js/drawer.js?v=293"));
         assertFalse(s.contains("v=280"), "旧静态版本必须全部升级（第十九批升 290）");
         assertFalse(s.contains("v=270"), "旧静态版本必须全部升级（第十九批升 290）");
-        assertTrue(s.indexOf("js/drawer.js?v=290") < s.indexOf("js/app.js?v=290"),
+        assertTrue(s.indexOf("js/drawer.js?v=293") < s.indexOf("js/app.js?v=293"),
                 "抽屉控制器必须先于原游戏逻辑初始化");
     }
 

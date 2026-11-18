@@ -137,6 +137,7 @@ public class CraftService {
         if (have < cost) {
             throw ApiException.badRequest("材料不足（兑换需要 " + cost + " 份）");
         }
+        checkInventoryCapacity(s.materials, to, 1);
         s.materials.put(from, have - cost);
         s.materials.merge(to, 1, Integer::sum);
         Map<String, Object> m = new LinkedHashMap<>();
@@ -158,13 +159,14 @@ public class CraftService {
     /** 直购一阶宝石（第八批）：cost = 售价 ×4，进材料仓。 */
     public Map<String, Object> buyGem(PlayerState s, String code) {
         Integer sell = com.gongpu.game.GameConst.GEM_SELL_PRICE.get(code);
-        if (sell == null || code.endsWith("_2")) {
-            throw ApiException.badRequest("这种宝石不能直购（二阶请用三颗一阶融合）");
+        if (sell == null || !com.gongpu.game.GameConst.gemTier1Ids().contains(code)) {
+            throw ApiException.badRequest("这种宝石不能直购（高阶请用三颗同种低阶宝石融合）");
         }
         long cost = (long) sell * GEM_BUY_MUL;
         if (com.gongpu.common.Num.lt(s.gold, com.gongpu.common.Num.of(cost))) {
             throw ApiException.badRequest("金币不足，需要 " + cost);
         }
+        checkInventoryCapacity(s.materials, code, 1);
         s.gold = com.gongpu.common.Num.sub(s.gold, com.gongpu.common.Num.of(cost));
         s.materials.merge(code, 1, Integer::sum);
         s.stats.gemsBought++;
@@ -190,6 +192,7 @@ public class CraftService {
         if (com.gongpu.common.Num.lt(s.gold, com.gongpu.common.Num.of(cost))) {
             throw ApiException.badRequest("金币不足，需要 " + cost);
         }
+        checkInventoryCapacity(s.materials, code, n);
         s.gold = com.gongpu.common.Num.sub(s.gold, com.gongpu.common.Num.of(cost));
         s.materials.merge(code, n, Integer::sum);
         Map<String, Object> m = new LinkedHashMap<>();
@@ -326,6 +329,7 @@ public class CraftService {
         if (n <= 0) {
             throw ApiException.badRequest("材料不足（兑换需要 " + cost + " 份）");
         }
+        checkInventoryCapacity(s.materials, to, n);
         s.materials.put(from, have - n * cost);
         s.materials.merge(to, n, Integer::sum);
         Map<String, Object> m = new LinkedHashMap<>();
@@ -367,6 +371,7 @@ public class CraftService {
             if (itemTpl(t.getProductCode()) == null) {
                 throw ApiException.badRequest("产物配置缺失: " + t.getProductCode());
             }
+            checkInventoryCapacity(s.potions, t.getProductCode().substring("item:".length()), 1);
         } else {
             if (s.equipBag.size() >= GameService.bagCap(s)) {
                 throw ApiException.badRequest("背包已满，先卖掉或丢弃一些装备");
@@ -414,6 +419,12 @@ public class CraftService {
             }
         }
         return null;
+    }
+
+    private static void checkInventoryCapacity(Map<String, Integer> inventory, String code, int count) {
+        if ((long) inventory.getOrDefault(code, 0) + count > Integer.MAX_VALUE) {
+            throw ApiException.badRequest("库存已达上限");
+        }
     }
 
     private static void consumeMat(PlayerState s, String key, int n) {

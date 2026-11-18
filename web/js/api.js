@@ -59,7 +59,11 @@
     online: true
   };
 
+  // 区分主动登录/退出；滑动续期属于同一会话，不改变代次。
+  let authVersion = 0;
+
   function setAuth(payload) {
+    authVersion++;
     state.token = payload.token;
     state.user = { id: payload.userId, username: payload.username };
     lsSet(TOKEN_KEY, state.token);
@@ -67,6 +71,7 @@
   }
 
   function clearAuth() {
+    authVersion++;
     state.token = '';
     state.user = null;
     lsDel(TOKEN_KEY);
@@ -102,14 +107,19 @@
     ERR_NET: '网络连接失败，请检查网络',
     ERR_TIMEOUT: '请求超时，请稍后重试',
     ERR_SERVER: '服务器开小差了，稍后再试',
-    ERR_AUTH: '登录已过期，请重新登录'
+    ERR_AUTH: '登录已过期，请重新登录',
+    ERR_SESSION: '登录状态已变更，请重试'
   };
 
   // 第十五批·轮 1/2/5：原始 fetch 封装——超时 abort、429 重试、GET 并发节流都在这一层
-  async function rawRequest(method, path, body, timeout) {
+  async function rawRequest(method, path, body, timeout, session) {
     const headers = { 'Content-Type': 'application/json' };
     if (state.token) {
       headers['Authorization'] = 'Bearer ' + state.token;
+    }
+    const sentToken = state.token;
+    if (session !== authVersion) {
+      throw new ApiError('ERR_SESSION', ERR_TEXT.ERR_SESSION, 0);
     }
     let res;
     const t0 = performance.now();
@@ -122,16 +132,26 @@
         body: body === undefined ? undefined : JSON.stringify(body),
         signal: ctl.signal
       });
+      // 超时覆盖响应正文，避免慢响应占满 GET 队列。
+      const text = await res.text();
+      if (session !== authVersion) {
+        throw new ApiError('ERR_SESSION', ERR_TEXT.ERR_SESSION, 0);
+      }
       state.online = true;
       // 第十五批·轮8：响应耗时埋点——最近一次请求的往返毫秒数，调试面板/排障时可直接读
       window.__gp_last_latency = Math.round(performance.now() - t0);
       // 滑动续期：服务端在令牌快到期时通过响应头回新令牌，无感替换本地存储
       const nt = res.headers.get('X-New-Token');
-      if (nt && nt !== state.token) {
+      if (nt && state.token === sentToken && nt !== state.token) {
         state.token = nt;
         lsSet(TOKEN_KEY, nt);
       }
+      return { res, text, session, sentToken };
     } catch (e) {
+      if (e instanceof ApiError) throw e;
+      if (session !== authVersion) {
+        throw new ApiError('ERR_SESSION', ERR_TEXT.ERR_SESSION, 0);
+      }
       state.online = false;
       // 超时(abort)抛 ERR_TIMEOUT,与断线区分;轮询循环 catch 后自动续转,不会永久卡死
       if (e && (e.name === 'AbortError' || e.name === 'TimeoutError')) {
@@ -141,7 +161,6 @@
     } finally {
       clearTimeout(killer);
     }
-    return res;
   }
 
   // 第十五批·轮 5：GET 并发节流——FIFO 队列，同刻最多 GET_CONCURRENCY 个 GET 在飞，超出排队；写请求不排队
@@ -174,17 +193,18 @@
   async function request(method, path, body, opts) {
     opts = opts || {};
     const timeout = opts.timeout > 0 ? opts.timeout : REQUEST_TIMEOUT_MS;
+    const session = authVersion;
     if (method !== 'GET') {
       // 写请求：不节流不重试，直接解析
-      const res = await rawRequest(method, path, body, timeout);
+      const res = await rawRequest(method, path, body, timeout, session);
       return parseAndCheck(res, path);
     }
     // GET：走并发节流 + 429 指数退避重试
     await acquireGetSlot();
     try {
       for (var attempt = 0; ; attempt++) {
-        const res = await rawRequest('GET', path, body, timeout);
-        if (res.status !== 429) {
+        const res = await rawRequest('GET', path, body, timeout, session);
+        if (res.res.status !== 429) {
           return await parseAndCheck(res, path);
         }
         if (attempt >= GET_RETRY_MAX) {
@@ -203,9 +223,12 @@
 
   // 第十五批·C1f·轮 1：响应统一解析——原函数头在上一轮编辑中丢失导致顶层 await 语法错，
   // 已重建并接回 request()；非 2xx 一律抛 ApiError，文案优先走 ERR_TEXT 映射表
-  async function parseAndCheck(res, path) {
+  async function parseAndCheck(response, path) {
+    const { res, text, session, sentToken } = response;
+    if (session !== authVersion) {
+      throw new ApiError('ERR_SESSION', ERR_TEXT.ERR_SESSION, 0);
+    }
     let data = null;
-    const text = await res.text();
     if (text) {
       try { data = JSON.parse(text); } catch (e) { data = null; }
     }
@@ -213,7 +236,7 @@
     if (!res.ok) {
       const isAuthApi = path.indexOf('/api/auth/') === 0;
       // 401 只对会话过期生效;登录/注册接口的 401 是"密码错误",不能误清 token + 广播"已过期"
-      if (res.status === 401 && !isAuthApi) {
+      if (res.status === 401 && !isAuthApi && state.token === sentToken) {
         clearAuth();
         global.dispatchEvent(new CustomEvent('gongpu:unauthorized'));
       }

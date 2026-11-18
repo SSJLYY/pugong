@@ -770,8 +770,8 @@ public class GameService {
         }
         int want = Math.min(count, SWEEP_MAX_PER_CALL);
         long per = 50L + 50L * Math.max(0, GameConst.zoneDepth(s.zone));
-        long affordable = s.gold.divide(java.math.BigDecimal.valueOf(per), 0, java.math.RoundingMode.FLOOR).longValue();
-        long actual = Math.min(want, affordable);
+        long actual = s.gold.divide(java.math.BigDecimal.valueOf(per), 0, java.math.RoundingMode.FLOOR)
+                .min(java.math.BigDecimal.valueOf(want)).longValueExact();
         if (actual <= 0) {
             throw ApiException.badRequest("金币不足，扫荡一只需要 " + per + " 金");
         }

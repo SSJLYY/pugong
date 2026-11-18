@@ -11,6 +11,7 @@ import com.gongpu.cfg.GameData;
 import com.gongpu.cfg.ItemTemplateRepository;
 import com.gongpu.cfg.SkillTemplateRepository;
 import com.gongpu.common.ApiException;
+import com.gongpu.game.GameConst;
 import com.gongpu.state.NewState;
 import com.gongpu.state.PlayerState;
 import org.junit.jupiter.api.BeforeAll;
@@ -162,6 +163,138 @@ class CraftServiceTest {
         assertEquals("食物", r.get("itemName"));
         assertEquals(bagBefore, s.equipBag.size(), "物品产物不占背包");
         assertEquals(1, s.potions.getOrDefault("food", 0), "食物应进药剂栏");
+    }
+
+    @Test
+    void exchangeCanReachInventoryLimitAndRejectsOverflowWithoutConsuming() {
+        PlayerState s = richState();
+        s.materials.put("pelt", GameConst.MAT_EXCHANGE_COST * 2);
+        s.materials.put("ore", Integer.MAX_VALUE - 1);
+
+        Map<String, Object> result = crafts.exchange(s, "pelt", "ore");
+
+        assertEquals(Integer.MAX_VALUE, result.get("toHave"));
+        assertEquals(GameConst.MAT_EXCHANGE_COST, s.materials.get("pelt"));
+        assertInventoryLimitRejected(s, () -> crafts.exchange(s, "pelt", "ore"));
+    }
+
+    @Test
+    void exchangeAllCanReachInventoryLimitAndPreservesRemainder() {
+        PlayerState s = richState();
+        s.materials.put("pelt", GameConst.MAT_EXCHANGE_COST * 2 + 1);
+        s.materials.put("ore", Integer.MAX_VALUE - 2);
+
+        Map<String, Object> result = crafts.exchangeAll(s, "pelt", "ore");
+
+        assertEquals(2, result.get("times"));
+        assertEquals(Integer.MAX_VALUE, result.get("toHave"));
+        assertEquals(1, s.materials.get("pelt"));
+    }
+
+    @Test
+    void exchangeAllRejectsLargeOverflowWithoutConsuming() {
+        PlayerState s = richState();
+        s.materials.put("pelt", Integer.MAX_VALUE);
+        s.materials.put("ore", Integer.MAX_VALUE - 1);
+
+        assertInventoryLimitRejected(s, () -> crafts.exchangeAll(s, "pelt", "ore"));
+    }
+
+    @Test
+    void buyCanReachInventoryLimitAndRejectsOverflowWithoutCharging() {
+        PlayerState s = richState();
+        s.gold = new BigDecimal("1000000");
+        s.materials.put("pelt", Integer.MAX_VALUE - 999);
+        BigDecimal before = s.gold;
+
+        Map<String, Object> result = crafts.buy(s, "pelt", 999);
+
+        assertEquals(Integer.MAX_VALUE, result.get("have"));
+        assertEquals(999, result.get("count"));
+        long cost = (long) GameConst.MAT_SELL_PRICE.get("pelt") * CraftService.MAT_BUY_MUL * 999;
+        assertEquals(0, s.gold.compareTo(before.subtract(BigDecimal.valueOf(cost))));
+        assertInventoryLimitRejected(s, () -> crafts.buy(s, "pelt", 1));
+        s.materials.put("pelt", Integer.MAX_VALUE - 998);
+        assertInventoryLimitRejected(s, () -> crafts.buy(s, "pelt", 999));
+    }
+
+    @Test
+    void buyGemCanReachInventoryLimitAndRejectsOverflowWithoutChargingOrCounting() {
+        PlayerState s = richState();
+        s.materials.put("gem_ruby", Integer.MAX_VALUE - 1);
+        BigDecimal before = s.gold;
+        long boughtBefore = s.stats.gemsBought;
+
+        Map<String, Object> result = crafts.buyGem(s, "gem_ruby");
+
+        assertEquals(Integer.MAX_VALUE, result.get("have"));
+        long cost = (long) GameConst.GEM_SELL_PRICE.get("gem_ruby") * CraftService.GEM_BUY_MUL;
+        assertEquals(0, s.gold.compareTo(before.subtract(BigDecimal.valueOf(cost))));
+        assertEquals(boughtBefore + 1, s.stats.gemsBought);
+        assertInventoryLimitRejected(s, () -> crafts.buyGem(s, "gem_ruby"));
+    }
+
+    @Test
+    void itemCraftCanReachInventoryLimitAndRejectsOverflowWithoutConsumingOrCounting() {
+        PlayerState s = richState();
+        s.potions.put("food", Integer.MAX_VALUE - 1);
+
+        crafts.craft(s, "cook_test");
+
+        assertEquals(Integer.MAX_VALUE, s.potions.get("food"));
+        assertEquals(4, s.materials.get("pelt"));
+        assertEquals(0, s.gold.compareTo(new BigDecimal("9990")));
+        assertEquals(1, s.stats.crafts);
+        assertInventoryLimitRejected(s, () -> crafts.craft(s, "cook_test"));
+    }
+
+    @Test
+    void ordinaryMaterialPurchasesAndExchangesKeepTheirCountsAndCosts() {
+        PlayerState s = richState();
+        s.materials.put("pelt", 10);
+
+        crafts.exchange(s, "pelt", "ore");
+        assertEquals(7, s.materials.get("pelt"));
+        assertEquals(6, s.materials.get("ore"));
+        Map<String, Object> exchanged = crafts.exchangeAll(s, "pelt", "ore");
+        assertEquals(2, exchanged.get("times"));
+        assertEquals(1, s.materials.get("pelt"));
+        assertEquals(8, s.materials.get("ore"));
+
+        Map<String, Object> bought = crafts.buy(s, "pelt", 2);
+        assertEquals(2, bought.get("count"));
+        assertEquals(3, s.materials.get("pelt"));
+        crafts.buyGem(s, "gem_ruby");
+        assertEquals(1, s.materials.get("gem_ruby"));
+        long cost = (long) GameConst.MAT_SELL_PRICE.get("pelt") * CraftService.MAT_BUY_MUL * 2
+                + (long) GameConst.GEM_SELL_PRICE.get("gem_ruby") * CraftService.GEM_BUY_MUL;
+        assertEquals(0, s.gold.compareTo(new BigDecimal("10000").subtract(BigDecimal.valueOf(cost))));
+        assertEquals(1, s.stats.gemsBought);
+    }
+
+    private void assertInventoryLimitRejected(PlayerState s, Runnable action) {
+        Map<String, Integer> materialsBefore = Map.copyOf(s.materials);
+        Map<String, Integer> potionsBefore = Map.copyOf(s.potions);
+        BigDecimal goldBefore = s.gold;
+        long craftsBefore = s.stats.crafts;
+        long gemsBoughtBefore = s.stats.gemsBought;
+        long matSoldBefore = s.stats.matSold;
+        long matSoldGoldBefore = s.stats.matSoldGold;
+        int bagBefore = s.equipBag.size();
+
+        ApiException error = assertThrows(ApiException.class, action::run);
+
+        assertEquals(400, error.getStatus());
+        assertEquals("BAD_REQUEST", error.getCode());
+        assertTrue(error.getMessage().contains("库存"));
+        assertEquals(materialsBefore, s.materials);
+        assertEquals(potionsBefore, s.potions);
+        assertEquals(goldBefore, s.gold);
+        assertEquals(craftsBefore, s.stats.crafts);
+        assertEquals(gemsBoughtBefore, s.stats.gemsBought);
+        assertEquals(matSoldBefore, s.stats.matSold);
+        assertEquals(matSoldGoldBefore, s.stats.matSoldGold);
+        assertEquals(bagBefore, s.equipBag.size());
     }
 
     @Test

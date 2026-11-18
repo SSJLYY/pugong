@@ -7,6 +7,8 @@ import com.gongpu.game.GameConst;
 import com.gongpu.game.GameEngine;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,6 +34,24 @@ public class SaveService {
     public SaveService(GameSaveRepository repo, StateCache cache) {
         this.repo = repo;
         this.cache = cache;
+    }
+
+    private void publishCache(long userId, int slot, String json) {
+        afterCommitOrNow(() -> cache.putJson(userId, slot, json));
+    }
+
+    private void afterCommitOrNow(Runnable action) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()
+                && TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    action.run();
+                }
+            });
+        } else {
+            action.run();
+        }
     }
 
     // ---- 冗余列边界防护（第十四批修复，2026-11-06）----
@@ -108,9 +128,8 @@ public class SaveService {
         }
         GameSave gs = repo.findByUserIdAndSlotNo(userId, slot)
                 .orElseThrow(() -> ApiException.notFound("槽位 " + slot + " 没有存档"));
-        PlayerState s = decodeOrRecover(gs);
-        cache.put(userId, slot, s);
-        return s;
+        // 缓存由持锁写路径发布；无锁冷读不发布共享状态，避免旧 DB 状态覆盖并发写入的新缓存。
+        return decodeOrRecover(gs);
     }
 
     // ---------------- 滚动备份环（第七批）：主档历史自愈 ----------------
@@ -262,16 +281,18 @@ public class SaveService {
             if (s.achievements != null) {
                 s.achievements.addAll(com.gongpu.game.Achievements.evaluate(s));
             }
-            cache.put(userId, slot, s);
+            publishCache(userId, slot, StateCodec.encode(s));
             return;
         }
         persist(userId, slot, s, null);
         // 第二十批·轮7：节流表只增不删，随历史玩家×槽位单调膨胀——超阈值清掉久未写入的条目
         // （条目过期不影响语义：下次写仍按 PERSIST_THROTTLE_MS 从头计）
-        if (lastDbWrite.size() > 4096) {
-            lastDbWrite.entrySet().removeIf(e -> now - e.getValue() > 10 * 60_000L);
-        }
-        lastDbWrite.put(key, System.currentTimeMillis());
+        afterCommitOrNow(() -> {
+            if (lastDbWrite.size() > 4096) {
+                lastDbWrite.entrySet().removeIf(e -> now - e.getValue() > 10 * 60_000L);
+            }
+            lastDbWrite.put(key, System.currentTimeMillis());
+        });
     }
 
     /** 落库并刷新缓存。 */
@@ -327,7 +348,7 @@ public class SaveService {
         }
         repo.save(gs);
         // 第二十批·轮2：复用上面已编码的 stateJson，不再让 cache.put 二次全量 encode
-        cache.putJson(userId, slot, stateJson);
+        publishCache(userId, slot, stateJson);
     }
 
     /**
@@ -352,7 +373,7 @@ public class SaveService {
         gs.setMaxHp(capVarchar(Num.plain(s.life.maxHP), MAX_HP_COLUMN_LEN));
         gs.setAliveSeconds(StateCodec.aliveSeconds(s));
         repo.save(gs);
-        cache.putJson(userId, slot, stateJson);
+        publishCache(userId, slot, stateJson);
     }
 
     /** 是否有可回档的快照。 */
@@ -405,7 +426,7 @@ public class SaveService {
             gs.setRebirthsTotal(restored.stats.rebirths);
         }
         repo.save(gs);
-        cache.putJson(userId, slot, restoredJson);
+        publishCache(userId, slot, restoredJson);
         return restored;
     }
 
@@ -480,7 +501,10 @@ public class SaveService {
     @Transactional
     public void delete(long userId, int slot) {
         repo.findByUserIdAndSlotNo(userId, slot).ifPresent(repo::delete);
-        cache.evict(userId, slot);
+        afterCommitOrNow(() -> {
+            cache.evict(userId, slot);
+            lastDbWrite.remove(userId + ":" + slot);
+        });
     }
 
     /** 槽位列表（不返回完整状态，只给摘要）。 */

@@ -52,6 +52,24 @@ class SweepTest {
     }
 
     @Test
+    void sweepCapsHugeBalancesBeforeConvertingToLong() {
+        for (BigDecimal gold : new BigDecimal[] {
+                new BigDecimal("1844674407370955161600"),
+                new BigDecimal("922337203685477580800"),
+                new BigDecimal("1E100")}) {
+            PlayerState s = NewState.create();
+            s.zone = "plain";
+            s.gold = gold;
+            Map<String, Object> result = game.sweep(s, 999);
+            assertEquals(200L, result.get("swept"));
+            assertEquals("20000", result.get("goldCost"));
+            assertEquals(0, com.gongpu.common.Num.sub(gold, new BigDecimal("20000")).compareTo(s.gold));
+            assertEquals(200, s.stats.zoneKills.get("plain"));
+            assertEquals(200, s.stats.sweeps);
+        }
+    }
+
+    @Test
     void sweepRejectsSafeZoneAndZeroCount() {
         PlayerState s = NewState.create();
         s.zone = "village";
